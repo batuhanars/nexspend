@@ -1,6 +1,5 @@
 generator client {
-  provider = "prisma-client"
-  output   = "../generated/prisma"
+  provider = "prisma-client-js"
 }
 
 datasource db {
@@ -112,8 +111,8 @@ model User {
   biometricEnabled     Boolean  @default(false) @map("biometric_enabled")
   notificationsEnabled Boolean  @default(true) @map("notifications_enabled")
   googleId             String?  @map("google_id") @db.VarChar(255)
-  createdAt            DateTime @default(now()) @map("created_at") @db.Timestamp(0)
-  updatedAt            DateTime @updatedAt @map("updated_at") @db.Timestamp(0)
+  createdAt            DateTime @default(now()) @map("created_at") @db.DateTime(0)
+  updatedAt            DateTime @updatedAt @map("updated_at") @db.DateTime(0)
 
   accounts              Account[]
   categories            Category[]
@@ -136,9 +135,9 @@ model PasswordResetToken {
   id        String   @id @default(uuid()) @db.VarChar(36)
   userId    String   @map("user_id") @db.VarChar(36)
   token     String   @unique @db.VarChar(255)
-  expiresAt DateTime @map("expires_at") @db.Timestamp(0)
+  expiresAt DateTime @map("expires_at") @db.DateTime(0)
   used      Boolean  @default(false)
-  createdAt DateTime @default(now()) @map("created_at") @db.Timestamp(0)
+  createdAt DateTime @default(now()) @map("created_at") @db.DateTime(0)
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -163,8 +162,8 @@ model Account {
   creditLimit   Decimal?    @map("credit_limit") @db.Decimal(15, 2)
   statementDay  Int?        @map("statement_day")
   paymentDueDay Int?        @map("payment_due_day")
-  createdAt     DateTime    @default(now()) @map("created_at") @db.Timestamp(0)
-  updatedAt     DateTime    @updatedAt @map("updated_at") @db.Timestamp(0)
+  createdAt     DateTime    @default(now()) @map("created_at") @db.DateTime(0)
+  updatedAt     DateTime    @updatedAt @map("updated_at") @db.DateTime(0)
 
   user                  User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
   transactions          Transaction[]          @relation("AccountTransactions")
@@ -191,7 +190,7 @@ model Category {
   type      CategoryType
   isSystem  Boolean      @default(false) @map("is_system")
   sortOrder Int          @default(0) @map("sort_order")
-  createdAt DateTime     @default(now()) @map("created_at") @db.Timestamp(0)
+  createdAt DateTime     @default(now()) @map("created_at") @db.DateTime(0)
 
   parent               Category?            @relation("CategoryTree", fields: [parentId], references: [id], onDelete: SetNull)
   children             Category[]           @relation("CategoryTree")
@@ -219,7 +218,7 @@ model Tag {
   icon      String?  @db.VarChar(50)
   color     String   @db.VarChar(7)
   isSystem  Boolean  @default(false) @map("is_system")
-  createdAt DateTime @default(now()) @map("created_at") @db.Timestamp(0)
+  createdAt DateTime @default(now()) @map("created_at") @db.DateTime(0)
 
   user         User?            @relation(fields: [userId], references: [id], onDelete: Cascade)
   transactions TransactionTag[]
@@ -253,13 +252,13 @@ model Transaction {
   amount              Decimal           @db.Decimal(15, 2)
   title               String            @db.VarChar(200)
   note                String?           @db.Text
-  transactionDate     DateTime          @default(now()) @map("transaction_date") @db.Timestamp(0)
+  transactionDate     DateTime          @default(now()) @map("transaction_date") @db.DateTime(0)
   receiptUrl          String?           @map("receipt_url") @db.VarChar(500)
   transferToAccountId String?           @map("transfer_to_account_id") @db.VarChar(36)
   relatedDebtId       String?           @map("related_debt_id") @db.VarChar(36)
   relatedSubId        String?           @map("related_subscription_id") @db.VarChar(36)
-  createdAt           DateTime          @default(now()) @map("created_at") @db.Timestamp(0)
-  updatedAt           DateTime          @updatedAt @map("updated_at") @db.Timestamp(0)
+  createdAt           DateTime          @default(now()) @map("created_at") @db.DateTime(0)
+  updatedAt           DateTime          @updatedAt @map("updated_at") @db.DateTime(0)
 
   user                User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   account             Account       @relation("AccountTransactions", fields: [accountId], references: [id])
@@ -296,8 +295,8 @@ model RecurringTransaction {
   endDate     DateTime?           @map("end_date") @db.Date
   nextRunDate DateTime            @map("next_run_date") @db.Date
   isActive    Boolean             @default(true) @map("is_active")
-  createdAt   DateTime            @default(now()) @map("created_at") @db.Timestamp(0)
-  updatedAt   DateTime            @updatedAt @map("updated_at") @db.Timestamp(0)
+  createdAt   DateTime            @default(now()) @map("created_at") @db.DateTime(0)
+  updatedAt   DateTime            @updatedAt @map("updated_at") @db.DateTime(0)
 
   user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   account  Account   @relation(fields: [accountId], references: [id])
@@ -324,8 +323,8 @@ model Budget {
   isActive      Boolean      @default(true) @map("is_active")
   startDate     DateTime     @map("start_date") @db.Date
   endDate       DateTime?    @map("end_date") @db.Date
-  createdAt     DateTime     @default(now()) @map("created_at") @db.Timestamp(0)
-  updatedAt     DateTime     @updatedAt @map("updated_at") @db.Timestamp(0)
+  createdAt     DateTime     @default(now()) @map("created_at") @db.DateTime(0)
+  updatedAt     DateTime     @updatedAt @map("updated_at") @db.DateTime(0)
 
   user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   category Category @relation(fields: [categoryId], references: [id])
@@ -348,8 +347,8 @@ model Debt {
   dueDate         DateTime?  @map("due_date") @db.Date
   note            String?    @db.Text
   hasInstallments Boolean    @default(false) @map("has_installments")
-  createdAt       DateTime   @default(now()) @map("created_at") @db.Timestamp(0)
-  updatedAt       DateTime   @updatedAt @map("updated_at") @db.Timestamp(0)
+  createdAt       DateTime   @default(now()) @map("created_at") @db.DateTime(0)
+  updatedAt       DateTime   @updatedAt @map("updated_at") @db.DateTime(0)
 
   user         User              @relation(fields: [userId], references: [id], onDelete: Cascade)
   installments DebtInstallment[]
@@ -367,7 +366,7 @@ model DebtInstallment {
   paidAmount    Decimal    @default(0.00) @map("paid_amount") @db.Decimal(15, 2)
   dueDate       DateTime   @map("due_date") @db.Date
   status        DebtStatus @default(PENDING)
-  createdAt     DateTime   @default(now()) @map("created_at") @db.Timestamp(0)
+  createdAt     DateTime   @default(now()) @map("created_at") @db.DateTime(0)
 
   debt     Debt          @relation(fields: [debtId], references: [id], onDelete: Cascade)
   payments DebtPayment[]
@@ -383,9 +382,9 @@ model DebtPayment {
   installmentId String?  @map("installment_id") @db.VarChar(36)
   accountId     String   @map("account_id") @db.VarChar(36)
   amount        Decimal  @db.Decimal(15, 2)
-  paidAt        DateTime @default(now()) @map("paid_at") @db.Timestamp(0)
+  paidAt        DateTime @default(now()) @map("paid_at") @db.DateTime(0)
   note          String?  @db.Text
-  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamp(0)
+  createdAt     DateTime @default(now()) @map("created_at") @db.DateTime(0)
 
   debt        Debt             @relation(fields: [debtId], references: [id], onDelete: Cascade)
   installment DebtInstallment? @relation(fields: [installmentId], references: [id], onDelete: Cascade)
@@ -411,8 +410,8 @@ model Subscription {
   categoryId  String?            @map("category_id") @db.VarChar(36)
   isActive    Boolean            @default(true) @map("is_active")
   autoDeduct  Boolean            @default(true) @map("auto_deduct")
-  createdAt   DateTime           @default(now()) @map("created_at") @db.Timestamp(0)
-  updatedAt   DateTime           @updatedAt @map("updated_at") @db.Timestamp(0)
+  createdAt   DateTime           @default(now()) @map("created_at") @db.DateTime(0)
+  updatedAt   DateTime           @updatedAt @map("updated_at") @db.DateTime(0)
 
   user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   account      Account       @relation(fields: [accountId], references: [id])
@@ -441,7 +440,7 @@ model Receipt {
   parsedTax      Decimal?      @map("parsed_tax") @db.Decimal(15, 2)
   paymentMethod  String?       @map("payment_method") @db.VarChar(20)
   status         ReceiptStatus @default(PROCESSING)
-  createdAt      DateTime      @default(now()) @map("created_at") @db.Timestamp(0)
+  createdAt      DateTime      @default(now()) @map("created_at") @db.DateTime(0)
 
   user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   transaction Transaction?  @relation(fields: [transactionId], references: [id])
@@ -474,8 +473,8 @@ model MerchantCategoryMap {
   merchantKey String   @map("merchant_key") @db.VarChar(100)
   categoryId  String   @map("category_id") @db.VarChar(36)
   hitCount    Int      @default(1) @map("hit_count")
-  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamp(0)
-  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamp(0)
+  createdAt   DateTime @default(now()) @map("created_at") @db.DateTime(0)
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.DateTime(0)
 
   user     User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
   category Category @relation(fields: [categoryId], references: [id])
@@ -495,7 +494,7 @@ model InflationRate {
   month       Int
   monthlyRate Decimal  @map("monthly_rate") @db.Decimal(6, 2)
   yearlyRate  Decimal  @map("yearly_rate") @db.Decimal(6, 2)
-  fetchedAt   DateTime @default(now()) @map("fetched_at") @db.Timestamp(0)
+  fetchedAt   DateTime @default(now()) @map("fetched_at") @db.DateTime(0)
 
   @@unique([categoryKey, year, month])
   @@map("inflation_rates")
@@ -523,8 +522,8 @@ model PortfolioAsset {
   quantity    Decimal   @db.Decimal(15, 4)
   avgBuyPrice Decimal   @map("avg_buy_price") @db.Decimal(15, 4)
   totalCost   Decimal   @map("total_cost") @db.Decimal(15, 2)
-  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamp(0)
-  updatedAt   DateTime  @updatedAt @map("updated_at") @db.Timestamp(0)
+  createdAt   DateTime  @default(now()) @map("created_at") @db.DateTime(0)
+  updatedAt   DateTime  @updatedAt @map("updated_at") @db.DateTime(0)
 
   account      Account       @relation(fields: [accountId], references: [id], onDelete: Cascade)
   transactions PortfolioTx[]
@@ -540,9 +539,9 @@ model PortfolioTx {
   quantity     Decimal   @db.Decimal(15, 4)
   pricePerUnit Decimal   @map("price_per_unit") @db.Decimal(15, 4)
   totalAmount  Decimal   @map("total_amount") @db.Decimal(15, 2)
-  txDate       DateTime  @map("tx_date") @db.Timestamp(0)
+  txDate       DateTime  @map("tx_date") @db.DateTime(0)
   note         String?   @db.Text
-  createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamp(0)
+  createdAt    DateTime  @default(now()) @map("created_at") @db.DateTime(0)
 
   asset PortfolioAsset @relation(fields: [assetId], references: [id], onDelete: Cascade)
 
@@ -554,7 +553,7 @@ model ExchangeRate {
   assetType AssetType @map("asset_type")
   buyPrice  Decimal   @map("buy_price") @db.Decimal(15, 4)
   sellPrice Decimal   @map("sell_price") @db.Decimal(15, 4)
-  fetchedAt DateTime  @default(now()) @map("fetched_at") @db.Timestamp(0)
+  fetchedAt DateTime  @default(now()) @map("fetched_at") @db.DateTime(0)
 
   @@unique([assetType])
   @@map("exchange_rates")
@@ -576,7 +575,7 @@ model Insight {
   isRead      Boolean  @default(false) @map("is_read")
   isDismissed Boolean  @default(false) @map("is_dismissed")
   period      String   @db.VarChar(7)
-  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamp(0)
+  createdAt   DateTime @default(now()) @map("created_at") @db.DateTime(0)
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -592,8 +591,8 @@ model FamilyGroup {
   id        String   @id @default(uuid()) @db.VarChar(36)
   name      String   @db.VarChar(100)
   icon      String?  @db.VarChar(50)
-  createdAt DateTime @default(now()) @map("created_at") @db.Timestamp(0)
-  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamp(0)
+  createdAt DateTime @default(now()) @map("created_at") @db.DateTime(0)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.DateTime(0)
 
   members       FamilyMember[]
   sharedBudgets SharedBudget[]
@@ -607,7 +606,7 @@ model FamilyMember {
   groupId  String     @map("group_id") @db.VarChar(36)
   userId   String     @map("user_id") @db.VarChar(36)
   role     FamilyRole @default(MEMBER)
-  joinedAt DateTime   @default(now()) @map("joined_at") @db.Timestamp(0)
+  joinedAt DateTime   @default(now()) @map("joined_at") @db.DateTime(0)
 
   group FamilyGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
   user  User        @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -623,8 +622,8 @@ model FamilyInvite {
   email     String       @db.VarChar(255)
   token     String       @unique @db.VarChar(255)
   status    InviteStatus @default(PENDING)
-  expiresAt DateTime     @map("expires_at") @db.Timestamp(0)
-  createdAt DateTime     @default(now()) @map("created_at") @db.Timestamp(0)
+  expiresAt DateTime     @map("expires_at") @db.DateTime(0)
+  createdAt DateTime     @default(now()) @map("created_at") @db.DateTime(0)
 
   group FamilyGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
 
@@ -642,8 +641,8 @@ model SharedBudget {
   startDate  DateTime     @map("start_date") @db.Date
   endDate    DateTime?    @map("end_date") @db.Date
   isActive   Boolean      @default(true) @map("is_active")
-  createdAt  DateTime     @default(now()) @map("created_at") @db.Timestamp(0)
-  updatedAt  DateTime     @updatedAt @map("updated_at") @db.Timestamp(0)
+  createdAt  DateTime     @default(now()) @map("created_at") @db.DateTime(0)
+  updatedAt  DateTime     @updatedAt @map("updated_at") @db.DateTime(0)
 
   group    FamilyGroup     @relation(fields: [groupId], references: [id], onDelete: Cascade)
   category Category        @relation(fields: [categoryId], references: [id])
@@ -658,7 +657,7 @@ model SharedExpense {
   transactionId  String   @map("transaction_id") @db.VarChar(36)
   userId         String   @map("user_id") @db.VarChar(36)
   amount         Decimal  @db.Decimal(15, 2)
-  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamp(0)
+  createdAt      DateTime @default(now()) @map("created_at") @db.DateTime(0)
 
   sharedBudget SharedBudget @relation(fields: [sharedBudgetId], references: [id], onDelete: Cascade)
 

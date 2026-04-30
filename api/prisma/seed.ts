@@ -1,5 +1,5 @@
 import 'dotenv/config';
-import { PrismaClient } from '../generated/prisma/client.js';
+import { PrismaClient } from '@prisma/client';
 import { PrismaMariaDb } from '@prisma/adapter-mariadb';
 
 type CategoryType = 'INCOME' | 'EXPENSE' | 'BOTH';
@@ -439,7 +439,7 @@ async function seedSystemTags() {
 
   for (const tag of systemTags) {
     await prisma.tag.upsert({
-      where: { userId_name: { userId: null as any, name: tag.name } },
+      where: { id: tag.id },
       update: {},
       create: {
         id: tag.id,

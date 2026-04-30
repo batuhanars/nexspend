@@ -4,6 +4,9 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
 import { ScheduleModule } from '@nestjs/schedule';
 import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { AccountsModule } from './modules/accounts/accounts.module';
+import { CategoriesModule } from './modules/categories/categories.module';
+import { DashboardModule } from './modules/dashboard/dashboard.module';
 import appConfig from './config/app.config';
 
 @Module({
@@ -17,6 +20,9 @@ import appConfig from './config/app.config';
     ScheduleModule.forRoot(),
     PrismaModule,
     AuthModule,
+    AccountsModule,
+    CategoriesModule,
+    DashboardModule,
   ],
 })
 export class AppModule {}

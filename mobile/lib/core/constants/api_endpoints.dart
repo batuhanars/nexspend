@@ -1,0 +1,78 @@
+class ApiEndpoints {
+  ApiEndpoints._();
+
+  static const String baseUrl = 'http://10.0.2.2:3000'; // Android emulator → localhost
+
+  // Auth
+  static const String register = '/api/auth/register';
+  static const String login = '/api/auth/login';
+  static const String googleAuth = '/api/auth/google';
+  static const String forgotPassword = '/api/auth/forgot-password';
+  static const String resetPassword = '/api/auth/reset-password';
+  static const String refresh = '/api/auth/refresh';
+  static const String logout = '/api/auth/logout';
+
+  // Users
+  static const String me = '/api/users/me';
+  static const String meSettings = '/api/users/me/settings';
+  static const String meAvatar = '/api/users/me/avatar';
+  static const String mePassword = '/api/users/me/password';
+
+  // Dashboard
+  static const String dashboard = '/api/dashboard';
+
+  // Accounts
+  static const String accounts = '/api/accounts';
+  static const String accountsSummary = '/api/accounts/summary';
+  static String accountById(String id) => '/api/accounts/$id';
+  static String accountTransactions(String id) => '/api/accounts/$id/transactions';
+  static String accountAnalytics(String id) => '/api/accounts/$id/analytics';
+  static String accountStatement(String id) => '/api/accounts/$id/statement';
+  static String accountArchive(String id) => '/api/accounts/$id/archive';
+  static String accountRestore(String id) => '/api/accounts/$id/restore';
+  static String accountSetDefault(String id) => '/api/accounts/$id/set-default';
+
+  // Transactions
+  static const String transactions = '/api/transactions';
+  static const String transactionsSummary = '/api/transactions/summary';
+  static String transactionById(String id) => '/api/transactions/$id';
+
+  // Budgets
+  static const String budgets = '/api/budgets';
+  static const String budgetsOverview = '/api/budgets/overview';
+  static String budgetById(String id) => '/api/budgets/$id';
+
+  // Debts
+  static const String debts = '/api/debts';
+  static const String debtsSummary = '/api/debts/summary';
+  static String debtById(String id) => '/api/debts/$id';
+  static String debtPayments(String id) => '/api/debts/$id/payments';
+  static String debtInstallments(String id) => '/api/debts/$id/installments';
+
+  // Subscriptions
+  static const String subscriptions = '/api/subscriptions';
+  static const String subscriptionsSummary = '/api/subscriptions/summary';
+  static const String subscriptionsUpcoming = '/api/subscriptions/upcoming';
+  static String subscriptionById(String id) => '/api/subscriptions/$id';
+  static String subscriptionToggle(String id) => '/api/subscriptions/$id/toggle';
+
+  // Categories
+  static const String categories = '/api/categories';
+  static String categoryById(String id) => '/api/categories/$id';
+
+  // Tags
+  static const String tags = '/api/tags';
+  static String tagById(String id) => '/api/tags/$id';
+
+  // Reports
+  static const String reportsExpenseDistribution = '/api/reports/expense-distribution';
+  static const String reportsCashFlow = '/api/reports/cash-flow';
+  static const String reportsTrends = '/api/reports/trends';
+
+  // Receipts
+  static const String receiptsScan = '/api/receipts/scan';
+  static const String receipts = '/api/receipts';
+  static String receiptById(String id) => '/api/receipts/$id';
+  static String receiptCreateTransaction(String id) => '/api/receipts/$id/create-transaction';
+  static const String receiptsCheckDuplicate = '/api/receipts/check-duplicate';
+}

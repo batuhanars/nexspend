@@ -1,0 +1,666 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// =============================================
+// ENUM TANIMLARI
+// =============================================
+
+enum AccountType {
+  BANK
+  CASH
+  CREDIT_CARD
+  INVESTMENT
+}
+
+enum CategoryType {
+  INCOME
+  EXPENSE
+  BOTH
+}
+
+enum TransactionType {
+  INCOME
+  EXPENSE
+  TRANSFER
+}
+
+enum TransactionSource {
+  MANUAL
+  RECURRING
+  DEBT_PAYMENT
+  DEBT_COLLECTION
+  SUBSCRIPTION
+}
+
+enum BudgetPeriod {
+  WEEKLY
+  MONTHLY
+  YEARLY
+}
+
+enum DebtType {
+  LENT
+  BORROWED
+}
+
+enum DebtStatus {
+  PENDING
+  PAID
+  OVERDUE
+}
+
+enum SubscriptionPeriod {
+  WEEKLY
+  MONTHLY
+  YEARLY
+}
+
+enum RecurrenceFrequency {
+  DAILY
+  WEEKLY
+  MONTHLY
+  YEARLY
+}
+
+enum ReceiptStatus {
+  PROCESSING
+  PARSED
+  CONFIRMED
+  FAILED
+}
+
+enum AssetType {
+  USD
+  EUR
+  GBP
+  GOLD_GRAM
+  GOLD_QUARTER
+  GOLD_HALF
+  GOLD_FULL
+}
+
+enum FamilyRole {
+  OWNER
+  MEMBER
+}
+
+enum InviteStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  EXPIRED
+}
+
+// =============================================
+// KULLANICI YÖNETİMİ
+// =============================================
+
+model User {
+  id                   String   @id @default(uuid()) @db.VarChar(36)
+  fullName             String   @map("full_name") @db.VarChar(100)
+  email                String   @unique @db.VarChar(255)
+  passwordHash         String   @map("password_hash") @db.VarChar(255)
+  avatarUrl            String?  @map("avatar_url") @db.VarChar(500)
+  currency             String   @default("TRY") @db.VarChar(3)
+  language             String   @default("tr") @db.VarChar(5)
+  biometricEnabled     Boolean  @default(false) @map("biometric_enabled")
+  notificationsEnabled Boolean  @default(true) @map("notifications_enabled")
+  googleId             String?  @map("google_id") @db.VarChar(255)
+  createdAt            DateTime @default(now()) @map("created_at") @db.Timestamp(0)
+  updatedAt            DateTime @updatedAt @map("updated_at") @db.Timestamp(0)
+
+  accounts              Account[]
+  categories            Category[]
+  transactions          Transaction[]
+  budgets               Budget[]
+  debts                 Debt[]
+  subscriptions         Subscription[]
+  receipts              Receipt[]
+  passwordResetTokens   PasswordResetToken[]
+  tags                  Tag[]
+  recurringTransactions RecurringTransaction[]
+  merchantCategoryMaps  MerchantCategoryMap[]
+  insights              Insight[]
+  familyMembers         FamilyMember[]
+
+  @@map("users")
+}
+
+model PasswordResetToken {
+  id        String   @id @default(uuid()) @db.VarChar(36)
+  userId    String   @map("user_id") @db.VarChar(36)
+  token     String   @unique @db.VarChar(255)
+  expiresAt DateTime @map("expires_at") @db.Timestamp(0)
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamp(0)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("password_reset_tokens")
+}
+
+// =============================================
+// HESAPLAR
+// =============================================
+
+model Account {
+  id            String      @id @default(uuid()) @db.VarChar(36)
+  userId        String      @map("user_id") @db.VarChar(36)
+  name          String      @db.VarChar(100)
+  type          AccountType
+  balance       Decimal     @default(0.00) @db.Decimal(15, 2)
+  icon          String?     @db.VarChar(50)
+  color         String?     @db.VarChar(7)
+  isActive      Boolean     @default(true) @map("is_active")
+  isDefault     Boolean     @default(false) @map("is_default")
+  isArchived    Boolean     @default(false) @map("is_archived")
+  creditLimit   Decimal?    @map("credit_limit") @db.Decimal(15, 2)
+  statementDay  Int?        @map("statement_day")
+  paymentDueDay Int?        @map("payment_due_day")
+  createdAt     DateTime    @default(now()) @map("created_at") @db.Timestamp(0)
+  updatedAt     DateTime    @updatedAt @map("updated_at") @db.Timestamp(0)
+
+  user                  User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions          Transaction[]          @relation("AccountTransactions")
+  transfersReceived     Transaction[]          @relation("TransferToAccount")
+  recurringTransactions RecurringTransaction[]
+  subscriptions         Subscription[]
+  portfolioAssets       PortfolioAsset[]
+
+  @@index([userId, isActive, isArchived], map: "idx_accounts_user_active")
+  @@map("accounts")
+}
+
+// =============================================
+// KATEGORİLER
+// =============================================
+
+model Category {
+  id        String       @id @default(uuid()) @db.VarChar(36)
+  userId    String?      @map("user_id") @db.VarChar(36)
+  parentId  String?      @map("parent_id") @db.VarChar(36)
+  name      String       @db.VarChar(50)
+  icon      String       @db.VarChar(50)
+  color     String       @db.VarChar(7)
+  type      CategoryType
+  isSystem  Boolean      @default(false) @map("is_system")
+  sortOrder Int          @default(0) @map("sort_order")
+  createdAt DateTime     @default(now()) @map("created_at") @db.Timestamp(0)
+
+  parent               Category?            @relation("CategoryTree", fields: [parentId], references: [id], onDelete: SetNull)
+  children             Category[]           @relation("CategoryTree")
+  user                 User?                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions         Transaction[]
+  budgets              Budget[]
+  subscriptions        Subscription[]
+  recurringTransactions RecurringTransaction[]
+  merchantCategoryMaps MerchantCategoryMap[]
+  inflationMap         CategoryInflationMap?
+  sharedBudgets        SharedBudget[]
+
+  @@index([parentId], map: "idx_categories_parent")
+  @@map("categories")
+}
+
+// =============================================
+// ETİKETLER
+// =============================================
+
+model Tag {
+  id        String   @id @default(uuid()) @db.VarChar(36)
+  userId    String?  @map("user_id") @db.VarChar(36)
+  name      String   @db.VarChar(50)
+  icon      String?  @db.VarChar(50)
+  color     String   @db.VarChar(7)
+  isSystem  Boolean  @default(false) @map("is_system")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamp(0)
+
+  user         User?            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions TransactionTag[]
+
+  @@unique([userId, name])
+  @@map("tags")
+}
+
+model TransactionTag {
+  transactionId String @map("transaction_id") @db.VarChar(36)
+  tagId         String @map("tag_id") @db.VarChar(36)
+
+  transaction Transaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+  tag         Tag         @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([transactionId, tagId])
+  @@map("transaction_tags")
+}
+
+// =============================================
+// İŞLEMLER
+// =============================================
+
+model Transaction {
+  id                  String            @id @default(uuid()) @db.VarChar(36)
+  userId              String            @map("user_id") @db.VarChar(36)
+  accountId           String            @map("account_id") @db.VarChar(36)
+  categoryId          String?           @map("category_id") @db.VarChar(36)
+  type                TransactionType
+  source              TransactionSource @default(MANUAL)
+  amount              Decimal           @db.Decimal(15, 2)
+  title               String            @db.VarChar(200)
+  note                String?           @db.Text
+  transactionDate     DateTime          @default(now()) @map("transaction_date") @db.Timestamp(0)
+  receiptUrl          String?           @map("receipt_url") @db.VarChar(500)
+  transferToAccountId String?           @map("transfer_to_account_id") @db.VarChar(36)
+  relatedDebtId       String?           @map("related_debt_id") @db.VarChar(36)
+  relatedSubId        String?           @map("related_subscription_id") @db.VarChar(36)
+  createdAt           DateTime          @default(now()) @map("created_at") @db.Timestamp(0)
+  updatedAt           DateTime          @updatedAt @map("updated_at") @db.Timestamp(0)
+
+  user                User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  account             Account       @relation("AccountTransactions", fields: [accountId], references: [id])
+  category            Category?     @relation(fields: [categoryId], references: [id])
+  transferToAccount   Account?      @relation("TransferToAccount", fields: [transferToAccountId], references: [id])
+  relatedDebt         Debt?         @relation(fields: [relatedDebtId], references: [id])
+  relatedSubscription Subscription? @relation(fields: [relatedSubId], references: [id])
+  receipts            Receipt[]
+  tags                TransactionTag[]
+
+  @@index([userId, transactionDate], map: "idx_transactions_user_date")
+  @@index([userId, type], map: "idx_transactions_user_type")
+  @@index([categoryId], map: "idx_transactions_category")
+  @@index([relatedDebtId], map: "idx_transactions_debt")
+  @@index([relatedSubId], map: "idx_transactions_sub")
+  @@map("transactions")
+}
+
+// =============================================
+// TEKRARLAYAN İŞLEM ŞABLONLARI
+// =============================================
+
+model RecurringTransaction {
+  id          String              @id @default(uuid()) @db.VarChar(36)
+  userId      String              @map("user_id") @db.VarChar(36)
+  accountId   String              @map("account_id") @db.VarChar(36)
+  categoryId  String?             @map("category_id") @db.VarChar(36)
+  type        TransactionType
+  amount      Decimal             @db.Decimal(15, 2)
+  title       String              @db.VarChar(200)
+  note        String?             @db.Text
+  frequency   RecurrenceFrequency
+  startDate   DateTime            @map("start_date") @db.Date
+  endDate     DateTime?           @map("end_date") @db.Date
+  nextRunDate DateTime            @map("next_run_date") @db.Date
+  isActive    Boolean             @default(true) @map("is_active")
+  createdAt   DateTime            @default(now()) @map("created_at") @db.Timestamp(0)
+  updatedAt   DateTime            @updatedAt @map("updated_at") @db.Timestamp(0)
+
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  account  Account   @relation(fields: [accountId], references: [id])
+  category Category? @relation(fields: [categoryId], references: [id])
+
+  @@index([nextRunDate, isActive], map: "idx_recurring_next_run")
+  @@map("recurring_transactions")
+}
+
+// =============================================
+// BÜTÇELER
+// =============================================
+
+model Budget {
+  id            String       @id @default(uuid()) @db.VarChar(36)
+  userId        String       @map("user_id") @db.VarChar(36)
+  categoryId    String       @map("category_id") @db.VarChar(36)
+  name          String       @db.VarChar(100)
+  amount        Decimal      @db.Decimal(15, 2)
+  spent         Decimal      @default(0.00) @db.Decimal(15, 2)
+  period        BudgetPeriod @default(MONTHLY)
+  note          String?      @db.Text
+  smartTracking Boolean      @default(true) @map("smart_tracking")
+  isActive      Boolean      @default(true) @map("is_active")
+  startDate     DateTime     @map("start_date") @db.Date
+  endDate       DateTime?    @map("end_date") @db.Date
+  createdAt     DateTime     @default(now()) @map("created_at") @db.Timestamp(0)
+  updatedAt     DateTime     @updatedAt @map("updated_at") @db.Timestamp(0)
+
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category Category @relation(fields: [categoryId], references: [id])
+
+  @@map("budgets")
+}
+
+// =============================================
+// BORÇ TAKİBİ
+// =============================================
+
+model Debt {
+  id              String     @id @default(uuid()) @db.VarChar(36)
+  userId          String     @map("user_id") @db.VarChar(36)
+  personName      String     @map("person_name") @db.VarChar(100)
+  type            DebtType
+  totalAmount     Decimal    @map("total_amount") @db.Decimal(15, 2)
+  paidAmount      Decimal    @default(0.00) @map("paid_amount") @db.Decimal(15, 2)
+  status          DebtStatus @default(PENDING)
+  dueDate         DateTime?  @map("due_date") @db.Date
+  note            String?    @db.Text
+  hasInstallments Boolean    @default(false) @map("has_installments")
+  createdAt       DateTime   @default(now()) @map("created_at") @db.Timestamp(0)
+  updatedAt       DateTime   @updatedAt @map("updated_at") @db.Timestamp(0)
+
+  user         User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  installments DebtInstallment[]
+  payments     DebtPayment[]
+  transactions Transaction[]
+
+  @@map("debts")
+}
+
+model DebtInstallment {
+  id            String     @id @default(uuid()) @db.VarChar(36)
+  debtId        String     @map("debt_id") @db.VarChar(36)
+  installmentNo Int        @map("installment_no")
+  amount        Decimal    @db.Decimal(15, 2)
+  paidAmount    Decimal    @default(0.00) @map("paid_amount") @db.Decimal(15, 2)
+  dueDate       DateTime   @map("due_date") @db.Date
+  status        DebtStatus @default(PENDING)
+  createdAt     DateTime   @default(now()) @map("created_at") @db.Timestamp(0)
+
+  debt     Debt          @relation(fields: [debtId], references: [id], onDelete: Cascade)
+  payments DebtPayment[]
+
+  @@unique([debtId, installmentNo])
+  @@index([dueDate, status], map: "idx_installment_due")
+  @@map("debt_installments")
+}
+
+model DebtPayment {
+  id            String   @id @default(uuid()) @db.VarChar(36)
+  debtId        String   @map("debt_id") @db.VarChar(36)
+  installmentId String?  @map("installment_id") @db.VarChar(36)
+  accountId     String   @map("account_id") @db.VarChar(36)
+  amount        Decimal  @db.Decimal(15, 2)
+  paidAt        DateTime @default(now()) @map("paid_at") @db.Timestamp(0)
+  note          String?  @db.Text
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamp(0)
+
+  debt        Debt             @relation(fields: [debtId], references: [id], onDelete: Cascade)
+  installment DebtInstallment? @relation(fields: [installmentId], references: [id], onDelete: Cascade)
+
+  @@map("debt_payments")
+}
+
+// =============================================
+// ABONELİKLER
+// =============================================
+
+model Subscription {
+  id          String             @id @default(uuid()) @db.VarChar(36)
+  userId      String             @map("user_id") @db.VarChar(36)
+  name        String             @db.VarChar(100)
+  amount      Decimal            @db.Decimal(15, 2)
+  period      SubscriptionPeriod @default(MONTHLY)
+  icon        String?            @db.VarChar(50)
+  color       String?            @db.VarChar(7)
+  startDate   DateTime           @map("start_date") @db.Date
+  nextRenewal DateTime           @map("next_renewal") @db.Date
+  accountId   String             @map("account_id") @db.VarChar(36)
+  categoryId  String?            @map("category_id") @db.VarChar(36)
+  isActive    Boolean            @default(true) @map("is_active")
+  autoDeduct  Boolean            @default(true) @map("auto_deduct")
+  createdAt   DateTime           @default(now()) @map("created_at") @db.Timestamp(0)
+  updatedAt   DateTime           @updatedAt @map("updated_at") @db.Timestamp(0)
+
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  account      Account       @relation(fields: [accountId], references: [id])
+  category     Category?     @relation(fields: [categoryId], references: [id])
+  transactions Transaction[]
+
+  @@index([nextRenewal, isActive], map: "idx_subscription_renewal")
+  @@map("subscriptions")
+}
+
+// =============================================
+// FİŞ TARAMA
+// =============================================
+
+model Receipt {
+  id             String        @id @default(uuid()) @db.VarChar(36)
+  userId         String        @map("user_id") @db.VarChar(36)
+  transactionId  String?       @map("transaction_id") @db.VarChar(36)
+  imageUrl       String        @map("image_url") @db.VarChar(500)
+  ocrRawText     String?       @map("ocr_raw_text") @db.Text
+  ocrSource      String?       @map("ocr_source") @db.VarChar(20)
+  confidence     Decimal?      @db.Decimal(3, 2)
+  parsedAmount   Decimal?      @map("parsed_amount") @db.Decimal(15, 2)
+  parsedMerchant String?       @map("parsed_merchant") @db.VarChar(200)
+  parsedDate     DateTime?     @map("parsed_date") @db.Date
+  parsedTax      Decimal?      @map("parsed_tax") @db.Decimal(15, 2)
+  paymentMethod  String?       @map("payment_method") @db.VarChar(20)
+  status         ReceiptStatus @default(PROCESSING)
+  createdAt      DateTime      @default(now()) @map("created_at") @db.Timestamp(0)
+
+  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transaction Transaction?  @relation(fields: [transactionId], references: [id])
+  items       ReceiptItem[]
+
+  @@map("receipts")
+}
+
+model ReceiptItem {
+  id         String  @id @default(uuid()) @db.VarChar(36)
+  receiptId  String  @map("receipt_id") @db.VarChar(36)
+  name       String  @db.VarChar(200)
+  quantity   Int     @default(1)
+  unitPrice  Decimal @map("unit_price") @db.Decimal(15, 2)
+  totalPrice Decimal @map("total_price") @db.Decimal(15, 2)
+  sortOrder  Int     @default(0) @map("sort_order")
+
+  receipt Receipt @relation(fields: [receiptId], references: [id], onDelete: Cascade)
+
+  @@map("receipt_items")
+}
+
+// =============================================
+// AKILLI KATEGORİ EŞLEŞTİRME
+// =============================================
+
+model MerchantCategoryMap {
+  id          String   @id @default(uuid()) @db.VarChar(36)
+  userId      String?  @map("user_id") @db.VarChar(36)
+  merchantKey String   @map("merchant_key") @db.VarChar(100)
+  categoryId  String   @map("category_id") @db.VarChar(36)
+  hitCount    Int      @default(1) @map("hit_count")
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamp(0)
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamp(0)
+
+  user     User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category Category @relation(fields: [categoryId], references: [id])
+
+  @@unique([userId, merchantKey])
+  @@map("merchant_category_maps")
+}
+
+// =============================================
+// ENFLASYON TAKİBİ
+// =============================================
+
+model InflationRate {
+  id          String   @id @default(uuid()) @db.VarChar(36)
+  categoryKey String   @map("category_key") @db.VarChar(50)
+  year        Int
+  month       Int
+  monthlyRate Decimal  @map("monthly_rate") @db.Decimal(6, 2)
+  yearlyRate  Decimal  @map("yearly_rate") @db.Decimal(6, 2)
+  fetchedAt   DateTime @default(now()) @map("fetched_at") @db.Timestamp(0)
+
+  @@unique([categoryKey, year, month])
+  @@map("inflation_rates")
+}
+
+model CategoryInflationMap {
+  id           String @id @default(uuid()) @db.VarChar(36)
+  categoryId   String @map("category_id") @db.VarChar(36)
+  inflationKey String @map("inflation_key") @db.VarChar(50)
+
+  category Category @relation(fields: [categoryId], references: [id])
+
+  @@unique([categoryId])
+  @@map("category_inflation_maps")
+}
+
+// =============================================
+// ALTIN / DÖVİZ PORTFÖY
+// =============================================
+
+model PortfolioAsset {
+  id          String    @id @default(uuid()) @db.VarChar(36)
+  accountId   String    @map("account_id") @db.VarChar(36)
+  assetType   AssetType @map("asset_type")
+  quantity    Decimal   @db.Decimal(15, 4)
+  avgBuyPrice Decimal   @map("avg_buy_price") @db.Decimal(15, 4)
+  totalCost   Decimal   @map("total_cost") @db.Decimal(15, 2)
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamp(0)
+  updatedAt   DateTime  @updatedAt @map("updated_at") @db.Timestamp(0)
+
+  account      Account       @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  transactions PortfolioTx[]
+
+  @@unique([accountId, assetType])
+  @@map("portfolio_assets")
+}
+
+model PortfolioTx {
+  id           String    @id @default(uuid()) @db.VarChar(36)
+  assetId      String    @map("asset_id") @db.VarChar(36)
+  type         String    @db.VarChar(4)
+  quantity     Decimal   @db.Decimal(15, 4)
+  pricePerUnit Decimal   @map("price_per_unit") @db.Decimal(15, 4)
+  totalAmount  Decimal   @map("total_amount") @db.Decimal(15, 2)
+  txDate       DateTime  @map("tx_date") @db.Timestamp(0)
+  note         String?   @db.Text
+  createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamp(0)
+
+  asset PortfolioAsset @relation(fields: [assetId], references: [id], onDelete: Cascade)
+
+  @@map("portfolio_transactions")
+}
+
+model ExchangeRate {
+  id        String    @id @default(uuid()) @db.VarChar(36)
+  assetType AssetType @map("asset_type")
+  buyPrice  Decimal   @map("buy_price") @db.Decimal(15, 4)
+  sellPrice Decimal   @map("sell_price") @db.Decimal(15, 4)
+  fetchedAt DateTime  @default(now()) @map("fetched_at") @db.Timestamp(0)
+
+  @@unique([assetType])
+  @@map("exchange_rates")
+}
+
+// =============================================
+// AKILLI HARCAMA ANALİZİ
+// =============================================
+
+model Insight {
+  id          String   @id @default(uuid()) @db.VarChar(36)
+  userId      String   @map("user_id") @db.VarChar(36)
+  ruleId      String   @map("rule_id") @db.VarChar(50)
+  title       String   @db.VarChar(200)
+  message     String   @db.Text
+  category    String?  @db.VarChar(50)
+  severity    String   @db.VarChar(10)
+  data        String?  @db.Text
+  isRead      Boolean  @default(false) @map("is_read")
+  isDismissed Boolean  @default(false) @map("is_dismissed")
+  period      String   @db.VarChar(7)
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamp(0)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, period, isDismissed], map: "idx_insights_user_period")
+  @@map("insights")
+}
+
+// =============================================
+// AİLE / ORTAK BÜTÇE
+// =============================================
+
+model FamilyGroup {
+  id        String   @id @default(uuid()) @db.VarChar(36)
+  name      String   @db.VarChar(100)
+  icon      String?  @db.VarChar(50)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamp(0)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamp(0)
+
+  members       FamilyMember[]
+  sharedBudgets SharedBudget[]
+  invites       FamilyInvite[]
+
+  @@map("family_groups")
+}
+
+model FamilyMember {
+  id       String     @id @default(uuid()) @db.VarChar(36)
+  groupId  String     @map("group_id") @db.VarChar(36)
+  userId   String     @map("user_id") @db.VarChar(36)
+  role     FamilyRole @default(MEMBER)
+  joinedAt DateTime   @default(now()) @map("joined_at") @db.Timestamp(0)
+
+  group FamilyGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  user  User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([groupId, userId])
+  @@map("family_members")
+}
+
+model FamilyInvite {
+  id        String       @id @default(uuid()) @db.VarChar(36)
+  groupId   String       @map("group_id") @db.VarChar(36)
+  invitedBy String       @map("invited_by") @db.VarChar(36)
+  email     String       @db.VarChar(255)
+  token     String       @unique @db.VarChar(255)
+  status    InviteStatus @default(PENDING)
+  expiresAt DateTime     @map("expires_at") @db.Timestamp(0)
+  createdAt DateTime     @default(now()) @map("created_at") @db.Timestamp(0)
+
+  group FamilyGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  @@map("family_invites")
+}
+
+model SharedBudget {
+  id         String       @id @default(uuid()) @db.VarChar(36)
+  groupId    String       @map("group_id") @db.VarChar(36)
+  categoryId String       @map("category_id") @db.VarChar(36)
+  name       String       @db.VarChar(100)
+  amount     Decimal      @db.Decimal(15, 2)
+  spent      Decimal      @default(0.00) @db.Decimal(15, 2)
+  period     BudgetPeriod @default(MONTHLY)
+  startDate  DateTime     @map("start_date") @db.Date
+  endDate    DateTime?    @map("end_date") @db.Date
+  isActive   Boolean      @default(true) @map("is_active")
+  createdAt  DateTime     @default(now()) @map("created_at") @db.Timestamp(0)
+  updatedAt  DateTime     @updatedAt @map("updated_at") @db.Timestamp(0)
+
+  group    FamilyGroup     @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  category Category        @relation(fields: [categoryId], references: [id])
+  expenses SharedExpense[]
+
+  @@map("shared_budgets")
+}
+
+model SharedExpense {
+  id             String   @id @default(uuid()) @db.VarChar(36)
+  sharedBudgetId String   @map("shared_budget_id") @db.VarChar(36)
+  transactionId  String   @map("transaction_id") @db.VarChar(36)
+  userId         String   @map("user_id") @db.VarChar(36)
+  amount         Decimal  @db.Decimal(15, 2)
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamp(0)
+
+  sharedBudget SharedBudget @relation(fields: [sharedBudgetId], references: [id], onDelete: Cascade)
+
+  @@map("shared_expenses")
+}

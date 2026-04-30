@@ -1,3 +1,42 @@
-DEVELOPMENT_PLAN.md
+DEVELOPMENT_PLAN_V1.md
+DEVELOPMENT_PLAN_V2.md
 STITCH_PROMPTS.md
 TASK.md
+SCHEMA.md
+
+# ENV
+api/.env
+api/.env.local
+api/.env.production
+
+# Node
+api/node_modules/
+api/dist/
+api/coverage/
+
+# Prisma generated client
+api/generated/
+
+# Uploads
+api/uploads/
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Flutter
+mobile/.dart_tool/
+mobile/.flutter-plugins
+mobile/.flutter-plugins-dependencies
+mobile/build/
+mobile/.pub-cache/
+mobile/android/.gradle/
+mobile/android/local.properties
+mobile/android/app/google-services.json
+mobile/ios/Pods/
+mobile/ios/Flutter/flutter_export_environment.sh
+mobile/ios/Runner.xcworkspace/xcshareddata/WorkspaceSettings.xcsettings

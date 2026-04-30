@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install *)",
+      "Bash(npx prisma *)",
+      "Bash(xargs sed *)",
+      "Bash(node -e \"require\\('mariadb'\\)\")",
+      "mcp__stitch__list_projects",
+      "mcp__stitch__list_screens",
+      "mcp__stitch__get_screen",
+      "WebFetch(domain:contribution.usercontent.google.com)",
+      "Bash(flutter analyze *)",
+      "WebFetch(domain:lh3.googleusercontent.com)"
+    ]
+  }
+}

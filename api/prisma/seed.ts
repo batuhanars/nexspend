@@ -1,6 +1,11 @@
-import { PrismaClient, CategoryType } from '@prisma/client';
+import 'dotenv/config';
+import { PrismaClient } from '../generated/prisma/client.js';
+import { PrismaMariaDb } from '@prisma/adapter-mariadb';
 
-const prisma = new PrismaClient();
+type CategoryType = 'INCOME' | 'EXPENSE' | 'BOTH';
+
+const adapter = new PrismaMariaDb(process.env['DATABASE_URL'] as string);
+const prisma = new (PrismaClient as any)({ adapter }) as InstanceType<typeof PrismaClient>;
 
 // =============================================
 // KATEGORİ SEED DATA

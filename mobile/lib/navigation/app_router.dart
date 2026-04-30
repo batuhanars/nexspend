@@ -18,6 +18,8 @@ import '../presentation/debts/pages/debts_page.dart';
 import '../presentation/subscriptions/pages/subscriptions_page.dart';
 import '../presentation/reports/pages/reports_page.dart';
 import '../presentation/receipt_scanner/pages/receipt_scanner_page.dart';
+import '../data/repositories/account_repository.dart';
+import '../presentation/accounts/bloc/account_bloc.dart';
 import '../presentation/accounts/pages/add_account_page.dart';
 import '../presentation/settings/pages/settings_page.dart';
 import '../presentation/settings/pages/edit_profile_page.dart';
@@ -132,7 +134,10 @@ GoRouter createRouter() {
         path: RouteNames.addAccount,
         name: 'add-account',
         parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, _) => const AddAccountPage(),
+        builder: (context, _) => BlocProvider(
+          create: (_) => AccountBloc(accountRepository: getIt<AccountRepository>()),
+          child: const AddAccountPage(),
+        ),
       ),
       GoRoute(
         path: RouteNames.settings,

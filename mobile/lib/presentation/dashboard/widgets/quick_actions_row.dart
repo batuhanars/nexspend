@@ -1,0 +1,95 @@
+import 'package:flutter/material.dart';
+import '../../../core/constants/app_colors.dart';
+import '../../../core/constants/app_spacing.dart';
+import '../../../core/constants/app_typography.dart';
+
+class QuickActionsRow extends StatelessWidget {
+  const QuickActionsRow({
+    super.key,
+    required this.onIncome,
+    required this.onExpense,
+    required this.onTransfer,
+    required this.onScan,
+  });
+
+  final VoidCallback onIncome;
+  final VoidCallback onExpense;
+  final VoidCallback onTransfer;
+  final VoidCallback onScan;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.pagePadding),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          _ActionButton(
+            icon: Icons.add_rounded,
+            label: 'Gelir',
+            color: AppColors.secondary,
+            onTap: onIncome,
+          ),
+          _ActionButton(
+            icon: Icons.remove_rounded,
+            label: 'Gider',
+            color: AppColors.tertiary,
+            onTap: onExpense,
+          ),
+          _ActionButton(
+            icon: Icons.swap_horiz_rounded,
+            label: 'Transfer',
+            color: AppColors.primary,
+            onTap: onTransfer,
+          ),
+          _ActionButton(
+            icon: Icons.document_scanner_outlined,
+            label: 'Tara',
+            color: AppColors.onSurfaceVariant,
+            onTap: onScan,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ActionButton extends StatelessWidget {
+  const _ActionButton({
+    required this.icon,
+    required this.label,
+    required this.color,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String label;
+  final Color color;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 56,
+            height: 56,
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.12),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(icon, color: color, size: 24),
+          ),
+          const SizedBox(height: AppSpacing.xs),
+          Text(
+            label,
+            style: AppTypography.labelMd.copyWith(color: AppColors.onSurface),
+          ),
+        ],
+      ),
+    );
+  }
+}

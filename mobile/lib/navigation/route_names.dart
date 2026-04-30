@@ -16,6 +16,10 @@ class RouteNames {
   static const String debts = '/debts';
   static const String subscriptions = '/subscriptions';
 
+  // Hesaplar
+  static const String addAccount = '/accounts/add';
+  static String accountDetail(String id) => '/accounts/$id';
+
   // AppBar erişimli
   static const String reports = '/reports';
   static const String receiptScanner = '/receipt-scanner';

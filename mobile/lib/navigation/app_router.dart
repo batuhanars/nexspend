@@ -18,6 +18,7 @@ import '../presentation/debts/pages/debts_page.dart';
 import '../presentation/subscriptions/pages/subscriptions_page.dart';
 import '../presentation/reports/pages/reports_page.dart';
 import '../presentation/receipt_scanner/pages/receipt_scanner_page.dart';
+import '../presentation/accounts/pages/add_account_page.dart';
 import '../presentation/settings/pages/settings_page.dart';
 import '../presentation/settings/pages/edit_profile_page.dart';
 import '../presentation/shared/bottom_nav_bar.dart';
@@ -126,6 +127,12 @@ GoRouter createRouter() {
         name: 'receipt-scanner',
         parentNavigatorKey: _rootNavigatorKey,
         builder: (context, _) => const ReceiptScannerPage(),
+      ),
+      GoRoute(
+        path: RouteNames.addAccount,
+        name: 'add-account',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, _) => const AddAccountPage(),
       ),
       GoRoute(
         path: RouteNames.settings,

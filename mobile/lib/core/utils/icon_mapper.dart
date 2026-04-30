@@ -44,7 +44,7 @@ class IconMapper {
     // Navigasyon
     'dashboard': Icons.dashboard_outlined,
     'receipt_long': Icons.receipt_long_outlined,
-    'pie_chart': Icons.pie_chart_outlined,
+    'pie_chart': Icons.pie_chart_outline,
     'handshake': Icons.handshake_outlined,
     'subscriptions': Icons.subscriptions_outlined,
     'settings': Icons.settings_outlined,

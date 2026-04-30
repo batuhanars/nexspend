@@ -1,5 +1,6 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get_it/get_it.dart';
+import '../../data/repositories/auth_repository.dart';
 import '../network/api_client.dart';
 import '../storage/secure_storage.dart';
 
@@ -21,5 +22,13 @@ Future<void> configureDependencies() async {
   // Network
   getIt.registerLazySingleton<ApiClient>(
     () => ApiClient(getIt<SecureStorage>()),
+  );
+
+  // Repositories
+  getIt.registerLazySingleton<AuthRepository>(
+    () => AuthRepository(
+      apiClient: getIt<ApiClient>(),
+      storage: getIt<SecureStorage>(),
+    ),
   );
 }

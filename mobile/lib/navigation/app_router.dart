@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../core/di/injection.dart';
 import '../core/storage/secure_storage.dart';
+import '../data/repositories/auth_repository.dart';
+import '../presentation/auth/bloc/auth_bloc.dart';
 import '../presentation/auth/pages/login_page.dart';
 import '../presentation/auth/pages/register_page.dart';
 import '../presentation/auth/pages/forgot_password_page.dart';
@@ -29,28 +32,40 @@ GoRouter createRouter() {
     initialLocation: RouteNames.login,
     redirect: _redirect,
     routes: [
-      // Auth Routes
+      // Auth Routes — share one AuthBloc instance across the auth flow
       GoRoute(
         path: RouteNames.login,
         name: 'login',
-        builder: (_, __) => const LoginPage(),
+        builder: (context, _) => BlocProvider(
+          create: (_) => AuthBloc(authRepository: getIt<AuthRepository>()),
+          child: const LoginPage(),
+        ),
       ),
       GoRoute(
         path: RouteNames.register,
         name: 'register',
-        builder: (_, __) => const RegisterPage(),
+        builder: (context, _) => BlocProvider(
+          create: (_) => AuthBloc(authRepository: getIt<AuthRepository>()),
+          child: const RegisterPage(),
+        ),
       ),
       GoRoute(
         path: RouteNames.forgotPassword,
         name: 'forgot-password',
-        builder: (_, __) => const ForgotPasswordPage(),
+        builder: (context, _) => BlocProvider(
+          create: (_) => AuthBloc(authRepository: getIt<AuthRepository>()),
+          child: const ForgotPasswordPage(),
+        ),
       ),
       GoRoute(
         path: RouteNames.resetPassword,
         name: 'reset-password',
-        builder: (context, state) {
+        builder: (_, state) {
           final token = state.uri.queryParameters['token'] ?? '';
-          return ResetPasswordPage(token: token);
+          return BlocProvider(
+            create: (_) => AuthBloc(authRepository: getIt<AuthRepository>()),
+            child: ResetPasswordPage(token: token),
+          );
         },
       ),
 
@@ -62,27 +77,27 @@ GoRouter createRouter() {
           GoRoute(
             path: RouteNames.home,
             name: 'home',
-            builder: (_, __) => const DashboardPage(),
+            builder: (context, _) => const DashboardPage(),
           ),
           GoRoute(
             path: RouteNames.transactions,
             name: 'transactions',
-            builder: (_, __) => const TransactionsPage(),
+            builder: (context, _) => const TransactionsPage(),
           ),
           GoRoute(
             path: RouteNames.budgets,
             name: 'budgets',
-            builder: (_, __) => const BudgetsPage(),
+            builder: (context, _) => const BudgetsPage(),
           ),
           GoRoute(
             path: RouteNames.debts,
             name: 'debts',
-            builder: (_, __) => const DebtsPage(),
+            builder: (context, _) => const DebtsPage(),
           ),
           GoRoute(
             path: RouteNames.subscriptions,
             name: 'subscriptions',
-            builder: (_, __) => const SubscriptionsPage(),
+            builder: (context, _) => const SubscriptionsPage(),
           ),
         ],
       ),
@@ -92,37 +107,37 @@ GoRouter createRouter() {
         path: RouteNames.addTransaction,
         name: 'add-transaction',
         parentNavigatorKey: _rootNavigatorKey,
-        builder: (_, __) => const AddTransactionPage(),
+        builder: (context, _) => const AddTransactionPage(),
       ),
       GoRoute(
         path: RouteNames.addBudget,
         name: 'add-budget',
         parentNavigatorKey: _rootNavigatorKey,
-        builder: (_, __) => const AddBudgetPage(),
+        builder: (context, _) => const AddBudgetPage(),
       ),
       GoRoute(
         path: RouteNames.reports,
         name: 'reports',
         parentNavigatorKey: _rootNavigatorKey,
-        builder: (_, __) => const ReportsPage(),
+        builder: (context, _) => const ReportsPage(),
       ),
       GoRoute(
         path: RouteNames.receiptScanner,
         name: 'receipt-scanner',
         parentNavigatorKey: _rootNavigatorKey,
-        builder: (_, __) => const ReceiptScannerPage(),
+        builder: (context, _) => const ReceiptScannerPage(),
       ),
       GoRoute(
         path: RouteNames.settings,
         name: 'settings',
         parentNavigatorKey: _rootNavigatorKey,
-        builder: (_, __) => const SettingsPage(),
+        builder: (context, _) => const SettingsPage(),
       ),
       GoRoute(
         path: RouteNames.editProfile,
         name: 'edit-profile',
         parentNavigatorKey: _rootNavigatorKey,
-        builder: (_, __) => const EditProfilePage(),
+        builder: (context, _) => const EditProfilePage(),
       ),
     ],
   );

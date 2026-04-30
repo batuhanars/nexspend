@@ -19,8 +19,12 @@ import '../presentation/subscriptions/pages/subscriptions_page.dart';
 import '../presentation/reports/pages/reports_page.dart';
 import '../presentation/receipt_scanner/pages/receipt_scanner_page.dart';
 import '../data/repositories/account_repository.dart';
+import '../data/repositories/category_repository.dart';
+import '../data/repositories/transaction_repository.dart';
 import '../presentation/accounts/bloc/account_bloc.dart';
 import '../presentation/accounts/pages/add_account_page.dart';
+import '../presentation/transactions/bloc/add_transaction_bloc.dart';
+import '../presentation/transactions/bloc/transactions_bloc.dart';
 import '../presentation/settings/pages/settings_page.dart';
 import '../presentation/settings/pages/edit_profile_page.dart';
 import '../presentation/shared/bottom_nav_bar.dart';
@@ -85,7 +89,12 @@ GoRouter createRouter() {
           GoRoute(
             path: RouteNames.transactions,
             name: 'transactions',
-            builder: (context, _) => const TransactionsPage(),
+            builder: (context, _) => BlocProvider(
+              create: (_) => TransactionsBloc(
+                transactionRepository: getIt<TransactionRepository>(),
+              ),
+              child: const TransactionsPage(),
+            ),
           ),
           GoRoute(
             path: RouteNames.budgets,
@@ -110,7 +119,14 @@ GoRouter createRouter() {
         path: RouteNames.addTransaction,
         name: 'add-transaction',
         parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, _) => const AddTransactionPage(),
+        builder: (context, _) => BlocProvider(
+          create: (_) => AddTransactionBloc(
+            transactionRepository: getIt<TransactionRepository>(),
+            categoryRepository: getIt<CategoryRepository>(),
+            accountRepository: getIt<AccountRepository>(),
+          ),
+          child: const AddTransactionPage(),
+        ),
       ),
       GoRoute(
         path: RouteNames.addBudget,

@@ -154,6 +154,7 @@ model Account {
   name          String      @db.VarChar(100)
   type          AccountType
   balance       Decimal     @default(0.00) @db.Decimal(15, 2)
+  currency      String      @default("TRY") @db.VarChar(3)
   icon          String?     @db.VarChar(50)
   color         String?     @db.VarChar(7)
   isActive      Boolean     @default(true) @map("is_active")

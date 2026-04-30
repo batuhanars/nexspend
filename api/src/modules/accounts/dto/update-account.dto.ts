@@ -25,6 +25,10 @@ export class UpdateAccountDto {
 
   @IsString()
   @IsOptional()
+  currency?: string;
+
+  @IsString()
+  @IsOptional()
   icon?: string;
 
   @IsString()

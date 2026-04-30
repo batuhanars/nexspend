@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE `accounts` ADD COLUMN `currency` VARCHAR(3) NOT NULL DEFAULT 'TRY';

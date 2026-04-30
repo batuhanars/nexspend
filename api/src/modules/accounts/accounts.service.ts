@@ -40,6 +40,7 @@ export class AccountsService {
         name: dto.name,
         type: dto.type,
         balance: dto.balance ?? 0,
+        currency: dto.currency ?? 'TRY',
         icon: dto.icon ?? null,
         color: dto.color ?? null,
         isDefault: dto.isDefault ?? false,
@@ -68,12 +69,17 @@ export class AccountsService {
         ...(dto.name !== undefined && { name: dto.name }),
         ...(dto.type !== undefined && { type: dto.type }),
         ...(dto.balance !== undefined && { balance: dto.balance }),
+        ...(dto.currency !== undefined && { currency: dto.currency }),
         ...(dto.icon !== undefined && { icon: dto.icon }),
         ...(dto.color !== undefined && { color: dto.color }),
         ...(dto.isDefault !== undefined && { isDefault: dto.isDefault }),
         ...(dto.creditLimit !== undefined && { creditLimit: dto.creditLimit }),
-        ...(dto.statementDay !== undefined && { statementDay: dto.statementDay }),
-        ...(dto.paymentDueDay !== undefined && { paymentDueDay: dto.paymentDueDay }),
+        ...(dto.statementDay !== undefined && {
+          statementDay: dto.statementDay,
+        }),
+        ...(dto.paymentDueDay !== undefined && {
+          paymentDueDay: dto.paymentDueDay,
+        }),
       },
     });
 
@@ -220,11 +226,19 @@ export class AccountsService {
 
         return Promise.all([
           this.prisma.transaction.aggregate({
-            where: { accountId: id, type: 'INCOME', transactionDate: { gte: start, lte: end } },
+            where: {
+              accountId: id,
+              type: 'INCOME',
+              transactionDate: { gte: start, lte: end },
+            },
             _sum: { amount: true },
           }),
           this.prisma.transaction.aggregate({
-            where: { accountId: id, type: 'EXPENSE', transactionDate: { gte: start, lte: end } },
+            where: {
+              accountId: id,
+              type: 'EXPENSE',
+              transactionDate: { gte: start, lte: end },
+            },
             _sum: { amount: true },
           }),
         ]).then(([inc, exp]) => ({
@@ -250,7 +264,9 @@ export class AccountsService {
     const topCategories = await Promise.all(
       categoryStats.map(async (stat) => {
         const category = stat.categoryId
-          ? await this.prisma.category.findUnique({ where: { id: stat.categoryId } })
+          ? await this.prisma.category.findUnique({
+              where: { id: stat.categoryId },
+            })
           : null;
         return {
           categoryId: stat.categoryId,
@@ -307,7 +323,8 @@ export class AccountsService {
     return {
       ...account,
       balance: Number(account.balance),
-      creditLimit: account.creditLimit !== null ? Number(account.creditLimit) : null,
+      creditLimit:
+        account.creditLimit !== null ? Number(account.creditLimit) : null,
     };
   }
 }

@@ -8,21 +8,34 @@ export class DashboardService {
   constructor(private readonly prisma: PrismaService) {}
 
   async getDashboard(userId: string) {
-    const [accounts, recentTransactions, monthlySummary] = await Promise.all([
-      this.getAccounts(userId),
-      this.getRecentTransactions(userId),
-      this.getMonthlySummary(userId),
-    ]);
+    const [user, accounts, recentTransactions, monthlySummary] =
+      await Promise.all([
+        this.prisma.user.findUnique({
+          where: { id: userId },
+          select: { fullName: true },
+        }),
+        this.getAccounts(userId),
+        this.getRecentTransactions(userId),
+        this.getMonthlySummary(userId),
+      ]);
 
     const { totalAssets, ccDebt, netAssets } = this.calcSummary(accounts);
 
+    const lastMonthNetAssets = totalAssets - ccDebt - monthlySummary.change;
+    const monthlyChangePercent =
+      lastMonthNetAssets !== 0
+        ? (monthlySummary.change / Math.abs(lastMonthNetAssets)) * 100
+        : 0;
+
     return {
       totalAssets,
-      ccDebt,
+      creditCardDebt: ccDebt,
       netAssets,
       monthlyIncome: monthlySummary.income,
       monthlyExpense: monthlySummary.expense,
       monthlyChange: monthlySummary.change,
+      monthlyChangePercent: Math.round(monthlyChangePercent * 10) / 10,
+      userFirstName: user?.fullName?.split(' ')[0] ?? null,
       accounts,
       recentTransactions,
     };
@@ -52,6 +65,8 @@ export class DashboardService {
     return transactions.map((t) => ({
       ...t,
       amount: Number(t.amount),
+      date: t.transactionDate,
+      description: t.title,
     }));
   }
 

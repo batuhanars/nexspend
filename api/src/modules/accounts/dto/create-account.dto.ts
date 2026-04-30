@@ -23,6 +23,10 @@ export class CreateAccountDto {
 
   @IsString()
   @IsOptional()
+  currency?: string;
+
+  @IsString()
+  @IsOptional()
   icon?: string;
 
   @IsString()

@@ -1,19 +1,32 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../constants/app_colors.dart';
-import '../constants/app_typography.dart';
 import '../constants/app_spacing.dart';
 
 class AppTheme {
   AppTheme._();
 
   static ThemeData get dark {
+    final textTheme = GoogleFonts.interTextTheme(
+      const TextTheme(
+        displayLarge: TextStyle(fontSize: 56, fontWeight: FontWeight.w700, color: AppColors.onSurface, height: 1.1, letterSpacing: -1.0),
+        displayMedium: TextStyle(fontSize: 45, fontWeight: FontWeight.w700, color: AppColors.onSurface, height: 1.15, letterSpacing: -0.5),
+        headlineMedium: TextStyle(fontSize: 28, fontWeight: FontWeight.w600, color: AppColors.onSurface, height: 1.25, letterSpacing: -0.25),
+        headlineSmall: TextStyle(fontSize: 24, fontWeight: FontWeight.w600, color: AppColors.onSurface, height: 1.3),
+        titleSmall: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: AppColors.onSurface, height: 1.4, letterSpacing: 0.1),
+        bodyMedium: TextStyle(fontSize: 14, fontWeight: FontWeight.w400, color: AppColors.onSurface, height: 1.5, letterSpacing: 0.1),
+        bodySmall: TextStyle(fontSize: 12, fontWeight: FontWeight.w400, color: AppColors.onSurfaceVariant, height: 1.5, letterSpacing: 0.2),
+        labelSmall: TextStyle(fontSize: 11, fontWeight: FontWeight.w500, color: AppColors.onSurfaceVariant, height: 1.45, letterSpacing: 1.0),
+        labelMedium: TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: AppColors.onSurfaceVariant, height: 1.45, letterSpacing: 0.5),
+      ),
+    );
+
     return ThemeData(
       useMaterial3: true,
       brightness: Brightness.dark,
-      fontFamily: AppTypography.fontFamily,
 
-      // Color Scheme — tüm design token'ları buraya bağlanır
+      // Color Scheme
       colorScheme: const ColorScheme(
         brightness: Brightness.dark,
         surface: AppColors.surface,
@@ -46,23 +59,23 @@ class AppTheme {
         surfaceContainerHighest: AppColors.surfaceContainerHighest,
       ),
 
-      // Scaffold
       scaffoldBackgroundColor: AppColors.surface,
+      textTheme: textTheme,
 
       // AppBar
-      appBarTheme: const AppBarTheme(
+      appBarTheme: AppBarTheme(
         backgroundColor: AppColors.surface,
         foregroundColor: AppColors.onSurface,
         elevation: 0,
         scrolledUnderElevation: 0,
         centerTitle: false,
-        systemOverlayStyle: SystemUiOverlayStyle(
+        systemOverlayStyle: const SystemUiOverlayStyle(
           statusBarColor: Colors.transparent,
           statusBarIconBrightness: Brightness.light,
           systemNavigationBarColor: AppColors.surface,
           systemNavigationBarIconBrightness: Brightness.light,
         ),
-        titleTextStyle: AppTypography.headlineSm,
+        titleTextStyle: textTheme.headlineSmall,
       ),
 
       // Card
@@ -75,7 +88,7 @@ class AppTheme {
         margin: EdgeInsets.zero,
       ),
 
-      // Elevated Button — Primary pill shape
+      // Elevated Button
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.primary,
@@ -88,12 +101,12 @@ class AppTheme {
             horizontal: AppSpacing.xl,
             vertical: AppSpacing.lg,
           ),
-          textStyle: AppTypography.titleSm,
+          textStyle: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w600),
           minimumSize: const Size(double.infinity, 56),
         ),
       ),
 
-      // Outlined Button — Ghost style
+      // Outlined Button
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
           foregroundColor: AppColors.primary,
@@ -107,7 +120,7 @@ class AppTheme {
             horizontal: AppSpacing.xl,
             vertical: AppSpacing.lg,
           ),
-          textStyle: AppTypography.titleSm,
+          textStyle: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w600),
           minimumSize: const Size(double.infinity, 56),
         ),
       ),
@@ -116,11 +129,11 @@ class AppTheme {
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
           foregroundColor: AppColors.primary,
-          textStyle: AppTypography.bodyMd,
+          textStyle: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w400),
         ),
       ),
 
-      // Input Decoration — border yok, surfaceContainerHighest bg
+      // Input Decoration
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: AppColors.surfaceContainerHighest,
@@ -144,8 +157,13 @@ class AppTheme {
           borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
           borderSide: const BorderSide(color: AppColors.error, width: 1.5),
         ),
-        labelStyle: AppTypography.labelMd,
-        hintStyle: AppTypography.bodyMd.copyWith(
+        labelStyle: GoogleFonts.inter(
+          fontSize: 12,
+          fontWeight: FontWeight.w500,
+          color: AppColors.onSurfaceVariant,
+        ),
+        hintStyle: GoogleFonts.inter(
+          fontSize: 14,
           color: AppColors.onSurfaceVariant,
         ),
         contentPadding: const EdgeInsets.symmetric(
@@ -158,7 +176,11 @@ class AppTheme {
       chipTheme: ChipThemeData(
         backgroundColor: AppColors.surfaceContainerHigh,
         selectedColor: AppColors.primaryContainer,
-        labelStyle: AppTypography.labelMd.copyWith(color: AppColors.onSurface),
+        labelStyle: GoogleFonts.inter(
+          fontSize: 12,
+          fontWeight: FontWeight.w500,
+          color: AppColors.onSurface,
+        ),
         side: BorderSide.none,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
@@ -178,7 +200,7 @@ class AppTheme {
         elevation: 0,
       ),
 
-      // Floating Action Button
+      // FAB
       floatingActionButtonTheme: const FloatingActionButtonThemeData(
         backgroundColor: AppColors.primary,
         foregroundColor: AppColors.onPrimary,
@@ -195,19 +217,6 @@ class AppTheme {
       // Progress Indicator
       progressIndicatorTheme: const ProgressIndicatorThemeData(
         color: AppColors.primary,
-      ),
-
-      // Text Theme
-      textTheme: const TextTheme(
-        displayLarge: AppTypography.displayLg,
-        displayMedium: AppTypography.displayMd,
-        headlineMedium: AppTypography.headlineMd,
-        headlineSmall: AppTypography.headlineSm,
-        titleSmall: AppTypography.titleSm,
-        bodyMedium: AppTypography.bodyMd,
-        bodySmall: AppTypography.bodySm,
-        labelSmall: AppTypography.labelSm,
-        labelMedium: AppTypography.labelMd,
       ),
     );
   }

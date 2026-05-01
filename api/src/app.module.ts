@@ -10,6 +10,8 @@ import { DashboardModule } from './modules/dashboard/dashboard.module';
 import { TransactionsModule } from './modules/transactions/transactions.module';
 import { TagsModule } from './modules/tags/tags.module';
 import { BudgetsModule } from './modules/budgets/budgets.module';
+import { DebtsModule } from './modules/debts/debts.module';
+import { SubscriptionsModule } from './modules/subscriptions/subscriptions.module';
 import appConfig from './config/app.config';
 
 @Module({
@@ -29,6 +31,8 @@ import appConfig from './config/app.config';
     TransactionsModule,
     TagsModule,
     BudgetsModule,
+    DebtsModule,
+    SubscriptionsModule,
   ],
 })
 export class AppModule {}

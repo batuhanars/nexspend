@@ -57,8 +57,10 @@ export class CategoriesService {
     const category = await this.prisma.category.findUnique({ where: { id } });
 
     if (!category) throw new NotFoundException('Kategori bulunamadı');
-    if (category.isSystem) throw new ForbiddenException('Sistem kategorisi silinemez');
-    if (category.userId !== userId) throw new ForbiddenException('Bu kategori size ait değil');
+    if (category.isSystem)
+      throw new ForbiddenException('Sistem kategorisi silinemez');
+    if (category.userId !== userId)
+      throw new ForbiddenException('Bu kategori size ait değil');
 
     await this.prisma.category.delete({ where: { id } });
     return { message: 'Kategori silindi' };

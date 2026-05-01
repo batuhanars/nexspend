@@ -10,7 +10,17 @@
       "mcp__stitch__get_screen",
       "WebFetch(domain:contribution.usercontent.google.com)",
       "Bash(flutter analyze *)",
-      "WebFetch(domain:lh3.googleusercontent.com)"
+      "WebFetch(domain:lh3.googleusercontent.com)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(npm run *)",
+      "Bash(git push *)",
+      "Bash(npm show *)",
+      "Bash(flutter pub *)",
+      "Bash(docker compose *)",
+      "Read(//tmp/**)",
+      "Bash(curl -s http://localhost:3000/api/dashboard -H \"Authorization: Bearer test\")",
+      "Bash(grep -v \"^$\")"
     ]
   }
 }

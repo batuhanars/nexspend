@@ -28,10 +28,7 @@ export class AccountsController {
   }
 
   @Post()
-  create(
-    @CurrentUser() user: { id: string },
-    @Body() dto: CreateAccountDto,
-  ) {
+  create(@CurrentUser() user: { id: string }, @Body() dto: CreateAccountDto) {
     return this.accountsService.create(user.id, dto);
   }
 
@@ -42,10 +39,7 @@ export class AccountsController {
   }
 
   @Get(':id')
-  findOne(
-    @CurrentUser() user: { id: string },
-    @Param('id') id: string,
-  ) {
+  findOne(@CurrentUser() user: { id: string }, @Param('id') id: string) {
     return this.accountsService.findOne(user.id, id);
   }
 
@@ -60,50 +54,32 @@ export class AccountsController {
 
   @Delete(':id')
   @HttpCode(HttpStatus.OK)
-  remove(
-    @CurrentUser() user: { id: string },
-    @Param('id') id: string,
-  ) {
+  remove(@CurrentUser() user: { id: string }, @Param('id') id: string) {
     return this.accountsService.remove(user.id, id);
   }
 
   @Patch(':id/archive')
-  archive(
-    @CurrentUser() user: { id: string },
-    @Param('id') id: string,
-  ) {
+  archive(@CurrentUser() user: { id: string }, @Param('id') id: string) {
     return this.accountsService.archive(user.id, id);
   }
 
   @Patch(':id/restore')
-  restore(
-    @CurrentUser() user: { id: string },
-    @Param('id') id: string,
-  ) {
+  restore(@CurrentUser() user: { id: string }, @Param('id') id: string) {
     return this.accountsService.restore(user.id, id);
   }
 
   @Patch(':id/set-default')
-  setDefault(
-    @CurrentUser() user: { id: string },
-    @Param('id') id: string,
-  ) {
+  setDefault(@CurrentUser() user: { id: string }, @Param('id') id: string) {
     return this.accountsService.setDefault(user.id, id);
   }
 
   @Get(':id/statement')
-  getStatement(
-    @CurrentUser() user: { id: string },
-    @Param('id') id: string,
-  ) {
+  getStatement(@CurrentUser() user: { id: string }, @Param('id') id: string) {
     return this.accountsService.getStatement(user.id, id);
   }
 
   @Get(':id/analytics')
-  getAnalytics(
-    @CurrentUser() user: { id: string },
-    @Param('id') id: string,
-  ) {
+  getAnalytics(@CurrentUser() user: { id: string }, @Param('id') id: string) {
     return this.accountsService.getAnalytics(user.id, id);
   }
 

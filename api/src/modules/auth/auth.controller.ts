@@ -41,7 +41,10 @@ export class AuthController {
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
   @UseGuards(RefreshTokenGuard)
-  async refresh(@CurrentUser() user: { id: string; email: string }, @Body() _dto: RefreshTokenDto) {
+  async refresh(
+    @CurrentUser() user: { id: string; email: string },
+    @Body() _dto: RefreshTokenDto,
+  ) {
     return this.authService.refresh(user.id, user.email);
   }
 
@@ -56,7 +59,9 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   async forgotPassword(@Body() dto: ForgotPasswordDto) {
     await this.authService.forgotPassword(dto.email);
-    return { message: 'Şifre sıfırlama bağlantısı e-posta adresinize gönderildi' };
+    return {
+      message: 'Şifre sıfırlama bağlantısı e-posta adresinize gönderildi',
+    };
   }
 
   @Post('reset-password')
@@ -75,10 +80,7 @@ export class AuthController {
 
   @Get('google/callback')
   @UseGuards(GoogleAuthGuard)
-  async googleCallback(
-    @CurrentUser() profile: any,
-    @Res() res: Response,
-  ) {
+  async googleCallback(@CurrentUser() profile: any, @Res() res: Response) {
     const result = await this.authService.googleAuth(profile);
     const frontendUrl = this.configService.get<string>('frontend.url');
 

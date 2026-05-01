@@ -9,11 +9,7 @@ import { GoogleStrategy } from './strategies/google.strategy';
 import { MailModule } from '../mail/mail.module';
 
 @Module({
-  imports: [
-    PassportModule,
-    JwtModule.register({}),
-    MailModule,
-  ],
+  imports: [PassportModule, JwtModule.register({}), MailModule],
   controllers: [AuthController],
   providers: [AuthService, JwtStrategy, RefreshTokenStrategy, GoogleStrategy],
   exports: [AuthService],

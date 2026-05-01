@@ -25,19 +25,13 @@ export class CategoriesController {
   }
 
   @Post()
-  create(
-    @CurrentUser() user: { id: string },
-    @Body() dto: CreateCategoryDto,
-  ) {
+  create(@CurrentUser() user: { id: string }, @Body() dto: CreateCategoryDto) {
     return this.categoriesService.create(user.id, dto);
   }
 
   @Delete(':id')
   @HttpCode(HttpStatus.OK)
-  remove(
-    @CurrentUser() user: { id: string },
-    @Param('id') id: string,
-  ) {
+  remove(@CurrentUser() user: { id: string }, @Param('id') id: string) {
     return this.categoriesService.remove(user.id, id);
   }
 }

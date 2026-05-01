@@ -9,6 +9,7 @@ import { CategoriesModule } from './modules/categories/categories.module';
 import { DashboardModule } from './modules/dashboard/dashboard.module';
 import { TransactionsModule } from './modules/transactions/transactions.module';
 import { TagsModule } from './modules/tags/tags.module';
+import { BudgetsModule } from './modules/budgets/budgets.module';
 import appConfig from './config/app.config';
 
 @Module({
@@ -27,6 +28,7 @@ import appConfig from './config/app.config';
     DashboardModule,
     TransactionsModule,
     TagsModule,
+    BudgetsModule,
   ],
 })
 export class AppModule {}

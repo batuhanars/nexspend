@@ -200,42 +200,48 @@ class _FilterChips extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 36,
-      child: ListView(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.pagePadding),
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.pagePadding,
+        vertical: AppSpacing.sm,
+      ),
+      child: Row(
         children: _filters.map((f) {
           final isActive = activeFilter == f.value;
-          return Padding(
-            padding: const EdgeInsets.only(right: AppSpacing.sm),
-            child: GestureDetector(
-              onTap: () => context
-                  .read<TransactionsBloc>()
-                  .add(TransactionsFilterChanged(f.value)),
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 150),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.lg,
-                  vertical: AppSpacing.xs,
-                ),
-                decoration: BoxDecoration(
-                  color: isActive
-                      ? AppColors.primary.withValues(alpha: 0.15)
-                      : AppColors.surfaceContainerHigh,
-                  borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
-                  border: isActive
-                      ? Border.all(color: AppColors.primary, width: 1.5)
-                      : null,
-                ),
-                child: Text(
-                  f.label,
-                  style: AppTypography.labelSm.copyWith(
+          final isLast = f == _filters.last;
+          return Expanded(
+            child: Padding(
+              padding: EdgeInsets.only(right: isLast ? 0 : AppSpacing.sm),
+              child: GestureDetector(
+                onTap: () => context
+                    .read<TransactionsBloc>()
+                    .add(TransactionsFilterChanged(f.value)),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 150),
+                  height: 36,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
                     color: isActive
-                        ? AppColors.primary
-                        : AppColors.onSurfaceVariant,
-                    fontWeight:
-                        isActive ? FontWeight.w600 : FontWeight.w500,
+                        ? AppColors.primary.withValues(alpha: 0.15)
+                        : AppColors.surfaceContainerHigh,
+                    borderRadius:
+                        BorderRadius.circular(AppSpacing.radiusFull),
+                    border: isActive
+                        ? Border.all(color: AppColors.primary, width: 1.5)
+                        : null,
+                  ),
+                  child: Text(
+                    f.label,
+                    style: TextStyle(
+                      fontFamily: 'Inter',
+                      fontSize: 12,
+                      fontWeight:
+                          isActive ? FontWeight.w600 : FontWeight.w500,
+                      color: isActive
+                          ? AppColors.primary
+                          : AppColors.onSurfaceVariant,
+                      height: 1.0,
+                    ),
                   ),
                 ),
               ),

@@ -57,17 +57,25 @@ class _BudgetsView extends StatelessWidget {
           );
         },
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () async {
-          await context.push(RouteNames.addBudget);
-          if (context.mounted) {
-            context.read<BudgetsBloc>().add(const BudgetsRefreshRequested());
+      floatingActionButton: BlocBuilder<BudgetsBloc, BudgetsState>(
+        builder: (context, state) {
+          if (state is! BudgetsLoaded || state.budgets.isEmpty) {
+            return const SizedBox.shrink();
           }
+          return FloatingActionButton(
+            onPressed: () async {
+              await context.push(RouteNames.addBudget);
+              if (context.mounted) {
+                context
+                    .read<BudgetsBloc>()
+                    .add(const BudgetsRefreshRequested());
+              }
+            },
+            backgroundColor: AppColors.primary,
+            foregroundColor: AppColors.surface,
+            child: const Icon(Icons.add),
+          );
         },
-        backgroundColor: AppColors.primary,
-        foregroundColor: AppColors.surface,
-        icon: const Icon(Icons.add),
-        label: Text('Bütçe Ekle', style: AppTypography.labelMd),
       ),
     );
   }

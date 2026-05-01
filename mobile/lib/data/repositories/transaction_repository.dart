@@ -49,8 +49,8 @@ class TransactionRepository {
     final response = await _dio.get(
       ApiEndpoints.transactionsSummary,
       queryParameters: {
-        ?'startDate': startDate,
-        ?'endDate': endDate,
+        if (startDate != null) 'startDate': startDate,
+        if (endDate != null) 'endDate': endDate,
       },
     );
     final d = response.data['data'] as Map<String, dynamic>;

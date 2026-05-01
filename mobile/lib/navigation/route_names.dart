@@ -19,6 +19,7 @@ class RouteNames {
   // Hesaplar
   static const String addAccount = '/accounts/add';
   static String accountDetail(String id) => '/accounts/$id';
+  static String editAccount(String id) => '/accounts/$id/edit';
 
   // AppBar erişimli
   static const String reports = '/reports';

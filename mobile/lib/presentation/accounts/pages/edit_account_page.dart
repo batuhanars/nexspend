@@ -8,36 +8,39 @@ import '../../../data/models/account_model.dart';
 import '../bloc/account_bloc.dart';
 import '../widgets/account_form_widgets.dart';
 
-class AddAccountPage extends StatefulWidget {
-  const AddAccountPage({super.key});
+class EditAccountPage extends StatefulWidget {
+  const EditAccountPage({super.key, required this.account});
+
+  final AccountModel account;
 
   @override
-  State<AddAccountPage> createState() => _AddAccountPageState();
+  State<EditAccountPage> createState() => _EditAccountPageState();
 }
 
-class _AddAccountPageState extends State<AddAccountPage> {
+class _EditAccountPageState extends State<EditAccountPage> {
   final _formKey = GlobalKey<FormState>();
-  final _nameController = TextEditingController();
-  final _balanceController = TextEditingController();
-  final _creditLimitController = TextEditingController();
+  late final _nameController =
+      TextEditingController(text: widget.account.name);
+  late final _creditLimitController = TextEditingController(
+    text: widget.account.creditLimit != null
+        ? widget.account.creditLimit!.toStringAsFixed(2)
+        : '',
+  );
 
-  AccountType _type = AccountType.BANK;
-  String _currency = 'TRY';
-  int _statementDay = 1;
-  int _paymentDueDay = 10;
-  bool _isDefault = false;
+  late AccountType _type = widget.account.type;
+  late String _currency = widget.account.currency;
+  late int _statementDay = widget.account.statementDay ?? 1;
+  late int _paymentDueDay = widget.account.paymentDueDay ?? 10;
+  late bool _isDefault = widget.account.isDefault;
 
   final _nameFocus = FocusNode();
-  final _balanceFocus = FocusNode();
   final _creditLimitFocus = FocusNode();
 
   @override
   void dispose() {
     _nameController.dispose();
-    _balanceController.dispose();
     _creditLimitController.dispose();
     _nameFocus.dispose();
-    _balanceFocus.dispose();
     _creditLimitFocus.dispose();
     super.dispose();
   }
@@ -45,25 +48,23 @@ class _AddAccountPageState extends State<AddAccountPage> {
   void _submit() {
     if (!(_formKey.currentState?.validate() ?? false)) return;
 
-    final balance =
-        double.tryParse(_balanceController.text.replaceAll(',', '.')) ?? 0.0;
-
     final data = <String, dynamic>{
       'name': _nameController.text.trim(),
       'type': _type.name,
-      'balance': balance,
       'currency': _currency,
       'isDefault': _isDefault,
       if (_type == AccountType.CREDIT_CARD) ...{
-        'creditLimit':
-            double.tryParse(_creditLimitController.text.replaceAll(',', '.')) ??
-                0.0,
+        'creditLimit': double.tryParse(
+                _creditLimitController.text.replaceAll(',', '.')) ??
+            0.0,
         'statementDay': _statementDay,
         'paymentDueDay': _paymentDueDay,
       },
     };
 
-    context.read<AccountBloc>().add(AccountCreateRequested(data));
+    context.read<AccountBloc>().add(
+          AccountUpdateRequested(id: widget.account.id, data: data),
+        );
   }
 
   @override
@@ -83,7 +84,7 @@ class _AddAccountPageState extends State<AddAccountPage> {
       },
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Hesap Ekle'),
+          title: const Text('Hesabı Düzenle'),
           leading: IconButton(
             icon: const Icon(Icons.close_rounded),
             onPressed: () => Navigator.of(context).pop(),
@@ -101,7 +102,9 @@ class _AddAccountPageState extends State<AddAccountPage> {
                 selected: _type,
                 onChanged: (t) => setState(() {
                   _type = t;
-                  _creditLimitController.clear();
+                  if (t != AccountType.CREDIT_CARD) {
+                    _creditLimitController.clear();
+                  }
                 }),
               ),
               const SizedBox(height: AppSpacing.xl),
@@ -112,21 +115,6 @@ class _AddAccountPageState extends State<AddAccountPage> {
                 focusNode: _nameFocus,
                 hintText: _type.label,
                 prefixIcon: _type.defaultIcon,
-                textInputAction: TextInputAction.next,
-                onFieldSubmitted: (_) => _balanceFocus.requestFocus(),
-                validator: (v) =>
-                    (v == null || v.trim().isEmpty) ? 'Hesap adı gerekli' : null,
-              ),
-              const SizedBox(height: AppSpacing.lg),
-              _label('Başlangıç Bakiyesi'),
-              const SizedBox(height: AppSpacing.sm),
-              AccountFormField(
-                controller: _balanceController,
-                focusNode: _balanceFocus,
-                hintText: '0,00',
-                prefixIcon: Icons.account_balance_wallet_outlined,
-                keyboardType:
-                    const TextInputType.numberWithOptions(decimal: true),
                 textInputAction: _type == AccountType.CREDIT_CARD
                     ? TextInputAction.next
                     : TextInputAction.done,
@@ -135,16 +123,8 @@ class _AddAccountPageState extends State<AddAccountPage> {
                     _creditLimitFocus.requestFocus();
                   }
                 },
-                inputFormatters: [
-                  FilteringTextInputFormatter.allow(RegExp(r'[\d,.]')),
-                ],
-                validator: (v) {
-                  if (v == null || v.isEmpty) return null;
-                  if (double.tryParse(v.replaceAll(',', '.')) == null) {
-                    return 'Geçersiz tutar';
-                  }
-                  return null;
-                },
+                validator: (v) =>
+                    (v == null || v.trim().isEmpty) ? 'Hesap adı gerekli' : null,
               ),
               const SizedBox(height: AppSpacing.sm),
               AccountCurrencySelector(
@@ -183,7 +163,8 @@ class _AddAccountPageState extends State<AddAccountPage> {
                       child: AccountDayDropdown(
                         label: 'Ekstre Günü',
                         value: _statementDay,
-                        onChanged: (d) => setState(() => _statementDay = d),
+                        onChanged: (d) =>
+                            setState(() => _statementDay = d),
                       ),
                     ),
                     const SizedBox(width: AppSpacing.md),
@@ -191,7 +172,8 @@ class _AddAccountPageState extends State<AddAccountPage> {
                       child: AccountDayDropdown(
                         label: 'Son Ödeme Günü',
                         value: _paymentDueDay,
-                        onChanged: (d) => setState(() => _paymentDueDay = d),
+                        onChanged: (d) =>
+                            setState(() => _paymentDueDay = d),
                       ),
                     ),
                   ],
@@ -230,9 +212,10 @@ class _AddAccountPageState extends State<AddAccountPage> {
                       ? const SizedBox(
                           width: 24,
                           height: 24,
-                          child: CircularProgressIndicator(strokeWidth: 2.5),
+                          child:
+                              CircularProgressIndicator(strokeWidth: 2.5),
                         )
-                      : const Text('Hesabı Kaydet'),
+                      : const Text('Değişiklikleri Kaydet'),
                 );
               },
             ),

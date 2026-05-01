@@ -75,7 +75,8 @@ class TransactionModel {
           (e) => e.name == json['source'],
           orElse: () => TransactionSource.MANUAL,
         ),
-        date: DateTime.parse(json['date'] as String),
+        date: DateTime.parse(
+            (json['date'] ?? json['transactionDate']) as String),
         category: json['category'] != null
             ? CategoryInfo.fromJson(json['category'] as Map<String, dynamic>)
             : null,

@@ -11,6 +11,13 @@ class AccountSuccess extends AccountState {
   final AccountModel account;
 }
 
+class AccountDeleted extends AccountState {}
+
+class AccountActionDone extends AccountState {
+  AccountActionDone(this.message);
+  final String message;
+}
+
 class AccountError extends AccountState {
   AccountError(this.message);
   final String message;

@@ -158,6 +158,10 @@ class _DashboardViewState extends State<_DashboardView> {
               AccountCarousel(
                 accounts: dashboard.accounts,
                 isBalanceHidden: _isBalanceHidden,
+                onAccountTap: (account) => context.push(
+                  RouteNames.accountDetail(account.id),
+                  extra: account,
+                ),
                 onAddAccount: () => context.push(RouteNames.addAccount),
               ),
               const SizedBox(height: AppSpacing.xl),

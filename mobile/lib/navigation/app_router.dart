@@ -18,11 +18,15 @@ import '../presentation/debts/pages/debts_page.dart';
 import '../presentation/subscriptions/pages/subscriptions_page.dart';
 import '../presentation/reports/pages/reports_page.dart';
 import '../presentation/receipt_scanner/pages/receipt_scanner_page.dart';
+import '../data/models/account_model.dart';
 import '../data/repositories/account_repository.dart';
 import '../data/repositories/category_repository.dart';
 import '../data/repositories/transaction_repository.dart';
 import '../presentation/accounts/bloc/account_bloc.dart';
+import '../presentation/accounts/bloc/account_detail_bloc.dart';
+import '../presentation/accounts/pages/account_detail_page.dart';
 import '../presentation/accounts/pages/add_account_page.dart';
+import '../presentation/accounts/pages/edit_account_page.dart';
 import '../presentation/transactions/bloc/add_transaction_bloc.dart';
 import '../presentation/transactions/bloc/transactions_bloc.dart';
 import '../presentation/settings/pages/settings_page.dart';
@@ -154,6 +158,47 @@ GoRouter createRouter() {
           create: (_) => AccountBloc(accountRepository: getIt<AccountRepository>()),
           child: const AddAccountPage(),
         ),
+      ),
+      GoRoute(
+        path: '/accounts/:id',
+        name: 'account-detail',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) {
+          final id = state.pathParameters['id']!;
+          final account = state.extra as AccountModel?;
+          return MultiBlocProvider(
+            providers: [
+              BlocProvider(
+                create: (_) => AccountDetailBloc(
+                  accountRepository: getIt<AccountRepository>(),
+                ),
+              ),
+              BlocProvider(
+                create: (_) => AccountBloc(
+                  accountRepository: getIt<AccountRepository>(),
+                ),
+              ),
+            ],
+            child: AccountDetailPage(
+              accountId: id,
+              initialAccount: account,
+            ),
+          );
+        },
+      ),
+      GoRoute(
+        path: '/accounts/:id/edit',
+        name: 'edit-account',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) {
+          final account = state.extra as AccountModel;
+          return BlocProvider(
+            create: (_) => AccountBloc(
+              accountRepository: getIt<AccountRepository>(),
+            ),
+            child: EditAccountPage(account: account),
+          );
+        },
       ),
       GoRoute(
         path: RouteNames.settings,

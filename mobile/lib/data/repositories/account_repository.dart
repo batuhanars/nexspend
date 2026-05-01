@@ -1,7 +1,9 @@
 import 'package:dio/dio.dart';
 import '../../core/constants/api_endpoints.dart';
 import '../../core/network/api_client.dart';
+import '../models/account_analytics_model.dart';
 import '../models/account_model.dart';
+import '../models/transaction_model.dart';
 
 class AccountRepository {
   AccountRepository({required ApiClient apiClient}) : _dio = apiClient.dio;
@@ -54,5 +56,28 @@ class AccountRepository {
 
   Future<void> setDefaultAccount(String id) async {
     await _dio.patch(ApiEndpoints.accountSetDefault(id));
+  }
+
+  Future<AccountAnalyticsModel> getAnalytics(String id) async {
+    final response = await _dio.get(ApiEndpoints.accountAnalytics(id));
+    return AccountAnalyticsModel.fromJson(
+      response.data['data'] as Map<String, dynamic>,
+    );
+  }
+
+  Future<List<TransactionModel>> getAccountTransactions(
+    String id, {
+    int page = 1,
+    int limit = 20,
+  }) async {
+    final response = await _dio.get(
+      ApiEndpoints.accountTransactions(id),
+      queryParameters: {'page': page, 'limit': limit},
+    );
+    final envelope = response.data['data'] as Map<String, dynamic>;
+    final list = envelope['data'] as List;
+    return list
+        .map((t) => TransactionModel.fromJson(t as Map<String, dynamic>))
+        .toList();
   }
 }

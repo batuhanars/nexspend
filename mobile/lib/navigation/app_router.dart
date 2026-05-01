@@ -12,6 +12,11 @@ import '../presentation/auth/pages/reset_password_page.dart';
 import '../presentation/dashboard/pages/dashboard_page.dart';
 import '../presentation/transactions/pages/transactions_page.dart';
 import '../presentation/transactions/pages/add_transaction_page.dart';
+import '../data/repositories/budget_repository.dart';
+import '../presentation/budgets/bloc/budgets_bloc.dart';
+import '../presentation/budgets/bloc/budgets_event.dart';
+import '../presentation/budgets/bloc/add_budget_bloc.dart';
+import '../presentation/budgets/bloc/add_budget_event.dart';
 import '../presentation/budgets/pages/budgets_page.dart';
 import '../presentation/budgets/pages/add_budget_page.dart';
 import '../presentation/debts/pages/debts_page.dart';
@@ -103,7 +108,12 @@ GoRouter createRouter() {
           GoRoute(
             path: RouteNames.budgets,
             name: 'budgets',
-            builder: (context, _) => const BudgetsPage(),
+            builder: (context, _) => BlocProvider(
+              create: (_) => BudgetsBloc(
+                budgetRepository: getIt<BudgetRepository>(),
+              )..add(const BudgetsLoadRequested()),
+              child: const BudgetsPage(),
+            ),
           ),
           GoRoute(
             path: RouteNames.debts,
@@ -136,7 +146,13 @@ GoRouter createRouter() {
         path: RouteNames.addBudget,
         name: 'add-budget',
         parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, _) => const AddBudgetPage(),
+        builder: (context, _) => BlocProvider(
+          create: (_) => AddBudgetBloc(
+            budgetRepository: getIt<BudgetRepository>(),
+            categoryRepository: getIt<CategoryRepository>(),
+          )..add(const AddBudgetInitialized()),
+          child: const AddBudgetPage(),
+        ),
       ),
       GoRoute(
         path: RouteNames.reports,

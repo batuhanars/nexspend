@@ -2,6 +2,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get_it/get_it.dart';
 import '../../data/repositories/account_repository.dart';
 import '../../data/repositories/auth_repository.dart';
+import '../../data/repositories/budget_repository.dart';
 import '../../data/repositories/category_repository.dart';
 import '../../data/repositories/dashboard_repository.dart';
 import '../../data/repositories/transaction_repository.dart';
@@ -50,5 +51,9 @@ Future<void> configureDependencies() async {
 
   getIt.registerLazySingleton<CategoryRepository>(
     () => CategoryRepository(apiClient: getIt<ApiClient>()),
+  );
+
+  getIt.registerLazySingleton<BudgetRepository>(
+    () => BudgetRepository(apiClient: getIt<ApiClient>()),
   );
 }

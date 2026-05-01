@@ -1,0 +1,28 @@
+part of 'subscriptions_bloc.dart';
+
+sealed class SubscriptionsEvent {
+  const SubscriptionsEvent();
+}
+
+class SubscriptionsLoadRequested extends SubscriptionsEvent {
+  const SubscriptionsLoadRequested();
+}
+
+class SubscriptionsRefreshRequested extends SubscriptionsEvent {
+  const SubscriptionsRefreshRequested();
+}
+
+class SubscriptionToggleRequested extends SubscriptionsEvent {
+  const SubscriptionToggleRequested(this.id);
+  final String id;
+}
+
+class SubscriptionDeleteRequested extends SubscriptionsEvent {
+  const SubscriptionDeleteRequested(this.id);
+  final String id;
+}
+
+class SubscriptionCreated extends SubscriptionsEvent {
+  const SubscriptionCreated(this.data);
+  final Map<String, dynamic> data;
+}

@@ -19,13 +19,17 @@ import '../presentation/budgets/bloc/add_budget_bloc.dart';
 import '../presentation/budgets/bloc/add_budget_event.dart';
 import '../presentation/budgets/pages/budgets_page.dart';
 import '../presentation/budgets/pages/add_budget_page.dart';
+import '../presentation/debts/bloc/debts_bloc.dart';
 import '../presentation/debts/pages/debts_page.dart';
+import '../presentation/subscriptions/bloc/subscriptions_bloc.dart';
 import '../presentation/subscriptions/pages/subscriptions_page.dart';
 import '../presentation/reports/pages/reports_page.dart';
 import '../presentation/receipt_scanner/pages/receipt_scanner_page.dart';
 import '../data/models/account_model.dart';
 import '../data/repositories/account_repository.dart';
 import '../data/repositories/category_repository.dart';
+import '../data/repositories/debt_repository.dart';
+import '../data/repositories/subscription_repository.dart';
 import '../data/repositories/tag_repository.dart';
 import '../data/repositories/transaction_repository.dart';
 import '../presentation/accounts/bloc/account_bloc.dart';
@@ -120,12 +124,22 @@ GoRouter createRouter() {
           GoRoute(
             path: RouteNames.debts,
             name: 'debts',
-            builder: (context, _) => const DebtsPage(),
+            builder: (context, _) => BlocProvider(
+              create: (_) => DebtsBloc(
+                debtRepository: getIt<DebtRepository>(),
+              )..add(const DebtsLoadRequested()),
+              child: const DebtsPage(),
+            ),
           ),
           GoRoute(
             path: RouteNames.subscriptions,
             name: 'subscriptions',
-            builder: (context, _) => const SubscriptionsPage(),
+            builder: (context, _) => BlocProvider(
+              create: (_) => SubscriptionsBloc(
+                subscriptionRepository: getIt<SubscriptionRepository>(),
+              )..add(const SubscriptionsLoadRequested()),
+              child: const SubscriptionsPage(),
+            ),
           ),
         ],
       ),

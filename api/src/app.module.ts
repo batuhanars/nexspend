@@ -14,6 +14,7 @@ import { DebtsModule } from './modules/debts/debts.module';
 import { SubscriptionsModule } from './modules/subscriptions/subscriptions.module';
 import { ReportsModule } from './modules/reports/reports.module';
 import { ReceiptsModule } from './modules/receipts/receipts.module';
+import { UsersModule } from './modules/users/users.module';
 import appConfig from './config/app.config';
 
 @Module({
@@ -37,6 +38,7 @@ import appConfig from './config/app.config';
     SubscriptionsModule,
     ReportsModule,
     ReceiptsModule,
+    UsersModule,
   ],
 })
 export class AppModule {}

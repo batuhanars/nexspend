@@ -11,6 +11,7 @@ class BudgetsBloc extends Bloc<BudgetsEvent, BudgetsState> {
     on<BudgetsLoadRequested>(_onLoad);
     on<BudgetsRefreshRequested>(_onRefresh);
     on<BudgetDeleteRequested>(_onDelete);
+    on<BudgetUpdateRequested>(_onUpdate);
   }
 
   final BudgetRepository _repo;
@@ -52,6 +53,16 @@ class BudgetsBloc extends Bloc<BudgetsEvent, BudgetsState> {
       }
     } catch (_) {
       // Keep current state on delete error
+    }
+  }
+
+  Future<void> _onUpdate(
+      BudgetUpdateRequested event, Emitter<BudgetsState> emit) async {
+    try {
+      await _repo.update(event.id, event.data);
+      await _fetch(emit);
+    } catch (_) {
+      // keep current state on update error
     }
   }
 

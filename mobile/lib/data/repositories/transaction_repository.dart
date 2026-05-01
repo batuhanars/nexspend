@@ -71,4 +71,8 @@ class TransactionRepository {
   Future<void> deleteTransaction(String id) async {
     await _dio.delete(ApiEndpoints.transactionById(id));
   }
+
+  Future<void> createRecurringTransaction(Map<String, dynamic> data) async {
+    await _dio.post(ApiEndpoints.recurringTransactions, data: data);
+  }
 }

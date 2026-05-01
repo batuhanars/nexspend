@@ -7,6 +7,7 @@ import '../../../core/constants/app_typography.dart';
 import '../../../core/utils/icon_mapper.dart';
 import '../../../data/models/account_model.dart';
 import '../../../data/models/category_model.dart';
+import '../../../data/models/tag_model.dart';
 import '../bloc/add_transaction_bloc.dart';
 
 class AddTransactionPage extends StatefulWidget {
@@ -28,6 +29,12 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
   DateTime _date = DateTime.now();
   bool _accountsInitialized = false;
 
+  final Set<String> _selectedTagIds = {};
+  bool _isRecurring = false;
+  String _recurringFrequency = 'MONTHLY';
+  DateTime? _recurringEndDate;
+  final _newTagController = TextEditingController();
+
   @override
   void initState() {
     super.initState();
@@ -39,6 +46,7 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
     _amountController.dispose();
     _titleController.dispose();
     _noteController.dispose();
+    _newTagController.dispose();
     super.dispose();
   }
 
@@ -78,6 +86,11 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
         'note': _noteController.text.trim(),
       if (_type == 'TRANSFER' && _transferToAccount != null)
         'transferToAccountId': _transferToAccount!.id,
+      if (_selectedTagIds.isNotEmpty) 'tagIds': _selectedTagIds.toList(),
+      'isRecurring': _isRecurring,
+      if (_isRecurring) 'frequency': _recurringFrequency,
+      if (_isRecurring && _recurringEndDate != null)
+        'endDate': _recurringEndDate!.toIso8601String(),
     };
 
     context.read<AddTransactionBloc>().add(AddTransactionSubmitted(data));
@@ -127,6 +140,7 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
 
             final categories = _categoriesFrom(state);
             final accounts = _accountsFrom(state);
+            final tags = _tagsFrom(state);
 
             // Varsayılan hesabı bir kez seç
             if (!_accountsInitialized && accounts.isNotEmpty) {
@@ -194,6 +208,41 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                 ),
                 const SizedBox(height: AppSpacing.md),
                 _NoteField(controller: _noteController),
+                const SizedBox(height: AppSpacing.xl),
+                _sectionLabel('Etiketler'),
+                const SizedBox(height: AppSpacing.sm),
+                _TagSection(
+                  tags: tags,
+                  selectedIds: _selectedTagIds,
+                  newTagController: _newTagController,
+                  onToggle: (id) => setState(() {
+                    if (_selectedTagIds.contains(id)) {
+                      _selectedTagIds.remove(id);
+                    } else {
+                      _selectedTagIds.add(id);
+                    }
+                  }),
+                  onAdd: () {
+                    final name = _newTagController.text.trim();
+                    if (name.isNotEmpty) {
+                      context
+                          .read<AddTransactionBloc>()
+                          .add(AddTransactionTagCreated(name));
+                      _newTagController.clear();
+                    }
+                  },
+                ),
+                const SizedBox(height: AppSpacing.xl),
+                _RecurringSection(
+                  isRecurring: _isRecurring,
+                  frequency: _recurringFrequency,
+                  endDate: _recurringEndDate,
+                  onToggle: (val) => setState(() => _isRecurring = val),
+                  onFrequencyChanged: (f) =>
+                      setState(() => _recurringFrequency = f),
+                  onEndDateChanged: (d) =>
+                      setState(() => _recurringEndDate = d),
+                ),
                 const SizedBox(height: AppSpacing.xxxl),
               ],
             );
@@ -245,6 +294,13 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
     if (s is AddTransactionReady) return s.accounts;
     if (s is AddTransactionSubmitting) return s.accounts;
     if (s is AddTransactionFailure) return s.accounts;
+    return const [];
+  }
+
+  List<TagModel> _tagsFrom(AddTransactionState s) {
+    if (s is AddTransactionReady) return s.tags;
+    if (s is AddTransactionSubmitting) return s.tags;
+    if (s is AddTransactionFailure) return s.tags;
     return const [];
   }
 
@@ -562,6 +618,325 @@ Widget _field({
       ),
     ),
   );
+}
+
+// ── Etiket bölümü ─────────────────────────────────────────────────────────
+
+class _TagSection extends StatelessWidget {
+  const _TagSection({
+    required this.tags,
+    required this.selectedIds,
+    required this.newTagController,
+    required this.onToggle,
+    required this.onAdd,
+  });
+  final List<TagModel> tags;
+  final Set<String> selectedIds;
+  final TextEditingController newTagController;
+  final ValueChanged<String> onToggle;
+  final VoidCallback onAdd;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (tags.isNotEmpty)
+          Wrap(
+            spacing: AppSpacing.sm,
+            runSpacing: AppSpacing.sm,
+            children: tags.map((tag) {
+              final isSelected = selectedIds.contains(tag.id);
+              return GestureDetector(
+                onTap: () => onToggle(tag.id),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 150),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.md,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    color: isSelected
+                        ? AppColors.primary.withValues(alpha: 0.15)
+                        : AppColors.surfaceContainerHighest,
+                    borderRadius:
+                        BorderRadius.circular(AppSpacing.radiusFull),
+                    border: isSelected
+                        ? Border.all(color: AppColors.primary, width: 1.5)
+                        : null,
+                  ),
+                  child: Text(
+                    '#${tag.name}',
+                    style: AppTypography.bodySm.copyWith(
+                      color: isSelected
+                          ? AppColors.primary
+                          : AppColors.onSurfaceVariant,
+                      fontWeight:
+                          isSelected ? FontWeight.w600 : FontWeight.w400,
+                    ),
+                  ),
+                ),
+              );
+            }).toList(),
+          ),
+        const SizedBox(height: AppSpacing.sm),
+        Row(
+          children: [
+            Expanded(
+              child: TextField(
+                controller: newTagController,
+                style: const TextStyle(
+                    color: AppColors.onSurface, fontSize: 13),
+                decoration: InputDecoration(
+                  hintText: 'Yeni etiket ekle...',
+                  hintStyle: const TextStyle(
+                      color: AppColors.onSurfaceVariant, fontSize: 13),
+                  filled: true,
+                  fillColor: AppColors.surfaceContainerHighest,
+                  border: OutlineInputBorder(
+                    borderRadius:
+                        BorderRadius.circular(AppSpacing.radiusMd),
+                    borderSide: BorderSide.none,
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius:
+                        BorderRadius.circular(AppSpacing.radiusMd),
+                    borderSide: BorderSide.none,
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius:
+                        BorderRadius.circular(AppSpacing.radiusMd),
+                    borderSide: const BorderSide(
+                        color: AppColors.primary, width: 1.5),
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.md,
+                    vertical: AppSpacing.sm,
+                  ),
+                  isDense: true,
+                ),
+                textInputAction: TextInputAction.done,
+                onSubmitted: (_) => onAdd(),
+              ),
+            ),
+            const SizedBox(width: AppSpacing.sm),
+            GestureDetector(
+              onTap: onAdd,
+              child: Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                ),
+                child: const Icon(Icons.add_rounded,
+                    color: AppColors.primary, size: 20),
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+// ── Tekrarlayan işlem bölümü ───────────────────────────────────────────────
+
+class _RecurringSection extends StatelessWidget {
+  const _RecurringSection({
+    required this.isRecurring,
+    required this.frequency,
+    required this.endDate,
+    required this.onToggle,
+    required this.onFrequencyChanged,
+    required this.onEndDateChanged,
+  });
+  final bool isRecurring;
+  final String frequency;
+  final DateTime? endDate;
+  final ValueChanged<bool> onToggle;
+  final ValueChanged<String> onFrequencyChanged;
+  final ValueChanged<DateTime?> onEndDateChanged;
+
+  static const _frequencies = [
+    (label: 'Günlük', value: 'DAILY'),
+    (label: 'Haftalık', value: 'WEEKLY'),
+    (label: 'Aylık', value: 'MONTHLY'),
+    (label: 'Yıllık', value: 'YEARLY'),
+  ];
+
+  static const _months = [
+    'Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran',
+    'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık',
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.surfaceContainerHigh,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+      ),
+      child: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.lg,
+              vertical: AppSpacing.xs,
+            ),
+            child: Row(
+              children: [
+                const Icon(Icons.repeat_rounded,
+                    size: 20, color: AppColors.onSurfaceVariant),
+                const SizedBox(width: AppSpacing.md),
+                Expanded(
+                  child: Text(
+                    'Tekrarlayan İşlem',
+                    style: AppTypography.bodyMd,
+                  ),
+                ),
+                Switch(
+                  value: isRecurring,
+                  onChanged: onToggle,
+                  activeThumbColor: AppColors.primary,
+                  activeTrackColor:
+                      AppColors.primary.withValues(alpha: 0.4),
+                ),
+              ],
+            ),
+          ),
+          if (isRecurring) ...[
+            const Divider(
+                height: 1,
+                color: AppColors.surfaceContainerHighest),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                  AppSpacing.lg, AppSpacing.md, AppSpacing.lg, AppSpacing.sm),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Sıklık',
+                    style: AppTypography.labelSm
+                        .copyWith(color: AppColors.onSurfaceVariant),
+                  ),
+                  const SizedBox(height: AppSpacing.sm),
+                  Row(
+                    children: _frequencies.map((f) {
+                      final isActive = frequency == f.value;
+                      final isLast = f == _frequencies.last;
+                      return Expanded(
+                        child: Padding(
+                          padding: EdgeInsets.only(
+                              right: isLast ? 0 : AppSpacing.xs),
+                          child: GestureDetector(
+                            onTap: () => onFrequencyChanged(f.value),
+                            child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 150),
+                              height: 32,
+                              alignment: Alignment.center,
+                              decoration: BoxDecoration(
+                                color: isActive
+                                    ? AppColors.primary.withValues(alpha: 0.15)
+                                    : AppColors.surfaceContainerHighest,
+                                borderRadius: BorderRadius.circular(
+                                    AppSpacing.radiusMd),
+                                border: isActive
+                                    ? Border.all(
+                                        color: AppColors.primary, width: 1.5)
+                                    : null,
+                              ),
+                              child: Text(
+                                f.label,
+                                style: TextStyle(
+                                  fontFamily: 'Inter',
+                                  fontSize: 11,
+                                  fontWeight: isActive
+                                      ? FontWeight.w600
+                                      : FontWeight.w400,
+                                  color: isActive
+                                      ? AppColors.primary
+                                      : AppColors.onSurfaceVariant,
+                                  height: 1.0,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                  const SizedBox(height: AppSpacing.md),
+                  GestureDetector(
+                    onTap: () async {
+                      final picked = await showDatePicker(
+                        context: context,
+                        initialDate: endDate ?? DateTime.now(),
+                        firstDate: DateTime.now(),
+                        lastDate: DateTime(2040),
+                        builder: (ctx, child) => Theme(
+                          data: Theme.of(ctx).copyWith(
+                            colorScheme: Theme.of(ctx).colorScheme.copyWith(
+                                  primary: AppColors.primary,
+                                  surface: AppColors.surfaceContainerHigh,
+                                ),
+                          ),
+                          child: child!,
+                        ),
+                      );
+                      onEndDateChanged(picked);
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.md,
+                        vertical: AppSpacing.sm,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppColors.surfaceContainerHighest,
+                        borderRadius:
+                            BorderRadius.circular(AppSpacing.radiusMd),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(Icons.event_outlined,
+                              size: 16,
+                              color: AppColors.onSurfaceVariant),
+                          const SizedBox(width: AppSpacing.sm),
+                          Text(
+                            endDate == null
+                                ? 'Bitiş tarihi (opsiyonel)'
+                                : '${endDate!.day} ${_months[endDate!.month - 1]} ${endDate!.year}',
+                            style: TextStyle(
+                              fontFamily: 'Inter',
+                              fontSize: 12,
+                              color: endDate == null
+                                  ? AppColors.onSurfaceVariant
+                                  : AppColors.onSurface,
+                            ),
+                          ),
+                          if (endDate != null) ...[
+                            const SizedBox(width: AppSpacing.sm),
+                            GestureDetector(
+                              onTap: () => onEndDateChanged(null),
+                              child: const Icon(Icons.close_rounded,
+                                  size: 14,
+                                  color: AppColors.onSurfaceVariant),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: AppSpacing.sm),
+          ],
+        ],
+      ),
+    );
+  }
 }
 
 // ── Tarih seçici ───────────────────────────────────────────────────────────

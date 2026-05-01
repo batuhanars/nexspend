@@ -368,12 +368,27 @@ class _TransactionTile extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 2),
-                  Text(
-                    '${transaction.account?.name ?? ''}  •  ${DateFormatter.formatTime(transaction.date)}',
-                    style: AppTypography.bodySm.copyWith(
-                        color: AppColors.onSurfaceVariant),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+                  Row(
+                    children: [
+                      Flexible(
+                        child: Text(
+                          '${transaction.account?.name ?? ''}  •  ${DateFormatter.formatTime(transaction.date)}',
+                          style: AppTypography.bodySm.copyWith(
+                              color: AppColors.onSurfaceVariant),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      if (_sourceIcon(transaction.source) != null) ...[
+                        const SizedBox(width: 4),
+                        Icon(
+                          _sourceIcon(transaction.source),
+                          size: 12,
+                          color: AppColors.onSurfaceVariant
+                              .withValues(alpha: 0.6),
+                        ),
+                      ],
+                    ],
                   ),
                 ],
               ),
@@ -391,6 +406,14 @@ class _TransactionTile extends StatelessWidget {
       ),
     );
   }
+
+  IconData? _sourceIcon(TransactionSource source) => switch (source) {
+        TransactionSource.RECURRING => Icons.repeat_rounded,
+        TransactionSource.DEBT_PAYMENT => Icons.money_off_rounded,
+        TransactionSource.DEBT_COLLECTION => Icons.attach_money_rounded,
+        TransactionSource.SUBSCRIPTION => Icons.schedule_rounded,
+        TransactionSource.MANUAL => null,
+      };
 
   Future<bool?> _confirmDelete(BuildContext context) {
     return showDialog<bool>(

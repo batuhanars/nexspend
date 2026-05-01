@@ -21,6 +21,9 @@ class RouteNames {
   static String accountDetail(String id) => '/accounts/$id';
   static String editAccount(String id) => '/accounts/$id/edit';
 
+  // Arşiv
+  static const String archivedAccounts = '/settings/archived-accounts';
+
   // AppBar erişimli
   static const String reports = '/reports';
   static const String receiptScanner = '/receipt-scanner';

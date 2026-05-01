@@ -27,3 +27,8 @@ class AccountDeleteRequested extends AccountEvent {
   AccountDeleteRequested(this.id);
   final String id;
 }
+
+class AccountRestoreRequested extends AccountEvent {
+  AccountRestoreRequested(this.id);
+  final String id;
+}

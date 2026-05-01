@@ -14,6 +14,7 @@ class AccountBloc extends Bloc<AccountEvent, AccountState> {
     on<AccountArchiveRequested>(_onArchive);
     on<AccountSetDefaultRequested>(_onSetDefault);
     on<AccountDeleteRequested>(_onDelete);
+    on<AccountRestoreRequested>(_onRestore);
   }
 
   final AccountRepository _repo;
@@ -80,6 +81,19 @@ class AccountBloc extends Bloc<AccountEvent, AccountState> {
       emit(AccountDeleted());
     } catch (e) {
       emit(AccountError(_parseError(e, isDelete: true)));
+    }
+  }
+
+  Future<void> _onRestore(
+    AccountRestoreRequested event,
+    Emitter<AccountState> emit,
+  ) async {
+    emit(AccountSubmitting());
+    try {
+      await _repo.restoreAccount(event.id);
+      emit(AccountActionDone('Hesap geri yüklendi'));
+    } catch (e) {
+      emit(AccountError(_parseError(e)));
     }
   }
 

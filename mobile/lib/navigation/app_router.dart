@@ -26,11 +26,13 @@ import '../presentation/receipt_scanner/pages/receipt_scanner_page.dart';
 import '../data/models/account_model.dart';
 import '../data/repositories/account_repository.dart';
 import '../data/repositories/category_repository.dart';
+import '../data/repositories/tag_repository.dart';
 import '../data/repositories/transaction_repository.dart';
 import '../presentation/accounts/bloc/account_bloc.dart';
 import '../presentation/accounts/bloc/account_detail_bloc.dart';
 import '../presentation/accounts/pages/account_detail_page.dart';
 import '../presentation/accounts/pages/add_account_page.dart';
+import '../presentation/accounts/pages/archived_accounts_page.dart';
 import '../presentation/accounts/pages/edit_account_page.dart';
 import '../presentation/transactions/bloc/add_transaction_bloc.dart';
 import '../presentation/transactions/bloc/transactions_bloc.dart';
@@ -138,6 +140,7 @@ GoRouter createRouter() {
             transactionRepository: getIt<TransactionRepository>(),
             categoryRepository: getIt<CategoryRepository>(),
             accountRepository: getIt<AccountRepository>(),
+            tagRepository: getIt<TagRepository>(),
           ),
           child: const AddTransactionPage(),
         ),
@@ -215,6 +218,17 @@ GoRouter createRouter() {
             child: EditAccountPage(account: account),
           );
         },
+      ),
+      GoRoute(
+        path: RouteNames.archivedAccounts,
+        name: 'archived-accounts',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, _) => BlocProvider(
+          create: (_) => AccountBloc(
+            accountRepository: getIt<AccountRepository>(),
+          ),
+          child: const ArchivedAccountsPage(),
+        ),
       ),
       GoRoute(
         path: RouteNames.settings,

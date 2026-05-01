@@ -60,6 +60,11 @@ class ApiEndpoints {
   static const String categories = '/api/categories';
   static String categoryById(String id) => '/api/categories/$id';
 
+  // Recurring Transactions
+  static const String recurringTransactions = '/api/recurring-transactions';
+  static String recurringTransactionById(String id) =>
+      '/api/recurring-transactions/$id';
+
   // Tags
   static const String tags = '/api/tags';
   static String tagById(String id) => '/api/tags/$id';

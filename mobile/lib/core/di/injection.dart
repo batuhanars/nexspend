@@ -4,6 +4,7 @@ import '../../data/repositories/account_repository.dart';
 import '../../data/repositories/auth_repository.dart';
 import '../../data/repositories/budget_repository.dart';
 import '../../data/repositories/category_repository.dart';
+import '../../data/repositories/tag_repository.dart';
 import '../../data/repositories/dashboard_repository.dart';
 import '../../data/repositories/transaction_repository.dart';
 import '../network/api_client.dart';
@@ -55,5 +56,9 @@ Future<void> configureDependencies() async {
 
   getIt.registerLazySingleton<BudgetRepository>(
     () => BudgetRepository(apiClient: getIt<ApiClient>()),
+  );
+
+  getIt.registerLazySingleton<TagRepository>(
+    () => TagRepository(apiClient: getIt<ApiClient>()),
   );
 }

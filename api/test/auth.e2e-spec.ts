@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
@@ -46,49 +47,72 @@ const mockPrismaService = {
 function resetMocks() {
   store.clear();
 
-  mockPrismaService.user.findUnique.mockImplementation(async ({ where }: any) => {
-    if (where.email) return store.users[where.email] ?? null;
-    if (where.id) return Object.values(store.users).find((u: any) => u.id === where.id) ?? null;
-    return null;
-  });
-  mockPrismaService.user.findFirst.mockImplementation(async ({ where }: any) => {
-    if (where.OR) {
-      return (
-        Object.values(store.users).find((u: any) =>
-          where.OR.some(
-            (c: any) =>
-              (c.googleId && u.googleId === c.googleId) ||
-              (c.email && u.email === c.email),
-          ),
-        ) ?? null
-      );
-    }
-    return null;
-  });
+  mockPrismaService.user.findUnique.mockImplementation(
+    async ({ where }: any) => {
+      if (where.email) return store.users[where.email] ?? null;
+      if (where.id)
+        return (
+          Object.values(store.users).find((u: any) => u.id === where.id) ?? null
+        );
+      return null;
+    },
+  );
+  mockPrismaService.user.findFirst.mockImplementation(
+    async ({ where }: any) => {
+      if (where.OR) {
+        return (
+          Object.values(store.users).find((u: any) =>
+            where.OR.some(
+              (c: any) =>
+                (c.googleId && u.googleId === c.googleId) ||
+                (c.email && u.email === c.email),
+            ),
+          ) ?? null
+        );
+      }
+      return null;
+    },
+  );
   mockPrismaService.user.create.mockImplementation(async ({ data }: any) => {
-    const user = { id: `user-${Date.now()}`, ...data, currency: 'TRY', language: 'tr', avatarUrl: null };
+    const user = {
+      id: `user-${Date.now()}`,
+      ...data,
+      currency: 'TRY',
+      language: 'tr',
+      avatarUrl: null,
+    };
     store.users[user.email] = user;
     return user;
   });
-  mockPrismaService.user.update.mockImplementation(async ({ where, data }: any) => {
-    const user = Object.values(store.users).find((u: any) => u.id === where.id) as any;
-    if (user) Object.assign(user, data);
-    return user;
+  mockPrismaService.user.update.mockImplementation(
+    async ({ where, data }: any) => {
+      const user = Object.values(store.users).find(
+        (u: any) => u.id === where.id,
+      );
+      if (user) Object.assign(user, data);
+      return user;
+    },
+  );
+  mockPrismaService.passwordResetToken.updateMany.mockResolvedValue({
+    count: 0,
   });
-  mockPrismaService.passwordResetToken.updateMany.mockResolvedValue({ count: 0 });
-  mockPrismaService.passwordResetToken.create.mockImplementation(async ({ data }: any) => {
-    const t = { id: `token-${Date.now()}`, ...data };
-    store.tokens[data.token] = t;
-    return t;
-  });
+  mockPrismaService.passwordResetToken.create.mockImplementation(
+    async ({ data }: any) => {
+      const t = { id: `token-${Date.now()}`, ...data };
+      store.tokens[data.token] = t;
+      return t;
+    },
+  );
   mockPrismaService.passwordResetToken.findUnique.mockImplementation(
     async ({ where }: any) => store.tokens[where.token] ?? null,
   );
-  mockPrismaService.passwordResetToken.update.mockImplementation(async ({ where, data }: any) => {
-    const t = store.tokens[where.token];
-    if (t) Object.assign(t, data);
-    return t;
-  });
+  mockPrismaService.passwordResetToken.update.mockImplementation(
+    async ({ where, data }: any) => {
+      const t = store.tokens[where.token];
+      if (t) Object.assign(t, data);
+      return t;
+    },
+  );
   mockPrismaService.$transaction.mockImplementation(async (ops: any) => {
     if (typeof ops === 'function') {
       return ops(mockPrismaService);
@@ -158,9 +182,13 @@ describe('Auth (e2e)', () => {
 
     // MailService'in e-posta gönderme metodunu mock'la
     try {
-      const mailService = moduleFixture.get<any>('MailService', { strict: false }) as any;
+      const mailService = moduleFixture.get<any>('MailService', {
+        strict: false,
+      });
       if (mailService?.sendPasswordReset) {
-        mailServiceSpy = jest.spyOn(mailService, 'sendPasswordReset').mockResolvedValue(undefined as never);
+        mailServiceSpy = jest
+          .spyOn(mailService, 'sendPasswordReset')
+          .mockResolvedValue(undefined);
       }
     } catch {
       // MailService doğrudan erişilemiyorsa jest mock yeterli
@@ -205,7 +233,11 @@ describe('Auth (e2e)', () => {
 
       const res = await request(app.getHttpServer())
         .post('/api/auth/register')
-        .send({ fullName: 'Test', email: 'dup@example.com', password: 'Password123!' });
+        .send({
+          fullName: 'Test',
+          email: 'dup@example.com',
+          password: 'Password123!',
+        });
 
       expect(res.status).toBe(409);
     });
@@ -294,7 +326,9 @@ describe('Auth (e2e)', () => {
     });
 
     it('refresh token olmadan 401 döner', async () => {
-      const res = await request(app.getHttpServer()).post('/api/auth/refresh').send({});
+      const res = await request(app.getHttpServer())
+        .post('/api/auth/refresh')
+        .send({});
       expect(res.status).toBe(401);
     });
   });

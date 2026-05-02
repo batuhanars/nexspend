@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-return */
 import { Injectable } from '@nestjs/common';
 import { TransactionType } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
@@ -6,7 +7,7 @@ import { PrismaService } from '../../prisma/prisma.service';
 export class BalanceService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async applyTransaction(
+  applyTransaction(
     accountId: string,
     type: TransactionType,
     amount: number,
@@ -44,7 +45,7 @@ export class BalanceService {
     return this.prisma.$transaction(ops);
   }
 
-  async revertTransaction(
+  revertTransaction(
     accountId: string,
     type: TransactionType,
     amount: number,

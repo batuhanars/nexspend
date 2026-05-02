@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-argument */
 import {
   Injectable,
   NotFoundException,
@@ -5,7 +6,12 @@ import {
   Logger,
 } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { DebtType, DebtStatus, TransactionType, TransactionSource } from '@prisma/client';
+import {
+  DebtType,
+  DebtStatus,
+  TransactionType,
+  TransactionSource,
+} from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import { TransactionCreatedEvent } from '../../common/events/transaction.events';
 import { CreateDebtDto } from './dto/create-debt.dto';
@@ -30,7 +36,7 @@ export class DebtsService {
       },
       orderBy: { createdAt: 'desc' },
     });
-    return debts.map(this.format);
+    return debts.map((d) => this.format(d));
   }
 
   async getSummary(userId: string) {
@@ -73,20 +79,27 @@ export class DebtsService {
       },
     });
 
-    if (dto.hasInstallments && dto.installmentCount && dto.firstInstallmentDate) {
+    if (
+      dto.hasInstallments &&
+      dto.installmentCount &&
+      dto.firstInstallmentDate
+    ) {
       const installmentAmount = dto.totalAmount / dto.installmentCount;
       const firstDate = new Date(dto.firstInstallmentDate);
 
-      const installments = Array.from({ length: dto.installmentCount }, (_, i) => {
-        const dueDate = new Date(firstDate);
-        dueDate.setMonth(dueDate.getMonth() + i);
-        return {
-          debtId: debt.id,
-          installmentNo: i + 1,
-          amount: installmentAmount,
-          dueDate,
-        };
-      });
+      const installments = Array.from(
+        { length: dto.installmentCount },
+        (_, i) => {
+          const dueDate = new Date(firstDate);
+          dueDate.setMonth(dueDate.getMonth() + i);
+          return {
+            debtId: debt.id,
+            installmentNo: i + 1,
+            amount: installmentAmount,
+            dueDate,
+          };
+        },
+      );
 
       await this.prisma.debtInstallment.createMany({ data: installments });
     }
@@ -107,7 +120,9 @@ export class DebtsService {
         where: { id },
         data: {
           ...(dto.personName !== undefined && { personName: dto.personName }),
-          ...(dto.totalAmount !== undefined && { totalAmount: dto.totalAmount }),
+          ...(dto.totalAmount !== undefined && {
+            totalAmount: dto.totalAmount,
+          }),
           ...(dto.status !== undefined && { status: dto.status }),
           ...(dto.dueDate !== undefined && { dueDate: new Date(dto.dueDate) }),
           ...(dto.note !== undefined && { note: dto.note }),
@@ -123,7 +138,11 @@ export class DebtsService {
     return { message: 'Borç silindi' };
   }
 
-  async createPayment(userId: string, debtId: string, dto: CreateDebtPaymentDto) {
+  async createPayment(
+    userId: string,
+    debtId: string,
+    dto: CreateDebtPaymentDto,
+  ) {
     const debt = await this.findOwned(userId, debtId);
     const remaining = Number(debt.totalAmount) - Number(debt.paidAmount);
 
@@ -158,7 +177,9 @@ export class DebtsService {
 
         const newPaid = Number(installment.paidAmount) + dto.amount;
         const newStatus: DebtStatus =
-          newPaid >= Number(installment.amount) ? DebtStatus.PAID : DebtStatus.PENDING;
+          newPaid >= Number(installment.amount)
+            ? DebtStatus.PAID
+            : DebtStatus.PENDING;
 
         await tx.debtInstallment.update({
           where: { id: dto.installmentId },
@@ -180,7 +201,9 @@ export class DebtsService {
 
       // Hesap bakiyesi güncelle + Transaction oluştur
       const txType =
-        debt.type === DebtType.BORROWED ? TransactionType.EXPENSE : TransactionType.INCOME;
+        debt.type === DebtType.BORROWED
+          ? TransactionType.EXPENSE
+          : TransactionType.INCOME;
       const txSource =
         debt.type === DebtType.BORROWED
           ? TransactionSource.DEBT_PAYMENT
@@ -294,7 +317,8 @@ export class DebtsService {
   }
 
   private async getSystemCategory(debtType: DebtType) {
-    const name = debtType === DebtType.BORROWED ? 'Borç Ödemesi' : 'Alacak Tahsilatı';
+    const name =
+      debtType === DebtType.BORROWED ? 'Borç Ödemesi' : 'Alacak Tahsilatı';
     return this.prisma.category.findFirst({ where: { name, isSystem: true } });
   }
 

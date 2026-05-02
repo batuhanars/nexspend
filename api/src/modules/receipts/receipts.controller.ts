@@ -64,9 +64,7 @@ export class ReceiptsController {
     @Body() dto: ScanReceiptDto,
     @UploadedFile() file?: Express.Multer.File,
   ) {
-    const imageUrl = file
-      ? `/uploads/receipts/${file.filename}`
-      : 'pending';
+    const imageUrl = file ? `/uploads/receipts/${file.filename}` : 'pending';
     return this.receiptsService.scan(user.id, dto, imageUrl);
   }
 

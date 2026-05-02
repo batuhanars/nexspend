@@ -27,7 +27,7 @@ export class BudgetsService {
       include: { category: true },
       orderBy: { createdAt: 'desc' },
     });
-    return budgets.map(this.format);
+    return budgets.map((b) => this.format(b));
   }
 
   async getOverview(userId: string) {
@@ -37,7 +37,8 @@ export class BudgetsService {
 
     const totalBudget = budgets.reduce((s, b) => s + Number(b.amount), 0);
     const totalSpent = budgets.reduce((s, b) => s + Number(b.spent), 0);
-    const percentage = totalBudget > 0 ? Math.round((totalSpent / totalBudget) * 100) : 0;
+    const percentage =
+      totalBudget > 0 ? Math.round((totalSpent / totalBudget) * 100) : 0;
 
     return {
       totalBudget,
@@ -59,10 +60,7 @@ export class BudgetsService {
         categoryId: dto.categoryId,
         isActive: true,
         startDate: { lte: new Date(dto.startDate) },
-        OR: [
-          { endDate: null },
-          { endDate: { gte: new Date(dto.startDate) } },
-        ],
+        OR: [{ endDate: null }, { endDate: { gte: new Date(dto.startDate) } }],
       },
     });
     if (existing) {
@@ -110,7 +108,9 @@ export class BudgetsService {
         ...(dto.amount !== undefined && { amount: dto.amount }),
         ...(dto.period !== undefined && { period: dto.period }),
         ...(dto.note !== undefined && { note: dto.note }),
-        ...(dto.smartTracking !== undefined && { smartTracking: dto.smartTracking }),
+        ...(dto.smartTracking !== undefined && {
+          smartTracking: dto.smartTracking,
+        }),
         ...(dto.isActive !== undefined && { isActive: dto.isActive }),
         ...(dto.endDate !== undefined && { endDate: new Date(dto.endDate) }),
       },
@@ -152,8 +152,8 @@ export class BudgetsService {
     if (!affectsOld && !affectsNew) return;
 
     const categories = new Set<string>();
-    if (affectsOld) categories.add(event.oldCategoryId!);
-    if (affectsNew) categories.add(event.newCategoryId!);
+    if (affectsOld) categories.add(event.oldCategoryId);
+    if (affectsNew) categories.add(event.newCategoryId);
 
     for (const categoryId of categories) {
       await this.recalculateForCategory(event.userId, categoryId);
@@ -230,13 +230,23 @@ export class BudgetsService {
     return budget;
   }
 
-  private format(b: any) {
+  private format(b: {
+    amount: unknown;
+    spent: unknown;
+    [key: string]: unknown;
+  }) {
     const amount = Number(b.amount);
     const spent = Number(b.spent);
     const remaining = amount - spent;
     const percentage = amount > 0 ? Math.round((spent / amount) * 100) : 0;
     const status =
-      percentage >= 100 ? 'EXCEEDED' : percentage >= 90 ? 'CRITICAL' : percentage >= 80 ? 'WARNING' : 'OK';
+      percentage >= 100
+        ? 'EXCEEDED'
+        : percentage >= 90
+          ? 'CRITICAL'
+          : percentage >= 80
+            ? 'WARNING'
+            : 'OK';
 
     return { ...b, amount, spent, remaining, percentage, status };
   }

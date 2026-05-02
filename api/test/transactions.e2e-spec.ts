@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
@@ -66,7 +67,10 @@ function resetMocks(userId: string) {
   store.clear();
 
   mockPrisma.user.findUnique.mockImplementation(async ({ where }: any) => {
-    if (where.id) return Object.values(store.users).find((u: any) => u.id === where.id) ?? null;
+    if (where.id)
+      return (
+        Object.values(store.users).find((u: any) => u.id === where.id) ?? null
+      );
     if (where.email) return store.users[where.email] ?? null;
     return null;
   });
@@ -94,38 +98,52 @@ function resetMocks(userId: string) {
     })),
   );
 
-  mockPrisma.transaction.count.mockImplementation(async () =>
-    Object.values(store.transactions).length,
+  mockPrisma.transaction.count.mockImplementation(
+    async () => Object.values(store.transactions).length,
   );
 
-  mockPrisma.transaction.findFirst.mockImplementation(async ({ where }: any) => {
-    const tx = store.transactions[where.id];
-    if (!tx || tx.userId !== where.userId) return null;
-    return {
-      ...tx,
-      tags: [],
-      category: null,
-      account: store.accounts[tx.accountId] ?? null,
-      transferToAccount: null,
-    };
-  });
+  mockPrisma.transaction.findFirst.mockImplementation(
+    async ({ where }: any) => {
+      const tx = store.transactions[where.id];
+      if (!tx || tx.userId !== where.userId) return null;
+      return {
+        ...tx,
+        tags: [],
+        category: null,
+        account: store.accounts[tx.accountId] ?? null,
+        transferToAccount: null,
+      };
+    },
+  );
 
-  mockPrisma.transaction.aggregate.mockImplementation(async ({ where }: any) => {
-    const filtered = Object.values(store.transactions).filter((t: any) => {
-      if (t.userId !== where.userId) return false;
-      if (where.type && t.type !== where.type) return false;
-      return true;
-    });
-    const sum = filtered.reduce((s: number, t: any) => s + Number(t.amount), 0);
-    return { _sum: { amount: sum || null } };
-  });
+  mockPrisma.transaction.aggregate.mockImplementation(
+    async ({ where }: any) => {
+      const filtered = Object.values(store.transactions).filter((t: any) => {
+        if (t.userId !== where.userId) return false;
+        if (where.type && t.type !== where.type) return false;
+        return true;
+      });
+      const sum = filtered.reduce(
+        (s: number, t: any) => s + Number(t.amount),
+        0,
+      );
+      return { _sum: { amount: sum || null } };
+    },
+  );
 
   mockPrisma.$transaction.mockImplementation(async (fn: any) => {
     if (typeof fn === 'function') {
       const txClient = {
         transaction: {
           create: jest.fn().mockImplementation(async ({ data }: any) => {
-            const tx = { id: store.nextId(), ...data, tags: [], category: null, account: null, transferToAccount: null };
+            const tx = {
+              id: store.nextId(),
+              ...data,
+              tags: [],
+              category: null,
+              account: null,
+              transferToAccount: null,
+            };
             store.transactions[tx.id] = tx;
             return tx;
           }),
@@ -158,7 +176,12 @@ function resetMocks(userId: string) {
   mockPrisma.recurringTransaction.update.mockResolvedValue({});
 
   // Seed a test account
-  store.accounts['acc-1'] = { id: 'acc-1', name: 'Test Hesap', balance: 10000, userId };
+  store.accounts['acc-1'] = {
+    id: 'acc-1',
+    name: 'Test Hesap',
+    balance: 10000,
+    userId,
+  };
 }
 
 // ──────────────────────────────────────────────────────────────────────────────
@@ -223,11 +246,22 @@ describe('Transactions (e2e)', () => {
 
     // Test kullanıcısı oluştur ve login yap
     const hash = await bcrypt.hash('Password123!', 10);
-    const user = { id: userId, email: userEmail, fullName: 'TX Test', passwordHash: hash, currency: 'TRY', language: 'tr', avatarUrl: null };
+    const user = {
+      id: userId,
+      email: userEmail,
+      fullName: 'TX Test',
+      passwordHash: hash,
+      currency: 'TRY',
+      language: 'tr',
+      avatarUrl: null,
+    };
     store.users[userEmail] = user;
 
     mockPrisma.user.findUnique.mockImplementation(async ({ where }: any) => {
-      if (where.id) return Object.values(store.users).find((u: any) => u.id === where.id) ?? null;
+      if (where.id)
+        return (
+          Object.values(store.users).find((u: any) => u.id === where.id) ?? null
+        );
       if (where.email) return store.users[where.email] ?? null;
       return null;
     });
@@ -247,9 +281,20 @@ describe('Transactions (e2e)', () => {
     resetMocks(userId);
     // Kullanıcıyı geri koy (resetMocks store'u temizler)
     const hash = '$2b$10$...(mock hash)';
-    store.users[userEmail] = { id: userId, email: userEmail, fullName: 'TX Test', passwordHash: hash, currency: 'TRY', language: 'tr', avatarUrl: null };
+    store.users[userEmail] = {
+      id: userId,
+      email: userEmail,
+      fullName: 'TX Test',
+      passwordHash: hash,
+      currency: 'TRY',
+      language: 'tr',
+      avatarUrl: null,
+    };
     mockPrisma.user.findUnique.mockImplementation(async ({ where }: any) => {
-      if (where.id) return Object.values(store.users).find((u: any) => u.id === where.id) ?? null;
+      if (where.id)
+        return (
+          Object.values(store.users).find((u: any) => u.id === where.id) ?? null
+        );
       if (where.email) return store.users[where.email] ?? null;
       return null;
     });
@@ -307,7 +352,7 @@ describe('Transactions (e2e)', () => {
         .send({
           accountId: 'acc-1',
           type: 'EXPENSE',
-          amount: 250.50,
+          amount: 250.5,
           title: 'Market alışverişi',
         });
 
@@ -362,7 +407,12 @@ describe('Transactions (e2e)', () => {
     it('token olmadan 401 döner', async () => {
       const res = await request(app.getHttpServer())
         .post('/api/transactions')
-        .send({ accountId: 'acc-1', type: 'EXPENSE', amount: 100, title: 'Test' });
+        .send({
+          accountId: 'acc-1',
+          type: 'EXPENSE',
+          amount: 100,
+          title: 'Test',
+        });
 
       expect(res.status).toBe(401);
     });

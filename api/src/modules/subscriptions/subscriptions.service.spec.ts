@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { NotFoundException } from '@nestjs/common';
 import { SubscriptionPeriod, TransactionType } from '@prisma/client';
 import { EventEmitter2 } from '@nestjs/event-emitter';
@@ -51,7 +52,10 @@ describe('SubscriptionsService', () => {
   let service: SubscriptionsService;
 
   beforeEach(() => {
-    service = new SubscriptionsService(mockPrisma as any, mockEventEmitter as any);
+    service = new SubscriptionsService(
+      mockPrisma as any,
+      mockEventEmitter as any,
+    );
     jest.clearAllMocks();
   });
 
@@ -75,8 +79,18 @@ describe('SubscriptionsService', () => {
     it('aylık ve yıllık toplam doğru hesaplar', async () => {
       mockPrisma.subscription.findMany.mockResolvedValue([
         { ...baseSub, amount: 150, period: SubscriptionPeriod.MONTHLY },
-        { ...baseSub, id: 'sub-2', amount: 1200, period: SubscriptionPeriod.YEARLY },
-        { ...baseSub, id: 'sub-3', amount: 50, period: SubscriptionPeriod.WEEKLY },
+        {
+          ...baseSub,
+          id: 'sub-2',
+          amount: 1200,
+          period: SubscriptionPeriod.YEARLY,
+        },
+        {
+          ...baseSub,
+          id: 'sub-3',
+          amount: 50,
+          period: SubscriptionPeriod.WEEKLY,
+        },
       ]);
 
       const result = await service.getSummary(USER_ID);
@@ -132,7 +146,9 @@ describe('SubscriptionsService', () => {
     it('bulunamazsa NotFoundException fırlatır', async () => {
       mockPrisma.subscription.findFirst.mockResolvedValue(null);
 
-      await expect(service.findOne(USER_ID, 'nonexistent')).rejects.toThrow(NotFoundException);
+      await expect(service.findOne(USER_ID, 'nonexistent')).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 
@@ -151,11 +167,19 @@ describe('SubscriptionsService', () => {
     };
 
     it('autoDeduct=true ise ilk işlemi otomatik oluşturur', async () => {
-      mockPrisma.subscription.create.mockResolvedValue({ ...baseSub, name: 'Spotify', amount: 49.99 });
+      mockPrisma.subscription.create.mockResolvedValue({
+        ...baseSub,
+        name: 'Spotify',
+        amount: 49.99,
+      });
       mockPrisma.$transaction.mockImplementation(async (fn: any) => {
         const tx = {
           account: { update: jest.fn().mockResolvedValue({}) },
-          transaction: { create: jest.fn().mockResolvedValue({ id: 'tx-1', type: TransactionType.EXPENSE }) },
+          transaction: {
+            create: jest
+              .fn()
+              .mockResolvedValue({ id: 'tx-1', type: TransactionType.EXPENSE }),
+          },
         };
         return fn(tx);
       });
@@ -164,7 +188,10 @@ describe('SubscriptionsService', () => {
 
       expect(mockPrisma.subscription.create).toHaveBeenCalled();
       expect(mockPrisma.$transaction).toHaveBeenCalled();
-      expect(mockEventEmitter.emit).toHaveBeenCalledWith('transaction.created', expect.any(Object));
+      expect(mockEventEmitter.emit).toHaveBeenCalledWith(
+        'transaction.created',
+        expect.any(Object),
+      );
     });
 
     it('autoDeduct=false ise işlem oluşturmaz', async () => {
@@ -187,7 +214,10 @@ describe('SubscriptionsService', () => {
   describe('update()', () => {
     it('aboneliği günceller', async () => {
       mockPrisma.subscription.findFirst.mockResolvedValue(baseSub);
-      mockPrisma.subscription.update.mockResolvedValue({ ...baseSub, name: 'Disney+' });
+      mockPrisma.subscription.update.mockResolvedValue({
+        ...baseSub,
+        name: 'Disney+',
+      });
 
       const result = await service.update(USER_ID, SUB_ID, { name: 'Disney+' });
 
@@ -197,7 +227,9 @@ describe('SubscriptionsService', () => {
     it('bulunamazsa NotFoundException fırlatır', async () => {
       mockPrisma.subscription.findFirst.mockResolvedValue(null);
 
-      await expect(service.update(USER_ID, 'bad-id', {})).rejects.toThrow(NotFoundException);
+      await expect(service.update(USER_ID, 'bad-id', {})).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 
@@ -211,13 +243,17 @@ describe('SubscriptionsService', () => {
       const result = await service.remove(USER_ID, SUB_ID);
 
       expect(result).toHaveProperty('message');
-      expect(mockPrisma.subscription.delete).toHaveBeenCalledWith({ where: { id: SUB_ID } });
+      expect(mockPrisma.subscription.delete).toHaveBeenCalledWith({
+        where: { id: SUB_ID },
+      });
     });
 
     it('bulunamazsa NotFoundException fırlatır', async () => {
       mockPrisma.subscription.findFirst.mockResolvedValue(null);
 
-      await expect(service.remove(USER_ID, 'bad-id')).rejects.toThrow(NotFoundException);
+      await expect(service.remove(USER_ID, 'bad-id')).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 
@@ -225,8 +261,14 @@ describe('SubscriptionsService', () => {
 
   describe('toggle()', () => {
     it('aktif aboneliği devre dışı bırakır', async () => {
-      mockPrisma.subscription.findFirst.mockResolvedValue({ ...baseSub, isActive: true });
-      mockPrisma.subscription.update.mockResolvedValue({ ...baseSub, isActive: false });
+      mockPrisma.subscription.findFirst.mockResolvedValue({
+        ...baseSub,
+        isActive: true,
+      });
+      mockPrisma.subscription.update.mockResolvedValue({
+        ...baseSub,
+        isActive: false,
+      });
 
       const result = await service.toggle(USER_ID, SUB_ID);
 
@@ -236,8 +278,14 @@ describe('SubscriptionsService', () => {
     });
 
     it('pasif aboneliği aktifleştirir', async () => {
-      mockPrisma.subscription.findFirst.mockResolvedValue({ ...baseSub, isActive: false });
-      mockPrisma.subscription.update.mockResolvedValue({ ...baseSub, isActive: true });
+      mockPrisma.subscription.findFirst.mockResolvedValue({
+        ...baseSub,
+        isActive: false,
+      });
+      mockPrisma.subscription.update.mockResolvedValue({
+        ...baseSub,
+        isActive: true,
+      });
 
       const result = await service.toggle(USER_ID, SUB_ID);
 
@@ -256,7 +304,11 @@ describe('SubscriptionsService', () => {
       mockPrisma.$transaction.mockImplementation(async (fn: any) => {
         const tx = {
           account: { update: jest.fn().mockResolvedValue({}) },
-          transaction: { create: jest.fn().mockResolvedValue({ id: 'tx-1', type: TransactionType.EXPENSE }) },
+          transaction: {
+            create: jest
+              .fn()
+              .mockResolvedValue({ id: 'tx-1', type: TransactionType.EXPENSE }),
+          },
         };
         return fn(tx);
       });

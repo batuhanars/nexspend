@@ -72,7 +72,10 @@ export class DebtsController {
   }
 
   @Get(':id/installments')
-  getInstallments(@CurrentUser() user: { id: string }, @Param('id') id: string) {
+  getInstallments(
+    @CurrentUser() user: { id: string },
+    @Param('id') id: string,
+  ) {
     return this.debtsService.getInstallments(user.id, id);
   }
 }

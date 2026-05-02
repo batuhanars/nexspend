@@ -37,7 +37,10 @@ export class SubscriptionsController {
     @CurrentUser() user: { id: string },
     @Query('days') days?: string,
   ) {
-    return this.subscriptionsService.getUpcoming(user.id, days ? Number(days) : 7);
+    return this.subscriptionsService.getUpcoming(
+      user.id,
+      days ? Number(days) : 7,
+    );
   }
 
   @Get(':id')
@@ -46,7 +49,10 @@ export class SubscriptionsController {
   }
 
   @Post()
-  create(@CurrentUser() user: { id: string }, @Body() dto: CreateSubscriptionDto) {
+  create(
+    @CurrentUser() user: { id: string },
+    @Body() dto: CreateSubscriptionDto,
+  ) {
     return this.subscriptionsService.create(user.id, dto);
   }
 

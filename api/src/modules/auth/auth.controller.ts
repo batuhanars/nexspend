@@ -15,10 +15,10 @@ import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
-import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { RefreshTokenGuard } from '../../common/guards/refresh-token.guard';
 import { GoogleAuthGuard } from '../../common/guards/google-auth.guard';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import { GoogleProfile } from './strategies/google.strategy';
 
 @Controller('auth')
 export class AuthController {
@@ -41,10 +41,7 @@ export class AuthController {
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
   @UseGuards(RefreshTokenGuard)
-  async refresh(
-    @CurrentUser() user: { id: string; email: string },
-    @Body() _dto: RefreshTokenDto,
-  ) {
+  refresh(@CurrentUser() user: { id: string; email: string }) {
     return this.authService.refresh(user.id, user.email);
   }
 
@@ -80,7 +77,10 @@ export class AuthController {
 
   @Get('google/callback')
   @UseGuards(GoogleAuthGuard)
-  async googleCallback(@CurrentUser() profile: any, @Res() res: Response) {
+  async googleCallback(
+    @CurrentUser() profile: GoogleProfile,
+    @Res() res: Response,
+  ) {
     const result = await this.authService.googleAuth(profile);
     const frontendUrl = this.configService.get<string>('frontend.url');
 

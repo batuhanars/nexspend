@@ -58,8 +58,8 @@ export class ReceiptParserService {
 
   private extractDate(lines: string[]): Date | null {
     const patterns = [
-      /(\d{2})[.\/](\d{2})[.\/](\d{4})/,   // DD.MM.YYYY veya DD/MM/YYYY
-      /(\d{4})[.\/-](\d{2})[.\/-](\d{2})/,  // YYYY-MM-DD
+      /(\d{2})[./](\d{2})[./](\d{4})/, // DD.MM.YYYY veya DD/MM/YYYY
+      /(\d{4})[./-](\d{2})[./-](\d{2})/, // YYYY-MM-DD
     ];
 
     for (const line of lines) {
@@ -79,7 +79,8 @@ export class ReceiptParserService {
 
   private extractMerchant(lines: string[]): string | null {
     // İşyeri adı genellikle ilk 3 satırda yer alır
-    const businessPatterns = /A\.Ş\.|LTD\.|TİC\.|MARKET|MARKETİ|GIDA|RESTORAN|CAFE|KAFE|A\.S\./i;
+    const businessPatterns =
+      /A\.Ş\.|LTD\.|TİC\.|MARKET|MARKETİ|GIDA|RESTORAN|CAFE|KAFE|A\.S\./i;
 
     for (let i = 0; i < Math.min(5, lines.length); i++) {
       const line = lines[i];
@@ -89,7 +90,8 @@ export class ReceiptParserService {
     // Pattern bulunamazsa ilk anlamlı satırı al
     for (let i = 0; i < Math.min(3, lines.length); i++) {
       const line = lines[i];
-      if (line.length > 3 && !/^\d/.test(line)) return this.cleanMerchantName(line);
+      if (line.length > 3 && !/^\d/.test(line))
+        return this.cleanMerchantName(line);
     }
     return null;
   }
@@ -141,7 +143,12 @@ export class ReceiptParserService {
       if (m2 && !this.isHeaderLine(m2[1])) {
         const price = this.parseDecimal(m2[2]);
         if (price && price > 0) {
-          items.push({ name: m2[1].trim(), quantity: 1, unitPrice: price, totalPrice: price });
+          items.push({
+            name: m2[1].trim(),
+            quantity: 1,
+            unitPrice: price,
+            totalPrice: price,
+          });
         }
       }
     }
@@ -171,11 +178,15 @@ export class ReceiptParserService {
   }
 
   private cleanMerchantName(s: string): string {
-    return s.replace(/[^a-zA-ZğüşıöçĞÜŞİÖÇ0-9\s.,&'-]/g, '').trim().slice(0, 100);
+    return s
+      .replace(/[^a-zA-ZğüşıöçĞÜŞİÖÇ0-9\s.,&'-]/g, '')
+      .trim()
+      .slice(0, 100);
   }
 
   private isHeaderLine(s: string): boolean {
-    const headers = /TOPLAM|KDV|TARİH|SAAT|FİŞ|SIRA|VKN|TCKN|ÖDEME|MAKBUZi|SATIŞ/i;
+    const headers =
+      /TOPLAM|KDV|TARİH|SAAT|FİŞ|SIRA|VKN|TCKN|ÖDEME|MAKBUZi|SATIŞ/i;
     return headers.test(s);
   }
 }

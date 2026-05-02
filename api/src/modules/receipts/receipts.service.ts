@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-argument */
 import {
   Injectable,
   NotFoundException,
@@ -44,7 +45,7 @@ export class ReceiptsService {
     ]);
 
     return {
-      data: receipts.map(this.format),
+      data: receipts.map((r) => this.format(r)),
       total,
       page,
       limit,
@@ -57,8 +58,24 @@ export class ReceiptsService {
   }
 
   async scan(userId: string, dto: ScanReceiptDto, imageUrl: string) {
-    let parsed: { amount: number | null; merchant: string | null; date: Date | null; tax: number | null; paymentMethod: string | null; items: any[]; confidence: number } = { amount: null, merchant: null, date: null, tax: null, paymentMethod: null, items: [], confidence: 0 };
-    let rawText = dto.rawText ?? null;
+    let parsed: {
+      amount: number | null;
+      merchant: string | null;
+      date: Date | null;
+      tax: number | null;
+      paymentMethod: string | null;
+      items: any[];
+      confidence: number;
+    } = {
+      amount: null,
+      merchant: null,
+      date: null,
+      tax: null,
+      paymentMethod: null,
+      items: [],
+      confidence: 0,
+    };
+    const rawText = dto.rawText ?? null;
     let ocrSource = 'CLIENT';
 
     // Client OCR text geldiyse parse et
@@ -66,7 +83,9 @@ export class ReceiptsService {
       parsed = this.parser.parse(rawText);
       // Güven skoru düşükse backend OCR tetiklenebilir (şimdilik stub)
       if ((dto.confidence ?? parsed.confidence) < 0.5) {
-        this.logger.warn(`Düşük OCR güveni: ${dto.confidence} — Cloud Vision TODO`);
+        this.logger.warn(
+          `Düşük OCR güveni: ${dto.confidence} — Cloud Vision TODO`,
+        );
         ocrSource = 'CLIENT_LOW_CONFIDENCE';
       }
     } else {
@@ -139,11 +158,19 @@ export class ReceiptsService {
       await this.prisma.receipt.update({
         where: { id },
         data: {
-          ...(dto.parsedAmount !== undefined && { parsedAmount: dto.parsedAmount }),
-          ...(dto.parsedMerchant !== undefined && { parsedMerchant: dto.parsedMerchant }),
-          ...(dto.parsedDate !== undefined && { parsedDate: new Date(dto.parsedDate) }),
+          ...(dto.parsedAmount !== undefined && {
+            parsedAmount: dto.parsedAmount,
+          }),
+          ...(dto.parsedMerchant !== undefined && {
+            parsedMerchant: dto.parsedMerchant,
+          }),
+          ...(dto.parsedDate !== undefined && {
+            parsedDate: new Date(dto.parsedDate),
+          }),
           ...(dto.parsedTax !== undefined && { parsedTax: dto.parsedTax }),
-          ...(dto.paymentMethod !== undefined && { paymentMethod: dto.paymentMethod }),
+          ...(dto.paymentMethod !== undefined && {
+            paymentMethod: dto.paymentMethod,
+          }),
         },
         include: { items: { orderBy: { sortOrder: 'asc' } } },
       }),
@@ -164,7 +191,7 @@ export class ReceiptsService {
 
     const transactionDate = dto.transactionDate
       ? new Date(dto.transactionDate)
-      : receipt.parsedDate ?? new Date();
+      : (receipt.parsedDate ?? new Date());
 
     const result = await this.prisma.$transaction(async (tx) => {
       await tx.account.update({
@@ -188,7 +215,10 @@ export class ReceiptsService {
 
       await tx.receipt.update({
         where: { id },
-        data: { status: ReceiptStatus.CONFIRMED, transactionId: transaction.id },
+        data: {
+          status: ReceiptStatus.CONFIRMED,
+          transactionId: transaction.id,
+        },
       });
 
       return transaction;
@@ -196,7 +226,9 @@ export class ReceiptsService {
 
     // Merchant → category mapping güncelle
     if (dto.categoryId && (dto.merchant ?? receipt.parsedMerchant)) {
-      const merchantKey = this.normalizeMerchant(dto.merchant ?? receipt.parsedMerchant ?? '');
+      const merchantKey = this.normalizeMerchant(
+        dto.merchant ?? receipt.parsedMerchant ?? '',
+      );
       await this.upsertMerchantMapping(userId, merchantKey, dto.categoryId);
     }
 
@@ -231,7 +263,11 @@ export class ReceiptsService {
     });
   }
 
-  async upsertMerchantMapping(userId: string, merchantKey: string, categoryId: string) {
+  async upsertMerchantMapping(
+    userId: string,
+    merchantKey: string,
+    categoryId: string,
+  ) {
     const key = this.normalizeMerchant(merchantKey);
     const existing = await this.prisma.merchantCategoryMap.findFirst({
       where: { userId, merchantKey: key },

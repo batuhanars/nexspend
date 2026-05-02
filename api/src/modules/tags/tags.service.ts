@@ -25,14 +25,20 @@ export class TagsService {
     if (existing) throw new ConflictException('Bu isimde bir etiket zaten var');
 
     return this.prisma.tag.create({
-      data: { userId, name: dto.name, color: dto.color, icon: dto.icon ?? null },
+      data: {
+        userId,
+        name: dto.name,
+        color: dto.color,
+        icon: dto.icon ?? null,
+      },
     });
   }
 
   async remove(userId: string, id: string) {
     const tag = await this.prisma.tag.findUnique({ where: { id } });
     if (!tag) throw new NotFoundException('Etiket bulunamadı');
-    if (tag.userId !== userId) throw new ForbiddenException('Bu etiket size ait değil');
+    if (tag.userId !== userId)
+      throw new ForbiddenException('Bu etiket size ait değil');
 
     await this.prisma.tag.delete({ where: { id } });
     return { message: 'Etiket silindi' };

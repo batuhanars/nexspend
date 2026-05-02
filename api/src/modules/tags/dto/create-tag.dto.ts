@@ -6,7 +6,9 @@ export class CreateTagDto {
   name: string;
 
   @IsString()
-  @Matches(/^#[0-9A-Fa-f]{6}$/, { message: 'color geçerli bir hex renk kodu olmalıdır (#RRGGBB)' })
+  @Matches(/^#[0-9A-Fa-f]{6}$/, {
+    message: 'color geçerli bir hex renk kodu olmalıdır (#RRGGBB)',
+  })
   color: string;
 
   @IsString()
@@ -14,4 +16,3 @@ export class CreateTagDto {
   @MaxLength(50)
   icon?: string;
 }
-

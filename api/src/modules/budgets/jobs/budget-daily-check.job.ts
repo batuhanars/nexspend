@@ -22,13 +22,17 @@ export class BudgetDailyCheckJob {
       distinct: ['userId', 'categoryId'],
     });
 
-    this.logger.log(`${activeBudgets.length} benzersiz bütçe kontrolü yapılacak`);
+    this.logger.log(
+      `${activeBudgets.length} benzersiz bütçe kontrolü yapılacak`,
+    );
 
     for (const { userId, categoryId } of activeBudgets) {
       try {
         await this.budgetsService.recalculateForCategory(userId, categoryId);
       } catch (err) {
-        this.logger.error(`userId=${userId} categoryId=${categoryId} güncellenemedi: ${err}`);
+        this.logger.error(
+          `userId=${userId} categoryId=${categoryId} güncellenemedi: ${err}`,
+        );
       }
     }
 

@@ -1,5 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { TransactionSource, TransactionType } from '@prisma/client';
+import {
+  type Prisma,
+  TransactionSource,
+  TransactionType,
+} from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import { QueryReportDto, ReportPeriod } from './dto/query-report.dto';
 
@@ -10,7 +14,10 @@ export class ReportsService {
   async getExpenseDistribution(userId: string, query: QueryReportDto) {
     const { startDate, endDate } = this.resolvePeriod(query);
 
-    const where: any = { userId, type: TransactionType.EXPENSE };
+    const where: Prisma.TransactionWhereInput = {
+      userId,
+      type: TransactionType.EXPENSE,
+    };
     if (query.accountId) where.accountId = query.accountId;
     where.transactionDate = { gte: startDate, lte: endDate };
 
@@ -23,7 +30,9 @@ export class ReportsService {
 
     const total = rows.reduce((s, r) => s + Number(r._sum.amount ?? 0), 0);
 
-    const categoryIds = rows.map((r) => r.categoryId).filter(Boolean) as string[];
+    const categoryIds = rows
+      .map((r) => r.categoryId)
+      .filter(Boolean) as string[];
     const categories = await this.prisma.category.findMany({
       where: { id: { in: categoryIds } },
     });
@@ -38,7 +47,8 @@ export class ReportsService {
         icon: cat?.icon ?? null,
         color: cat?.color ?? null,
         amount,
-        percentage: total > 0 ? Math.round((amount / total) * 100 * 10) / 10 : 0,
+        percentage:
+          total > 0 ? Math.round((amount / total) * 100 * 10) / 10 : 0,
       };
     });
   }
@@ -46,7 +56,7 @@ export class ReportsService {
   async getCashFlow(userId: string, query: QueryReportDto) {
     const { startDate, endDate } = this.resolvePeriod(query);
 
-    const where: any = { userId };
+    const where: Prisma.TransactionWhereInput = { userId };
     if (query.accountId) where.accountId = query.accountId;
     where.transactionDate = { gte: startDate, lte: endDate };
 
@@ -62,7 +72,10 @@ export class ReportsService {
       const key = `${t.transactionDate.getFullYear()}-${String(t.transactionDate.getMonth() + 1).padStart(2, '0')}`;
       if (!monthMap.has(key)) monthMap.set(key, { income: 0, expense: 0 });
       const entry = monthMap.get(key)!;
-      if (t.type === TransactionType.INCOME && t.source !== TransactionSource.DEBT_COLLECTION) {
+      if (
+        t.type === TransactionType.INCOME &&
+        t.source !== TransactionSource.DEBT_COLLECTION
+      ) {
         entry.income += Number(t.amount);
       } else if (t.type === TransactionType.EXPENSE) {
         entry.expense += Number(t.amount);
@@ -92,15 +105,24 @@ export class ReportsService {
 
     const expenseChange =
       previous.expense > 0
-        ? Math.round(((current.expense - previous.expense) / previous.expense) * 100)
+        ? Math.round(
+            ((current.expense - previous.expense) / previous.expense) * 100,
+          )
         : null;
     const incomeChange =
       previous.income > 0
-        ? Math.round(((current.income - previous.income) / previous.income) * 100)
+        ? Math.round(
+            ((current.income - previous.income) / previous.income) * 100,
+          )
         : null;
 
     // Dönem içi en çok harcama kategorileri
-    const topCategories = await this.getTopCategories(userId, startDate, endDate, query.accountId);
+    const topCategories = await this.getTopCategories(
+      userId,
+      startDate,
+      endDate,
+      query.accountId,
+    );
 
     return {
       current,
@@ -115,11 +137,21 @@ export class ReportsService {
   // Helpers
   // =============================================
 
-  private resolvePeriod(query: QueryReportDto): { startDate: Date; endDate: Date } {
+  private resolvePeriod(query: QueryReportDto): {
+    startDate: Date;
+    endDate: Date;
+  } {
     const now = new Date();
 
-    if (query.period === ReportPeriod.CUSTOM && query.startDate && query.endDate) {
-      return { startDate: new Date(query.startDate), endDate: new Date(query.endDate) };
+    if (
+      query.period === ReportPeriod.CUSTOM &&
+      query.startDate &&
+      query.endDate
+    ) {
+      return {
+        startDate: new Date(query.startDate),
+        endDate: new Date(query.endDate),
+      };
     }
 
     if (query.period === ReportPeriod.LAST_3_MONTHS) {
@@ -146,12 +178,19 @@ export class ReportsService {
     endDate: Date,
     accountId?: string,
   ) {
-    const where: any = { userId, transactionDate: { gte: startDate, lte: endDate } };
+    const where: Prisma.TransactionWhereInput = {
+      userId,
+      transactionDate: { gte: startDate, lte: endDate },
+    };
     if (accountId) where.accountId = accountId;
 
     const [incomeAgg, expenseAgg] = await Promise.all([
       this.prisma.transaction.aggregate({
-        where: { ...where, type: TransactionType.INCOME, source: { not: TransactionSource.DEBT_COLLECTION } },
+        where: {
+          ...where,
+          type: TransactionType.INCOME,
+          source: { not: TransactionSource.DEBT_COLLECTION },
+        },
         _sum: { amount: true },
       }),
       this.prisma.transaction.aggregate({
@@ -172,7 +211,7 @@ export class ReportsService {
     accountId?: string,
     limit = 5,
   ) {
-    const where: any = {
+    const where: Prisma.TransactionWhereInput = {
       userId,
       type: TransactionType.EXPENSE,
       transactionDate: { gte: startDate, lte: endDate },
@@ -188,12 +227,16 @@ export class ReportsService {
     });
 
     const ids = rows.map((r) => r.categoryId).filter(Boolean) as string[];
-    const cats = await this.prisma.category.findMany({ where: { id: { in: ids } } });
+    const cats = await this.prisma.category.findMany({
+      where: { id: { in: ids } },
+    });
     const catMap = new Map(cats.map((c) => [c.id, c]));
 
     return rows.map((r) => ({
       categoryId: r.categoryId,
-      categoryName: r.categoryId ? (catMap.get(r.categoryId)?.name ?? 'Kategorisiz') : 'Kategorisiz',
+      categoryName: r.categoryId
+        ? (catMap.get(r.categoryId)?.name ?? 'Kategorisiz')
+        : 'Kategorisiz',
       icon: r.categoryId ? (catMap.get(r.categoryId)?.icon ?? null) : null,
       amount: Number(r._sum.amount ?? 0),
     }));

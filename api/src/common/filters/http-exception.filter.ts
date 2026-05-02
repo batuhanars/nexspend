@@ -37,10 +37,11 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       }
     } else if (exception instanceof Error) {
       // Prisma unique constraint ihlali
-      if ((exception as any).code === 'P2002') {
+      const prismaErr = exception as { code?: string };
+      if (prismaErr.code === 'P2002') {
         status = HttpStatus.CONFLICT;
         message = 'Bu kayıt zaten mevcut';
-      } else if ((exception as any).code === 'P2025') {
+      } else if (prismaErr.code === 'P2025') {
         status = HttpStatus.NOT_FOUND;
         message = 'Kayıt bulunamadı';
       } else {

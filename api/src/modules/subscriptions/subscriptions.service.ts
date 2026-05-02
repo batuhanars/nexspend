@@ -1,6 +1,11 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-argument */
 import { Injectable, NotFoundException, Logger } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { TransactionType, TransactionSource, SubscriptionPeriod } from '@prisma/client';
+import {
+  TransactionType,
+  TransactionSource,
+  SubscriptionPeriod,
+} from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import { TransactionCreatedEvent } from '../../common/events/transaction.events';
 import { CreateSubscriptionDto } from './dto/create-subscription.dto';
@@ -24,7 +29,7 @@ export class SubscriptionsService {
       },
       orderBy: { nextRenewal: 'asc' },
     });
-    return subs.map(this.format);
+    return subs.map((s) => this.format(s));
   }
 
   async getSummary(userId: string) {
@@ -64,7 +69,7 @@ export class SubscriptionsService {
       },
       orderBy: { nextRenewal: 'asc' },
     });
-    return subs.map(this.format);
+    return subs.map((s) => this.format(s));
   }
 
   async findOne(userId: string, id: string) {
@@ -114,11 +119,15 @@ export class SubscriptionsService {
           ...(dto.color !== undefined && { color: dto.color }),
           ...(dto.accountId !== undefined && { accountId: dto.accountId }),
           ...(dto.categoryId !== undefined && { categoryId: dto.categoryId }),
-          ...(dto.nextRenewal !== undefined && { nextRenewal: new Date(dto.nextRenewal) }),
+          ...(dto.nextRenewal !== undefined && {
+            nextRenewal: new Date(dto.nextRenewal),
+          }),
           ...(dto.autoDeduct !== undefined && { autoDeduct: dto.autoDeduct }),
         },
         include: {
-          account: { select: { id: true, name: true, icon: true, color: true } },
+          account: {
+            select: { id: true, name: true, icon: true, color: true },
+          },
           category: true,
         },
       }),
@@ -138,7 +147,9 @@ export class SubscriptionsService {
         where: { id },
         data: { isActive: !sub.isActive },
         include: {
-          account: { select: { id: true, name: true, icon: true, color: true } },
+          account: {
+            select: { id: true, name: true, icon: true, color: true },
+          },
           category: true,
         },
       }),
@@ -153,7 +164,11 @@ export class SubscriptionsService {
     tomorrow.setDate(tomorrow.getDate() + 1);
 
     const due = await this.prisma.subscription.findMany({
-      where: { isActive: true, autoDeduct: true, nextRenewal: { lt: tomorrow } },
+      where: {
+        isActive: true,
+        autoDeduct: true,
+        nextRenewal: { lt: tomorrow },
+      },
       include: {
         account: { select: { id: true, name: true, icon: true, color: true } },
         category: true,
@@ -185,7 +200,10 @@ export class SubscriptionsService {
   }
 
   private async processOneRenewal(sub: any) {
-    const nextRenewal = this.calcNextRenewal(new Date(sub.nextRenewal), sub.period);
+    const nextRenewal = this.calcNextRenewal(
+      new Date(sub.nextRenewal),
+      sub.period,
+    );
 
     await this.createRenewalTransaction(sub.userId, sub);
 

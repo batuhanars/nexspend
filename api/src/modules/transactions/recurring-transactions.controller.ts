@@ -19,7 +19,9 @@ import { CurrentUser } from '../../common/decorators/current-user.decorator';
 @Controller('recurring-transactions')
 @UseGuards(JwtAuthGuard)
 export class RecurringTransactionsController {
-  constructor(private readonly recurringService: RecurringTransactionsService) {}
+  constructor(
+    private readonly recurringService: RecurringTransactionsService,
+  ) {}
 
   @Get()
   findAll(@CurrentUser() user: { id: string }) {

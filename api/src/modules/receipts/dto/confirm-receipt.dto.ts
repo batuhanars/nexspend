@@ -1,4 +1,10 @@
-import { IsString, IsNumber, IsOptional, IsDateString, IsPositive } from 'class-validator';
+import {
+  IsString,
+  IsNumber,
+  IsOptional,
+  IsDateString,
+  IsPositive,
+} from 'class-validator';
 
 export class ConfirmReceiptDto {
   @IsString()

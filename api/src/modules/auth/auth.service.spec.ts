@@ -1,4 +1,9 @@
-import { ConflictException, UnauthorizedException, BadRequestException } from '@nestjs/common';
+/* eslint-disable */
+import {
+  ConflictException,
+  UnauthorizedException,
+  BadRequestException,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
 import * as bcrypt from 'bcrypt';
 
@@ -55,7 +60,11 @@ describe('AuthService', () => {
   // ─── register ────────────────────────────────────────────────────────────────
 
   describe('register()', () => {
-    const dto = { fullName: 'Test User', email: 'test@example.com', password: 'Password1!' };
+    const dto = {
+      fullName: 'Test User',
+      email: 'test@example.com',
+      password: 'Password1!',
+    };
 
     it('yeni kullanıcı kaydeder ve token döner', async () => {
       mockPrisma.user.findUnique.mockResolvedValue(null);
@@ -71,7 +80,9 @@ describe('AuthService', () => {
 
       const result = await service.register(dto);
 
-      expect(mockPrisma.user.findUnique).toHaveBeenCalledWith({ where: { email: dto.email } });
+      expect(mockPrisma.user.findUnique).toHaveBeenCalledWith({
+        where: { email: dto.email },
+      });
       expect(mockPrisma.user.create).toHaveBeenCalled();
       expect(result).toHaveProperty('accessToken', 'mock-token');
       expect(result.user.email).toBe(dto.email);
@@ -149,7 +160,11 @@ describe('AuthService', () => {
 
   describe('forgotPassword()', () => {
     it('kullanıcı varsa token oluşturur ve e-posta gönderir', async () => {
-      mockPrisma.user.findUnique.mockResolvedValue({ id: 'user-1', email: 'test@example.com', fullName: 'Test' });
+      mockPrisma.user.findUnique.mockResolvedValue({
+        id: 'user-1',
+        email: 'test@example.com',
+        fullName: 'Test',
+      });
       mockPrisma.passwordResetToken.updateMany.mockResolvedValue({ count: 0 });
       mockPrisma.passwordResetToken.create.mockResolvedValue({});
 
@@ -162,7 +177,9 @@ describe('AuthService', () => {
     it('kullanıcı bulunamazsa sessizce döner (güvenlik)', async () => {
       mockPrisma.user.findUnique.mockResolvedValue(null);
 
-      await expect(service.forgotPassword('unknown@example.com')).resolves.toBeUndefined();
+      await expect(
+        service.forgotPassword('unknown@example.com'),
+      ).resolves.toBeUndefined();
       expect(mockMail.sendPasswordReset).not.toHaveBeenCalled();
     });
   });
@@ -183,14 +200,18 @@ describe('AuthService', () => {
       mockPrisma.passwordResetToken.findUnique.mockResolvedValue(validToken);
       mockPrisma.$transaction.mockResolvedValue([{}, {}]);
 
-      await expect(service.resetPassword('valid-token', 'NewPassword1!')).resolves.toBeUndefined();
+      await expect(
+        service.resetPassword('valid-token', 'NewPassword1!'),
+      ).resolves.toBeUndefined();
       expect(mockPrisma.$transaction).toHaveBeenCalled();
     });
 
     it('token bulunamazsa BadRequestException fırlatır', async () => {
       mockPrisma.passwordResetToken.findUnique.mockResolvedValue(null);
 
-      await expect(service.resetPassword('bad-token', 'pass')).rejects.toThrow(BadRequestException);
+      await expect(service.resetPassword('bad-token', 'pass')).rejects.toThrow(
+        BadRequestException,
+      );
     });
 
     it('süresi dolmuş token için BadRequestException fırlatır', async () => {
@@ -199,7 +220,9 @@ describe('AuthService', () => {
         expiresAt: new Date(Date.now() - 1000),
       });
 
-      await expect(service.resetPassword('expired-token', 'pass')).rejects.toThrow(BadRequestException);
+      await expect(
+        service.resetPassword('expired-token', 'pass'),
+      ).rejects.toThrow(BadRequestException);
     });
 
     it('zaten kullanılmış token için BadRequestException fırlatır', async () => {
@@ -208,7 +231,9 @@ describe('AuthService', () => {
         used: true,
       });
 
-      await expect(service.resetPassword('used-token', 'pass')).rejects.toThrow(BadRequestException);
+      await expect(service.resetPassword('used-token', 'pass')).rejects.toThrow(
+        BadRequestException,
+      );
     });
   });
 
@@ -253,7 +278,10 @@ describe('AuthService', () => {
         passwordHash: 'hash',
       };
       mockPrisma.user.findFirst.mockResolvedValue(existingUser);
-      mockPrisma.user.update.mockResolvedValue({ ...existingUser, googleId: profile.id });
+      mockPrisma.user.update.mockResolvedValue({
+        ...existingUser,
+        googleId: profile.id,
+      });
 
       const result = await service.googleAuth(profile);
 

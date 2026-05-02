@@ -18,12 +18,18 @@ export class ReportsController {
   }
 
   @Get('cash-flow')
-  getCashFlow(@CurrentUser() user: { id: string }, @Query() query: QueryReportDto) {
+  getCashFlow(
+    @CurrentUser() user: { id: string },
+    @Query() query: QueryReportDto,
+  ) {
     return this.reportsService.getCashFlow(user.id, query);
   }
 
   @Get('trends')
-  getTrends(@CurrentUser() user: { id: string }, @Query() query: QueryReportDto) {
+  getTrends(
+    @CurrentUser() user: { id: string },
+    @Query() query: QueryReportDto,
+  ) {
     return this.reportsService.getTrends(user.id, query);
   }
 }

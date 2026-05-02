@@ -28,7 +28,9 @@ export class CreditCardStatementJob {
 
     if (cards.length === 0) return;
 
-    this.logger.log(`${cards.length} kredi kartı için ekstre bildirimi hazırlanıyor`);
+    this.logger.log(
+      `${cards.length} kredi kartı için ekstre bildirimi hazırlanıyor`,
+    );
 
     for (const card of cards) {
       const limit = Number(card.creditLimit!);
@@ -39,9 +41,9 @@ export class CreditCardStatementJob {
 
       this.logger.log(
         `📋 Ekstre Kesim Günü [${card.name}] — ` +
-        `Kullanılan: ₺${used.toFixed(2)} / Limit: ₺${limit.toFixed(2)} ` +
-        `(${pct}%) — Kullanılabilir: ₺${available.toFixed(2)} ` +
-        `[${card.user.email}]`,
+          `Kullanılan: ₺${used.toFixed(2)} / Limit: ₺${limit.toFixed(2)} ` +
+          `(${pct}%) — Kullanılabilir: ₺${available.toFixed(2)} ` +
+          `[${card.user.email}]`,
       );
 
       // Son ödeme günü bildirimi (statementDay'den paymentDueDay gün sonra)

@@ -23,7 +23,7 @@ export class AccountsService {
       where: { userId, isArchived: false },
       orderBy: [{ isDefault: 'desc' }, { createdAt: 'asc' }],
     });
-    return accounts.map(this.format);
+    return accounts.map((a) => this.format(a));
   }
 
   async findOne(userId: string, id: string) {
@@ -336,11 +336,17 @@ export class AccountsService {
     const pct = limit > 0 ? (used / limit) * 100 : 0;
 
     if (pct >= 100) {
-      this.logger.warn(`💳 CC Limit AŞILDI [${account.name}] — %${Math.round(pct)} (${used}/${limit} TL)`);
+      this.logger.warn(
+        `💳 CC Limit AŞILDI [${account.name}] — %${Math.round(pct)} (${used}/${limit} TL)`,
+      );
     } else if (pct >= 90) {
-      this.logger.warn(`💳 CC Limit KRİTİK [${account.name}] — %${Math.round(pct)} (${used}/${limit} TL)`);
+      this.logger.warn(
+        `💳 CC Limit KRİTİK [${account.name}] — %${Math.round(pct)} (${used}/${limit} TL)`,
+      );
     } else if (pct >= 80) {
-      this.logger.log(`💳 CC Limit UYARISI [${account.name}] — %${Math.round(pct)} (${used}/${limit} TL)`);
+      this.logger.log(
+        `💳 CC Limit UYARISI [${account.name}] — %${Math.round(pct)} (${used}/${limit} TL)`,
+      );
     }
   }
 
@@ -352,7 +358,11 @@ export class AccountsService {
     return account;
   }
 
-  private format(account: any) {
+  private format(account: {
+    balance: unknown;
+    creditLimit: unknown;
+    [key: string]: unknown;
+  }) {
     return {
       ...account,
       balance: Number(account.balance),

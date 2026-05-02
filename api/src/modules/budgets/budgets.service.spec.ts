@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { ConflictException, NotFoundException } from '@nestjs/common';
 import { TransactionType } from '@prisma/client';
 import { BudgetsService } from './budgets.service';
@@ -107,7 +108,9 @@ describe('BudgetsService', () => {
     it('yeni bütçe oluşturur ve geçmiş harcamaları hesaplar', async () => {
       mockPrisma.budget.findFirst.mockResolvedValueOnce(null); // çakışma yok
       mockPrisma.budget.create.mockResolvedValue(baseBudget);
-      mockPrisma.transaction.aggregate.mockResolvedValue({ _sum: { amount: 500 } });
+      mockPrisma.transaction.aggregate.mockResolvedValue({
+        _sum: { amount: 500 },
+      });
       mockPrisma.budget.update.mockResolvedValue({ ...baseBudget, spent: 500 });
 
       const result = await service.create(USER_ID, dto);
@@ -121,7 +124,9 @@ describe('BudgetsService', () => {
     it('aynı kategoride aktif bütçe varsa ConflictException fırlatır', async () => {
       mockPrisma.budget.findFirst.mockResolvedValueOnce(baseBudget);
 
-      await expect(service.create(USER_ID, dto)).rejects.toThrow(ConflictException);
+      await expect(service.create(USER_ID, dto)).rejects.toThrow(
+        ConflictException,
+      );
     });
   });
 
@@ -130,7 +135,10 @@ describe('BudgetsService', () => {
   describe('update()', () => {
     it('bütçeyi günceller', async () => {
       mockPrisma.budget.findFirst.mockResolvedValue(baseBudget);
-      mockPrisma.budget.update.mockResolvedValue({ ...baseBudget, amount: 4000 });
+      mockPrisma.budget.update.mockResolvedValue({
+        ...baseBudget,
+        amount: 4000,
+      });
 
       const result = await service.update(USER_ID, BUDGET_ID, { amount: 4000 });
 
@@ -140,7 +148,9 @@ describe('BudgetsService', () => {
     it('kullanıcıya ait değilse NotFoundException fırlatır', async () => {
       mockPrisma.budget.findFirst.mockResolvedValue(null);
 
-      await expect(service.update(USER_ID, 'other-budget', {})).rejects.toThrow(NotFoundException);
+      await expect(service.update(USER_ID, 'other-budget', {})).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 
@@ -153,13 +163,17 @@ describe('BudgetsService', () => {
 
       const result = await service.remove(USER_ID, BUDGET_ID);
 
-      expect(mockPrisma.budget.delete).toHaveBeenCalledWith({ where: { id: BUDGET_ID } });
+      expect(mockPrisma.budget.delete).toHaveBeenCalledWith({
+        where: { id: BUDGET_ID },
+      });
     });
 
     it('bulunamazsa NotFoundException fırlatır', async () => {
       mockPrisma.budget.findFirst.mockResolvedValue(null);
 
-      await expect(service.remove(USER_ID, 'nonexistent')).rejects.toThrow(NotFoundException);
+      await expect(service.remove(USER_ID, 'nonexistent')).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 
@@ -168,7 +182,9 @@ describe('BudgetsService', () => {
   describe('@OnEvent(transaction.created)', () => {
     it('EXPENSE işlemi oluşturulduğunda etkilenen bütçelerin spent değerini günceller', async () => {
       mockPrisma.budget.findMany.mockResolvedValue([baseBudget]);
-      mockPrisma.transaction.aggregate.mockResolvedValue({ _sum: { amount: 600 } });
+      mockPrisma.transaction.aggregate.mockResolvedValue({
+        _sum: { amount: 600 },
+      });
       mockPrisma.budget.update.mockResolvedValue({ ...baseBudget, spent: 600 });
 
       const event = new TransactionCreatedEvent(
@@ -210,7 +226,9 @@ describe('BudgetsService', () => {
   describe('@OnEvent(transaction.deleted)', () => {
     it('EXPENSE işlemi silindiğinde spent değerini yeniden hesaplar', async () => {
       mockPrisma.budget.findMany.mockResolvedValue([baseBudget]);
-      mockPrisma.transaction.aggregate.mockResolvedValue({ _sum: { amount: 400 } });
+      mockPrisma.transaction.aggregate.mockResolvedValue({
+        _sum: { amount: 400 },
+      });
       mockPrisma.budget.update.mockResolvedValue({ ...baseBudget, spent: 400 });
 
       const event = new TransactionDeletedEvent(
@@ -231,7 +249,9 @@ describe('BudgetsService', () => {
   describe('@OnEvent(transaction.updated)', () => {
     it('EXPENSE güncelleme sonrası ilgili bütçeleri yeniden hesaplar', async () => {
       mockPrisma.budget.findMany.mockResolvedValue([baseBudget]);
-      mockPrisma.transaction.aggregate.mockResolvedValue({ _sum: { amount: 700 } });
+      mockPrisma.transaction.aggregate.mockResolvedValue({
+        _sum: { amount: 700 },
+      });
       mockPrisma.budget.update.mockResolvedValue({ ...baseBudget, spent: 700 });
 
       const event = new TransactionUpdatedEvent(

@@ -16,7 +16,9 @@ export class UpcomingRenewalNotifyJob {
     this.logger.log(`${upcoming.length} abonelik yarın yenilenecek`);
     // TODO: FCM push notification entegrasyonu eklenince buraya bildirim gönderimi gelecek
     for (const sub of upcoming) {
-      this.logger.log(`[Bildirim] ${sub.user.fullName} — yarın yenilenecek: ${sub.name}`);
+      this.logger.log(
+        `[Bildirim] ${sub.user.fullName} — yarın yenilenecek: ${sub.name}`,
+      );
     }
   }
 }

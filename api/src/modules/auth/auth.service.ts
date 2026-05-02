@@ -2,7 +2,6 @@ import {
   Injectable,
   ConflictException,
   UnauthorizedException,
-  NotFoundException,
   BadRequestException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
@@ -181,20 +180,25 @@ export class AuthService {
 
     const accessToken = this.jwtService.sign(payload, {
       secret: this.configService.get<string>('jwt.secret'),
-      expiresIn: (this.configService.get<string>('jwt.accessExpiresIn') ??
-        '15m') as any,
+      expiresIn: this.configService.get<string>('jwt.accessExpiresIn') ?? '15m',
     });
 
     const refreshToken = this.jwtService.sign(payload, {
       secret: this.configService.get<string>('jwt.refreshSecret'),
-      expiresIn: (this.configService.get<string>('jwt.refreshExpiresIn') ??
-        '7d') as any,
+      expiresIn: this.configService.get<string>('jwt.refreshExpiresIn') ?? '7d',
     });
 
     return { accessToken, refreshToken };
   }
 
-  private sanitizeUser(user: any) {
+  private sanitizeUser(user: {
+    id: string;
+    email: string;
+    fullName: string;
+    currency: string;
+    language: string;
+    avatarUrl: string | null;
+  }) {
     return {
       id: user.id,
       email: user.email,

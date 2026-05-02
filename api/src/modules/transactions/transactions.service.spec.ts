@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { Test, TestingModule } from '@nestjs/testing';
 import { NotFoundException, BadRequestException } from '@nestjs/common';
 import { TransactionType } from '@prisma/client';
@@ -49,7 +50,13 @@ const baseTx = {
   transferToAccountId: null,
   tags: [],
   category: { id: 'cat-1', name: 'Market' },
-  account: { id: ACCOUNT_ID, name: 'Ziraat', icon: 'bank', color: '#fff', type: 'BANK' },
+  account: {
+    id: ACCOUNT_ID,
+    name: 'Ziraat',
+    icon: 'bank',
+    color: '#fff',
+    type: 'BANK',
+  },
   transferToAccount: null,
 };
 
@@ -93,7 +100,10 @@ describe('TransactionsService', () => {
       mockPrisma.transaction.findMany.mockResolvedValue([]);
       mockPrisma.transaction.count.mockResolvedValue(0);
 
-      await service.findAll(USER_ID, { startDate: '2026-01-01', endDate: '2026-01-31' });
+      await service.findAll(USER_ID, {
+        startDate: '2026-01-01',
+        endDate: '2026-01-31',
+      });
 
       const whereArg = mockPrisma.transaction.findMany.mock.calls[0][0].where;
       expect(whereArg.transactionDate).toBeDefined();
@@ -152,7 +162,9 @@ describe('TransactionsService', () => {
     it('bulunamazsa NotFoundException fırlatır', async () => {
       mockPrisma.transaction.findFirst.mockResolvedValue(null);
 
-      await expect(service.findOne(USER_ID, 'nonexistent')).rejects.toThrow(NotFoundException);
+      await expect(service.findOne(USER_ID, 'nonexistent')).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 
@@ -168,15 +180,24 @@ describe('TransactionsService', () => {
         categoryId: 'cat-1',
       };
 
-      mockPrisma.$transaction.mockImplementation(async (fn: any) => fn({
-        transaction: { create: jest.fn().mockResolvedValue({ ...baseTx, ...dto, tags: [] }) },
-        account: { update: jest.fn().mockResolvedValue({}) },
-      }));
+      mockPrisma.$transaction.mockImplementation(async (fn: any) =>
+        fn({
+          transaction: {
+            create: jest
+              .fn()
+              .mockResolvedValue({ ...baseTx, ...dto, tags: [] }),
+          },
+          account: { update: jest.fn().mockResolvedValue({}) },
+        }),
+      );
 
       const result = await service.create(USER_ID, dto);
 
       expect(mockPrisma.$transaction).toHaveBeenCalled();
-      expect(mockEventEmitter.emit).toHaveBeenCalledWith('transaction.created', expect.any(Object));
+      expect(mockEventEmitter.emit).toHaveBeenCalledWith(
+        'transaction.created',
+        expect.any(Object),
+      );
     });
 
     it('INCOME işlemi oluşturur', async () => {
@@ -188,14 +209,25 @@ describe('TransactionsService', () => {
         categoryId: 'cat-income',
       };
 
-      mockPrisma.$transaction.mockImplementation(async (fn: any) => fn({
-        transaction: { create: jest.fn().mockResolvedValue({ ...baseTx, type: TransactionType.INCOME, tags: [] }) },
-        account: { update: jest.fn().mockResolvedValue({}) },
-      }));
+      mockPrisma.$transaction.mockImplementation(async (fn: any) =>
+        fn({
+          transaction: {
+            create: jest.fn().mockResolvedValue({
+              ...baseTx,
+              type: TransactionType.INCOME,
+              tags: [],
+            }),
+          },
+          account: { update: jest.fn().mockResolvedValue({}) },
+        }),
+      );
 
       await service.create(USER_ID, dto);
 
-      expect(mockEventEmitter.emit).toHaveBeenCalledWith('transaction.created', expect.any(Object));
+      expect(mockEventEmitter.emit).toHaveBeenCalledWith(
+        'transaction.created',
+        expect.any(Object),
+      );
     });
 
     it('TRANSFER için hedef hesap olmayınca BadRequestException fırlatır', async () => {
@@ -206,7 +238,9 @@ describe('TransactionsService', () => {
         title: 'Transfer',
       };
 
-      await expect(service.create(USER_ID, dto)).rejects.toThrow(BadRequestException);
+      await expect(service.create(USER_ID, dto)).rejects.toThrow(
+        BadRequestException,
+      );
     });
 
     it('TRANSFER işlemi oluşturur', async () => {
@@ -218,18 +252,25 @@ describe('TransactionsService', () => {
         title: 'Transfer',
       };
 
-      mockPrisma.$transaction.mockImplementation(async (fn: any) => fn({
-        transaction: {
-          create: jest.fn().mockResolvedValue({
-            ...baseTx,
-            type: TransactionType.TRANSFER,
-            transferToAccountId: 'acc-2',
-            transferToAccount: { id: 'acc-2', name: 'Yapı Kredi', icon: 'bank', color: '#000' },
-            tags: [],
-          }),
-        },
-        account: { update: jest.fn().mockResolvedValue({}) },
-      }));
+      mockPrisma.$transaction.mockImplementation(async (fn: any) =>
+        fn({
+          transaction: {
+            create: jest.fn().mockResolvedValue({
+              ...baseTx,
+              type: TransactionType.TRANSFER,
+              transferToAccountId: 'acc-2',
+              transferToAccount: {
+                id: 'acc-2',
+                name: 'Yapı Kredi',
+                icon: 'bank',
+                color: '#000',
+              },
+              tags: [],
+            }),
+          },
+          account: { update: jest.fn().mockResolvedValue({}) },
+        }),
+      );
 
       await service.create(USER_ID, dto);
 
@@ -242,21 +283,28 @@ describe('TransactionsService', () => {
   describe('remove()', () => {
     it('işlemi siler ve event emit eder', async () => {
       mockPrisma.transaction.findFirst.mockResolvedValue(baseTx);
-      mockPrisma.$transaction.mockImplementation(async (fn: any) => fn({
-        account: { update: jest.fn().mockResolvedValue({}) },
-        transaction: { delete: jest.fn().mockResolvedValue({}) },
-      }));
+      mockPrisma.$transaction.mockImplementation(async (fn: any) =>
+        fn({
+          account: { update: jest.fn().mockResolvedValue({}) },
+          transaction: { delete: jest.fn().mockResolvedValue({}) },
+        }),
+      );
 
       const result = await service.remove(USER_ID, 'tx-1');
 
       expect(result).toHaveProperty('message');
-      expect(mockEventEmitter.emit).toHaveBeenCalledWith('transaction.deleted', expect.any(Object));
+      expect(mockEventEmitter.emit).toHaveBeenCalledWith(
+        'transaction.deleted',
+        expect.any(Object),
+      );
     });
 
     it('bulunamazsa NotFoundException fırlatır', async () => {
       mockPrisma.transaction.findFirst.mockResolvedValue(null);
 
-      await expect(service.remove(USER_ID, 'nonexistent')).rejects.toThrow(NotFoundException);
+      await expect(service.remove(USER_ID, 'nonexistent')).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 
@@ -265,22 +313,33 @@ describe('TransactionsService', () => {
   describe('update()', () => {
     it('işlemi günceller ve event emit eder', async () => {
       mockPrisma.transaction.findFirst.mockResolvedValue(baseTx);
-      mockPrisma.$transaction.mockImplementation(async (fn: any) => fn({
-        account: { update: jest.fn().mockResolvedValue({}) },
-        transaction: {
-          update: jest.fn().mockResolvedValue({ ...baseTx, title: 'Güncellendi', tags: [] }),
-        },
-      }));
+      mockPrisma.$transaction.mockImplementation(async (fn: any) =>
+        fn({
+          account: { update: jest.fn().mockResolvedValue({}) },
+          transaction: {
+            update: jest
+              .fn()
+              .mockResolvedValue({ ...baseTx, title: 'Güncellendi', tags: [] }),
+          },
+        }),
+      );
 
-      const result = await service.update(USER_ID, 'tx-1', { title: 'Güncellendi' });
+      const result = await service.update(USER_ID, 'tx-1', {
+        title: 'Güncellendi',
+      });
 
-      expect(mockEventEmitter.emit).toHaveBeenCalledWith('transaction.updated', expect.any(Object));
+      expect(mockEventEmitter.emit).toHaveBeenCalledWith(
+        'transaction.updated',
+        expect.any(Object),
+      );
     });
 
     it('bulunamazsa NotFoundException fırlatır', async () => {
       mockPrisma.transaction.findFirst.mockResolvedValue(null);
 
-      await expect(service.update(USER_ID, 'nonexistent', {})).rejects.toThrow(NotFoundException);
+      await expect(service.update(USER_ID, 'nonexistent', {})).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 });

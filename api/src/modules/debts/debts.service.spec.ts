@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { NotFoundException, BadRequestException } from '@nestjs/common';
 import { DebtType, DebtStatus, TransactionType } from '@prisma/client';
 import { EventEmitter2 } from '@nestjs/event-emitter';
@@ -128,7 +129,9 @@ describe('DebtsService', () => {
     it('bulunamazsa NotFoundException fırlatır', async () => {
       mockPrisma.debt.findFirst.mockResolvedValue(null);
 
-      await expect(service.findOne(USER_ID, 'nonexistent')).rejects.toThrow(NotFoundException);
+      await expect(service.findOne(USER_ID, 'nonexistent')).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 
@@ -145,7 +148,10 @@ describe('DebtsService', () => {
 
       const createdDebt = { ...baseBorrowedDebt, ...dto };
       mockPrisma.debt.create.mockResolvedValue(createdDebt);
-      mockPrisma.debt.findUniqueOrThrow.mockResolvedValue({ ...createdDebt, installments: [] });
+      mockPrisma.debt.findUniqueOrThrow.mockResolvedValue({
+        ...createdDebt,
+        installments: [],
+      });
 
       const result = await service.create(USER_ID, dto);
 
@@ -189,9 +195,14 @@ describe('DebtsService', () => {
   describe('update()', () => {
     it('borcu günceller', async () => {
       mockPrisma.debt.findFirst.mockResolvedValue(baseBorrowedDebt);
-      mockPrisma.debt.update.mockResolvedValue({ ...baseBorrowedDebt, personName: 'Ali' });
+      mockPrisma.debt.update.mockResolvedValue({
+        ...baseBorrowedDebt,
+        personName: 'Ali',
+      });
 
-      const result = await service.update(USER_ID, DEBT_ID, { personName: 'Ali' });
+      const result = await service.update(USER_ID, DEBT_ID, {
+        personName: 'Ali',
+      });
 
       expect(mockPrisma.debt.update).toHaveBeenCalled();
     });
@@ -199,7 +210,9 @@ describe('DebtsService', () => {
     it('bulunamazsa NotFoundException fırlatır', async () => {
       mockPrisma.debt.findFirst.mockResolvedValue(null);
 
-      await expect(service.update(USER_ID, 'bad-id', {})).rejects.toThrow(NotFoundException);
+      await expect(service.update(USER_ID, 'bad-id', {})).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 
@@ -213,13 +226,17 @@ describe('DebtsService', () => {
       const result = await service.remove(USER_ID, DEBT_ID);
 
       expect(result).toHaveProperty('message');
-      expect(mockPrisma.debt.delete).toHaveBeenCalledWith({ where: { id: DEBT_ID } });
+      expect(mockPrisma.debt.delete).toHaveBeenCalledWith({
+        where: { id: DEBT_ID },
+      });
     });
 
     it('bulunamazsa NotFoundException fırlatır', async () => {
       mockPrisma.debt.findFirst.mockResolvedValue(null);
 
-      await expect(service.remove(USER_ID, 'bad-id')).rejects.toThrow(NotFoundException);
+      await expect(service.remove(USER_ID, 'bad-id')).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 
@@ -233,14 +250,21 @@ describe('DebtsService', () => {
 
     it('BORROWED borç ödemesi gider işlemi oluşturur', async () => {
       mockPrisma.debt.findFirst.mockResolvedValue(baseBorrowedDebt);
-      mockPrisma.category.findFirst.mockResolvedValue({ id: 'cat-debt', name: 'Borç Ödemesi' });
+      mockPrisma.category.findFirst.mockResolvedValue({
+        id: 'cat-debt',
+        name: 'Borç Ödemesi',
+      });
       mockPrisma.$transaction.mockImplementation(async (fn: any) => {
         const tx = {
           debtPayment: { create: jest.fn().mockResolvedValue({ id: 'pay-1' }) },
           debtInstallment: { findFirst: jest.fn(), update: jest.fn() },
           debt: { update: jest.fn().mockResolvedValue({}) },
           account: { update: jest.fn().mockResolvedValue({}) },
-          transaction: { create: jest.fn().mockResolvedValue({ id: 'tx-1', type: TransactionType.EXPENSE }) },
+          transaction: {
+            create: jest
+              .fn()
+              .mockResolvedValue({ id: 'tx-1', type: TransactionType.EXPENSE }),
+          },
         };
         return fn(tx);
       });
@@ -248,19 +272,29 @@ describe('DebtsService', () => {
       const result = await service.createPayment(USER_ID, DEBT_ID, paymentDto);
 
       expect(mockPrisma.$transaction).toHaveBeenCalled();
-      expect(mockEventEmitter.emit).toHaveBeenCalledWith('transaction.created', expect.any(Object));
+      expect(mockEventEmitter.emit).toHaveBeenCalledWith(
+        'transaction.created',
+        expect.any(Object),
+      );
     });
 
     it('LENT alacak tahsilatı gelir işlemi oluşturur', async () => {
       mockPrisma.debt.findFirst.mockResolvedValue(baseLentDebt);
-      mockPrisma.category.findFirst.mockResolvedValue({ id: 'cat-lent', name: 'Alacak Tahsilatı' });
+      mockPrisma.category.findFirst.mockResolvedValue({
+        id: 'cat-lent',
+        name: 'Alacak Tahsilatı',
+      });
       mockPrisma.$transaction.mockImplementation(async (fn: any) => {
         const tx = {
           debtPayment: { create: jest.fn().mockResolvedValue({ id: 'pay-2' }) },
           debtInstallment: { findFirst: jest.fn(), update: jest.fn() },
           debt: { update: jest.fn().mockResolvedValue({}) },
           account: { update: jest.fn().mockResolvedValue({}) },
-          transaction: { create: jest.fn().mockResolvedValue({ id: 'tx-2', type: TransactionType.INCOME }) },
+          transaction: {
+            create: jest
+              .fn()
+              .mockResolvedValue({ id: 'tx-2', type: TransactionType.INCOME }),
+          },
         };
         return fn(tx);
       });

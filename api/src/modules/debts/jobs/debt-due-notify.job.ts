@@ -16,7 +16,9 @@ export class DebtDueNotifyJob {
     this.logger.log(`${dueTomorrow.length} borç yarın vadesi dolacak`);
     // TODO: FCM push notification entegrasyonu eklenince buraya bildirim gönderimi gelecek
     for (const debt of dueTomorrow) {
-      this.logger.log(`[Bildirim] ${debt.user.fullName} — borç vadesi yarın: ${debt.personName}`);
+      this.logger.log(
+        `[Bildirim] ${debt.user.fullName} — borç vadesi yarın: ${debt.personName}`,
+      );
     }
   }
 }

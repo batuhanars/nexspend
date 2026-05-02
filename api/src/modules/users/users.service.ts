@@ -50,8 +50,12 @@ export class UsersService {
         ...(dto.fullName !== undefined && { fullName: dto.fullName }),
         ...(dto.currency !== undefined && { currency: dto.currency }),
         ...(dto.language !== undefined && { language: dto.language }),
-        ...(dto.biometricEnabled !== undefined && { biometricEnabled: dto.biometricEnabled }),
-        ...(dto.notificationsEnabled !== undefined && { notificationsEnabled: dto.notificationsEnabled }),
+        ...(dto.biometricEnabled !== undefined && {
+          biometricEnabled: dto.biometricEnabled,
+        }),
+        ...(dto.notificationsEnabled !== undefined && {
+          notificationsEnabled: dto.notificationsEnabled,
+        }),
       },
       select: {
         id: true,
@@ -78,7 +82,10 @@ export class UsersService {
       );
     }
 
-    const isMatch = await bcrypt.compare(dto.currentPassword, user.passwordHash);
+    const isMatch = await bcrypt.compare(
+      dto.currentPassword,
+      user.passwordHash,
+    );
     if (!isMatch) {
       throw new UnauthorizedException('Mevcut şifre hatalı');
     }
@@ -150,7 +157,7 @@ export class UsersService {
       where: { id: userId },
       select: { passwordHash: true },
     });
-    return !!(user?.passwordHash);
+    return !!user?.passwordHash;
   }
 
   private deleteLocalFile(url: string) {

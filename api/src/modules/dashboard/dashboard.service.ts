@@ -128,7 +128,7 @@ export class DashboardService {
     };
   }
 
-  private calcSummary(accounts: any[]) {
+  private calcSummary(accounts: Array<{ balance: unknown; type: string }>) {
     let totalAssets = 0;
     let ccDebt = 0;
 

@@ -177,15 +177,21 @@ export class AuthService {
 
   private generateTokens(userId: string, email: string): AuthTokens {
     const payload = { sub: userId, email };
+    const accessExp =
+      this.configService.get<string>('jwt.accessExpiresIn') ?? '15m';
+    const refreshExp =
+      this.configService.get<string>('jwt.refreshExpiresIn') ?? '7d';
 
     const accessToken = this.jwtService.sign(payload, {
       secret: this.configService.get<string>('jwt.secret'),
-      expiresIn: this.configService.get<string>('jwt.accessExpiresIn') ?? '15m',
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      expiresIn: accessExp as any,
     });
 
     const refreshToken = this.jwtService.sign(payload, {
       secret: this.configService.get<string>('jwt.refreshSecret'),
-      expiresIn: this.configService.get<string>('jwt.refreshExpiresIn') ?? '7d',
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      expiresIn: refreshExp as any,
     });
 
     return { accessToken, refreshToken };

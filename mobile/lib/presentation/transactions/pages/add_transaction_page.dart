@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
 import '../../../core/utils/icon_mapper.dart';
 import '../../../data/models/account_model.dart';
 import '../../../data/models/category_model.dart';
-import '../../../data/models/tag_model.dart';
 import '../bloc/add_transaction_bloc.dart';
 
 class AddTransactionPage extends StatefulWidget {
@@ -29,11 +29,9 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
   DateTime _date = DateTime.now();
   bool _accountsInitialized = false;
 
-  final Set<String> _selectedTagIds = {};
   bool _isRecurring = false;
   String _recurringFrequency = 'MONTHLY';
   DateTime? _recurringEndDate;
-  final _newTagController = TextEditingController();
 
   @override
   void initState() {
@@ -46,7 +44,6 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
     _amountController.dispose();
     _titleController.dispose();
     _noteController.dispose();
-    _newTagController.dispose();
     super.dispose();
   }
 
@@ -75,18 +72,23 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
         ? _titleController.text.trim()
         : _selectedCategory?.name ?? 'İşlem';
 
+    final now = DateTime.now();
+    final isToday = _date.year == now.year &&
+        _date.month == now.month &&
+        _date.day == now.day;
+    final submitDate = isToday ? now : _date;
+
     final data = <String, dynamic>{
       'type': _type,
       'amount': amount,
       'title': title,
       'accountId': _selectedAccount!.id,
-      'transactionDate': _date.toIso8601String(),
+      'transactionDate': submitDate.toIso8601String(),
       if (_selectedCategory != null) 'categoryId': _selectedCategory!.id,
       if (_noteController.text.trim().isNotEmpty)
         'note': _noteController.text.trim(),
       if (_type == 'TRANSFER' && _transferToAccount != null)
         'transferToAccountId': _transferToAccount!.id,
-      if (_selectedTagIds.isNotEmpty) 'tagIds': _selectedTagIds.toList(),
       'isRecurring': _isRecurring,
       if (_isRecurring) 'frequency': _recurringFrequency,
       if (_isRecurring && _recurringEndDate != null)
@@ -116,7 +118,7 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
     return BlocListener<AddTransactionBloc, AddTransactionState>(
       listener: (context, state) {
         if (state is AddTransactionSuccess) {
-          Navigator.of(context).pop(true);
+          context.pop(true);
         } else if (state is AddTransactionFailure) {
           _showError(state.message);
         }
@@ -126,7 +128,7 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
           title: const Text('İşlem Ekle'),
           leading: IconButton(
             icon: const Icon(Icons.close_rounded),
-            onPressed: () => Navigator.of(context).pop(),
+            onPressed: () => context.pop(),
           ),
         ),
         body: BlocBuilder<AddTransactionBloc, AddTransactionState>(
@@ -140,7 +142,6 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
 
             final categories = _categoriesFrom(state);
             final accounts = _accountsFrom(state);
-            final tags = _tagsFrom(state);
 
             // Varsayılan hesabı bir kez seç
             if (!_accountsInitialized && accounts.isNotEmpty) {
@@ -204,34 +205,13 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                 const SizedBox(height: AppSpacing.md),
                 _DatePicker(
                   date: _date,
-                  onChanged: (d) => setState(() => _date = d),
+                  onChanged: (d) => setState(() {
+                    _date = DateTime(
+                        d.year, d.month, d.day, _date.hour, _date.minute);
+                  }),
                 ),
                 const SizedBox(height: AppSpacing.md),
                 _NoteField(controller: _noteController),
-                const SizedBox(height: AppSpacing.xl),
-                _sectionLabel('Etiketler'),
-                const SizedBox(height: AppSpacing.sm),
-                _TagSection(
-                  tags: tags,
-                  selectedIds: _selectedTagIds,
-                  newTagController: _newTagController,
-                  onToggle: (id) => setState(() {
-                    if (_selectedTagIds.contains(id)) {
-                      _selectedTagIds.remove(id);
-                    } else {
-                      _selectedTagIds.add(id);
-                    }
-                  }),
-                  onAdd: () {
-                    final name = _newTagController.text.trim();
-                    if (name.isNotEmpty) {
-                      context
-                          .read<AddTransactionBloc>()
-                          .add(AddTransactionTagCreated(name));
-                      _newTagController.clear();
-                    }
-                  },
-                ),
                 const SizedBox(height: AppSpacing.xl),
                 _RecurringSection(
                   isRecurring: _isRecurring,
@@ -294,13 +274,6 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
     if (s is AddTransactionReady) return s.accounts;
     if (s is AddTransactionSubmitting) return s.accounts;
     if (s is AddTransactionFailure) return s.accounts;
-    return const [];
-  }
-
-  List<TagModel> _tagsFrom(AddTransactionState s) {
-    if (s is AddTransactionReady) return s.tags;
-    if (s is AddTransactionSubmitting) return s.tags;
-    if (s is AddTransactionFailure) return s.tags;
     return const [];
   }
 
@@ -618,126 +591,6 @@ Widget _field({
       ),
     ),
   );
-}
-
-// ── Etiket bölümü ─────────────────────────────────────────────────────────
-
-class _TagSection extends StatelessWidget {
-  const _TagSection({
-    required this.tags,
-    required this.selectedIds,
-    required this.newTagController,
-    required this.onToggle,
-    required this.onAdd,
-  });
-  final List<TagModel> tags;
-  final Set<String> selectedIds;
-  final TextEditingController newTagController;
-  final ValueChanged<String> onToggle;
-  final VoidCallback onAdd;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        if (tags.isNotEmpty)
-          Wrap(
-            spacing: AppSpacing.sm,
-            runSpacing: AppSpacing.sm,
-            children: tags.map((tag) {
-              final isSelected = selectedIds.contains(tag.id);
-              return GestureDetector(
-                onTap: () => onToggle(tag.id),
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 150),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.md,
-                    vertical: 6,
-                  ),
-                  decoration: BoxDecoration(
-                    color: isSelected
-                        ? AppColors.primary.withValues(alpha: 0.15)
-                        : AppColors.surfaceContainerHighest,
-                    borderRadius:
-                        BorderRadius.circular(AppSpacing.radiusFull),
-                    border: isSelected
-                        ? Border.all(color: AppColors.primary, width: 1.5)
-                        : null,
-                  ),
-                  child: Text(
-                    '#${tag.name}',
-                    style: AppTypography.bodySm.copyWith(
-                      color: isSelected
-                          ? AppColors.primary
-                          : AppColors.onSurfaceVariant,
-                      fontWeight:
-                          isSelected ? FontWeight.w600 : FontWeight.w400,
-                    ),
-                  ),
-                ),
-              );
-            }).toList(),
-          ),
-        const SizedBox(height: AppSpacing.sm),
-        Row(
-          children: [
-            Expanded(
-              child: TextField(
-                controller: newTagController,
-                style: const TextStyle(
-                    color: AppColors.onSurface, fontSize: 13),
-                decoration: InputDecoration(
-                  hintText: 'Yeni etiket ekle...',
-                  hintStyle: const TextStyle(
-                      color: AppColors.onSurfaceVariant, fontSize: 13),
-                  filled: true,
-                  fillColor: AppColors.surfaceContainerHighest,
-                  border: OutlineInputBorder(
-                    borderRadius:
-                        BorderRadius.circular(AppSpacing.radiusMd),
-                    borderSide: BorderSide.none,
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius:
-                        BorderRadius.circular(AppSpacing.radiusMd),
-                    borderSide: BorderSide.none,
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius:
-                        BorderRadius.circular(AppSpacing.radiusMd),
-                    borderSide: const BorderSide(
-                        color: AppColors.primary, width: 1.5),
-                  ),
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.md,
-                    vertical: AppSpacing.sm,
-                  ),
-                  isDense: true,
-                ),
-                textInputAction: TextInputAction.done,
-                onSubmitted: (_) => onAdd(),
-              ),
-            ),
-            const SizedBox(width: AppSpacing.sm),
-            GestureDetector(
-              onTap: onAdd,
-              child: Container(
-                width: 36,
-                height: 36,
-                decoration: BoxDecoration(
-                  color: AppColors.primary.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-                ),
-                child: const Icon(Icons.add_rounded,
-                    color: AppColors.primary, size: 20),
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
 }
 
 // ── Tekrarlayan işlem bölümü ───────────────────────────────────────────────

@@ -27,9 +27,13 @@ export class DebtsService {
     private readonly eventEmitter: EventEmitter2,
   ) {}
 
-  async findAll(userId: string) {
+  async findAll(userId: string, type?: string, status?: string) {
     const debts = await this.prisma.debt.findMany({
-      where: { userId },
+      where: {
+        userId,
+        ...(type && { type: type as DebtType }),
+        ...(status && { status: status as DebtStatus }),
+      },
       include: {
         installments: { orderBy: { installmentNo: 'asc' } },
         _count: { select: { payments: true } },
@@ -258,18 +262,24 @@ export class DebtsService {
 
   async getPayments(userId: string, debtId: string) {
     await this.findOwned(userId, debtId);
-    return this.prisma.debtPayment.findMany({
+    const payments = await this.prisma.debtPayment.findMany({
       where: { debtId },
       orderBy: { paidAt: 'desc' },
     });
+    return payments.map((p) => ({ ...p, amount: Number(p.amount) }));
   }
 
   async getInstallments(userId: string, debtId: string) {
     await this.findOwned(userId, debtId);
-    return this.prisma.debtInstallment.findMany({
+    const installments = await this.prisma.debtInstallment.findMany({
       where: { debtId },
       orderBy: { installmentNo: 'asc' },
     });
+    return installments.map((i) => ({
+      ...i,
+      amount: Number(i.amount),
+      paidAmount: Number(i.paidAmount),
+    }));
   }
 
   // Cron job tarafından çağrılır

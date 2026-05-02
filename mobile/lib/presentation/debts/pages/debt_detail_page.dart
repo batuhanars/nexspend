@@ -3,8 +3,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:wallet_app/core/constants/app_colors.dart';
 import 'package:wallet_app/core/constants/app_spacing.dart';
 import 'package:wallet_app/core/constants/app_typography.dart';
+import 'package:wallet_app/core/di/injection.dart';
 import 'package:wallet_app/core/utils/currency_formatter.dart';
+import 'package:wallet_app/data/models/account_model.dart';
 import 'package:wallet_app/data/models/debt_model.dart';
+import 'package:wallet_app/data/repositories/account_repository.dart';
 import 'package:wallet_app/presentation/debts/bloc/debt_detail_bloc.dart';
 import 'package:wallet_app/presentation/debts/widgets/installment_row.dart';
 import 'package:wallet_app/presentation/debts/widgets/payment_row.dart';
@@ -87,7 +90,13 @@ class _DebtDetailView extends StatelessWidget {
                         title: 'Taksitler',
                         subtitle: '${installments.where((i) => i.status == DebtStatus.PAID).length}/${installments.length} ödendi',
                         children: installments
-                            .map((i) => InstallmentRow(installment: i))
+                            .map((i) => InstallmentRow(
+                                  installment: i,
+                                  isLent: debt.type == DebtType.LENT,
+                                  onPay: i.status != DebtStatus.PAID && debt.status != DebtStatus.PAID
+                                      ? () => _showInstallmentPayment(context, i, debt)
+                                      : null,
+                                ))
                             .toList(),
                       ),
                       const SizedBox(height: AppSpacing.lg),
@@ -103,7 +112,7 @@ class _DebtDetailView extends StatelessWidget {
                                 ))
                             .toList(),
                       )
-                    else if (!debt.hasInstallments)
+                    else
                       Center(
                         child: Padding(
                           padding:
@@ -116,28 +125,47 @@ class _DebtDetailView extends StatelessWidget {
                           ),
                         ),
                       ),
-                    const SizedBox(height: 96),
+                    const SizedBox(height: AppSpacing.xl),
                   ],
                 ),
               ),
             _ => const SizedBox.shrink(),
           },
-          floatingActionButton: state is DebtDetailLoaded &&
-                  state.debt.status != DebtStatus.PAID
-              ? FloatingActionButton.extended(
-                  onPressed: () => _showPaymentSheet(context, state.debt),
-                  backgroundColor: AppColors.primary,
-                  foregroundColor: AppColors.onPrimary,
-                  label: Text(
-                    state.debt.type == DebtType.LENT
-                        ? 'Ödeme Aldım'
-                        : 'Ödeme Yap',
-                    style: AppTypography.bodyMd.copyWith(
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.onPrimary,
+          bottomNavigationBar: state is DebtDetailLoaded &&
+                  state.debt.status != DebtStatus.PAID &&
+                  (!state.debt.hasInstallments || state.installments.isEmpty)
+              ? Container(
+                  color: AppColors.surface,
+                  child: SafeArea(
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(
+                        AppSpacing.pagePadding,
+                        AppSpacing.sm,
+                        AppSpacing.pagePadding,
+                        AppSpacing.lg,
+                      ),
+                      child: FilledButton(
+                        onPressed: () =>
+                            _showPaymentSheet(context, state.debt),
+                        style: FilledButton.styleFrom(
+                          minimumSize: const Size.fromHeight(56),
+                          backgroundColor: AppColors.primaryContainer,
+                          foregroundColor: AppColors.onPrimaryContainer,
+                          shape: RoundedRectangleBorder(
+                            borderRadius:
+                                BorderRadius.circular(AppSpacing.radiusXl),
+                          ),
+                        ),
+                        child: Text(
+                          state.debt.type == DebtType.LENT
+                              ? 'Tahsil Et'
+                              : 'Borç Öde',
+                          style: AppTypography.bodyMd
+                              .copyWith(fontWeight: FontWeight.w600),
+                        ),
+                      ),
                     ),
                   ),
-                  icon: const Icon(Icons.payment_rounded),
                 )
               : null,
         );
@@ -161,12 +189,34 @@ class _DebtDetailView extends StatelessWidget {
       ),
     );
   }
+
+  void _showInstallmentPayment(
+    BuildContext context,
+    DebtInstallmentModel installment,
+    DebtModel debt,
+  ) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: AppColors.surfaceContainerHigh,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(AppSpacing.radiusXl),
+        ),
+      ),
+      builder: (_) => BlocProvider.value(
+        value: context.read<DebtDetailBloc>(),
+        child: _DetailPaymentSheet(debt: debt, installment: installment),
+      ),
+    );
+  }
 }
 
 // Payment sheet that dispatches to DebtDetailBloc (not DebtsBloc)
 class _DetailPaymentSheet extends StatefulWidget {
-  const _DetailPaymentSheet({required this.debt});
+  const _DetailPaymentSheet({required this.debt, this.installment});
   final DebtModel debt;
+  final DebtInstallmentModel? installment; // null = free-form, non-null = specific installment
 
   @override
   State<_DetailPaymentSheet> createState() => _DetailPaymentSheetState();
@@ -175,6 +225,23 @@ class _DetailPaymentSheet extends StatefulWidget {
 class _DetailPaymentSheetState extends State<_DetailPaymentSheet> {
   final _amountCtrl = TextEditingController();
   final _noteCtrl = TextEditingController();
+  String? _selectedAccountId;
+  late final Future<List<AccountModel>> _accountsFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _accountsFuture = getIt<AccountRepository>().getAccounts();
+    if (widget.installment != null) {
+      _amountCtrl.text = widget.installment!.remainingAmount
+          .toStringAsFixed(2)
+          .replaceAll('.', ',');
+    } else {
+      _amountCtrl.text = widget.debt.remainingAmount
+          .toStringAsFixed(2)
+          .replaceAll('.', ',');
+    }
+  }
 
   @override
   void dispose() {
@@ -187,9 +254,13 @@ class _DetailPaymentSheetState extends State<_DetailPaymentSheet> {
     final amountStr = _amountCtrl.text.trim().replaceAll(',', '.');
     final amount = double.tryParse(amountStr);
     if (amount == null || amount <= 0) return;
+    if (_selectedAccountId == null) return;
 
     context.read<DebtDetailBloc>().add(DebtDetailPaymentMade({
       'amount': amount,
+      'accountId': _selectedAccountId!,
+      if (widget.installment != null)
+        'installmentId': widget.installment!.id,
       if (_noteCtrl.text.trim().isNotEmpty) 'note': _noteCtrl.text.trim(),
     }));
     Navigator.of(context).pop();
@@ -213,7 +284,9 @@ class _DetailPaymentSheetState extends State<_DetailPaymentSheet> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                isLent ? 'Ödeme Aldım' : 'Ödeme Yap',
+                widget.installment != null
+                    ? '${widget.installment!.installmentNo}. Taksit Ödemesi'
+                    : (isLent ? 'Ödeme Aldım' : 'Ödeme Yap'),
                 style: AppTypography.headlineSm,
               ),
               IconButton(
@@ -225,12 +298,107 @@ class _DetailPaymentSheetState extends State<_DetailPaymentSheet> {
           ),
           const SizedBox(height: AppSpacing.sm),
           Text(
-            'Kalan: ${CurrencyFormatter.format(widget.debt.remainingAmount)}',
+            widget.installment != null
+                ? 'Taksit tutarı: ${CurrencyFormatter.format(widget.installment!.amount)}'
+                : 'Kalan: ${CurrencyFormatter.format(widget.debt.remainingAmount)}',
             style: AppTypography.bodySm,
           ),
           const SizedBox(height: AppSpacing.lg),
-          _inputField(_amountCtrl, 'Tutar (₺)', Icons.attach_money_rounded,
-              numeric: true),
+          _inputField(
+            _amountCtrl,
+            'Tutar (₺)',
+            Icons.attach_money_rounded,
+            numeric: true,
+            readOnly: widget.installment == null,
+          ),
+          const SizedBox(height: AppSpacing.md),
+          Text(
+            'Hesap',
+            style: AppTypography.labelSm.copyWith(
+              color: AppColors.onSurfaceVariant,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          FutureBuilder<List<AccountModel>>(
+            future: _accountsFuture,
+            builder: (context, snapshot) {
+              if (!snapshot.hasData) {
+                return const SizedBox(
+                  height: 36,
+                  child: Center(
+                    child: SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: AppColors.primary,
+                      ),
+                    ),
+                  ),
+                );
+              }
+              final accounts = snapshot.data!
+                  .where((a) => !a.isArchived)
+                  .toList();
+              if (accounts.isEmpty) {
+                return Text(
+                  'Hesap bulunamadı',
+                  style: AppTypography.bodySm
+                      .copyWith(color: AppColors.onSurfaceVariant),
+                );
+              }
+              if (_selectedAccountId == null) {
+                final def = accounts.firstWhere(
+                  (a) => a.isDefault,
+                  orElse: () => accounts.first,
+                );
+                WidgetsBinding.instance.addPostFrameCallback(
+                  (_) => setState(() => _selectedAccountId = def.id),
+                );
+              }
+              return SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: accounts.map((a) {
+                    final isSelected = _selectedAccountId == a.id;
+                    return GestureDetector(
+                      onTap: () => setState(() => _selectedAccountId = a.id),
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 150),
+                        margin: const EdgeInsets.only(right: AppSpacing.sm),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: AppSpacing.md,
+                          vertical: AppSpacing.sm,
+                        ),
+                        decoration: BoxDecoration(
+                          color: isSelected
+                              ? AppColors.primary.withValues(alpha: 0.15)
+                              : AppColors.surfaceContainerHighest,
+                          borderRadius:
+                              BorderRadius.circular(AppSpacing.radiusMd),
+                          border: isSelected
+                              ? Border.all(
+                                  color: AppColors.primary, width: 1.5)
+                              : null,
+                        ),
+                        child: Text(
+                          a.name,
+                          style: AppTypography.labelSm.copyWith(
+                            color: isSelected
+                                ? AppColors.primary
+                                : AppColors.onSurfaceVariant,
+                            fontWeight: isSelected
+                                ? FontWeight.w600
+                                : FontWeight.w400,
+                          ),
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                ),
+              );
+            },
+          ),
           const SizedBox(height: AppSpacing.md),
           _inputField(_noteCtrl, 'Not (opsiyonel)', Icons.notes_outlined),
           const SizedBox(height: AppSpacing.xl),
@@ -254,11 +422,13 @@ class _DetailPaymentSheetState extends State<_DetailPaymentSheet> {
     String hint,
     IconData icon, {
     bool numeric = false,
+    bool readOnly = false,
   }) {
     return TextField(
       controller: ctrl,
       keyboardType:
           numeric ? const TextInputType.numberWithOptions(decimal: true) : null,
+      readOnly: readOnly,
       style: const TextStyle(color: AppColors.onSurface, fontSize: 14),
       decoration: InputDecoration(
         hintText: hint,

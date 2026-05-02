@@ -67,7 +67,7 @@ class SubscriptionModel {
         name: json['name'] as String,
         amount: (json['amount'] as num).toDouble(),
         billingCycle: BillingCycle.values.firstWhere(
-          (e) => e.name == json['billingCycle'],
+          (e) => e.name == (json['period'] ?? json['billingCycle']),
           orElse: () => BillingCycle.MONTHLY,
         ),
         isActive: json['isActive'] as bool? ?? true,
@@ -77,8 +77,8 @@ class SubscriptionModel {
         color: json['color'] as String?,
         accountId: json['accountId'] as String?,
         accountName: json['account']?['name'] as String?,
-        nextRenewalDate: json['nextRenewalDate'] != null
-            ? DateTime.parse(json['nextRenewalDate'] as String)
+        nextRenewalDate: (json['nextRenewal'] ?? json['nextRenewalDate']) != null
+            ? DateTime.parse((json['nextRenewal'] ?? json['nextRenewalDate']) as String)
             : null,
         categoryId: json['categoryId'] as String?,
         categoryName: json['category']?['name'] as String?,

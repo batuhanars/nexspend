@@ -24,6 +24,32 @@ class AccountCarousel extends StatefulWidget {
 
 class _AccountCarouselState extends State<AccountCarousel> {
   int _currentIndex = 0;
+  late final ScrollController _scrollController;
+
+  static const double _itemWidth = AccountCard.cardWidth + AppSpacing.md;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController = ScrollController();
+    _scrollController.addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (widget.accounts.isEmpty) return;
+    final index = (_scrollController.offset / _itemWidth)
+        .round()
+        .clamp(0, widget.accounts.length - 1);
+    if (index != _currentIndex) {
+      setState(() => _currentIndex = index);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -32,6 +58,7 @@ class _AccountCarouselState extends State<AccountCarousel> {
         SizedBox(
           height: 150,
           child: ListView.separated(
+            controller: _scrollController,
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(
               horizontal: AppSpacing.pagePadding,

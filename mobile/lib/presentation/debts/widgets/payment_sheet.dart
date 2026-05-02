@@ -3,7 +3,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:wallet_app/core/constants/app_colors.dart';
 import 'package:wallet_app/core/constants/app_spacing.dart';
 import 'package:wallet_app/core/constants/app_typography.dart';
+import 'package:wallet_app/core/di/injection.dart';
+import 'package:wallet_app/data/models/account_model.dart';
 import 'package:wallet_app/data/models/debt_model.dart';
+import 'package:wallet_app/data/repositories/account_repository.dart';
 import 'package:wallet_app/presentation/debts/bloc/debts_bloc.dart';
 
 class PaymentSheet extends StatefulWidget {
@@ -17,6 +20,8 @@ class PaymentSheet extends StatefulWidget {
 class _PaymentSheetState extends State<PaymentSheet> {
   final _amountController = TextEditingController();
   final _noteController = TextEditingController();
+  String? _selectedAccountId;
+  late final Future<List<AccountModel>> _accountsFuture;
 
   @override
   void initState() {
@@ -24,6 +29,7 @@ class _PaymentSheetState extends State<PaymentSheet> {
     _amountController.text = widget.debt.remainingAmount
         .toStringAsFixed(2)
         .replaceAll('.', ',');
+    _accountsFuture = getIt<AccountRepository>().getAccounts();
   }
 
   @override
@@ -37,11 +43,14 @@ class _PaymentSheetState extends State<PaymentSheet> {
     final amountStr = _amountController.text.trim().replaceAll(',', '.');
     final amount = double.tryParse(amountStr);
     if (amount == null || amount <= 0) return;
+    if (_selectedAccountId == null) return;
+
     context.read<DebtsBloc>().add(
       DebtPaymentRecorded(
         debtId: widget.debt.id,
         data: {
           'amount': amount,
+          'accountId': _selectedAccountId!,
           if (_noteController.text.trim().isNotEmpty)
             'note': _noteController.text.trim(),
         },
@@ -78,7 +87,7 @@ class _PaymentSheetState extends State<PaymentSheet> {
               ),
             ],
           ),
-          const SizedBox(height: AppSpacing.lg),
+          const SizedBox(height: AppSpacing.sm),
           Text(
             widget.debt.personName,
             style: AppTypography.bodyMd.copyWith(
@@ -89,7 +98,7 @@ class _PaymentSheetState extends State<PaymentSheet> {
           TextField(
             controller: _amountController,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            autofocus: true,
+            readOnly: true,
             style: AppTypography.headlineSm,
             decoration: InputDecoration(
               labelText: 'Tutar (₺)',
@@ -110,6 +119,93 @@ class _PaymentSheetState extends State<PaymentSheet> {
                 ),
               ),
             ),
+          ),
+          const SizedBox(height: AppSpacing.md),
+          Text(
+            'Hesap',
+            style: AppTypography.labelSm.copyWith(
+              color: AppColors.onSurfaceVariant,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          FutureBuilder<List<AccountModel>>(
+            future: _accountsFuture,
+            builder: (context, snapshot) {
+              if (!snapshot.hasData) {
+                return const SizedBox(
+                  height: 36,
+                  child: Center(
+                    child: SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: AppColors.primary,
+                      ),
+                    ),
+                  ),
+                );
+              }
+              final accounts =
+                  snapshot.data!.where((a) => !a.isArchived).toList();
+              if (accounts.isEmpty) {
+                return Text(
+                  'Hesap bulunamadı',
+                  style: AppTypography.bodySm
+                      .copyWith(color: AppColors.onSurfaceVariant),
+                );
+              }
+              if (_selectedAccountId == null) {
+                final def = accounts.firstWhere(
+                  (a) => a.isDefault,
+                  orElse: () => accounts.first,
+                );
+                WidgetsBinding.instance.addPostFrameCallback(
+                  (_) => setState(() => _selectedAccountId = def.id),
+                );
+              }
+              return SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: accounts.map((a) {
+                    final isSelected = _selectedAccountId == a.id;
+                    return GestureDetector(
+                      onTap: () => setState(() => _selectedAccountId = a.id),
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 150),
+                        margin: const EdgeInsets.only(right: AppSpacing.sm),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: AppSpacing.md,
+                          vertical: AppSpacing.sm,
+                        ),
+                        decoration: BoxDecoration(
+                          color: isSelected
+                              ? AppColors.primary.withValues(alpha: 0.15)
+                              : AppColors.surfaceContainerHighest,
+                          borderRadius:
+                              BorderRadius.circular(AppSpacing.radiusMd),
+                          border: isSelected
+                              ? Border.all(
+                                  color: AppColors.primary, width: 1.5)
+                              : null,
+                        ),
+                        child: Text(
+                          a.name,
+                          style: AppTypography.labelSm.copyWith(
+                            color: isSelected
+                                ? AppColors.primary
+                                : AppColors.onSurfaceVariant,
+                            fontWeight: isSelected
+                                ? FontWeight.w600
+                                : FontWeight.w400,
+                          ),
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                ),
+              );
+            },
           ),
           const SizedBox(height: AppSpacing.md),
           TextField(
@@ -144,7 +240,7 @@ class _PaymentSheetState extends State<PaymentSheet> {
                 borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
               ),
             ),
-            child: Text(isLent ? 'Tahsilat Kaydet' : 'Ödeme Kaydet'),
+            child: Text(isLent ? 'Tahsil Et' : 'Borç Öde'),
           ),
         ],
       ),

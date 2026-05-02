@@ -46,13 +46,15 @@ class DebtDetailBloc extends Bloc<DebtDetailEvent, DebtDetailState> {
     final debtId = _debt!.id;
     try {
       final results = await Future.wait([
+        _repo.getOne(debtId),
         _repo.getInstallments(debtId),
         _repo.getPayments(debtId),
       ]);
+      _debt = results[0] as DebtModel;
       emit(DebtDetailLoaded(
         debt: _debt!,
-        installments: results[0] as List<DebtInstallmentModel>,
-        payments: results[1] as List<DebtPaymentModel>,
+        installments: results[1] as List<DebtInstallmentModel>,
+        payments: results[2] as List<DebtPaymentModel>,
       ));
     } catch (e) {
       emit(DebtDetailError(_parseError(e)));

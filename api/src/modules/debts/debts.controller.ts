@@ -6,6 +6,7 @@ import {
   Delete,
   Body,
   Param,
+  Query,
   UseGuards,
   HttpCode,
   HttpStatus,
@@ -23,8 +24,12 @@ export class DebtsController {
   constructor(private readonly debtsService: DebtsService) {}
 
   @Get()
-  findAll(@CurrentUser() user: { id: string }) {
-    return this.debtsService.findAll(user.id);
+  findAll(
+    @CurrentUser() user: { id: string },
+    @Query('type') type?: string,
+    @Query('status') status?: string,
+  ) {
+    return this.debtsService.findAll(user.id, type, status);
   }
 
   @Get('summary')

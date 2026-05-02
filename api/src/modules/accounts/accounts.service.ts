@@ -308,7 +308,12 @@ export class AccountsService {
     ]);
 
     return {
-      data: transactions,
+      data: transactions.map((t) => ({
+        ...t,
+        amount: Number(t.amount),
+        date: t.transactionDate,
+        description: t.title,
+      })),
       total,
       page,
       limit,

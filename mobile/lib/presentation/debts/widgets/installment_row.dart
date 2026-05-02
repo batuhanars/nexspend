@@ -7,8 +7,15 @@ import 'package:wallet_app/core/utils/date_formatter.dart';
 import 'package:wallet_app/data/models/debt_model.dart';
 
 class InstallmentRow extends StatelessWidget {
-  const InstallmentRow({super.key, required this.installment});
+  const InstallmentRow({
+    super.key,
+    required this.installment,
+    this.onPay,
+    this.isLent = false,
+  });
   final DebtInstallmentModel installment;
+  final VoidCallback? onPay;
+  final bool isLent;
 
   @override
   Widget build(BuildContext context) {
@@ -66,25 +73,45 @@ class InstallmentRow extends StatelessWidget {
               ],
             ),
           ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(
-                CurrencyFormatter.format(installment.amount),
-                style: AppTypography.bodyMd.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: isPaid ? AppColors.onSurfaceVariant : color,
-                  decoration:
-                      isPaid ? TextDecoration.lineThrough : null,
+          if (!isPaid && onPay != null)
+            TextButton(
+              onPressed: onPay,
+              style: TextButton.styleFrom(
+                foregroundColor: color,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.sm,
+                  vertical: 0,
+                ),
+                minimumSize: Size.zero,
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              ),
+              child: Text(
+                isLent ? 'Tahsil Et' : 'Öde',
+                style: AppTypography.labelSm.copyWith(
+                  color: color,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
-              if (installment.paidAmount > 0 && !isPaid)
+            )
+          else
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
                 Text(
-                  '${CurrencyFormatter.formatCompact(installment.paidAmount)} ödendi',
-                  style: AppTypography.bodySm,
+                  CurrencyFormatter.format(installment.amount),
+                  style: AppTypography.bodyMd.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: isPaid ? AppColors.onSurfaceVariant : color,
+                    decoration: isPaid ? TextDecoration.lineThrough : null,
+                  ),
                 ),
-            ],
-          ),
+                if (installment.paidAmount > 0 && !isPaid)
+                  Text(
+                    '${CurrencyFormatter.formatCompact(installment.paidAmount)} ödendi',
+                    style: AppTypography.bodySm,
+                  ),
+              ],
+            ),
         ],
       ),
     );

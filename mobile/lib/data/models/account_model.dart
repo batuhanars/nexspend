@@ -71,7 +71,8 @@ class AccountModel {
 
   double get creditUsed {
     if (type != AccountType.CREDIT_CARD || creditLimit == null) return 0;
-    return creditLimit! + balance; // balance is negative for CC debt
+    // balance is negative when debt exists (e.g. -500 means 500 TL owed)
+    return (-balance).clamp(0.0, creditLimit!);
   }
 
   double get creditUsagePercent {

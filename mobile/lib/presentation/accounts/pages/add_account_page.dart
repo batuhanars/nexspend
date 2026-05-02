@@ -46,8 +46,12 @@ class _AddAccountPageState extends State<AddAccountPage> {
   void _submit() {
     if (!(_formKey.currentState?.validate() ?? false)) return;
 
-    final balance =
+    final rawBalance =
         double.tryParse(_balanceController.text.replaceAll(',', '.')) ?? 0.0;
+    // For credit cards, user enters the current debt as a positive number,
+    // but the backend stores debt as a negative balance.
+    final balance =
+        _type == AccountType.CREDIT_CARD ? -rawBalance : rawBalance;
 
     final data = <String, dynamic>{
       'name': _nameController.text.trim(),
@@ -119,12 +123,16 @@ class _AddAccountPageState extends State<AddAccountPage> {
                     (v == null || v.trim().isEmpty) ? 'Hesap adı gerekli' : null,
               ),
               const SizedBox(height: AppSpacing.lg),
-              _label('Başlangıç Bakiyesi'),
+              _label(_type == AccountType.CREDIT_CARD
+                  ? 'Mevcut Borç (opsiyonel)'
+                  : 'Başlangıç Bakiyesi'),
               const SizedBox(height: AppSpacing.sm),
               AccountFormField(
                 controller: _balanceController,
                 focusNode: _balanceFocus,
-                hintText: '0,00',
+                hintText: _type == AccountType.CREDIT_CARD
+                    ? 'Borcunuz yoksa boş bırakın'
+                    : '0,00',
                 prefixIcon: Icons.account_balance_wallet_outlined,
                 keyboardType:
                     const TextInputType.numberWithOptions(decimal: true),

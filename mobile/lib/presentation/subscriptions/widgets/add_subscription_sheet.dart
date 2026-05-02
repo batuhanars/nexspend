@@ -3,6 +3,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
+import '../../../core/di/injection.dart';
+import '../../../data/models/account_model.dart';
+import '../../../data/repositories/account_repository.dart';
 import '../bloc/subscriptions_bloc.dart';
 
 class AddSubscriptionSheet extends StatefulWidget {
@@ -16,8 +19,10 @@ class _AddSubscriptionSheetState extends State<AddSubscriptionSheet> {
   final _nameController = TextEditingController();
   final _amountController = TextEditingController();
 
-  String _billingCycle = 'MONTHLY';
+  String _period = 'MONTHLY';
   bool _autoDeduct = true;
+  String? _selectedAccountId;
+  late final Future<List<AccountModel>> _accountsFuture;
 
   static const _cycles = [
     (label: 'Günlük', value: 'DAILY'),
@@ -27,10 +32,35 @@ class _AddSubscriptionSheetState extends State<AddSubscriptionSheet> {
   ];
 
   @override
+  void initState() {
+    super.initState();
+    _accountsFuture = getIt<AccountRepository>().getAccounts();
+  }
+
+  @override
   void dispose() {
     _nameController.dispose();
     _amountController.dispose();
     super.dispose();
+  }
+
+  String _isoDate(DateTime d) =>
+      '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
+
+  String _calcNextRenewal() {
+    final now = DateTime.now();
+    final DateTime next;
+    switch (_period) {
+      case 'DAILY':
+        next = now.add(const Duration(days: 1));
+      case 'WEEKLY':
+        next = now.add(const Duration(days: 7));
+      case 'YEARLY':
+        next = DateTime(now.year + 1, now.month, now.day);
+      default:
+        next = DateTime(now.year, now.month + 1, now.day);
+    }
+    return _isoDate(next);
   }
 
   void _submit() {
@@ -38,13 +68,18 @@ class _AddSubscriptionSheetState extends State<AddSubscriptionSheet> {
     final amountStr = _amountController.text.trim().replaceAll(',', '.');
     final amount = double.tryParse(amountStr);
     if (name.isEmpty || amount == null || amount <= 0) return;
+    if (_selectedAccountId == null) return;
 
+    final now = DateTime.now();
     context.read<SubscriptionsBloc>().add(
       SubscriptionCreated({
         'name': name,
         'amount': amount,
-        'billingCycle': _billingCycle,
+        'period': _period,
         'autoDeduct': _autoDeduct,
+        'accountId': _selectedAccountId!,
+        'startDate': _isoDate(now),
+        'nextRenewal': _calcNextRenewal(),
       }),
     );
     Navigator.of(context).pop();
@@ -89,6 +124,95 @@ class _AddSubscriptionSheetState extends State<AddSubscriptionSheet> {
           ),
           const SizedBox(height: AppSpacing.lg),
           Text(
+            'Hesap',
+            style: AppTypography.labelSm.copyWith(
+              color: AppColors.onSurfaceVariant,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          FutureBuilder<List<AccountModel>>(
+            future: _accountsFuture,
+            builder: (context, snapshot) {
+              if (!snapshot.hasData) {
+                return const SizedBox(
+                  height: 36,
+                  child: Center(
+                    child: SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: AppColors.primary,
+                      ),
+                    ),
+                  ),
+                );
+              }
+              final accounts = snapshot.data!
+                  .where((a) => !a.isArchived)
+                  .toList();
+              if (accounts.isEmpty) {
+                return Text(
+                  'Hesap bulunamadı',
+                  style: AppTypography.bodySm.copyWith(
+                    color: AppColors.onSurfaceVariant,
+                  ),
+                );
+              }
+              if (_selectedAccountId == null) {
+                final def = accounts.firstWhere(
+                  (a) => a.isDefault,
+                  orElse: () => accounts.first,
+                );
+                WidgetsBinding.instance.addPostFrameCallback(
+                  (_) => setState(() => _selectedAccountId = def.id),
+                );
+              }
+              return SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: accounts.map((a) {
+                    final isSelected = _selectedAccountId == a.id;
+                    return GestureDetector(
+                      onTap: () => setState(() => _selectedAccountId = a.id),
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 150),
+                        margin: const EdgeInsets.only(right: AppSpacing.sm),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: AppSpacing.md,
+                          vertical: AppSpacing.sm,
+                        ),
+                        decoration: BoxDecoration(
+                          color: isSelected
+                              ? AppColors.primary.withValues(alpha: 0.15)
+                              : AppColors.surfaceContainerHighest,
+                          borderRadius:
+                              BorderRadius.circular(AppSpacing.radiusMd),
+                          border: isSelected
+                              ? Border.all(
+                                  color: AppColors.primary, width: 1.5)
+                              : null,
+                        ),
+                        child: Text(
+                          a.name,
+                          style: AppTypography.labelSm.copyWith(
+                            color: isSelected
+                                ? AppColors.primary
+                                : AppColors.onSurfaceVariant,
+                            fontWeight: isSelected
+                                ? FontWeight.w600
+                                : FontWeight.w400,
+                          ),
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                ),
+              );
+            },
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          Text(
             'Fatura Dönemi',
             style: AppTypography.labelSm.copyWith(
               color: AppColors.onSurfaceVariant,
@@ -97,13 +221,13 @@ class _AddSubscriptionSheetState extends State<AddSubscriptionSheet> {
           const SizedBox(height: AppSpacing.sm),
           Row(
             children: _cycles.map((c) {
-              final isActive = _billingCycle == c.value;
+              final isActive = _period == c.value;
               final isLast = c == _cycles.last;
               return Expanded(
                 child: Padding(
                   padding: EdgeInsets.only(right: isLast ? 0 : AppSpacing.xs),
                   child: GestureDetector(
-                    onTap: () => setState(() => _billingCycle = c.value),
+                    onTap: () => setState(() => _period = c.value),
                     child: AnimatedContainer(
                       duration: const Duration(milliseconds: 150),
                       height: 36,

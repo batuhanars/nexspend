@@ -25,6 +25,11 @@ class DebtRepository {
     return DebtSummaryModel.fromJson(response.data['data'] as Map<String, dynamic>);
   }
 
+  Future<DebtModel> getOne(String id) async {
+    final response = await _dio.get(ApiEndpoints.debtById(id));
+    return DebtModel.fromJson(response.data['data'] as Map<String, dynamic>);
+  }
+
   Future<DebtModel> create(Map<String, dynamic> data) async {
     final response = await _dio.post(ApiEndpoints.debts, data: data);
     return DebtModel.fromJson(response.data['data'] as Map<String, dynamic>);

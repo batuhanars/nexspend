@@ -134,12 +134,35 @@ class DebtCard extends StatelessWidget {
                   Row(
                     children: [
                       if (debt.hasInstallments)
-                        Padding(
-                          padding: const EdgeInsets.only(right: AppSpacing.sm),
-                          child: Icon(
-                            Icons.receipt_long_outlined,
-                            size: 12,
-                            color: AppColors.onSurfaceVariant,
+                        Container(
+                          margin: const EdgeInsets.only(right: AppSpacing.sm),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: AppSpacing.sm,
+                            vertical: 2,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppColors.primary.withValues(alpha: 0.12),
+                            borderRadius:
+                                BorderRadius.circular(AppSpacing.radiusSm),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(
+                                Icons.receipt_long_outlined,
+                                size: 10,
+                                color: AppColors.primary,
+                              ),
+                              const SizedBox(width: 3),
+                              Text(
+                                'Taksitli',
+                                style: AppTypography.labelSm.copyWith(
+                                  color: AppColors.primary,
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 10,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       if (debt.dueDate != null)
@@ -158,7 +181,12 @@ class DebtCard extends StatelessWidget {
                 SizedBox(
                   width: double.infinity,
                   child: OutlinedButton(
-                    onPressed: () => _showPaymentSheet(context),
+                    onPressed: debt.hasInstallments
+                        ? () => context.push(
+                              RouteNames.debtDetail(debt.id),
+                              extra: debt,
+                            )
+                        : () => _showPaymentSheet(context),
                     style: OutlinedButton.styleFrom(
                       side: BorderSide(color: color, width: 1.5),
                       foregroundColor: color,
@@ -172,7 +200,9 @@ class DebtCard extends StatelessWidget {
                       ),
                     ),
                     child: Text(
-                      isLent ? 'Ödeme Aldım' : 'Ödeme Yap',
+                      debt.hasInstallments
+                          ? 'Taksitleri Gör'
+                          : (isLent ? 'Ödeme Aldım' : 'Ödeme Yap'),
                       style: AppTypography.bodyMd.copyWith(
                         fontWeight: FontWeight.w600,
                       ),

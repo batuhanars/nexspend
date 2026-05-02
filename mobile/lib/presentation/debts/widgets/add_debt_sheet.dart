@@ -8,7 +8,7 @@ import 'package:wallet_app/presentation/debts/bloc/debts_bloc.dart';
 import 'package:wallet_app/presentation/debts/widgets/type_toggle.dart';
 
 class AddDebtSheet extends StatefulWidget {
-  const AddDebtSheet();
+  const AddDebtSheet({super.key});
 
   @override
   State<AddDebtSheet> createState() => _AddDebtSheetState();
@@ -56,14 +56,18 @@ class _AddDebtSheetState extends State<AddDebtSheet> {
     if (amount == null || amount <= 0) return;
 
     final data = <String, dynamic>{
-      'type': _type,
+      'type': _type.name,
       'personName': name,
       'totalAmount': amount,
       if (_descController.text.trim().isNotEmpty)
-        'description': _descController.text.trim(),
-      if (_dueDate != null) 'dueDate': _dueDate!.toIso8601String(),
+        'note': _descController.text.trim(),
+      if (_dueDate != null)
+        'dueDate': _dueDate!.toIso8601String().split('T').first,
       'hasInstallments': _hasInstallments,
       if (_hasInstallments) 'installmentCount': _installmentCount,
+      if (_hasInstallments)
+        'firstInstallmentDate':
+            DateTime.now().toIso8601String().split('T').first,
     };
 
     context.read<DebtsBloc>().add(DebtCreated(data));

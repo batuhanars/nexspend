@@ -1,6 +1,6 @@
 # Stitch Wallet App — Görev Takip Dosyası
 
-> Son güncelleme: 2 Mayıs 2026 (Sprint 5-6 detay sayfaları + Sprint 8 optimizasyon + DebtsBloc/BudgetsBloc testleri)  
+> Son güncelleme: 2 Mayıs 2026 (Sprint 5-6 detay sayfaları + Sprint 8 optimizasyon + DebtsBloc/BudgetsBloc testleri + timezone/sıralama düzeltmeleri)  
 > ✅ = Tamamlandı | 🔧 = Kısmen yapıldı | ❌ = Henüz başlanmadı  
 > ☑ = Kodda mevcut ancak migration henüz çalıştırılmadı
 
@@ -147,7 +147,7 @@
   - En çok harcama kategorileri listesi
   - İşlem geçmişi (read-only liste)
   - "Varsayılan Yap" / "Düzenle" / "Arşivle" / "Sil" aksiyonları
-- [ ] Arşivlenmiş hesaplar listesi (ayarlardan erişim)
+- [x] Arşivlenmiş hesaplar listesi (ayarlardan erişim) — ArchivedAccountsPage + AccountsListPage
 - [x] AccountsBloc (hesap CRUD + arşiv + varsayılan)
 
 ---
@@ -205,11 +205,11 @@
 - [x] Gider/Gelir toggle (tasarımdaki segment control)
 - [x] Miktar girişi (₺ formatı, büyük font)
 - [x] Kategori seçici grid (ikonlu, renkli)
-- [ ] Tag seçici chip listesi (çoklu seçim + yeni tag ekleme)
+- [ ] Tag seçici chip listesi (çoklu seçim + yeni tag ekleme) — formdan kaldırıldı, ileriye ertelendi
 - [x] Hesap seçici chip'ler (Ziraat/Nakit/...)
-- [ ] Tekrarlayan toggle + frekans seçimi + bitiş tarihi
+- [x] Tekrarlayan toggle + frekans seçimi + bitiş tarihi
 - [x] FAB (+) butonu
-- [ ] İşlem kaynağı göstergesi (ikon: manuel / abonelik / borç / tekrarlayan)
+- [x] İşlem kaynağı göstergesi (ikon: manuel / abonelik / borç / tekrarlayan)
 
 ---
 
@@ -640,8 +640,8 @@
 |--------|-------|---------|----------|-------|
 | Sprint 0 | Proje Kurulumu | 🔧 %90 | 🔧 %90 | 🔧 CI/CD eksik |
 | Sprint 1 | Auth | ✅ %100 | 🔧 %78 | 🔧 Google Sign-In + şifre checklist eksik |
-| Sprint 2 | Hesaplar + Dashboard | ✅ %100 | 🔧 %92 | 🔧 Frontend arşiv listesi eksik |
-| Sprint 3 | İşlemler | ✅ %100 | 🔧 %85 | 🔧 Frontend: tag seçici, tekrarlayan toggle, işlem kaynağı göstergesi eksik |
+| Sprint 2 | Hesaplar + Dashboard | ✅ %100 | ✅ %100 | ✅ Tamamlandı |
+| Sprint 3 | İşlemler | ✅ %100 | 🔧 %93 | 🔧 Frontend: yalnızca tag seçici eksik (ertelendi) |
 | Sprint 4 | Bütçeler | 🔧 %95 | ✅ %100 | 🔧 Backend FCM bildirim eksik, frontend tamamlandı |
 | Sprint 5 | Borçlar + Abonelikler | ✅ %100 | ✅ %100 | ✅ Borç detay + Abonelik detay tamamlandı |
 | Sprint 6 | Raporlar + Fiş Tarama | 🔧 %95 | ✅ %100 | 🔧 Backend Cloud Vision stub; frontend tamamlandı |
@@ -653,7 +653,7 @@
 | **Sprint 12** | **Aile/Ortak Bütçe (v2)** | ❌ %0 | ❌ %0 | ❌ Başlanmadı |
 | Çapraz | Merkezi Entegrasyon | 🔧 %90 | — | 🔧 Event akışı ✅, Report/Dashboard source filtresi ✅, FCM bildirimleri eksik |
 
-**Tahmini genel ilerleme: ~%73** — Sprint 0-4 backend ~%95, Sprint 5-7 backend ✅, frontend Sprint 0-7 ~%88  
+**Tahmini genel ilerleme: ~%75** — Sprint 0-7 backend ✅, frontend Sprint 0-7 ~%91  
 **Toplam sprint: 13** (Sprint 0-8 temel + Sprint 9-12 fark yaratan özellikler)  
-**Sıradaki (Backend):** Sprint 8 — Backend testler tamamlandı (76 unit + 25 e2e); shimmer/empty state optimizasyonları kaldı  
-**Sıradaki (Frontend):** Sprint 5 — Borç detay sayfası + Sprint 6 — ReceiptHistoryPage
+**Sıradaki (Backend):** Sprint 9 (Enflasyon) — V1 tamamlandı  
+**Sıradaki (Frontend):** Sprint 8 tamamlama (empty state, lazy loading, app icon/splash) veya Sprint 9 başlangıcı

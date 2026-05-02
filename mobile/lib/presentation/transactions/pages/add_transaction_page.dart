@@ -83,7 +83,7 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
       'amount': amount,
       'title': title,
       'accountId': _selectedAccount!.id,
-      'transactionDate': submitDate.toIso8601String(),
+      'transactionDate': submitDate.toUtc().toIso8601String(),
       if (_selectedCategory != null) 'categoryId': _selectedCategory!.id,
       if (_noteController.text.trim().isNotEmpty)
         'note': _noteController.text.trim(),
@@ -92,7 +92,7 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
       'isRecurring': _isRecurring,
       if (_isRecurring) 'frequency': _recurringFrequency,
       if (_isRecurring && _recurringEndDate != null)
-        'endDate': _recurringEndDate!.toIso8601String(),
+        'endDate': _recurringEndDate!.toUtc().toIso8601String(),
     };
 
     context.read<AddTransactionBloc>().add(AddTransactionSubmitted(data));

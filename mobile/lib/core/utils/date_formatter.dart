@@ -10,13 +10,13 @@ class DateFormatter {
   static final _fullDateTime = DateFormat('d MMM yyyy, HH:mm', 'tr_TR');
 
   /// 15 Ocak 2026
-  static String formatLong(DateTime date) => _dayMonthYear.format(date.toLocal());
+  static String formatLong(DateTime date) => _dayMonthYear.format(date);
 
   /// 15 Ocak
-  static String formatShort(DateTime date) => _dayMonth.format(date.toLocal());
+  static String formatShort(DateTime date) => _dayMonth.format(date);
 
   /// 15 Oca
-  static String formatMini(DateTime date) => _dayMonthShort.format(date.toLocal());
+  static String formatMini(DateTime date) => _dayMonthShort.format(date);
 
   /// 14:30
   static String formatTime(DateTime date) => _time.format(date.toLocal());

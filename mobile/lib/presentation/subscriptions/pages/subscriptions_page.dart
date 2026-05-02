@@ -8,6 +8,7 @@ import '../widgets/add_subscription_sheet.dart';
 import '../widgets/empty_view.dart';
 import '../widgets/error_view.dart';
 import '../widgets/subscription_list.dart';
+import '../widgets/subscriptions_shimmer.dart';
 import '../widgets/summary_card.dart';
 import '../widgets/upcoming_banner.dart';
 
@@ -39,14 +40,18 @@ class _SubscriptionsView extends StatelessWidget {
                 _buildAppBar(context),
                 if (state is SubscriptionsLoading)
                   const SliverFillRemaining(
-                    child: Center(
-                      child: CircularProgressIndicator(
-                        color: AppColors.primary,
-                      ),
-                    ),
+                    hasScrollBody: false,
+                    child: SubscriptionsShimmer(),
                   )
                 else if (state is SubscriptionsError)
-                  SliverFillRemaining(child: ErrorView(message: state.message))
+                  SliverFillRemaining(
+                    child: ErrorView(
+                      message: state.message,
+                      onRetry: () => context
+                          .read<SubscriptionsBloc>()
+                          .add(const SubscriptionsLoadRequested()),
+                    ),
+                  )
                 else if (state is SubscriptionsLoaded) ...[
                   SliverToBoxAdapter(child: SummaryCard(state: state)),
                   if (state.upcomingRenewals.isNotEmpty)

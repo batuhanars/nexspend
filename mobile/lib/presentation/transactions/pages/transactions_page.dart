@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/constants/app_colors.dart';
-import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
 import '../../../navigation/route_names.dart';
 import '../bloc/transactions_bloc.dart';
@@ -11,6 +10,7 @@ import '../widgets/error_view.dart';
 import '../widgets/filter_chips.dart';
 import '../widgets/summary_row.dart';
 import '../widgets/transaction_list.dart';
+import '../widgets/transactions_shimmer.dart';
 
 class TransactionsPage extends StatelessWidget {
   const TransactionsPage({super.key});
@@ -39,12 +39,18 @@ class _TransactionsView extends StatelessWidget {
                 _buildAppBar(context),
                 if (state is TransactionsLoading)
                   const SliverFillRemaining(
-                    child: Center(
-                      child: CircularProgressIndicator(color: AppColors.primary),
-                    ),
+                    hasScrollBody: false,
+                    child: TransactionsShimmer(),
                   )
                 else if (state is TransactionsError)
-                  SliverFillRemaining(child: ErrorView(message: state.message))
+                  SliverFillRemaining(
+                    child: ErrorView(
+                      message: state.message,
+                      onRetry: () => context
+                          .read<TransactionsBloc>()
+                          .add(TransactionsLoadRequested()),
+                    ),
+                  )
                 else if (state is TransactionsLoaded) ...[
                   SliverToBoxAdapter(child: SummaryRow(state: state)),
                   SliverToBoxAdapter(

@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
-import '../bloc/transactions_bloc.dart';
 
 class ErrorView extends StatelessWidget {
-  const ErrorView({super.key, required this.message});
+  const ErrorView({super.key, required this.message, required this.onRetry});
   final String message;
+  final VoidCallback onRetry;
 
   @override
   Widget build(BuildContext context) {
@@ -15,18 +14,24 @@ class ErrorView extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.wifi_off_rounded,
-              size: 48, color: AppColors.onSurfaceVariant.withValues(alpha: 0.5)),
+          Icon(
+            Icons.wifi_off_rounded,
+            size: 56,
+            color: AppColors.onSurfaceVariant.withValues(alpha: 0.3),
+          ),
           const SizedBox(height: AppSpacing.lg),
-          Text(message,
-              style: AppTypography.bodyMd
-                  .copyWith(color: AppColors.onSurfaceVariant)),
-          const SizedBox(height: AppSpacing.lg),
-          FilledButton.tonal(
-            onPressed: () => context
-                .read<TransactionsBloc>()
-                .add(TransactionsLoadRequested()),
-            child: const Text('Tekrar Dene'),
+          Text(
+            message,
+            style: AppTypography.bodyMd.copyWith(color: AppColors.onSurfaceVariant),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: AppSpacing.xl),
+          TextButton(
+            onPressed: onRetry,
+            child: Text(
+              'Tekrar Dene',
+              style: AppTypography.bodyMd.copyWith(color: AppColors.primary),
+            ),
           ),
         ],
       ),

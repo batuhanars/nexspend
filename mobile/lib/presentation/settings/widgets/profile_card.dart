@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:wallet_app/core/constants/app_colors.dart';
 import 'package:wallet_app/core/constants/app_spacing.dart';
@@ -41,10 +42,14 @@ class ProfileCard extends StatelessWidget {
                   ),
                   child: user.avatarUrl != null
                       ? ClipOval(
-                          child: Image.network(
-                            user.avatarUrl!,
+                          child: CachedNetworkImage(
+                            imageUrl: user.avatarUrl!,
                             fit: BoxFit.cover,
-                            errorBuilder: (_, __, ___) =>
+                            placeholder: (context, _) => const CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: AppColors.primary,
+                            ),
+                            errorWidget: (context, _, error) =>
                                 _initialsWidget(initials),
                           ),
                         )

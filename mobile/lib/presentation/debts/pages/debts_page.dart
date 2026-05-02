@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:wallet_app/presentation/debts/widgets/add_debt_sheet.dart';
 import 'package:wallet_app/presentation/debts/widgets/debt_list.dart';
+import 'package:wallet_app/presentation/debts/widgets/debts_shimmer.dart';
 import 'package:wallet_app/presentation/debts/widgets/empty_view.dart';
 import 'package:wallet_app/presentation/debts/widgets/error_view.dart';
 import 'package:wallet_app/presentation/debts/widgets/filter_chips.dart';
@@ -38,14 +39,18 @@ class _DebtsView extends StatelessWidget {
                 _buildAppBar(context),
                 if (state is DebtsLoading)
                   const SliverFillRemaining(
-                    child: Center(
-                      child: CircularProgressIndicator(
-                        color: AppColors.primary,
-                      ),
-                    ),
+                    hasScrollBody: false,
+                    child: DebtsShimmer(),
                   )
                 else if (state is DebtsError)
-                  SliverFillRemaining(child: ErrorView(message: state.message))
+                  SliverFillRemaining(
+                    child: ErrorView(
+                      message: state.message,
+                      onRetry: () => context
+                          .read<DebtsBloc>()
+                          .add(const DebtsLoadRequested()),
+                    ),
+                  )
                 else if (state is DebtsLoaded) ...[
                   SliverToBoxAdapter(
                     child: SummaryCards(summary: state.summary),

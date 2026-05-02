@@ -1,15 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
-import '../../../core/utils/icon_mapper.dart';
 import '../../../data/models/budget_model.dart';
 import '../../../data/models/category_model.dart';
 import '../bloc/add_budget_bloc.dart';
 import '../bloc/add_budget_event.dart';
 import '../bloc/add_budget_state.dart';
+import '../widgets/amount_field.dart';
+import '../widgets/app_field.dart';
+import '../widgets/category_grid.dart';
+import '../widgets/date_button.dart';
+import '../widgets/period_selector.dart';
 
 class AddBudgetPage extends StatefulWidget {
   const AddBudgetPage({super.key});
@@ -83,7 +86,7 @@ class _AddBudgetPageState extends State<AddBudgetPage> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(msg),
-        backgroundColor: const Color(0xFFEF5350),
+        backgroundColor: AppColors.error,
       ),
     );
   }
@@ -172,11 +175,11 @@ class _AddBudgetPageState extends State<AddBudgetPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // Amount input
-                  _AmountField(controller: _amountController),
+                  AmountField(controller: _amountController),
                   const SizedBox(height: AppSpacing.xl),
 
                   // Name input
-                  _AppField(
+                  AppField(
                     controller: _nameController,
                     label: 'Bütçe Adı',
                     hint: 'Örn. Market Bütçesi',
@@ -194,7 +197,7 @@ class _AddBudgetPageState extends State<AddBudgetPage> {
                           .copyWith(color: AppColors.onSurfaceVariant),
                     )
                   else
-                    _CategoryGrid(
+                    CategoryGrid(
                       categories: categories,
                       selected: _selectedCategory,
                       onSelect: (c) =>
@@ -205,7 +208,7 @@ class _AddBudgetPageState extends State<AddBudgetPage> {
                   // Period
                   Text('Dönem', style: AppTypography.titleSm),
                   const SizedBox(height: AppSpacing.md),
-                  _PeriodSelector(
+                  PeriodSelector(
                     selected: _period,
                     onSelect: (p) => setState(() {
                       _period = p;
@@ -218,7 +221,7 @@ class _AddBudgetPageState extends State<AddBudgetPage> {
                   Row(
                     children: [
                       Expanded(
-                        child: _DateButton(
+                        child: DateButton(
                           label: 'Başlangıç',
                           value: _formatDate(_startDate),
                           onTap: () => _pickDate(isStart: true),
@@ -227,7 +230,7 @@ class _AddBudgetPageState extends State<AddBudgetPage> {
                       if (_period == BudgetPeriod.CUSTOM) ...[
                         const SizedBox(width: AppSpacing.md),
                         Expanded(
-                          child: _DateButton(
+                          child: DateButton(
                             label: 'Bitiş',
                             value: _endDate != null
                                 ? _formatDate(_endDate!)
@@ -279,7 +282,7 @@ class _AddBudgetPageState extends State<AddBudgetPage> {
                   const SizedBox(height: AppSpacing.xl),
 
                   // Note
-                  _AppField(
+                  AppField(
                     controller: _noteController,
                     label: 'Not (isteğe bağlı)',
                     hint: 'Açıklama ekle...',
@@ -328,293 +331,6 @@ class _AddBudgetPageState extends State<AddBudgetPage> {
               ),
             );
           },
-        ),
-      ),
-    );
-  }
-}
-
-// ─────────────────────────────────────────────────────────────
-// Widgets
-// ─────────────────────────────────────────────────────────────
-
-class _AmountField extends StatelessWidget {
-  const _AmountField({required this.controller});
-  final TextEditingController controller;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(
-        AppSpacing.xl,
-        AppSpacing.xl,
-        AppSpacing.xl,
-        AppSpacing.lg,
-      ),
-      decoration: BoxDecoration(
-        color: AppColors.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-      ),
-      child: Column(
-        children: [
-          Text(
-            'BÜTÇE TUTARI',
-            style: AppTypography.labelSm.copyWith(
-              color: AppColors.onSurfaceVariant,
-              letterSpacing: 1.2,
-            ),
-          ),
-          const SizedBox(height: AppSpacing.md),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.baseline,
-            textBaseline: TextBaseline.alphabetic,
-            children: [
-              Text(
-                '₺',
-                style: AppTypography.headlineMd.copyWith(
-                  color: AppColors.primary,
-                  fontWeight: FontWeight.w300,
-                ),
-              ),
-              const SizedBox(width: AppSpacing.sm),
-              Expanded(
-                child: TextField(
-                  controller: controller,
-                  keyboardType:
-                      const TextInputType.numberWithOptions(decimal: true),
-                  inputFormatters: [
-                    FilteringTextInputFormatter.allow(RegExp(r'[\d,\.]')),
-                  ],
-                  style: AppTypography.displayLg.copyWith(
-                    color: AppColors.onSurface,
-                  ),
-                  textAlign: TextAlign.center,
-                  decoration: InputDecoration(
-                    hintText: '0',
-                    hintStyle: AppTypography.displayLg.copyWith(
-                      color: AppColors.onSurfaceVariant.withValues(alpha: 0.25),
-                    ),
-                    border: InputBorder.none,
-                    isDense: true,
-                    contentPadding: EdgeInsets.zero,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _AppField extends StatelessWidget {
-  const _AppField({
-    required this.controller,
-    required this.label,
-    required this.hint,
-    required this.icon,
-    this.maxLines = 1,
-  });
-  final TextEditingController controller;
-  final String label;
-  final String hint;
-  final IconData icon;
-  final int maxLines;
-
-  @override
-  Widget build(BuildContext context) {
-    return TextField(
-      controller: controller,
-      maxLines: maxLines,
-      style: AppTypography.bodyMd,
-      decoration: InputDecoration(
-        labelText: label,
-        hintText: hint,
-        prefixIcon: Icon(icon, color: AppColors.onSurfaceVariant, size: 20),
-        filled: true,
-        fillColor: AppColors.surfaceContainerHighest,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-          borderSide: BorderSide.none,
-        ),
-        labelStyle:
-            AppTypography.bodySm.copyWith(color: AppColors.onSurfaceVariant),
-        hintStyle:
-            AppTypography.bodySm.copyWith(color: AppColors.onSurfaceVariant),
-      ),
-    );
-  }
-}
-
-class _CategoryGrid extends StatelessWidget {
-  const _CategoryGrid({
-    required this.categories,
-    required this.selected,
-    required this.onSelect,
-  });
-  final List<CategoryModel> categories;
-  final CategoryModel? selected;
-  final ValueChanged<CategoryModel> onSelect;
-
-  @override
-  Widget build(BuildContext context) {
-    return Wrap(
-      spacing: AppSpacing.sm,
-      runSpacing: AppSpacing.sm,
-      children: categories.map((cat) {
-        final isSelected = selected?.id == cat.id;
-        return GestureDetector(
-          onTap: () => onSelect(cat),
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 150),
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.md,
-              vertical: AppSpacing.sm,
-            ),
-            decoration: BoxDecoration(
-              color: isSelected
-                  ? cat.cardColor.withValues(alpha: 0.2)
-                  : AppColors.surfaceContainerHighest,
-              borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-              border: Border.all(
-                color: isSelected
-                    ? cat.cardColor
-                    : Colors.transparent,
-                width: 1.5,
-              ),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  IconMapper.fromString(cat.icon),
-                  size: 16,
-                  color: isSelected ? cat.cardColor : AppColors.onSurfaceVariant,
-                ),
-                const SizedBox(width: AppSpacing.xs),
-                Text(
-                  cat.name,
-                  style: AppTypography.bodySm.copyWith(
-                    color: isSelected ? cat.cardColor : AppColors.onSurface,
-                    fontWeight:
-                        isSelected ? FontWeight.w600 : FontWeight.w400,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      }).toList(),
-    );
-  }
-}
-
-class _PeriodSelector extends StatelessWidget {
-  const _PeriodSelector({required this.selected, required this.onSelect});
-  final BudgetPeriod selected;
-  final ValueChanged<BudgetPeriod> onSelect;
-
-  static const _labels = {
-    BudgetPeriod.MONTHLY: 'Aylık',
-    BudgetPeriod.WEEKLY: 'Haftalık',
-    BudgetPeriod.YEARLY: 'Yıllık',
-    BudgetPeriod.CUSTOM: 'Özel',
-  };
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: BudgetPeriod.values.map((p) {
-        final isSelected = p == selected;
-        return Expanded(
-          child: GestureDetector(
-            onTap: () => onSelect(p),
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 150),
-              margin: EdgeInsets.only(
-                right: p != BudgetPeriod.CUSTOM ? AppSpacing.sm : 0,
-              ),
-              padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
-              decoration: BoxDecoration(
-                color: isSelected
-                    ? AppColors.primary.withValues(alpha: 0.15)
-                    : AppColors.surfaceContainerHighest,
-                borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-                border: Border.all(
-                  color: isSelected ? AppColors.primary : Colors.transparent,
-                  width: 1.5,
-                ),
-              ),
-              child: Text(
-                _labels[p]!,
-                textAlign: TextAlign.center,
-                style: AppTypography.bodySm.copyWith(
-                  color: isSelected ? AppColors.primary : AppColors.onSurface,
-                  fontWeight:
-                      isSelected ? FontWeight.w600 : FontWeight.w400,
-                ),
-              ),
-            ),
-          ),
-        );
-      }).toList(),
-    );
-  }
-}
-
-class _DateButton extends StatelessWidget {
-  const _DateButton({
-    required this.label,
-    required this.value,
-    required this.onTap,
-  });
-  final String label;
-  final String value;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.md,
-          vertical: AppSpacing.md,
-        ),
-        decoration: BoxDecoration(
-          color: AppColors.surfaceContainerHighest,
-          borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-        ),
-        child: Row(
-          children: [
-            Icon(
-              Icons.calendar_today_outlined,
-              size: 16,
-              color: AppColors.onSurfaceVariant,
-            ),
-            const SizedBox(width: AppSpacing.sm),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    label,
-                    style: AppTypography.labelSm.copyWith(
-                      color: AppColors.onSurfaceVariant,
-                      fontSize: 10,
-                    ),
-                  ),
-                  Text(
-                    value,
-                    style: AppTypography.bodySm,
-                  ),
-                ],
-              ),
-            ),
-          ],
         ),
       ),
     );

@@ -36,6 +36,7 @@ import '../presentation/accounts/bloc/account_bloc.dart';
 import '../presentation/accounts/bloc/account_detail_bloc.dart';
 import '../presentation/accounts/pages/account_detail_page.dart';
 import '../presentation/accounts/pages/add_account_page.dart';
+import '../presentation/accounts/pages/accounts_list_page.dart';
 import '../presentation/accounts/pages/archived_accounts_page.dart';
 import '../presentation/accounts/pages/edit_account_page.dart';
 import '../presentation/transactions/bloc/add_transaction_bloc.dart';
@@ -182,6 +183,17 @@ GoRouter createRouter() {
         name: 'receipt-scanner',
         parentNavigatorKey: _rootNavigatorKey,
         builder: (context, _) => const ReceiptScannerPage(),
+      ),
+      GoRoute(
+        path: RouteNames.accounts,
+        name: 'accounts',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, _) => BlocProvider(
+          create: (_) => AccountBloc(
+            accountRepository: getIt<AccountRepository>(),
+          ),
+          child: const AccountsListPage(),
+        ),
       ),
       GoRoute(
         path: RouteNames.addAccount,

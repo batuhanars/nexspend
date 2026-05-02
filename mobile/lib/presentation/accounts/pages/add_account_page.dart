@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
@@ -71,7 +72,7 @@ class _AddAccountPageState extends State<AddAccountPage> {
     return BlocListener<AccountBloc, AccountState>(
       listener: (context, state) {
         if (state is AccountSuccess) {
-          Navigator.of(context).pop(state.account);
+          context.pop(state.account);
         } else if (state is AccountError) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -86,7 +87,7 @@ class _AddAccountPageState extends State<AddAccountPage> {
           title: const Text('Hesap Ekle'),
           leading: IconButton(
             icon: const Icon(Icons.close_rounded),
-            onPressed: () => Navigator.of(context).pop(),
+            onPressed: () => context.pop(),
           ),
         ),
         body: Form(

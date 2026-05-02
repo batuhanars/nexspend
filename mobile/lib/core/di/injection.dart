@@ -9,6 +9,7 @@ import '../../data/repositories/report_repository.dart';
 import '../../data/repositories/subscription_repository.dart';
 import '../../data/repositories/user_repository.dart';
 import '../../data/repositories/tag_repository.dart';
+import '../../data/repositories/receipt_repository.dart';
 import '../../data/repositories/dashboard_repository.dart';
 import '../../data/repositories/transaction_repository.dart';
 import '../network/api_client.dart';
@@ -80,5 +81,9 @@ Future<void> configureDependencies() async {
 
   getIt.registerLazySingleton<UserRepository>(
     () => UserRepository(apiClient: getIt<ApiClient>()),
+  );
+
+  getIt.registerLazySingleton<ReceiptRepository>(
+    () => ReceiptRepository(apiClient: getIt<ApiClient>()),
   );
 }

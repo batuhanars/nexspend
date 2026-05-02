@@ -17,6 +17,7 @@ class RouteNames {
   static const String subscriptions = '/subscriptions';
 
   // Hesaplar
+  static const String accounts = '/accounts';
   static const String addAccount = '/accounts/add';
   static String accountDetail(String id) => '/accounts/$id';
   static String editAccount(String id) => '/accounts/$id/edit';

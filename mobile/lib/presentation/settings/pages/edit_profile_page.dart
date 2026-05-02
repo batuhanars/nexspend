@@ -89,10 +89,10 @@ class _EditProfilePageState extends State<EditProfilePage> {
                     onPressed: _save,
                     child: Text(
                       'Kaydet',
-                      style: TextStyle(
-                          color: AppColors.primary,
-                          fontFamily: 'Inter',
-                          fontWeight: FontWeight.w600),
+                      style: AppTypography.bodyMd.copyWith(
+                        color: AppColors.primary,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
               ],

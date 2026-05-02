@@ -19,13 +19,20 @@ import '../presentation/budgets/bloc/add_budget_bloc.dart';
 import '../presentation/budgets/bloc/add_budget_event.dart';
 import '../presentation/budgets/pages/budgets_page.dart';
 import '../presentation/budgets/pages/add_budget_page.dart';
+import '../data/models/debt_model.dart' show DebtModel;
+import '../data/models/subscription_model.dart' show SubscriptionModel;
+import '../presentation/debts/bloc/debt_detail_bloc.dart';
 import '../presentation/debts/bloc/debts_bloc.dart';
+import '../presentation/debts/pages/debt_detail_page.dart';
 import '../presentation/debts/pages/debts_page.dart';
+import '../presentation/receipt_scanner/pages/receipt_history_page.dart';
+import '../presentation/subscriptions/bloc/subscriptions_bloc.dart' show SubscriptionsBloc, SubscriptionsLoadRequested;
+import '../presentation/subscriptions/pages/subscription_detail_page.dart';
 import '../presentation/subscriptions/bloc/subscriptions_bloc.dart';
 import '../presentation/subscriptions/pages/subscriptions_page.dart';
 import '../presentation/reports/pages/reports_page.dart';
 import '../presentation/receipt_scanner/pages/receipt_scanner_page.dart';
-import '../data/models/account_model.dart';
+import '../data/models/account_model.dart' show AccountModel;
 import '../data/repositories/account_repository.dart';
 import '../data/repositories/category_repository.dart';
 import '../data/repositories/debt_repository.dart';
@@ -267,6 +274,40 @@ GoRouter createRouter() {
         name: 'edit-profile',
         parentNavigatorKey: _rootNavigatorKey,
         builder: (context, _) => const EditProfilePage(),
+      ),
+      GoRoute(
+        path: '/debts/:id',
+        name: 'debt-detail',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) {
+          final debt = state.extra as DebtModel;
+          return BlocProvider(
+            create: (_) => DebtDetailBloc(
+              debtRepository: getIt<DebtRepository>(),
+            ),
+            child: DebtDetailPage(debt: debt),
+          );
+        },
+      ),
+      GoRoute(
+        path: '/subscriptions/:id',
+        name: 'subscription-detail',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) {
+          final subscription = state.extra as SubscriptionModel;
+          return BlocProvider(
+            create: (_) => SubscriptionsBloc(
+              subscriptionRepository: getIt<SubscriptionRepository>(),
+            )..add(const SubscriptionsLoadRequested()),
+            child: SubscriptionDetailPage(subscription: subscription),
+          );
+        },
+      ),
+      GoRoute(
+        path: RouteNames.receiptHistory,
+        name: 'receipt-history',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, _) => const ReceiptHistoryPage(),
       ),
     ],
   );

@@ -148,6 +148,13 @@ class _SettingsView extends StatelessWidget {
                         ),
                 ),
                 const SizedBox(height: AppSpacing.lg),
+                SectionHeader('Araçlar'),
+                SettingsTile(
+                  icon: Icons.receipt_long_outlined,
+                  label: 'Fiş Geçmişi',
+                  onTap: () => context.push(RouteNames.receiptHistory),
+                ),
+                const SizedBox(height: AppSpacing.lg),
                 SectionHeader('Güvenlik'),
                 if (user.hasPassword)
                   SettingsTile(

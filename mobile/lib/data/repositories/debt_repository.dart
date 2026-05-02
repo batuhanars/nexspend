@@ -50,4 +50,12 @@ class DebtRepository {
         .map((i) => DebtInstallmentModel.fromJson(i as Map<String, dynamic>))
         .toList();
   }
+
+  Future<List<DebtPaymentModel>> getPayments(String id) async {
+    final response = await _dio.get(ApiEndpoints.debtPayments(id));
+    final list = response.data['data'] as List;
+    return list
+        .map((p) => DebtPaymentModel.fromJson(p as Map<String, dynamic>))
+        .toList();
+  }
 }

@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:wallet_app/data/models/subscription_model.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
 import '../../../core/utils/currency_formatter.dart';
+import '../../../navigation/route_names.dart';
 import '../bloc/subscriptions_bloc.dart';
 
 class SubscriptionCard extends StatelessWidget {
@@ -26,7 +28,12 @@ class SubscriptionCard extends StatelessWidget {
       onDismissed: (_) => context.read<SubscriptionsBloc>().add(
         SubscriptionDeleteRequested(sub.id),
       ),
-      child: Padding(
+      child: GestureDetector(
+        onTap: () => context.push(
+          RouteNames.subscriptionDetail(sub.id),
+          extra: sub,
+        ),
+        child: Padding(
         padding: const EdgeInsets.symmetric(
           horizontal: AppSpacing.pagePadding,
           vertical: AppSpacing.xs,
@@ -156,6 +163,7 @@ class SubscriptionCard extends StatelessWidget {
             ],
           ),
         ),
+      ),
       ),
     );
   }

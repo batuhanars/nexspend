@@ -104,6 +104,31 @@ class DebtSummaryModel {
       );
 }
 
+class DebtPaymentModel {
+  const DebtPaymentModel({
+    required this.id,
+    required this.amount,
+    required this.paidAt,
+    this.note,
+    this.installmentId,
+  });
+
+  final String id;
+  final double amount;
+  final DateTime paidAt;
+  final String? note;
+  final String? installmentId;
+
+  factory DebtPaymentModel.fromJson(Map<String, dynamic> json) =>
+      DebtPaymentModel(
+        id: json['id'] as String,
+        amount: (json['amount'] as num).toDouble(),
+        paidAt: DateTime.parse(json['paidAt'] as String),
+        note: json['note'] as String?,
+        installmentId: json['installmentId'] as String?,
+      );
+}
+
 class DebtInstallmentModel {
   const DebtInstallmentModel({
     required this.id,

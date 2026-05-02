@@ -14,7 +14,9 @@ class RouteNames {
   static const String budgets = '/budgets';
   static const String addBudget = '/budgets/add';
   static const String debts = '/debts';
+  static String debtDetail(String id) => '/debts/$id';
   static const String subscriptions = '/subscriptions';
+  static String subscriptionDetail(String id) => '/subscriptions/$id';
 
   // Hesaplar
   static const String accounts = '/accounts';
@@ -28,6 +30,7 @@ class RouteNames {
   // AppBar erişimli
   static const String reports = '/reports';
   static const String receiptScanner = '/receipt-scanner';
+  static const String receiptHistory = '/receipt-history';
   static const String settings = '/settings';
   static const String editProfile = '/settings/profile';
 }

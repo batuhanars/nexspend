@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:wallet_app/core/constants/app_colors.dart';
 import 'package:wallet_app/core/constants/app_spacing.dart';
 import 'package:wallet_app/core/constants/app_typography.dart';
 import 'package:wallet_app/core/utils/currency_formatter.dart';
 import 'package:wallet_app/data/models/debt_model.dart';
+import 'package:wallet_app/navigation/route_names.dart';
 import 'package:wallet_app/presentation/debts/bloc/debts_bloc.dart';
 import 'package:wallet_app/presentation/debts/widgets/payment_sheet.dart';
 
@@ -29,7 +31,9 @@ class DebtCard extends StatelessWidget {
       confirmDismiss: (_) => _confirmDelete(context),
       onDismissed: (_) =>
           context.read<DebtsBloc>().add(DebtDeleteRequested(debt.id)),
-      child: Padding(
+      child: GestureDetector(
+        onTap: () => context.push(RouteNames.debtDetail(debt.id), extra: debt),
+        child: Padding(
         padding: const EdgeInsets.symmetric(
           horizontal: AppSpacing.pagePadding,
           vertical: AppSpacing.xs,
@@ -179,6 +183,7 @@ class DebtCard extends StatelessWidget {
             ],
           ),
         ),
+      ),
       ),
     );
   }

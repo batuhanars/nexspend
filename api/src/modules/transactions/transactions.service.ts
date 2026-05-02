@@ -217,6 +217,7 @@ export class TransactionsService {
       new TransactionCreatedEvent(
         transaction.id,
         userId,
+        dto.accountId,
         dto.categoryId ?? null,
         dto.type,
         'MANUAL',

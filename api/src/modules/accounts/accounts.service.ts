@@ -1,16 +1,21 @@
 import {
   Injectable,
+  Logger,
   NotFoundException,
   BadRequestException,
 } from '@nestjs/common';
-import { AccountType } from '@prisma/client';
+import { AccountType, TransactionType } from '@prisma/client';
+import { OnEvent } from '@nestjs/event-emitter';
 import { startOfMonth, endOfMonth, subMonths } from 'date-fns';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CreateAccountDto } from './dto/create-account.dto';
 import { UpdateAccountDto } from './dto/update-account.dto';
+import { TransactionCreatedEvent } from '../../common/events/transaction.events';
 
 @Injectable()
 export class AccountsService {
+  private readonly logger = new Logger(AccountsService.name);
+
   constructor(private readonly prisma: PrismaService) {}
 
   async findAll(userId: string) {
@@ -309,6 +314,34 @@ export class AccountsService {
       limit,
       totalPages: Math.ceil(total / limit),
     };
+  }
+
+  // =============================================
+  // CC Limit Kontrolü (Event-Driven)
+  // =============================================
+
+  @OnEvent('transaction.created')
+  async onTransactionCreated(event: TransactionCreatedEvent) {
+    if (event.type !== TransactionType.EXPENSE) return;
+
+    const account = await this.prisma.account.findFirst({
+      where: { id: event.accountId, type: AccountType.CREDIT_CARD },
+      select: { name: true, balance: true, creditLimit: true },
+    });
+
+    if (!account || !account.creditLimit) return;
+
+    const limit = Number(account.creditLimit);
+    const used = Math.abs(Math.min(Number(account.balance), 0));
+    const pct = limit > 0 ? (used / limit) * 100 : 0;
+
+    if (pct >= 100) {
+      this.logger.warn(`💳 CC Limit AŞILDI [${account.name}] — %${Math.round(pct)} (${used}/${limit} TL)`);
+    } else if (pct >= 90) {
+      this.logger.warn(`💳 CC Limit KRİTİK [${account.name}] — %${Math.round(pct)} (${used}/${limit} TL)`);
+    } else if (pct >= 80) {
+      this.logger.log(`💳 CC Limit UYARISI [${account.name}] — %${Math.round(pct)} (${used}/${limit} TL)`);
+    }
   }
 
   private async findOwned(userId: string, id: string) {

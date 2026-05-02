@@ -4,6 +4,7 @@ export class TransactionCreatedEvent {
   constructor(
     public readonly transactionId: string,
     public readonly userId: string,
+    public readonly accountId: string,
     public readonly categoryId: string | null,
     public readonly type: TransactionType,
     public readonly source: TransactionSource,

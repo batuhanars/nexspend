@@ -86,6 +86,7 @@ export class RecurringTransactionJob {
         new TransactionCreatedEvent(
           transaction.id,
           template.userId,
+          template.accountId,
           template.categoryId,
           template.type,
           'RECURRING',

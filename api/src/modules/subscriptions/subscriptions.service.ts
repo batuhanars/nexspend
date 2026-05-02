@@ -224,6 +224,7 @@ export class SubscriptionsService {
       new TransactionCreatedEvent(
         transaction.id,
         userId,
+        sub.accountId,
         sub.categoryId ?? null,
         TransactionType.EXPENSE,
         TransactionSource.SUBSCRIPTION,

@@ -205,6 +205,7 @@ export class ReceiptsService {
       new TransactionCreatedEvent(
         result.id,
         userId,
+        dto.accountId,
         dto.categoryId ?? null,
         TransactionType.EXPENSE,
         TransactionSource.MANUAL,

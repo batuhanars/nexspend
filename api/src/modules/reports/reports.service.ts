@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { TransactionType } from '@prisma/client';
+import { TransactionSource, TransactionType } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import { QueryReportDto, ReportPeriod } from './dto/query-report.dto';
 
@@ -52,18 +52,21 @@ export class ReportsService {
 
     const transactions = await this.prisma.transaction.findMany({
       where,
-      select: { type: true, amount: true, transactionDate: true },
+      select: { type: true, amount: true, transactionDate: true, source: true },
     });
 
-    // Aylara göre grupla
+    // Aylara göre grupla — DEBT_COLLECTION gerçek gelir sayılmaz
     const monthMap = new Map<string, { income: number; expense: number }>();
 
     for (const t of transactions) {
       const key = `${t.transactionDate.getFullYear()}-${String(t.transactionDate.getMonth() + 1).padStart(2, '0')}`;
       if (!monthMap.has(key)) monthMap.set(key, { income: 0, expense: 0 });
       const entry = monthMap.get(key)!;
-      if (t.type === TransactionType.INCOME) entry.income += Number(t.amount);
-      else if (t.type === TransactionType.EXPENSE) entry.expense += Number(t.amount);
+      if (t.type === TransactionType.INCOME && t.source !== TransactionSource.DEBT_COLLECTION) {
+        entry.income += Number(t.amount);
+      } else if (t.type === TransactionType.EXPENSE) {
+        entry.expense += Number(t.amount);
+      }
     }
 
     return Array.from(monthMap.entries())
@@ -148,7 +151,7 @@ export class ReportsService {
 
     const [incomeAgg, expenseAgg] = await Promise.all([
       this.prisma.transaction.aggregate({
-        where: { ...where, type: TransactionType.INCOME },
+        where: { ...where, type: TransactionType.INCOME, source: { not: TransactionSource.DEBT_COLLECTION } },
         _sum: { amount: true },
       }),
       this.prisma.transaction.aggregate({

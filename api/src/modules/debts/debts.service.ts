@@ -221,6 +221,7 @@ export class DebtsService {
       new TransactionCreatedEvent(
         result.transaction.id,
         userId,
+        dto.accountId,
         systemCategory?.id ?? null,
         result.transaction.type,
         result.transaction.source,

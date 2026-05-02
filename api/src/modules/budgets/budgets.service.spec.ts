@@ -174,6 +174,7 @@ describe('BudgetsService', () => {
       const event = new TransactionCreatedEvent(
         'tx-1',
         USER_ID,
+        'acc-1',
         CATEGORY_ID,
         TransactionType.EXPENSE,
         TransactionSource.MANUAL,
@@ -192,6 +193,7 @@ describe('BudgetsService', () => {
       const event = new TransactionCreatedEvent(
         'tx-2',
         USER_ID,
+        'acc-1',
         CATEGORY_ID,
         TransactionType.INCOME,
         TransactionSource.MANUAL,

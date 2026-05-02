@@ -14,6 +14,7 @@ import { GoogleProfile } from './strategies/google.strategy';
 import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
 import { addHours } from 'date-fns';
+import axios from 'axios';
 
 export interface AuthTokens {
   accessToken: string;
@@ -119,6 +120,39 @@ export class AuthService {
       ...tokens,
       user: this.sanitizeUser(user),
     };
+  }
+
+  async googleMobileAuth(idToken: string): Promise<AuthResponse> {
+    interface GoogleTokenPayload {
+      sub: string;
+      email: string;
+      name?: string;
+      picture?: string;
+      aud?: string;
+    }
+
+    let payload: GoogleTokenPayload;
+    try {
+      const { data } = await axios.get<GoogleTokenPayload>(
+        `https://oauth2.googleapis.com/tokeninfo?id_token=${idToken}`,
+      );
+      payload = data;
+    } catch {
+      throw new UnauthorizedException('Geçersiz Google token');
+    }
+
+    if (!payload.sub || !payload.email) {
+      throw new UnauthorizedException('Geçersiz Google token');
+    }
+
+    const profile: GoogleProfile = {
+      id: payload.sub,
+      email: payload.email,
+      fullName: payload.name ?? payload.email,
+      picture: payload.picture,
+    };
+
+    return this.googleAuth(profile);
   }
 
   refresh(userId: string, email: string): AuthTokens {

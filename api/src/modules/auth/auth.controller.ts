@@ -68,7 +68,14 @@ export class AuthController {
     return { message: 'Şifreniz başarıyla güncellendi' };
   }
 
-  // Google OAuth — redirect flow
+  // Google OAuth — mobile (ID token flow)
+  @Post('google/mobile')
+  @HttpCode(HttpStatus.OK)
+  async googleMobileAuth(@Body() dto: { idToken: string }) {
+    return this.authService.googleMobileAuth(dto.idToken);
+  }
+
+  // Google OAuth — redirect flow (web)
   @Get('google')
   @UseGuards(GoogleAuthGuard)
   googleAuth() {

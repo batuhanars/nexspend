@@ -50,8 +50,9 @@ class NotificationService {
         '/users/me/fcm-token',
         data: {'fcmToken': token},
       );
-    } catch (_) {
-      // Token kaydedilemezse sessizce geç — sonraki açılışta tekrar dener
+      if (kDebugMode) print('[FCM] Token backend\'e kaydedildi.');
+    } catch (e) {
+      if (kDebugMode) print('[FCM] Token kaydedilemedi: $e');
     }
   }
 }

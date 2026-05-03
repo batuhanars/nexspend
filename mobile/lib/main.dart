@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'app.dart';
 import 'core/di/injection.dart';
-import 'core/services/notification_service.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
 void main() async {
@@ -26,8 +25,6 @@ void main() async {
 
   await configureDependencies();
   await initializeDateFormatting('tr_TR', null);
-
-  await getIt<NotificationService>().initialize();
 
   runApp(const WalletApp());
 }

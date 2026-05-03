@@ -1,12 +1,14 @@
 class ApiEndpoints {
   ApiEndpoints._();
 
-  static const String baseUrl = 'http://10.0.2.2:3000'; // Android emulator → localhost
+  static const String baseUrl =
+      'https://wallet-api.up.railway.app'; // Android emulator → localhost
 
   // Auth
   static const String register = '/api/auth/register';
   static const String login = '/api/auth/login';
   static const String googleAuth = '/api/auth/google';
+  static const String googleMobileAuth = '/api/auth/google/mobile';
   static const String forgotPassword = '/api/auth/forgot-password';
   static const String resetPassword = '/api/auth/reset-password';
   static const String refresh = '/api/auth/refresh';
@@ -25,7 +27,8 @@ class ApiEndpoints {
   static const String accounts = '/api/accounts';
   static const String accountsSummary = '/api/accounts/summary';
   static String accountById(String id) => '/api/accounts/$id';
-  static String accountTransactions(String id) => '/api/accounts/$id/transactions';
+  static String accountTransactions(String id) =>
+      '/api/accounts/$id/transactions';
   static String accountAnalytics(String id) => '/api/accounts/$id/analytics';
   static String accountStatement(String id) => '/api/accounts/$id/statement';
   static String accountArchive(String id) => '/api/accounts/$id/archive';
@@ -54,7 +57,8 @@ class ApiEndpoints {
   static const String subscriptionsSummary = '/api/subscriptions/summary';
   static const String subscriptionsUpcoming = '/api/subscriptions/upcoming';
   static String subscriptionById(String id) => '/api/subscriptions/$id';
-  static String subscriptionToggle(String id) => '/api/subscriptions/$id/toggle';
+  static String subscriptionToggle(String id) =>
+      '/api/subscriptions/$id/toggle';
 
   // Categories
   static const String categories = '/api/categories';
@@ -70,7 +74,8 @@ class ApiEndpoints {
   static String tagById(String id) => '/api/tags/$id';
 
   // Reports
-  static const String reportsExpenseDistribution = '/api/reports/expense-distribution';
+  static const String reportsExpenseDistribution =
+      '/api/reports/expense-distribution';
   static const String reportsCashFlow = '/api/reports/cash-flow';
   static const String reportsTrends = '/api/reports/trends';
 
@@ -78,6 +83,7 @@ class ApiEndpoints {
   static const String receiptsScan = '/api/receipts/scan';
   static const String receipts = '/api/receipts';
   static String receiptById(String id) => '/api/receipts/$id';
-  static String receiptCreateTransaction(String id) => '/api/receipts/$id/create-transaction';
+  static String receiptCreateTransaction(String id) =>
+      '/api/receipts/$id/create-transaction';
   static const String receiptsCheckDuplicate = '/api/receipts/check-duplicate';
 }

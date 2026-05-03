@@ -5,6 +5,7 @@ import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
 import '../../../core/di/injection.dart';
+import '../../../core/storage/secure_storage.dart';
 import '../../../data/repositories/user_repository.dart';
 import '../bloc/settings_bloc.dart';
 
@@ -29,8 +30,10 @@ class _EditProfilePageState extends State<EditProfilePage> {
   Widget build(BuildContext context) {
     // Wrap in BlocProvider only if there isn't one higher in the tree
     return BlocProvider(
-      create: (_) => SettingsBloc(userRepository: getIt<UserRepository>())
-        ..add(const SettingsLoadRequested()),
+      create: (_) => SettingsBloc(
+            userRepository: getIt<UserRepository>(),
+            storage: getIt<SecureStorage>(),
+          )..add(const SettingsLoadRequested()),
       child: BlocConsumer<SettingsBloc, SettingsState>(
         listener: (context, state) {
           if (state is SettingsLoaded && state.successMessage != null) {

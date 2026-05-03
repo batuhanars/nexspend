@@ -54,6 +54,10 @@ final class GoogleSignInRequested extends AuthEvent {
   const GoogleSignInRequested();
 }
 
+final class BiometricAuthRequested extends AuthEvent {
+  const BiometricAuthRequested();
+}
+
 final class LogoutRequested extends AuthEvent {
   const LogoutRequested();
 }

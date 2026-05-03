@@ -22,8 +22,34 @@ class TransactionsPage extends StatelessWidget {
   }
 }
 
-class _TransactionsView extends StatelessWidget {
+class _TransactionsView extends StatefulWidget {
   const _TransactionsView();
+
+  @override
+  State<_TransactionsView> createState() => _TransactionsViewState();
+}
+
+class _TransactionsViewState extends State<_TransactionsView> {
+  final _scrollController = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent - 200) {
+      context.read<TransactionsBloc>().add(TransactionsLoadMoreRequested());
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -35,8 +61,9 @@ class _TransactionsView extends StatelessWidget {
             onRefresh: () async =>
                 context.read<TransactionsBloc>().add(TransactionsRefreshRequested()),
             child: CustomScrollView(
+              controller: _scrollController,
               slivers: [
-                _buildAppBar(context),
+                _buildAppBar(),
                 if (state is TransactionsLoading)
                   const SliverFillRemaining(
                     hasScrollBody: false,
@@ -58,8 +85,25 @@ class _TransactionsView extends StatelessWidget {
                   ),
                   if (state.transactions.isEmpty)
                     const SliverFillRemaining(child: EmptyView())
-                  else
+                  else ...[
                     TransactionList(grouped: state.grouped),
+                    if (state.isLoadingMore)
+                      const SliverToBoxAdapter(
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(vertical: 16),
+                          child: Center(
+                            child: SizedBox(
+                              width: 24,
+                              height: 24,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: AppColors.primary,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
                 ],
               ],
             ),
@@ -80,7 +124,7 @@ class _TransactionsView extends StatelessWidget {
     );
   }
 
-  SliverAppBar _buildAppBar(BuildContext context) {
+  SliverAppBar _buildAppBar() {
     return SliverAppBar(
       floating: true,
       title: Text('İşlemler', style: AppTypography.headlineSm),

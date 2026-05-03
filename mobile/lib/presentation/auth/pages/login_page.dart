@@ -4,6 +4,9 @@ import 'package:go_router/go_router.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
+import '../../../core/di/injection.dart';
+import '../../../core/services/local_auth_service.dart';
+import '../../../core/storage/secure_storage.dart';
 import '../../../core/utils/validators.dart';
 import '../../../navigation/route_names.dart';
 import '../bloc/auth_bloc.dart';
@@ -24,6 +27,41 @@ class _LoginPageState extends State<LoginPage> {
   final _passwordController = TextEditingController();
   final _emailFocus = FocusNode();
   final _passwordFocus = FocusNode();
+  bool _showBiometric = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkBiometric();
+  }
+
+  Future<void> _checkBiometric() async {
+    try {
+      final storage = getIt<SecureStorage>();
+      final biometricEnabled = await storage.getBiometricEnabled();
+      final hasToken = await storage.hasTokens();
+      if (!biometricEnabled || !hasToken) return;
+
+      final localAuth = getIt<LocalAuthService>();
+      final isAvailable = await localAuth.isAvailable();
+
+      if (!isAvailable) {
+        if (mounted) context.go(RouteNames.home);
+        return;
+      }
+
+      if (mounted) {
+        setState(() => _showBiometric = true);
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) {
+            context.read<AuthBloc>().add(const BiometricAuthRequested());
+          }
+        });
+      }
+    } catch (_) {
+      // Biyometrik kontrol başarısız olursa sessizce geç
+    }
+  }
 
   @override
   void dispose() {
@@ -135,6 +173,14 @@ class _LoginPageState extends State<LoginPage> {
                       );
                     },
                   ),
+                  if (_showBiometric) ...[
+                    const SizedBox(height: AppSpacing.md),
+                    _BiometricButton(
+                      onPressed: () => context
+                          .read<AuthBloc>()
+                          .add(const BiometricAuthRequested()),
+                    ),
+                  ],
                   const SizedBox(height: AppSpacing.xxl),
                   _RegisterLink(),
                   const SizedBox(height: AppSpacing.xl),
@@ -207,6 +253,36 @@ class _Divider extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _BiometricButton extends StatelessWidget {
+  const _BiometricButton({required this.onPressed});
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: double.infinity,
+      height: 56,
+      child: OutlinedButton.icon(
+        onPressed: onPressed,
+        icon: const Icon(Icons.fingerprint_rounded, size: 24),
+        label: Text(
+          'Parmak İzi ile Giriş',
+          style: AppTypography.bodyMd.copyWith(fontWeight: FontWeight.w600),
+        ),
+        style: OutlinedButton.styleFrom(
+          foregroundColor: AppColors.primary,
+          side: BorderSide(
+            color: AppColors.primary.withValues(alpha: 0.4),
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
+          ),
+        ),
+      ),
     );
   }
 }

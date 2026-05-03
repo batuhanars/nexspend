@@ -1,23 +1,29 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../core/services/local_auth_service.dart';
 import '../../../data/repositories/auth_repository.dart';
 
 part 'auth_event.dart';
 part 'auth_state.dart';
 
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
-  AuthBloc({required AuthRepository authRepository})
-      : _authRepository = authRepository,
+  AuthBloc({
+    required AuthRepository authRepository,
+    required LocalAuthService localAuthService,
+  })  : _authRepository = authRepository,
+        _localAuthService = localAuthService,
         super(const AuthInitial()) {
     on<LoginRequested>(_onLoginRequested);
     on<RegisterRequested>(_onRegisterRequested);
     on<ForgotPasswordRequested>(_onForgotPasswordRequested);
     on<ResetPasswordRequested>(_onResetPasswordRequested);
     on<GoogleSignInRequested>(_onGoogleSignInRequested);
+    on<BiometricAuthRequested>(_onBiometricAuthRequested);
     on<LogoutRequested>(_onLogoutRequested);
   }
 
   final AuthRepository _authRepository;
+  final LocalAuthService _localAuthService;
 
   Future<void> _onLoginRequested(
     LoginRequested event,
@@ -89,6 +95,23 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     try {
       await _authRepository.googleSignIn();
       emit(const AuthAuthenticated());
+    } catch (e) {
+      emit(AuthFailure(message: _parseError(e)));
+    }
+  }
+
+  Future<void> _onBiometricAuthRequested(
+    BiometricAuthRequested event,
+    Emitter<AuthState> emit,
+  ) async {
+    emit(const AuthLoading());
+    try {
+      final success = await _localAuthService.authenticate();
+      if (success) {
+        emit(const AuthAuthenticated());
+      } else {
+        emit(const AuthInitial());
+      }
     } catch (e) {
       emit(AuthFailure(message: _parseError(e)));
     }

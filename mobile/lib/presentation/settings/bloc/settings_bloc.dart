@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../core/storage/secure_storage.dart';
 import '../../../data/models/user_model.dart';
 import '../../../data/repositories/user_repository.dart';
 
@@ -6,8 +7,11 @@ part 'settings_event.dart';
 part 'settings_state.dart';
 
 class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
-  SettingsBloc({required UserRepository userRepository})
-      : _repo = userRepository,
+  SettingsBloc({
+    required UserRepository userRepository,
+    required SecureStorage storage,
+  })  : _repo = userRepository,
+        _storage = storage,
         super(SettingsInitial()) {
     on<SettingsLoadRequested>(_onLoad);
     on<SettingsProfileUpdated>(_onProfileUpdated);
@@ -18,6 +22,7 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
   }
 
   final UserRepository _repo;
+  final SecureStorage _storage;
 
   Future<void> _onLoad(
       SettingsLoadRequested event, Emitter<SettingsState> emit) async {
@@ -102,6 +107,9 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
     try {
       final updated =
           await _repo.updateMe({event.field == 'biometric' ? 'biometricEnabled' : 'notificationsEnabled': event.value});
+      if (event.field == 'biometric') {
+        await _storage.saveBiometricEnabled(event.value);
+      }
       emit(SettingsLoaded(user: updated));
     } catch (_) {
       emit(SettingsLoaded(user: current.user));

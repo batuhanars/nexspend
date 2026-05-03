@@ -11,6 +11,7 @@ import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
 import '../../../core/di/injection.dart';
+import '../../../core/storage/secure_storage.dart';
 import '../../../data/repositories/user_repository.dart';
 import '../../../navigation/route_names.dart';
 import '../bloc/settings_bloc.dart';
@@ -21,9 +22,10 @@ class SettingsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) =>
-          SettingsBloc(userRepository: getIt<UserRepository>())
-            ..add(const SettingsLoadRequested()),
+      create: (_) => SettingsBloc(
+            userRepository: getIt<UserRepository>(),
+            storage: getIt<SecureStorage>(),
+          )..add(const SettingsLoadRequested()),
       child: const _SettingsView(),
     );
   }

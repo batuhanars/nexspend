@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import '../../core/constants/api_endpoints.dart';
 import '../../core/network/api_client.dart';
 import '../../core/storage/secure_storage.dart';
@@ -10,6 +11,10 @@ class AuthRepository {
 
   final Dio _dio;
   final SecureStorage _storage;
+  final _googleSignIn = GoogleSignIn(
+    serverClientId: '31697958728-08g4o12cre3s1hle79v1gabugvviuvba.apps.googleusercontent.com',
+    scopes: ['email', 'profile'],
+  );
 
   Future<void> login({required String email, required String password}) async {
     final response = await _dio.post(
@@ -54,9 +59,22 @@ class AuthRepository {
   }
 
   Future<void> googleSignIn() async {
-    // Google Sign-In token'ı backend'e gönder
-    // google_sign_in paketi ile entegrasyon Sprint 1 sonunda yapılacak
-    throw UnimplementedError('Google Sign-In henüz implemente edilmedi');
+    final account = await _googleSignIn.signIn();
+    if (account == null) throw Exception('Google Sign-In iptal edildi');
+
+    final auth = await account.authentication;
+    final idToken = auth.idToken;
+    if (idToken == null) throw Exception('Google ID token alınamadı');
+
+    final response = await _dio.post(
+      ApiEndpoints.googleMobileAuth,
+      data: {'idToken': idToken},
+    );
+    final data = response.data['data'];
+    await _storage.saveTokens(
+      accessToken: data['accessToken'] as String,
+      refreshToken: data['refreshToken'] as String,
+    );
   }
 
   Future<void> logout() async {

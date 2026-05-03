@@ -10,6 +10,56 @@ import '../bloc/auth_bloc.dart';
 import '../widgets/auth_button.dart';
 import '../widgets/auth_input_field.dart';
 
+class _PasswordChecklist extends StatelessWidget {
+  const _PasswordChecklist({required this.controller});
+  final TextEditingController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder<TextEditingValue>(
+      valueListenable: controller,
+      builder: (context, value, _) {
+        final p = value.text;
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _CheckItem('En az 8 karakter', Validators.hasMinLength(p)),
+            const SizedBox(height: AppSpacing.xs),
+            _CheckItem('Büyük harf içeriyor', Validators.hasUppercase(p)),
+            const SizedBox(height: AppSpacing.xs),
+            _CheckItem('Rakam içeriyor', Validators.hasNumber(p)),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class _CheckItem extends StatelessWidget {
+  const _CheckItem(this.label, this.met);
+  final String label;
+  final bool met;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = met ? AppColors.secondary : AppColors.onSurfaceVariant;
+    return Row(
+      children: [
+        Icon(
+          met ? Icons.check_circle_rounded : Icons.circle_outlined,
+          size: 16,
+          color: color,
+        ),
+        const SizedBox(width: AppSpacing.sm),
+        Text(
+          label,
+          style: AppTypography.bodySm.copyWith(color: color),
+        ),
+      ],
+    );
+  }
+}
+
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
 
@@ -130,6 +180,13 @@ class _RegisterPageState extends State<RegisterPage> {
                     autofillHints: const [AutofillHints.newPassword],
                     validator: Validators.password,
                     onFieldSubmitted: (_) => _confirmPasswordFocus.requestFocus(),
+                  ),
+                  const SizedBox(height: AppSpacing.sm),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.sm,
+                    ),
+                    child: _PasswordChecklist(controller: _passwordController),
                   ),
                   const SizedBox(height: AppSpacing.md),
                   AuthInputField(

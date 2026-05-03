@@ -33,4 +33,14 @@ class SecureStorage {
     final token = await _storage.read(key: _accessTokenKey);
     return token != null && token.isNotEmpty;
   }
+
+  static const _biometricEnabledKey = 'biometric_enabled';
+
+  Future<void> saveBiometricEnabled(bool value) =>
+      _storage.write(key: _biometricEnabledKey, value: value.toString());
+
+  Future<bool> getBiometricEnabled() async {
+    final val = await _storage.read(key: _biometricEnabledKey);
+    return val == 'true';
+  }
 }

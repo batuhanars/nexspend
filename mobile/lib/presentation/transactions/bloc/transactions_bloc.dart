@@ -12,18 +12,22 @@ class TransactionsBloc extends Bloc<TransactionsEvent, TransactionsState> {
         super(TransactionsInitial()) {
     on<TransactionsLoadRequested>(_onLoad);
     on<TransactionsRefreshRequested>(_onRefresh);
+    on<TransactionsLoadMoreRequested>(_onLoadMore);
     on<TransactionsFilterChanged>(_onFilterChanged);
     on<TransactionDeleteRequested>(_onDelete);
   }
 
   final TransactionRepository _repo;
   String? _currentFilter;
+  int _currentPage = 1;
+  static const int _pageSize = 20;
 
   Future<void> _onLoad(
     TransactionsLoadRequested event,
     Emitter<TransactionsState> emit,
   ) async {
     emit(TransactionsLoading());
+    _currentPage = 1;
     await _fetch(emit);
   }
 
@@ -31,7 +35,36 @@ class TransactionsBloc extends Bloc<TransactionsEvent, TransactionsState> {
     TransactionsRefreshRequested event,
     Emitter<TransactionsState> emit,
   ) async {
+    _currentPage = 1;
     await _fetch(emit);
+  }
+
+  Future<void> _onLoadMore(
+    TransactionsLoadMoreRequested event,
+    Emitter<TransactionsState> emit,
+  ) async {
+    final current = state;
+    if (current is! TransactionsLoaded || !current.hasMore || current.isLoadingMore) {
+      return;
+    }
+    emit(current.copyWith(isLoadingMore: true));
+
+    try {
+      final nextPage = _currentPage + 1;
+      final txResult = await _repo.getTransactions(
+        type: _currentFilter,
+        page: nextPage,
+        limit: _pageSize,
+      );
+      _currentPage = nextPage;
+      emit(current.copyWith(
+        transactions: [...current.transactions, ...txResult.data],
+        hasMore: nextPage < txResult.totalPages,
+        isLoadingMore: false,
+      ));
+    } catch (_) {
+      emit(current.copyWith(isLoadingMore: false));
+    }
   }
 
   Future<void> _onFilterChanged(
@@ -39,6 +72,7 @@ class TransactionsBloc extends Bloc<TransactionsEvent, TransactionsState> {
     Emitter<TransactionsState> emit,
   ) async {
     _currentFilter = event.filter;
+    _currentPage = 1;
     await _fetch(emit);
   }
 
@@ -74,7 +108,11 @@ class TransactionsBloc extends Bloc<TransactionsEvent, TransactionsState> {
   Future<void> _fetch(Emitter<TransactionsState> emit) async {
     try {
       final results = await Future.wait([
-        _repo.getTransactions(type: _currentFilter, limit: 50),
+        _repo.getTransactions(
+          type: _currentFilter,
+          page: 1,
+          limit: _pageSize,
+        ),
         _repo.getSummary(),
       ]);
 
@@ -89,6 +127,7 @@ class TransactionsBloc extends Bloc<TransactionsEvent, TransactionsState> {
         expense: summary.expense,
         net: summary.net,
         filter: _currentFilter,
+        hasMore: txResult.totalPages > 1,
       ));
     } catch (e) {
       emit(TransactionsError(_parseError(e)));

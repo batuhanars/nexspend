@@ -13,6 +13,8 @@ class TransactionsLoaded extends TransactionsState {
     required this.expense,
     required this.net,
     required this.filter,
+    this.hasMore = false,
+    this.isLoadingMore = false,
   });
 
   final List<TransactionModel> transactions;
@@ -20,6 +22,28 @@ class TransactionsLoaded extends TransactionsState {
   final double expense;
   final double net;
   final String? filter;
+  final bool hasMore;
+  final bool isLoadingMore;
+
+  TransactionsLoaded copyWith({
+    List<TransactionModel>? transactions,
+    double? income,
+    double? expense,
+    double? net,
+    String? filter,
+    bool? hasMore,
+    bool? isLoadingMore,
+  }) {
+    return TransactionsLoaded(
+      transactions: transactions ?? this.transactions,
+      income: income ?? this.income,
+      expense: expense ?? this.expense,
+      net: net ?? this.net,
+      filter: filter ?? this.filter,
+      hasMore: hasMore ?? this.hasMore,
+      isLoadingMore: isLoadingMore ?? this.isLoadingMore,
+    );
+  }
 
   Map<String, List<TransactionModel>> get grouped {
     final sorted = [...transactions]..sort((a, b) => b.date.compareTo(a.date));

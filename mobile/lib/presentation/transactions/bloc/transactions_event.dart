@@ -6,6 +6,8 @@ class TransactionsLoadRequested extends TransactionsEvent {}
 
 class TransactionsRefreshRequested extends TransactionsEvent {}
 
+class TransactionsLoadMoreRequested extends TransactionsEvent {}
+
 class TransactionsFilterChanged extends TransactionsEvent {
   TransactionsFilterChanged(this.filter);
   final String? filter; // null = hepsi

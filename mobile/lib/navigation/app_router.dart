@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../core/di/injection.dart';
+import '../core/services/local_auth_service.dart';
 import '../core/storage/secure_storage.dart';
 import '../data/repositories/auth_repository.dart';
 import '../presentation/auth/bloc/auth_bloc.dart';
@@ -67,7 +68,10 @@ GoRouter createRouter() {
         path: RouteNames.login,
         name: 'login',
         builder: (context, _) => BlocProvider(
-          create: (_) => AuthBloc(authRepository: getIt<AuthRepository>()),
+          create: (_) => AuthBloc(
+            authRepository: getIt<AuthRepository>(),
+            localAuthService: getIt<LocalAuthService>(),
+          ),
           child: const LoginPage(),
         ),
       ),
@@ -75,7 +79,10 @@ GoRouter createRouter() {
         path: RouteNames.register,
         name: 'register',
         builder: (context, _) => BlocProvider(
-          create: (_) => AuthBloc(authRepository: getIt<AuthRepository>()),
+          create: (_) => AuthBloc(
+            authRepository: getIt<AuthRepository>(),
+            localAuthService: getIt<LocalAuthService>(),
+          ),
           child: const RegisterPage(),
         ),
       ),
@@ -83,7 +90,10 @@ GoRouter createRouter() {
         path: RouteNames.forgotPassword,
         name: 'forgot-password',
         builder: (context, _) => BlocProvider(
-          create: (_) => AuthBloc(authRepository: getIt<AuthRepository>()),
+          create: (_) => AuthBloc(
+            authRepository: getIt<AuthRepository>(),
+            localAuthService: getIt<LocalAuthService>(),
+          ),
           child: const ForgotPasswordPage(),
         ),
       ),
@@ -93,7 +103,10 @@ GoRouter createRouter() {
         builder: (_, state) {
           final token = state.uri.queryParameters['token'] ?? '';
           return BlocProvider(
-            create: (_) => AuthBloc(authRepository: getIt<AuthRepository>()),
+            create: (_) => AuthBloc(
+            authRepository: getIt<AuthRepository>(),
+            localAuthService: getIt<LocalAuthService>(),
+          ),
             child: ResetPasswordPage(token: token),
           );
         },
@@ -322,6 +335,15 @@ Future<String?> _redirect(BuildContext context, GoRouterState state) async {
       state.matchedLocation == RouteNames.resetPassword;
 
   if (!isLoggedIn && !isOnAuthPage) return RouteNames.login;
-  if (isLoggedIn && isOnAuthPage) return RouteNames.home;
+
+  if (isLoggedIn && isOnAuthPage) {
+    // Biometric açıksa login sayfasında kal — LoginPage tetikleyecek
+    final biometricEnabled = await storage.getBiometricEnabled();
+    if (biometricEnabled && state.matchedLocation == RouteNames.login) {
+      return null;
+    }
+    return RouteNames.home;
+  }
+
   return null;
 }

@@ -1,5 +1,6 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
+import '../constants/api_endpoints.dart';
 import '../network/api_client.dart';
 
 @pragma('vm:entry-point')
@@ -22,14 +23,29 @@ class NotificationService {
       sound: true,
     );
 
-    if (settings.authorizationStatus != AuthorizationStatus.authorized &&
-        settings.authorizationStatus != AuthorizationStatus.provisional) {
+    if (kDebugMode) {
+      print('[FCM] İzin durumu: ${settings.authorizationStatus}');
+    }
+
+    if (settings.authorizationStatus == AuthorizationStatus.denied) {
+      if (kDebugMode) print('[FCM] Bildirim izni reddedildi, token alınmıyor.');
       return;
     }
 
-    final token = await FirebaseMessaging.instance.getToken();
-    if (token != null) {
-      await _registerToken(token);
+    try {
+      final token = await FirebaseMessaging.instance.getToken();
+      if (kDebugMode) print('[FCM] getToken() sonucu: $token');
+      if (token != null) {
+        await _registerToken(token);
+      } else {
+        if (kDebugMode) {
+          print(
+            '[FCM] Token null — emülatörde Google Play Services olmayabilir.',
+          );
+        }
+      }
+    } catch (e) {
+      if (kDebugMode) print('[FCM] getToken() hatası: $e');
     }
 
     FirebaseMessaging.instance.onTokenRefresh.listen(_registerToken);
@@ -47,7 +63,7 @@ class NotificationService {
   Future<void> _registerToken(String token) async {
     try {
       await _apiClient.dio.patch(
-        '/users/me/fcm-token',
+        ApiEndpoints.meFcmToken,
         data: {'fcmToken': token},
       );
       if (kDebugMode) print('[FCM] Token backend\'e kaydedildi.');

@@ -19,6 +19,7 @@ class _AppShellState extends State<AppShell> {
   @override
   void initState() {
     super.initState();
+    debugPrint('[AppShell] initState — NotificationService başlatılıyor');
     getIt<NotificationService>().initialize();
   }
 

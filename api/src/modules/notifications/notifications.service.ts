@@ -8,21 +8,39 @@ export class NotificationsService {
   private messaging: admin.messaging.Messaging | null = null;
 
   constructor(private readonly prisma: PrismaService) {
-    const projectId = process.env.FIREBASE_PROJECT_ID;
-    const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
-    const privateKey = process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n');
+    try {
+      const serviceAccountJson = process.env.FIREBASE_SERVICE_ACCOUNT_JSON;
+      let credential: admin.credential.Credential;
 
-    if (projectId && clientEmail && privateKey) {
-      const app = admin.initializeApp({
-        credential: admin.credential.cert({ projectId, clientEmail, privateKey }),
-      });
+      if (serviceAccountJson) {
+        const parsed = JSON.parse(serviceAccountJson);
+        credential = admin.credential.cert(parsed);
+      } else {
+        const projectId = process.env.FIREBASE_PROJECT_ID;
+        const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
+        const privateKey = process.env.FIREBASE_PRIVATE_KEY?.replace(
+          /\\n/g,
+          '\n',
+        );
+        if (!projectId || !clientEmail || !privateKey) {
+          this.logger.warn(
+            `Firebase ortam değişkenleri eksik — FCM devre dışı` +
+              ` (PROJECT_ID=${!!projectId}, CLIENT_EMAIL=${!!clientEmail}, PRIVATE_KEY=${!!privateKey})`,
+          );
+          return;
+        }
+        credential = admin.credential.cert({
+          projectId,
+          clientEmail,
+          privateKey,
+        });
+      }
+
+      const app = admin.initializeApp({ credential });
       this.messaging = admin.messaging(app);
       this.logger.log('Firebase Admin SDK başlatıldı — FCM aktif');
-    } else {
-      this.logger.warn(
-        `Firebase ortam değişkenleri eksik — FCM devre dışı` +
-          ` (PROJECT_ID=${!!projectId}, CLIENT_EMAIL=${!!clientEmail}, PRIVATE_KEY=${!!privateKey})`,
-      );
+    } catch (err: any) {
+      this.logger.error(`Firebase başlatılamadı: ${err?.message}`);
     }
   }
 

@@ -1,6 +1,8 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../core/di/injection.dart';
 import '../../../core/services/local_auth_service.dart';
+import '../../../core/services/notification_service.dart';
 import '../../../data/repositories/auth_repository.dart';
 
 part 'auth_event.dart';
@@ -36,6 +38,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         password: event.password,
       );
       emit(const AuthAuthenticated());
+      getIt<NotificationService>().initialize();
     } catch (e) {
       emit(AuthFailure(message: _parseError(e)));
     }
@@ -53,6 +56,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         password: event.password,
       );
       emit(const AuthAuthenticated());
+      getIt<NotificationService>().initialize();
     } catch (e) {
       emit(AuthFailure(message: _parseError(e)));
     }
@@ -95,6 +99,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     try {
       await _authRepository.googleSignIn();
       emit(const AuthAuthenticated());
+      getIt<NotificationService>().initialize();
     } catch (e) {
       emit(AuthFailure(message: _parseError(e)));
     }

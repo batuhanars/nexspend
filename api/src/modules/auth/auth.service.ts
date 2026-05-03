@@ -145,6 +145,11 @@ export class AuthService {
       throw new UnauthorizedException('Geçersiz Google token');
     }
 
+    const expectedClientId = this.configService.get<string>('google.clientId');
+    if (payload.aud !== expectedClientId) {
+      throw new UnauthorizedException('Geçersiz Google token');
+    }
+
     const profile: GoogleProfile = {
       id: payload.sub,
       email: payload.email,

@@ -15,6 +15,7 @@ import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
+import { GoogleMobileAuthDto } from './dto/google-mobile-auth.dto';
 import { RefreshTokenGuard } from '../../common/guards/refresh-token.guard';
 import { GoogleAuthGuard } from '../../common/guards/google-auth.guard';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
@@ -71,7 +72,7 @@ export class AuthController {
   // Google OAuth — mobile (ID token flow)
   @Post('google/mobile')
   @HttpCode(HttpStatus.OK)
-  async googleMobileAuth(@Body() dto: { idToken: string }) {
+  async googleMobileAuth(@Body() dto: GoogleMobileAuthDto) {
     return this.authService.googleMobileAuth(dto.idToken);
   }
 

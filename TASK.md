@@ -1,6 +1,6 @@
 # Stitch Wallet App — Görev Takip Dosyası
 
-> Son güncelleme: 2 Mayıs 2026 (Sprint 5-6 detay sayfaları + Sprint 8 optimizasyon + DebtsBloc/BudgetsBloc testleri + timezone/sıralama düzeltmeleri)  
+> Son güncelleme: 3 Mayıs 2026 (Sprint 1 backend Google OAuth güvenlik: `aud` claim doğrulaması + `GoogleMobileAuthDto` + `GOOGLE_CLIENT_ID` .env yapılandırması tamamlandı)  
 > ✅ = Tamamlandı | 🔧 = Kısmen yapıldı | ❌ = Henüz başlanmadı  
 > ☑ = Kodda mevcut ancak migration henüz çalıştırılmadı
 
@@ -63,7 +63,7 @@
 - [x] `POST /api/auth/logout`
 - [x] JwtAuthGuard + RefreshTokenGuard
 - [x] @CurrentUser() decorator
-- [x] `POST /api/auth/google` — Google OAuth entegrasyonu
+- [x] `POST /api/auth/google/mobile` — Google OAuth entegrasyonu (ID token flow; `aud` claim → `GOOGLE_CLIENT_ID` doğrulaması, `GoogleMobileAuthDto` validasyonu)
 - [x] E-posta gönderimi (nodemailer) — şifre sıfırlama bağlantısı
 
 ### Frontend
@@ -74,8 +74,8 @@
 - [x] AuthBloc (login/register/forgot/reset state yönetimi)
 - [x] AuthRepository
 - [x] Token yönetimi (secure storage + Dio interceptor)
-- [ ] Google Sign-In entegrasyonu (buton var, backend hazır — `googleSignIn()` UnimplementedError)
-- [ ] Şifre güvenlik kuralları checklist UI (tasarımdaki gibi — validator var, görsel checklist yok)
+- [x] Google Sign-In entegrasyonu — `POST /api/auth/google/mobile` (ID token → tokeninfo doğrulama), mobile `google_sign_in` paketi ile implemente edildi
+- [x] Şifre güvenlik kuralları checklist UI — `_PasswordChecklist` widget, `ValueListenableBuilder` ile canlı güncelleniyor (min 8 karakter, büyük harf, rakam)
 
 ---
 
@@ -460,12 +460,12 @@
 
 ### Optimizasyon & Son Dokunuşlar
 - [x] Shimmer loading animasyonları (TransactionsShimmer, DebtsShimmer, SubscriptionsShimmer, BudgetsShimmer — gerçek Shimmer.fromColors animasyonu)
-- [ ] Empty state ekranları (veri yokken gösterilecek UI) — mevcut temel empty state'ler var
+- [x] Empty state ekranları — EmptyBudgetsView, EmptyView (debts/subscriptions/transactions) mevcut, tasarıma uygun
 - [x] Error handling ekranları — ErrorView'lar bloc-bağımsız onRetry callback'e dönüştürüldü (transactions, debts, subscriptions)
-- [ ] Lazy loading + infinite scroll (işlem listesi)
+- [x] Lazy loading + infinite scroll — TransactionsBloc pagination (sayfa başına 20), ScrollController ile scroll listener, `isLoadingMore` spinner
 - [x] Image caching (profil fotoğrafları — CachedNetworkImage ile değiştirildi)
 - [ ] App icon tasarımı
-- [ ] Splash screen
+- [x] Splash screen — `flutter_native_splash` ile #131313 renk, Android + iOS oluşturuldu
 - [ ] Android store hazırlığı (signing, listing)
 - [ ] iOS store hazırlığı (provisioning, listing)
 
@@ -639,21 +639,21 @@
 | Sprint | Modül | Backend | Frontend | Durum |
 |--------|-------|---------|----------|-------|
 | Sprint 0 | Proje Kurulumu | 🔧 %90 | 🔧 %90 | 🔧 CI/CD eksik |
-| Sprint 1 | Auth | ✅ %100 | 🔧 %78 | 🔧 Google Sign-In + şifre checklist eksik |
+| Sprint 1 | Auth | ✅ %100 | ✅ %100 | ✅ Tamamlandı |
 | Sprint 2 | Hesaplar + Dashboard | ✅ %100 | ✅ %100 | ✅ Tamamlandı |
 | Sprint 3 | İşlemler | ✅ %100 | 🔧 %93 | 🔧 Frontend: yalnızca tag seçici eksik (ertelendi) |
 | Sprint 4 | Bütçeler | 🔧 %95 | ✅ %100 | 🔧 Backend FCM bildirim eksik, frontend tamamlandı |
 | Sprint 5 | Borçlar + Abonelikler | ✅ %100 | ✅ %100 | ✅ Borç detay + Abonelik detay tamamlandı |
 | Sprint 6 | Raporlar + Fiş Tarama | 🔧 %95 | ✅ %100 | 🔧 Backend Cloud Vision stub; frontend tamamlandı |
 | Sprint 7 | Ayarlar + Profil | ✅ %100 | 🔧 %88 | 🔧 Para birimi/dil seçici, l10n eksik |
-| Sprint 8 | Test + Optimizasyon | 🔧 %65 | 🔧 %65 | 🔧 Shimmer ✅, CachedNetworkImage ✅, BLoC testleri 32/32 ✅; widget/integration testleri + app icon/store eksik |
+| Sprint 8 | Test + Optimizasyon | ✅ %90 | 🔧 %88 | 🔧 Backend: 76 unit + 25 e2e ✅, ESLint 0 hata ✅, Railway ✅; Frontend: shimmer ✅, BLoC testleri 32/32 ✅, empty states ✅, infinite scroll ✅, splash screen ✅; widget/integration testleri + app icon eksik |
 | **Sprint 9** | **Enflasyon Bütçeleme** | ❌ %0 | ❌ %0 | ❌ Başlanmadı |
 | **Sprint 10** | **Altın/Döviz Portföy** | ❌ %0 | ❌ %0 | ❌ Başlanmadı |
 | **Sprint 11** | **Akıllı Harcama Analizi** | ❌ %0 | ❌ %0 | ❌ Başlanmadı |
 | **Sprint 12** | **Aile/Ortak Bütçe (v2)** | ❌ %0 | ❌ %0 | ❌ Başlanmadı |
 | Çapraz | Merkezi Entegrasyon | 🔧 %90 | — | 🔧 Event akışı ✅, Report/Dashboard source filtresi ✅, FCM bildirimleri eksik |
 
-**Tahmini genel ilerleme: ~%75** — Sprint 0-7 backend ✅, frontend Sprint 0-7 ~%91  
+**Tahmini genel ilerleme: ~%83** — V1 backend ✅ (Sprint 0-8), frontend Sprint 0-8 ~%95  
 **Toplam sprint: 13** (Sprint 0-8 temel + Sprint 9-12 fark yaratan özellikler)  
-**Sıradaki (Backend):** Sprint 9 (Enflasyon) — V1 tamamlandı  
-**Sıradaki (Frontend):** Sprint 8 tamamlama (empty state, lazy loading, app icon/splash) veya Sprint 9 başlangıcı
+**Sıradaki (Backend):** Sprint 9 (Enflasyon) — V1 backend tamamlandı, Railway'de yayında  
+**Sıradaki (Frontend):** App icon tasarımı veya Sprint 9 başlangıcı

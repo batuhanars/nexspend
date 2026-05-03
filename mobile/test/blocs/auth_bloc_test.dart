@@ -1,17 +1,26 @@
 import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:wallet_app/core/services/local_auth_service.dart';
 import 'package:wallet_app/data/repositories/auth_repository.dart';
 import 'package:wallet_app/presentation/auth/bloc/auth_bloc.dart';
 
 class MockAuthRepository extends Mock implements AuthRepository {}
+class MockLocalAuthService extends Mock implements LocalAuthService {}
 
 void main() {
   late MockAuthRepository repo;
+  late MockLocalAuthService localAuth;
 
-  setUp(() => repo = MockAuthRepository());
+  setUp(() {
+    repo = MockAuthRepository();
+    localAuth = MockLocalAuthService();
+  });
 
-  AuthBloc buildBloc() => AuthBloc(authRepository: repo);
+  AuthBloc buildBloc() => AuthBloc(
+        authRepository: repo,
+        localAuthService: localAuth,
+      );
 
   group('LoginRequested', () {
     blocTest<AuthBloc, AuthState>(

@@ -29,6 +29,7 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
     emit(SettingsLoading());
     try {
       final user = await _repo.getMe();
+      await _storage.saveBiometricEnabled(user.biometricEnabled);
       emit(SettingsLoaded(user: user));
     } catch (e) {
       emit(SettingsError(_parseError(e)));

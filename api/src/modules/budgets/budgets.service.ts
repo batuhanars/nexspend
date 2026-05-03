@@ -14,12 +14,16 @@ import {
 } from '../../common/events/transaction.events';
 import { CreateBudgetDto } from './dto/create-budget.dto';
 import { UpdateBudgetDto } from './dto/update-budget.dto';
+import { NotificationsService } from '../notifications/notifications.service';
 
 @Injectable()
 export class BudgetsService {
   private readonly logger = new Logger(BudgetsService.name);
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly notifications: NotificationsService,
+  ) {}
 
   async findAll(userId: string) {
     const budgets = await this.prisma.budget.findMany({
@@ -167,6 +171,7 @@ export class BudgetsService {
   async recalculateForCategory(userId: string, categoryId: string) {
     const budgets = await this.prisma.budget.findMany({
       where: { userId, categoryId, isActive: true },
+      include: { category: { select: { name: true } } },
     });
 
     for (const budget of budgets) {
@@ -181,7 +186,13 @@ export class BudgetsService {
           where: { id: budget.id },
           data: { spent },
         });
-        this.logThreshold(budget.id, Number(budget.amount), spent);
+        await this.notifyThreshold(
+          userId,
+          budget.category.name,
+          budget.id,
+          Number(budget.amount),
+          spent,
+        );
       } catch (err) {
         this.logger.error(`Bütçe ${budget.id} güncellenemedi: ${err}`);
       }
@@ -209,15 +220,37 @@ export class BudgetsService {
     return Number(result._sum.amount ?? 0);
   }
 
-  private logThreshold(budgetId: string, amount: number, spent: number) {
+  private async notifyThreshold(
+    userId: string,
+    categoryName: string,
+    budgetId: string,
+    amount: number,
+    spent: number,
+  ) {
     if (amount <= 0) return;
     const pct = (spent / amount) * 100;
+
     if (pct >= 100) {
       this.logger.warn(`Bütçe aşıldı [${budgetId}] — %${Math.round(pct)}`);
+      await this.notifications.sendToUser(
+        userId,
+        'Bütçe Aşıldı!',
+        `${categoryName} bütçenizi %${Math.round(pct)} oranında aştınız.`,
+      );
     } else if (pct >= 90) {
       this.logger.warn(`Bütçe kritik [${budgetId}] — %${Math.round(pct)}`);
+      await this.notifications.sendToUser(
+        userId,
+        'Bütçe Kritik Seviyede',
+        `${categoryName} bütçenizin %${Math.round(pct)}'ini harcadınız.`,
+      );
     } else if (pct >= 80) {
       this.logger.log(`Bütçe uyarısı [${budgetId}] — %${Math.round(pct)}`);
+      await this.notifications.sendToUser(
+        userId,
+        'Bütçe Uyarısı',
+        `${categoryName} bütçenizin %${Math.round(pct)}'ini harcadınız.`,
+      );
     }
   }
 

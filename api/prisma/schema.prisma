@@ -110,6 +110,7 @@ model User {
   language             String   @default("tr") @db.VarChar(5)
   biometricEnabled     Boolean  @default(false) @map("biometric_enabled")
   notificationsEnabled Boolean  @default(true) @map("notifications_enabled")
+  fcmToken             String?  @map("fcm_token") @db.VarChar(500)
   googleId             String?  @map("google_id") @db.VarChar(255)
   createdAt            DateTime @default(now()) @map("created_at") @db.DateTime(0)
   updatedAt            DateTime @updatedAt @map("updated_at") @db.DateTime(0)

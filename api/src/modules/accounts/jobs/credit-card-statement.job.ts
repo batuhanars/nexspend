@@ -2,12 +2,16 @@ import { Injectable, Logger } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
 import { AccountType } from '@prisma/client';
 import { PrismaService } from '../../../prisma/prisma.service';
+import { NotificationsService } from '../../notifications/notifications.service';
 
 @Injectable()
 export class CreditCardStatementJob {
   private readonly logger = new Logger(CreditCardStatementJob.name);
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly notifications: NotificationsService,
+  ) {}
 
   @Cron('0 8 * * *') // Her gün 08:00
   async run() {
@@ -46,7 +50,13 @@ export class CreditCardStatementJob {
           `[${card.user.email}]`,
       );
 
-      // Son ödeme günü bildirimi (statementDay'den paymentDueDay gün sonra)
+      await this.notifications.sendToUser(
+        card.userId,
+        'Ekstre Kesim Günü',
+        `${card.name}: ₺${used.toFixed(2)} kullanıldı, ₺${available.toFixed(2)} kullanılabilir.`,
+      );
+
+      // Son ödeme günü bildirimi
       if (card.paymentDueDay) {
         const paymentDate = new Date();
         paymentDate.setDate(card.paymentDueDay);
@@ -55,6 +65,11 @@ export class CreditCardStatementJob {
         }
         this.logger.log(
           `📅 Son Ödeme Tarihi: ${paymentDate.toLocaleDateString('tr-TR')} [${card.name}]`,
+        );
+        await this.notifications.sendToUser(
+          card.userId,
+          'Son Ödeme Tarihi Hatırlatması',
+          `${card.name} son ödeme tarihi: ${paymentDate.toLocaleDateString('tr-TR')}.`,
         );
       }
     }

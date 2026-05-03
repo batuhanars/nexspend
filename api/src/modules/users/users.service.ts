@@ -137,6 +137,14 @@ export class UsersService {
     return { message: 'Profil fotoğrafı kaldırıldı' };
   }
 
+  async updateFcmToken(userId: string, fcmToken: string) {
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { fcmToken },
+    });
+    return { message: 'FCM token güncellendi' };
+  }
+
   async deleteAccount(userId: string) {
     await this.findUser(userId);
 

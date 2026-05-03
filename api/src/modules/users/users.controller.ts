@@ -17,6 +17,7 @@ import { extname, join } from 'path';
 import { UsersService } from './users.service';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
+import { UpdateFcmTokenDto } from './dto/update-fcm-token.dto';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 
@@ -69,6 +70,15 @@ export class UsersController {
   @HttpCode(HttpStatus.OK)
   deleteAvatar(@CurrentUser() user: { id: string }) {
     return this.usersService.deleteAvatar(user.id);
+  }
+
+  @Patch('me/fcm-token')
+  @HttpCode(HttpStatus.OK)
+  updateFcmToken(
+    @CurrentUser() user: { id: string },
+    @Body() dto: UpdateFcmTokenDto,
+  ) {
+    return this.usersService.updateFcmToken(user.id, dto.fcmToken);
   }
 
   @Post('me/change-password')

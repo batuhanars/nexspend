@@ -15,6 +15,7 @@ import { SubscriptionsModule } from './modules/subscriptions/subscriptions.modul
 import { ReportsModule } from './modules/reports/reports.module';
 import { ReceiptsModule } from './modules/receipts/receipts.module';
 import { UsersModule } from './modules/users/users.module';
+import { NotificationsModule } from './modules/notifications/notifications.module';
 import appConfig from './config/app.config';
 
 @Module({
@@ -39,6 +40,7 @@ import appConfig from './config/app.config';
     ReportsModule,
     ReceiptsModule,
     UsersModule,
+    NotificationsModule,
   ],
 })
 export class AppModule {}

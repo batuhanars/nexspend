@@ -14,6 +14,7 @@ import '../../data/repositories/receipt_repository.dart';
 import '../../data/repositories/dashboard_repository.dart';
 import '../../data/repositories/transaction_repository.dart';
 import '../network/api_client.dart';
+import '../services/notification_service.dart';
 import '../storage/secure_storage.dart';
 
 final getIt = GetIt.instance;
@@ -37,6 +38,10 @@ Future<void> configureDependencies() async {
   // Network
   getIt.registerLazySingleton<ApiClient>(
     () => ApiClient(getIt<SecureStorage>()),
+  );
+
+  getIt.registerLazySingleton<NotificationService>(
+    () => NotificationService(getIt<ApiClient>()),
   );
 
   // Repositories

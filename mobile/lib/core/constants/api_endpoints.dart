@@ -85,6 +85,6 @@ class ApiEndpoints {
   static const String receipts = '/api/receipts';
   static String receiptById(String id) => '/api/receipts/$id';
   static String receiptCreateTransaction(String id) =>
-      '/api/receipts/$id/create-transaction';
+      '/api/receipts/$id/confirm';
   static const String receiptsCheckDuplicate = '/api/receipts/check-duplicate';
 }

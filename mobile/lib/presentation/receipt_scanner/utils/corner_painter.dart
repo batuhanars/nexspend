@@ -13,23 +13,18 @@ class CornerPainter extends CustomPainter {
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round;
 
-    // Top-left
+    // Top-left: arc from west (π) clockwise to north (3π/2)
     canvas.drawLine(const Offset(r, 0), const Offset(len, 0), paint);
     canvas.drawLine(const Offset(0, r), const Offset(0, len), paint);
     canvas.drawArc(
-      Rect.fromLTWH(
-        0,
-        0,
-        r * 2,
-        r * 2,
-      ), // dart fix: const removed because of type error
+      Rect.fromLTWH(0, 0, r * 2, r * 2),
       3.14,
-      -1.57,
+      1.57,
       false,
       paint,
     );
 
-    // Top-right
+    // Top-right: arc from north (3π/2) clockwise to east (2π)
     canvas.drawLine(
       Offset(size.width - len, 0),
       Offset(size.width - r, 0),
@@ -39,12 +34,12 @@ class CornerPainter extends CustomPainter {
     canvas.drawArc(
       Rect.fromLTWH(size.width - r * 2, 0, r * 2, r * 2),
       4.71,
-      -1.57,
+      1.57,
       false,
       paint,
     );
 
-    // Bottom-left
+    // Bottom-left: arc from west (π) counterclockwise to south (π/2)
     canvas.drawLine(
       Offset(0, size.height - len),
       Offset(0, size.height - r),
@@ -53,13 +48,13 @@ class CornerPainter extends CustomPainter {
     canvas.drawLine(Offset(r, size.height), Offset(len, size.height), paint);
     canvas.drawArc(
       Rect.fromLTWH(0, size.height - r * 2, r * 2, r * 2),
-      1.57,
+      3.14,
       -1.57,
       false,
       paint,
     );
 
-    // Bottom-right
+    // Bottom-right: arc from east (0) clockwise to south (π/2)
     canvas.drawLine(
       Offset(size.width - len, size.height),
       Offset(size.width - r, size.height),
@@ -73,7 +68,7 @@ class CornerPainter extends CustomPainter {
     canvas.drawArc(
       Rect.fromLTWH(size.width - r * 2, size.height - r * 2, r * 2, r * 2),
       0,
-      -1.57,
+      1.57,
       false,
       paint,
     );

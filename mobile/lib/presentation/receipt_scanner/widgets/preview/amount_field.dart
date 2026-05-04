@@ -23,14 +23,7 @@ class AmountField extends StatelessWidget {
           );
         }
       },
-      decoration: inputDecoration(
-        hint: '0,00',
-        prefix: const Icon(
-          Icons.attach_money_rounded,
-          size: 20,
-          color: AppColors.onSurfaceVariant,
-        ),
-      ),
+      decoration: inputDecoration(hint: '0,00', prefixText: '₺'),
     );
   }
 }

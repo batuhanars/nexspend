@@ -38,13 +38,16 @@ export class ReceiptParserService {
   }
 
   private extractAmount(lines: string[]): number | null {
-    // En yüksek öncelikten başla
+    // Öncelik sırası: en spesifik → en genel
+    // [\s:*.]* → boşluk, iki nokta, yıldız (*), nokta gibi ayraçları geç
     const patterns = [
-      /GENEL\s*TOPLAM\s*[:\s]*(\d[\d.,]*)/i,
-      /TOPLAM\s*[:\s]*(\d[\d.,]*)/i,
-      /TOP\.\s*[:\s]*(\d[\d.,]*)/i,
-      /TUTAR\s*[:\s]*(\d[\d.,]*)/i,
-      /ÖDENECEK\s*TUTAR\s*[:\s]*(\d[\d.,]*)/i,
+      /GENEL\s*TOPLAM[\s:*.]*(\d[\d.,]*)/i,
+      /ÖDENECEK[\s\w]*TUTAR[\s:*.]*(\d[\d.,]*)/i, // "Ödenecek KDV Dahil Tutar *351.54"
+      /TOPLAM\s+TUTAR[\s:*.]*(\d[\d.,]*)/i,
+      /TOP\.\s*TUTAR[\s:*.]*(\d[\d.,]*)/i,
+      /TUTAR[\s:*.]*(\d[\d.,]*)/i,
+      /TOPLAM[\s:*.]*(\d[\d.,]*)/i,
+      /TOP\.[\s:*.]*(\d[\d.,]*)/i,
     ];
 
     for (const line of lines) {

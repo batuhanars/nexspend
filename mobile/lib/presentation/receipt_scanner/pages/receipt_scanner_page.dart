@@ -6,7 +6,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:wallet_app/presentation/receipt_scanner/widgets/scanner/capture_button.dart';
 import 'package:wallet_app/presentation/receipt_scanner/widgets/scanner/circle_button.dart';
 import 'package:wallet_app/presentation/receipt_scanner/widgets/scanner/error_view.dart';
-import 'package:wallet_app/presentation/receipt_scanner/widgets/scanner/scanner_overlay.dart';
+
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
@@ -176,6 +176,7 @@ class _ReceiptScannerPageState extends State<ReceiptScannerPage>
     return Scaffold(
       backgroundColor: Colors.black,
       body: Stack(
+        fit: StackFit.expand,
         children: [
           // Camera preview
           if (_isInitializing)
@@ -187,41 +188,43 @@ class _ReceiptScannerPageState extends State<ReceiptScannerPage>
           else if (_controller != null && _controller!.value.isInitialized)
             Positioned.fill(child: CameraPreview(_controller!)),
 
-          // Scanner overlay
-          if (!_isInitializing && _initError == null) const ScannerOverlay(),
-
           // Top bar
-          SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.lg,
-                vertical: AppSpacing.sm,
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  IconButton(
-                    onPressed: () => context.pop(),
-                    icon: const Icon(Icons.close, color: Colors.white),
-                    style: IconButton.styleFrom(
-                      backgroundColor: Colors.black38,
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.lg,
+                  vertical: AppSpacing.sm,
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    IconButton(
+                      onPressed: () => context.pop(),
+                      icon: const Icon(Icons.close, color: Colors.white),
+                      style: IconButton.styleFrom(
+                        backgroundColor: Colors.black38,
+                      ),
                     ),
-                  ),
-                  Text(
-                    'Makbuz Tara',
-                    style: AppTypography.titleSm.copyWith(color: Colors.white),
-                  ),
-                  IconButton(
-                    onPressed: _controller != null ? _toggleFlash : null,
-                    icon: Icon(
-                      _flashOn ? Icons.flash_on : Icons.flash_off,
-                      color: _flashOn ? Colors.yellow : Colors.white,
+                    Text(
+                      'Makbuz Tara',
+                      style: AppTypography.titleSm.copyWith(color: Colors.white),
                     ),
-                    style: IconButton.styleFrom(
-                      backgroundColor: Colors.black38,
+                    IconButton(
+                      onPressed: _controller != null ? _toggleFlash : null,
+                      icon: Icon(
+                        _flashOn ? Icons.flash_on : Icons.flash_off,
+                        color: _flashOn ? Colors.yellow : Colors.white,
+                      ),
+                      style: IconButton.styleFrom(
+                        backgroundColor: Colors.black38,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),

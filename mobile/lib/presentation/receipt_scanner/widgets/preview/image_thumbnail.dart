@@ -13,9 +13,8 @@ class ImageThumbnail extends StatelessWidget {
       borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
       child: Image.file(
         File(imagePath),
-        height: 200,
         width: double.infinity,
-        fit: BoxFit.cover,
+        fit: BoxFit.fitWidth,
         errorBuilder: (ctx, obj, e) => Container(
           height: 200,
           color: AppColors.surfaceContainerHigh,

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
 import 'package:wallet_app/presentation/receipt_scanner/widgets/preview/ready_view.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
@@ -45,18 +44,15 @@ class _ReceiptPreviewView extends StatelessWidget {
     return BlocConsumer<ReceiptPreviewBloc, ReceiptPreviewState>(
       listener: (context, state) {
         if (state is ReceiptPreviewSuccess) {
-          ScaffoldMessenger.of(context).clearSnackBars();
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('İşlem başarıyla oluşturuldu')),
-          );
-          Navigator.of(context).pop();
-          context.pop();
+          // Pop back to ReceiptScannerPage with success=true.
+          // ReceiptScannerPage owns the GoRouter pop + dashboard refresh.
+          Navigator.of(context).pop(true);
         }
         if (state is ReceiptPreviewReady && state.errorMessage != null) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(state.errorMessage!),
-              backgroundColor: AppColors.error,
+              backgroundColor: AppColors.errorContainer,
             ),
           );
         }

@@ -213,8 +213,18 @@ export class ReceiptParserService {
   }
 
   private parseDecimal(s: string): number | null {
-    // Türk formatı: 1.234,56 → 1234.56
-    const cleaned = s.replace(/\./g, '').replace(',', '.');
+    const t = s.trim();
+    let cleaned: string;
+    if (t.includes('.') && t.includes(',')) {
+      // Türk format: 1.234,56 → 1234.56
+      cleaned = t.replace(/\./g, '').replace(',', '.');
+    } else if (t.includes(',')) {
+      // Virgüllü ondalık: 198,00 → 198.00
+      cleaned = t.replace(',', '.');
+    } else {
+      // Noktalı ondalık (e-fatura): 351.54 → 351.54
+      cleaned = t;
+    }
     const n = parseFloat(cleaned);
     return isNaN(n) ? null : n;
   }

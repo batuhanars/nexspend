@@ -169,6 +169,7 @@ class _ReadyViewState extends State<ReadyView> {
                 'İşlem Oluştur',
                 style: AppTypography.titleSm.copyWith(
                   fontWeight: FontWeight.w600,
+                  color: AppColors.onPrimary,
                 ),
               ),
             ),

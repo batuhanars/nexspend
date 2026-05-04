@@ -1,8 +1,11 @@
 import 'package:camera/camera.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:wallet_app/presentation/dashboard/bloc/dashboard_bloc.dart';
 import 'package:wallet_app/presentation/receipt_scanner/widgets/scanner/capture_button.dart';
 import 'package:wallet_app/presentation/receipt_scanner/widgets/scanner/circle_button.dart';
 import 'package:wallet_app/presentation/receipt_scanner/widgets/scanner/error_view.dart';
@@ -143,22 +146,58 @@ class _ReceiptScannerPageState extends State<ReceiptScannerPage>
         confidence: confidence,
       );
       if (!mounted) return;
-      await Navigator.of(context).push(
+
+      final confirmed = await Navigator.of(context).push<bool>(
         MaterialPageRoute(
           builder: (_) =>
               ReceiptPreviewPage(imagePath: imagePath, ocrResult: result),
         ),
+      );
+
+      if (!mounted) return;
+      if (confirmed == true) {
+        // Dashboard'u yenile, sonra scanner'ı kapat
+        try {
+          context.read<DashboardBloc>().add(const DashboardRefreshRequested());
+        } catch (_) {}
+        context.pop();
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('İşlem başarıyla oluşturuldu')),
+        );
+      }
+    } on DioException catch (e) {
+      if (!mounted) return;
+      final msg = _parseScanError(e);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(msg), backgroundColor: Colors.red.shade700),
       );
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Fiş işlenemedi: $e'),
-            backgroundColor: Colors.red,
+            backgroundColor: Colors.red.shade700,
           ),
         );
       }
     }
+  }
+
+  String _parseScanError(DioException e) {
+    final data = e.response?.data;
+    if (data is Map) {
+      final msg = data['message'];
+      if (msg is String && msg.isNotEmpty) return msg;
+      final nested = data['data'];
+      if (nested is Map) {
+        final nestedMsg = nested['message'];
+        if (nestedMsg is String && nestedMsg.isNotEmpty) return nestedMsg;
+      }
+    }
+    final status = e.response?.statusCode;
+    if (status == 400) return 'Bu fişi daha önce taradınız';
+    if (status == 413) return 'Görsel çok büyük (maks 10 MB)';
+    return 'Sunucu hatası, tekrar deneyin';
   }
 
   double _estimateConfidence(String text) {

@@ -1,17 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_spacing.dart';
 import '../../core/di/injection.dart';
 import '../../core/services/notification_service.dart';
-import '../../data/repositories/debt_repository.dart';
-import '../../data/repositories/subscription_repository.dart';
 import '../../navigation/route_names.dart';
-import '../debts/bloc/debts_bloc.dart';
-import '../debts/widgets/add_debt_sheet.dart';
-import '../subscriptions/bloc/subscriptions_bloc.dart';
-import '../subscriptions/widgets/add_subscription_sheet.dart';
 import 'expandable_fab.dart';
 
 class AppShell extends StatefulWidget {
@@ -42,28 +35,31 @@ class _AppShellState extends State<AppShell> {
 
   List<FabAction> _buildActions(BuildContext context) => [
         FabAction(
-          label: 'İşlem Ekle',
-          icon: Icons.receipt_long_outlined,
-          color: AppColors.primary,
-          onTap: () => context.push(RouteNames.addTransaction),
-        ),
-        FabAction(
-          label: 'Bütçe Ekle',
-          icon: Icons.pie_chart_outline_rounded,
-          color: const Color(0xFFCE93D8),
-          onTap: () => context.push(RouteNames.addBudget),
-        ),
-        FabAction(
-          label: 'Borç Ekle',
-          icon: Icons.handshake_outlined,
-          color: const Color(0xFFFFCC80),
-          onTap: () => _showDebtSheet(context),
-        ),
-        FabAction(
-          label: 'Abonelik Ekle',
-          icon: Icons.subscriptions_outlined,
+          label: 'Gelir',
+          icon: Icons.arrow_downward_rounded,
           color: AppColors.secondary,
-          onTap: () => _showSubscriptionSheet(context),
+          onTap: () => context.push(
+            RouteNames.addTransaction,
+            extra: {'type': 'INCOME'},
+          ),
+        ),
+        FabAction(
+          label: 'Gider',
+          icon: Icons.arrow_upward_rounded,
+          color: AppColors.tertiary,
+          onTap: () => context.push(
+            RouteNames.addTransaction,
+            extra: {'type': 'EXPENSE'},
+          ),
+        ),
+        FabAction(
+          label: 'Transfer',
+          icon: Icons.swap_horiz_rounded,
+          color: AppColors.primary,
+          onTap: () => context.push(
+            RouteNames.addTransaction,
+            extra: {'type': 'TRANSFER'},
+          ),
         ),
         FabAction(
           label: 'Tara',
@@ -72,33 +68,6 @@ class _AppShellState extends State<AppShell> {
           onTap: () => context.push(RouteNames.receiptScanner),
         ),
       ];
-
-  void _showDebtSheet(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (_) => BlocProvider(
-        create: (_) =>
-            DebtsBloc(debtRepository: getIt<DebtRepository>()),
-        child: const AddDebtSheet(),
-      ),
-    );
-  }
-
-  void _showSubscriptionSheet(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (_) => BlocProvider(
-        create: (_) => SubscriptionsBloc(
-          subscriptionRepository: getIt<SubscriptionRepository>(),
-        ),
-        child: const AddSubscriptionSheet(),
-      ),
-    );
-  }
 
   @override
   Widget build(BuildContext context) {

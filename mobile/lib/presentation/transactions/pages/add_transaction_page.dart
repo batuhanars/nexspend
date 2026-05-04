@@ -11,9 +11,14 @@ import '../../../data/models/category_model.dart';
 import '../bloc/add_transaction_bloc.dart';
 
 class AddTransactionPage extends StatefulWidget {
-  const AddTransactionPage({super.key, this.initialAccountId});
+  const AddTransactionPage({
+    super.key,
+    this.initialAccountId,
+    this.initialType,
+  });
 
   final String? initialAccountId;
+  final String? initialType;
 
   @override
   State<AddTransactionPage> createState() => _AddTransactionPageState();
@@ -24,7 +29,7 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
   final _titleController = TextEditingController();
   final _noteController = TextEditingController();
 
-  String _type = 'EXPENSE';
+  late String _type;
   CategoryModel? _selectedCategory;
   AccountModel? _selectedAccount;
   AccountModel? _transferToAccount;
@@ -38,6 +43,7 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
   @override
   void initState() {
     super.initState();
+    _type = widget.initialType ?? 'EXPENSE';
     context.read<AddTransactionBloc>().add(AddTransactionInitialized());
   }
 

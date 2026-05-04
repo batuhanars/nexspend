@@ -170,17 +170,21 @@ GoRouter createRouter() {
         path: RouteNames.addTransaction,
         name: 'add-transaction',
         parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) => BlocProvider(
-          create: (_) => AddTransactionBloc(
-            transactionRepository: getIt<TransactionRepository>(),
-            categoryRepository: getIt<CategoryRepository>(),
-            accountRepository: getIt<AccountRepository>(),
-            tagRepository: getIt<TagRepository>(),
-          ),
-          child: AddTransactionPage(
-            initialAccountId: state.extra as String?,
-          ),
-        ),
+        builder: (context, state) {
+          final extra = state.extra as Map<String, String?>?;
+          return BlocProvider(
+            create: (_) => AddTransactionBloc(
+              transactionRepository: getIt<TransactionRepository>(),
+              categoryRepository: getIt<CategoryRepository>(),
+              accountRepository: getIt<AccountRepository>(),
+              tagRepository: getIt<TagRepository>(),
+            ),
+            child: AddTransactionPage(
+              initialAccountId: extra?['accountId'],
+              initialType: extra?['type'],
+            ),
+          );
+        },
       ),
       GoRoute(
         path: RouteNames.addBudget,

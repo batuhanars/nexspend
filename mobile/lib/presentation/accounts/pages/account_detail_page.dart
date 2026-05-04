@@ -43,7 +43,7 @@ class _AccountDetailPageState extends State<AccountDetailPage> {
 
   Future<void> _addTransaction() async {
     final bloc = context.read<AccountDetailBloc>();
-    await context.push(RouteNames.addTransaction, extra: widget.accountId);
+    await context.push(RouteNames.addTransaction, extra: {'accountId': widget.accountId});
     if (mounted) {
       bloc.add(AccountDetailRefreshRequested(accountId: widget.accountId));
     }

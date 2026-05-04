@@ -41,6 +41,14 @@ class _AccountDetailPageState extends State<AccountDetailPage> {
         );
   }
 
+  Future<void> _addTransaction() async {
+    final bloc = context.read<AccountDetailBloc>();
+    await context.push(RouteNames.addTransaction);
+    if (mounted) {
+      bloc.add(AccountDetailRefreshRequested(accountId: widget.accountId));
+    }
+  }
+
   Future<void> _openEdit(AccountModel account) async {
     final updated = await context.push<AccountModel>(
       RouteNames.editAccount(account.id),
@@ -170,6 +178,11 @@ class _AccountDetailPageState extends State<AccountDetailPage> {
         style: AppTypography.headlineSm,
       ),
       actions: [
+        if (account != null)
+          IconButton(
+            icon: const Icon(Icons.add_rounded, color: AppColors.primary),
+            onPressed: _addTransaction,
+          ),
         if (account != null)
           BlocBuilder<AccountBloc, AccountState>(
             builder: (context, state) {
@@ -314,6 +327,7 @@ class _AccountDetailPageState extends State<AccountDetailPage> {
         account: state.account,
         analytics: state.analytics,
         transactions: state.transactions,
+        onAddTransaction: _addTransaction,
       );
     }
     return const SizedBox.shrink();
@@ -327,11 +341,13 @@ class _DetailContent extends StatelessWidget {
     required this.account,
     required this.analytics,
     required this.transactions,
+    required this.onAddTransaction,
   });
 
   final AccountModel account;
   final AccountAnalyticsModel analytics;
   final List<TransactionModel> transactions;
+  final VoidCallback onAddTransaction;
 
   @override
   Widget build(BuildContext context) {
@@ -351,7 +367,10 @@ class _DetailContent extends StatelessWidget {
           _TopCategoriesSection(categories: analytics.topCategories),
         ],
         const SizedBox(height: AppSpacing.xl),
-        _TransactionsSection(transactions: transactions),
+        _TransactionsSection(
+          transactions: transactions,
+          onAddTransaction: onAddTransaction,
+        ),
       ],
     );
   }
@@ -827,8 +846,12 @@ class _CategoryRow extends StatelessWidget {
 // ── İşlem geçmişi ──────────────────────────────────────────────────────────
 
 class _TransactionsSection extends StatelessWidget {
-  const _TransactionsSection({required this.transactions});
+  const _TransactionsSection({
+    required this.transactions,
+    required this.onAddTransaction,
+  });
   final List<TransactionModel> transactions;
+  final VoidCallback onAddTransaction;
 
   @override
   Widget build(BuildContext context) {
@@ -859,6 +882,20 @@ class _TransactionsSection extends StatelessWidget {
                     'Henüz işlem yok',
                     style: AppTypography.bodyMd
                         .copyWith(color: AppColors.onSurfaceVariant),
+                  ),
+                  const SizedBox(height: AppSpacing.lg),
+                  FilledButton.icon(
+                    onPressed: onAddTransaction,
+                    icon: const Icon(Icons.add_rounded, size: 18),
+                    label: const Text('İşlem Ekle'),
+                    style: FilledButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      foregroundColor: AppColors.surface,
+                      shape: RoundedRectangleBorder(
+                        borderRadius:
+                            BorderRadius.circular(AppSpacing.radiusXl),
+                      ),
+                    ),
                   ),
                 ],
               ),

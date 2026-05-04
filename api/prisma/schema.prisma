@@ -434,13 +434,13 @@ model Receipt {
   transactionId  String?       @map("transaction_id") @db.VarChar(36)
   imageUrl       String        @map("image_url") @db.VarChar(500)
   ocrRawText     String?       @map("ocr_raw_text") @db.Text
-  ocrSource      String?       @map("ocr_source") @db.VarChar(20)
+  ocrSource      String?       @map("ocr_source") @db.VarChar(30)
   confidence     Decimal?      @db.Decimal(3, 2)
   parsedAmount   Decimal?      @map("parsed_amount") @db.Decimal(15, 2)
   parsedMerchant String?       @map("parsed_merchant") @db.VarChar(200)
   parsedDate     DateTime?     @map("parsed_date") @db.Date
   parsedTax      Decimal?      @map("parsed_tax") @db.Decimal(15, 2)
-  paymentMethod  String?       @map("payment_method") @db.VarChar(20)
+  paymentMethod  String?       @map("payment_method") @db.VarChar(30)
   status         ReceiptStatus @default(PROCESSING)
   createdAt      DateTime      @default(now()) @map("created_at") @db.DateTime(0)
 

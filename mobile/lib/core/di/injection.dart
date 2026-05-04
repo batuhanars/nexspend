@@ -2,6 +2,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get_it/get_it.dart';
 import '../../data/repositories/account_repository.dart';
 import '../../data/repositories/auth_repository.dart';
+import '../services/app_events.dart';
 import '../services/local_auth_service.dart';
 import '../../data/repositories/budget_repository.dart';
 import '../../data/repositories/category_repository.dart';
@@ -33,6 +34,7 @@ Future<void> configureDependencies() async {
   );
 
   // Services
+  getIt.registerLazySingleton<AppEvents>(() => AppEvents());
   getIt.registerLazySingleton<LocalAuthService>(() => LocalAuthService());
 
   // Network

@@ -1,11 +1,10 @@
 import 'package:camera/camera.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:wallet_app/presentation/dashboard/bloc/dashboard_bloc.dart';
+import 'package:wallet_app/core/services/app_events.dart';
 import 'package:wallet_app/presentation/receipt_scanner/widgets/scanner/capture_button.dart';
 import 'package:wallet_app/presentation/receipt_scanner/widgets/scanner/circle_button.dart';
 import 'package:wallet_app/presentation/receipt_scanner/widgets/scanner/error_view.dart';
@@ -156,14 +155,17 @@ class _ReceiptScannerPageState extends State<ReceiptScannerPage>
 
       if (!mounted) return;
       if (confirmed == true) {
-        // Dashboard'u yenile, sonra scanner'ı kapat
-        try {
-          context.read<DashboardBloc>().add(const DashboardRefreshRequested());
-        } catch (_) {}
-        context.pop();
+        // Snackbar ÖNCE göster (context hâlâ geçerli), sonra pop et.
+        // Snackbar MaterialApp root ScaffoldMessenger'a bağlı olduğundan
+        // pop sonrasında home ekranında görünmeye devam eder.
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('İşlem başarıyla oluşturuldu')),
         );
+        // AppEvents singleton aracılığıyla DashboardPage'e refresh sinyali.
+        // parentNavigatorKey route'undan BlocProvider scope'una erişilemediği
+        // için doğrudan context.read<DashboardBloc>() çalışmaz.
+        getIt<AppEvents>().transactionAdded();
+        context.pop();
       }
     } on DioException catch (e) {
       if (!mounted) return;

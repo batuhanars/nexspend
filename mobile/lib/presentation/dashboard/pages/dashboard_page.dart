@@ -6,6 +6,7 @@ import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
 import '../../../core/di/injection.dart';
+import '../../../core/services/app_events.dart';
 import '../../../data/repositories/dashboard_repository.dart';
 import '../../../navigation/route_names.dart';
 import '../bloc/dashboard_bloc.dart';
@@ -36,6 +37,24 @@ class _DashboardView extends StatefulWidget {
 
 class _DashboardViewState extends State<_DashboardView> {
   bool _isBalanceHidden = false;
+
+  @override
+  void initState() {
+    super.initState();
+    getIt<AppEvents>().addListener(_onTransactionAdded);
+  }
+
+  @override
+  void dispose() {
+    getIt<AppEvents>().removeListener(_onTransactionAdded);
+    super.dispose();
+  }
+
+  void _onTransactionAdded() {
+    if (mounted) {
+      context.read<DashboardBloc>().add(const DashboardRefreshRequested());
+    }
+  }
 
   @override
   Widget build(BuildContext context) {

@@ -170,14 +170,16 @@ GoRouter createRouter() {
         path: RouteNames.addTransaction,
         name: 'add-transaction',
         parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, _) => BlocProvider(
+        builder: (context, state) => BlocProvider(
           create: (_) => AddTransactionBloc(
             transactionRepository: getIt<TransactionRepository>(),
             categoryRepository: getIt<CategoryRepository>(),
             accountRepository: getIt<AccountRepository>(),
             tagRepository: getIt<TagRepository>(),
           ),
-          child: const AddTransactionPage(),
+          child: AddTransactionPage(
+            initialAccountId: state.extra as String?,
+          ),
         ),
       ),
       GoRoute(

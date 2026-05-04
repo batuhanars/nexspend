@@ -11,7 +11,9 @@ import '../../../data/models/category_model.dart';
 import '../bloc/add_transaction_bloc.dart';
 
 class AddTransactionPage extends StatefulWidget {
-  const AddTransactionPage({super.key});
+  const AddTransactionPage({super.key, this.initialAccountId});
+
+  final String? initialAccountId;
 
   @override
   State<AddTransactionPage> createState() => _AddTransactionPageState();
@@ -143,12 +145,21 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
             final categories = _categoriesFrom(state);
             final accounts = _accountsFrom(state);
 
-            // Varsayılan hesabı bir kez seç
+            // İlk yüklemede hesabı seç: önce initialAccountId, sonra varsayılan
             if (!_accountsInitialized && accounts.isNotEmpty) {
-              _selectedAccount = accounts.firstWhere(
-                (a) => a.isDefault,
-                orElse: () => accounts.first,
-              );
+              final preselect = widget.initialAccountId;
+              _selectedAccount = preselect != null
+                  ? accounts.firstWhere(
+                      (a) => a.id == preselect,
+                      orElse: () => accounts.firstWhere(
+                        (a) => a.isDefault,
+                        orElse: () => accounts.first,
+                      ),
+                    )
+                  : accounts.firstWhere(
+                      (a) => a.isDefault,
+                      orElse: () => accounts.first,
+                    );
               _accountsInitialized = true;
             }
 

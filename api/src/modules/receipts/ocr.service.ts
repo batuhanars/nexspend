@@ -8,8 +8,23 @@ export class OcrService {
   private readonly client: ImageAnnotatorClient;
 
   constructor(config: ConfigService) {
-    const keyFilename = config.get<string>('GOOGLE_APPLICATION_CREDENTIALS');
-    this.client = new ImageAnnotatorClient(keyFilename ? { keyFilename } : {});
+    // Railway: GOOGLE_APPLICATION_CREDENTIALS_JSON (base64 veya ham JSON)
+    // Local: GOOGLE_APPLICATION_CREDENTIALS (dosya yolu)
+    const credentialsJson = config.get<string>('GOOGLE_APPLICATION_CREDENTIALS_JSON');
+
+    if (credentialsJson) {
+      const jsonStr = credentialsJson.trim().startsWith('{')
+        ? credentialsJson
+        : Buffer.from(credentialsJson, 'base64').toString('utf-8');
+      const parsed = JSON.parse(jsonStr) as Record<string, string>;
+      if (typeof parsed.private_key === 'string') {
+        parsed.private_key = parsed.private_key.replace(/\\n/g, '\n');
+      }
+      this.client = new ImageAnnotatorClient({ credentials: parsed as any });
+    } else {
+      const keyFilename = config.get<string>('GOOGLE_APPLICATION_CREDENTIALS');
+      this.client = new ImageAnnotatorClient(keyFilename ? { keyFilename } : {});
+    }
   }
 
   async extractText(imagePath: string): Promise<string> {

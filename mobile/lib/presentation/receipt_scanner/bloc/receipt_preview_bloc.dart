@@ -39,12 +39,16 @@ class ReceiptPreviewBloc
     try {
       final categories = await _categoryRepo.getCategories();
       final accounts = await _accountRepo.getAccounts();
+      final defaultAccount = accounts.isNotEmpty
+          ? accounts.firstWhere((a) => a.isDefault,
+              orElse: () => accounts.first)
+          : null;
       emit(ReceiptPreviewReady(
         result: event.result,
         categories: categories,
         accounts: accounts,
         selectedCategoryId: event.result.suggestedCategoryId,
-        selectedAccountId: accounts.isNotEmpty ? accounts.first.id : null,
+        selectedAccountId: defaultAccount?.id,
       ));
     } catch (e) {
       emit(ReceiptPreviewError(e.toString()));
@@ -80,9 +84,10 @@ class ReceiptPreviewBloc
 
       await _receiptRepo.confirmAndCreateTransaction(receiptId, {
         'amount': current.effectiveAmount,
-        'date': current.effectiveDate.toIso8601String(),
-        'description': current.effectiveMerchant,
-        'categoryId': current.selectedCategoryId,
+        'transactionDate': current.effectiveDate.toIso8601String(),
+        'merchant': current.effectiveMerchant,
+        if (current.selectedCategoryId != null)
+          'categoryId': current.selectedCategoryId,
         'accountId': current.selectedAccountId,
       });
 

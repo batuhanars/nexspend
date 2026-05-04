@@ -9,9 +9,15 @@ class ReceiptRepository {
 
   final ApiClient _client;
 
-  Future<ReceiptParseResult> scan(String imagePath) async {
+  Future<ReceiptParseResult> scan(
+    String imagePath, {
+    String? rawText,
+    double? confidence,
+  }) async {
     final formData = FormData.fromMap({
       'image': await MultipartFile.fromFile(imagePath, filename: 'receipt.jpg'),
+      if (rawText != null && rawText.isNotEmpty) 'rawText': rawText,
+      if (confidence != null) 'confidence': confidence.toString(),
     });
     final response = await _client.dio.post(
       ApiEndpoints.receiptsScan,

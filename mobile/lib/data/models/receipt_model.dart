@@ -56,16 +56,23 @@ class ReceiptParseResult {
 
   factory ReceiptParseResult.fromJson(Map<String, dynamic> json) {
     final data = json['data'] as Map<String, dynamic>? ?? json;
+    final suggestedCategory =
+        data['suggestedCategory'] as Map<String, dynamic>?;
     return ReceiptParseResult(
       receiptId: data['id'] as String? ?? data['receiptId'] as String?,
-      amount: (data['amount'] as num?)?.toDouble() ??
-          (data['totalAmount'] as num?)?.toDouble(),
-      date: data['date'] != null
-          ? DateTime.tryParse(data['date'] as String)
-          : null,
-      merchantName: data['merchantName'] as String?,
-      suggestedCategoryId: data['suggestedCategoryId'] as String?,
-      suggestedCategoryName: data['suggestedCategoryName'] as String?,
+      amount: (data['parsedAmount'] as num?)?.toDouble() ??
+          (data['amount'] as num?)?.toDouble(),
+      date: data['parsedDate'] != null
+          ? DateTime.tryParse(data['parsedDate'] as String)
+          : data['date'] != null
+              ? DateTime.tryParse(data['date'] as String)
+              : null,
+      merchantName: data['parsedMerchant'] as String? ??
+          data['merchantName'] as String?,
+      suggestedCategoryId: suggestedCategory?['id'] as String? ??
+          data['suggestedCategoryId'] as String?,
+      suggestedCategoryName: suggestedCategory?['name'] as String? ??
+          data['suggestedCategoryName'] as String?,
       items: (data['items'] as List? ?? [])
           .map((i) => ReceiptItemModel.fromJson(i as Map<String, dynamic>))
           .toList(),

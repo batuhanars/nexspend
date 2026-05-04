@@ -10,7 +10,8 @@ import 'package:wallet_app/presentation/receipt_scanner/widgets/scanner/scanner_
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
-import '../../../data/models/receipt_model.dart';
+import '../../../core/di/injection.dart';
+import '../../../data/repositories/receipt_repository.dart';
 import 'receipt_preview_page.dart';
 
 class ReceiptScannerPage extends StatefulWidget {
@@ -121,75 +122,53 @@ class _ReceiptScannerPageState extends State<ReceiptScannerPage>
   }
 
   Future<void> _processImage(String imagePath) async {
-    // Run ML Kit OCR to extract text and estimate confidence
     final inputImage = InputImage.fromFilePath(imagePath);
     final recognizer = TextRecognizer(script: TextRecognitionScript.latin);
+    var rawText = '';
+    var confidence = 0.0;
+
     try {
       final recognized = await recognizer.processImage(inputImage);
-      final text = recognized.text;
+      rawText = recognized.text.trim();
+      confidence = _estimateConfidence(rawText);
+    } finally {
+      recognizer.close();
+    }
 
-      // Build a lightweight parse result from OCR text to pre-fill the preview
-      final parseResult = _parseOcrText(text, imagePath);
-
+    if (!mounted) return;
+    try {
+      final result = await getIt<ReceiptRepository>().scan(
+        imagePath,
+        rawText: rawText.isNotEmpty ? rawText : null,
+        confidence: confidence,
+      );
       if (!mounted) return;
       await Navigator.of(context).push(
         MaterialPageRoute(
           builder: (_) =>
-              ReceiptPreviewPage(imagePath: imagePath, ocrResult: parseResult),
+              ReceiptPreviewPage(imagePath: imagePath, ocrResult: result),
         ),
       );
-    } finally {
-      recognizer.close();
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Fiş işlenemedi: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
   }
 
-  /// Lightweight heuristic parser — backend will do the authoritative parse.
-  /// This just pre-populates fields so the preview feels responsive.
-  ReceiptParseResult _parseOcrText(String text, String imagePath) {
-    double? amount;
-    DateTime? date;
-    String? merchant;
-
-    final lines = text
-        .split('\n')
-        .map((l) => l.trim())
-        .where((l) => l.isNotEmpty)
-        .toList();
-
-    // Merchant: usually the first non-trivial line
-    if (lines.isNotEmpty) merchant = lines.first;
-
-    // Amount: look for largest decimal number with ₺ or common patterns
-    final amountRegex = RegExp(r'[₺$€]?\s*(\d{1,3}(?:[.,]\d{3})*[.,]\d{2})');
-    double maxAmount = 0;
-    for (final line in lines) {
-      final match = amountRegex.firstMatch(line);
-      if (match != null) {
-        final raw = match.group(1)!.replaceAll('.', '').replaceAll(',', '.');
-        final val = double.tryParse(raw) ?? 0;
-        if (val > maxAmount) {
-          maxAmount = val;
-          amount = val;
-        }
-      }
-    }
-
-    // Date: look for dd/mm/yyyy or dd.mm.yyyy
-    final dateRegex = RegExp(r'(\d{2})[./](\d{2})[./](\d{4})');
-    for (final line in lines) {
-      final m = dateRegex.firstMatch(line);
-      if (m != null) {
-        date = DateTime.tryParse('${m.group(3)}-${m.group(2)}-${m.group(1)}');
-        if (date != null) break;
-      }
-    }
-
-    return ReceiptParseResult(
-      amount: amount,
-      date: date,
-      merchantName: merchant,
-      confidence: amount != null ? 0.7 : 0.3,
-    );
+  double _estimateConfidence(String text) {
+    if (text.isEmpty) return 0.0;
+    final hasAmount = RegExp(r'\d+[.,]\d{2}').hasMatch(text);
+    final hasDate =
+        RegExp(r'\d{2}[./]\d{2}[./]\d{4}').hasMatch(text);
+    if (hasAmount && hasDate) return 0.7;
+    if (hasAmount) return 0.5;
+    return 0.3;
   }
 
   @override

@@ -54,14 +54,22 @@ class _TransactionsViewState extends State<_TransactionsView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: BlocBuilder<TransactionsBloc, TransactionsState>(
-        builder: (context, state) {
-          return RefreshIndicator(
-            color: AppColors.primary,
-            onRefresh: () async =>
-                context.read<TransactionsBloc>().add(TransactionsRefreshRequested()),
-            child: CustomScrollView(
+      body: RefreshIndicator(
+        color: AppColors.primary,
+        backgroundColor: AppColors.surfaceContainerHigh,
+        onRefresh: () async {
+          context
+              .read<TransactionsBloc>()
+              .add(TransactionsRefreshRequested());
+          await context.read<TransactionsBloc>().stream.firstWhere(
+                (s) => s is TransactionsLoaded || s is TransactionsError,
+              );
+        },
+        child: BlocBuilder<TransactionsBloc, TransactionsState>(
+          builder: (context, state) {
+            return CustomScrollView(
               controller: _scrollController,
+              physics: const AlwaysScrollableScrollPhysics(),
               slivers: [
                 _buildAppBar(),
                 if (state is TransactionsLoading)
@@ -117,9 +125,9 @@ class _TransactionsViewState extends State<_TransactionsView> {
                   ],
                 ],
               ],
-            ),
-          );
-        },
+            );
+          },
+        ),
       ),
     );
   }

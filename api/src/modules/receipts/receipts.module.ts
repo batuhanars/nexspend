@@ -4,6 +4,7 @@ import { join } from 'path';
 import { ReceiptsController } from './receipts.controller';
 import { ReceiptsService } from './receipts.service';
 import { ReceiptParserService } from './receipt-parser.service';
+import { OcrService } from './ocr.service';
 
 @Module({
   imports: [
@@ -12,6 +13,6 @@ import { ReceiptParserService } from './receipt-parser.service';
     }),
   ],
   controllers: [ReceiptsController],
-  providers: [ReceiptsService, ReceiptParserService],
+  providers: [ReceiptsService, ReceiptParserService, OcrService],
 })
 export class ReceiptsModule {}

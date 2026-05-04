@@ -11,9 +11,11 @@ import {
   TransactionType,
   TransactionSource,
 } from '@prisma/client';
+import { join } from 'path';
 import { PrismaService } from '../../prisma/prisma.service';
 import { TransactionCreatedEvent } from '../../common/events/transaction.events';
 import { ReceiptParserService } from './receipt-parser.service';
+import { OcrService } from './ocr.service';
 import { ScanReceiptDto } from './dto/scan-receipt.dto';
 import { ConfirmReceiptDto } from './dto/confirm-receipt.dto';
 import { UpdateReceiptDto } from './dto/update-receipt.dto';
@@ -25,6 +27,7 @@ export class ReceiptsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly parser: ReceiptParserService,
+    private readonly ocr: OcrService,
     private readonly eventEmitter: EventEmitter2,
   ) {}
 
@@ -75,22 +78,39 @@ export class ReceiptsService {
       items: [],
       confidence: 0,
     };
-    const rawText = dto.rawText ?? null;
+    let rawText = dto.rawText ?? null;
     let ocrSource = 'CLIENT';
 
-    // Client OCR text geldiyse parse et
+    const absoluteImagePath =
+      imageUrl !== 'pending' ? join(process.cwd(), imageUrl) : null;
+
     if (rawText) {
       parsed = this.parser.parse(rawText);
-      // Güven skoru düşükse backend OCR tetiklenebilir (şimdilik stub)
-      if ((dto.confidence ?? parsed.confidence) < 0.5) {
-        this.logger.warn(
-          `Düşük OCR güveni: ${dto.confidence} — Cloud Vision TODO`,
-        );
-        ocrSource = 'CLIENT_LOW_CONFIDENCE';
+      // Client güveni düşükse Cloud Vision ile yeniden dene
+      if ((dto.confidence ?? parsed.confidence) < 0.5 && absoluteImagePath) {
+        this.logger.log(`Düşük OCR güveni (${dto.confidence ?? parsed.confidence}) — Cloud Vision devreye giriyor`);
+        const cloudText = await this.ocr.extractText(absoluteImagePath);
+        if (cloudText) {
+          rawText = cloudText;
+          parsed = this.parser.parse(cloudText);
+          ocrSource = 'CLOUD_VISION';
+        } else {
+          ocrSource = 'CLIENT_LOW_CONFIDENCE';
+        }
+      }
+    } else if (absoluteImagePath) {
+      // Sadece görsel yüklendi — Cloud Vision OCR
+      this.logger.log(`Cloud Vision OCR başlatılıyor: ${absoluteImagePath}`);
+      const cloudText = await this.ocr.extractText(absoluteImagePath);
+      if (cloudText) {
+        rawText = cloudText;
+        parsed = this.parser.parse(cloudText);
+        ocrSource = 'CLOUD_VISION';
+      } else {
+        this.logger.warn(`Cloud Vision metin çıkaramadı: ${absoluteImagePath}`);
+        ocrSource = 'NONE';
       }
     } else {
-      // Sadece görsel yüklendi, Cloud Vision TODO
-      this.logger.warn(`Raw text yok — Cloud Vision entegrasyonu henüz yok`);
       ocrSource = 'NONE';
     }
 

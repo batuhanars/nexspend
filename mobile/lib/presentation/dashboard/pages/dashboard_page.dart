@@ -121,7 +121,11 @@ class _DashboardViewState extends State<_DashboardView> {
                   const Spacer(),
                   if (dashboard.accounts.isNotEmpty)
                     TextButton(
-                      onPressed: () => context.push(RouteNames.addAccount),
+                      onPressed: () async {
+                        final bloc = context.read<DashboardBloc>();
+                        await context.push(RouteNames.addAccount);
+                        if (mounted) bloc.add(const DashboardRefreshRequested());
+                      },
                       style: TextButton.styleFrom(
                         padding: EdgeInsets.zero,
                         minimumSize: Size.zero,
@@ -139,7 +143,11 @@ class _DashboardViewState extends State<_DashboardView> {
             const SizedBox(height: AppSpacing.md),
             if (dashboard.accounts.isEmpty)
               _EmptyAccountsCard(
-                onTap: () => context.push(RouteNames.addAccount),
+                onTap: () async {
+                  final bloc = context.read<DashboardBloc>();
+                  await context.push(RouteNames.addAccount);
+                  if (mounted) bloc.add(const DashboardRefreshRequested());
+                },
               )
             else
               AccountCarousel(
@@ -149,7 +157,11 @@ class _DashboardViewState extends State<_DashboardView> {
                   RouteNames.accountDetail(account.id),
                   extra: account,
                 ),
-                onAddAccount: () => context.push(RouteNames.addAccount),
+                onAddAccount: () async {
+                  final bloc = context.read<DashboardBloc>();
+                  await context.push(RouteNames.addAccount);
+                  if (mounted) bloc.add(const DashboardRefreshRequested());
+                },
               ),
             const SizedBox(height: AppSpacing.xl),
             RecentTransactionsSection(

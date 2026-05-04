@@ -12,20 +12,32 @@ class SummaryCard extends StatelessWidget {
     required this.remaining,
     required this.color,
     required this.icon,
+    this.isActive = false,
+    this.onTap,
   });
   final String label;
   final double total;
   final double remaining;
   final Color color;
   final IconData icon;
+  final bool isActive;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+      duration: const Duration(milliseconds: 150),
       padding: const EdgeInsets.all(AppSpacing.lg),
       decoration: BoxDecoration(
-        color: AppColors.surfaceContainerHigh,
+        color: isActive
+            ? color.withValues(alpha: 0.12)
+            : AppColors.surfaceContainerHigh,
         borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+        border: isActive
+            ? Border.all(color: color.withValues(alpha: 0.4), width: 1.5)
+            : null,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -52,6 +64,7 @@ class SummaryCard extends StatelessWidget {
           ),
         ],
       ),
+    ),
     );
   }
 }

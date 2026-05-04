@@ -53,7 +53,10 @@ class _DebtsView extends StatelessWidget {
                   )
                 else if (state is DebtsLoaded) ...[
                   SliverToBoxAdapter(
-                    child: SummaryCards(summary: state.summary),
+                    child: SummaryCards(
+                      summary: state.summary,
+                      activeFilter: state.filter,
+                    ),
                   ),
                   SliverToBoxAdapter(
                     child: FilterChips(activeFilter: state.filter),

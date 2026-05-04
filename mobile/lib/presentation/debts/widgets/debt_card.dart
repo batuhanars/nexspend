@@ -32,7 +32,11 @@ class DebtCard extends StatelessWidget {
       onDismissed: (_) =>
           context.read<DebtsBloc>().add(DebtDeleteRequested(debt.id)),
       child: GestureDetector(
-        onTap: () => context.push(RouteNames.debtDetail(debt.id), extra: debt),
+        onTap: () async {
+          final bloc = context.read<DebtsBloc>();
+          await context.push(RouteNames.debtDetail(debt.id), extra: debt);
+          if (context.mounted) bloc.add(const DebtsRefreshRequested());
+        },
         child: Padding(
         padding: const EdgeInsets.symmetric(
           horizontal: AppSpacing.pagePadding,
@@ -182,10 +186,16 @@ class DebtCard extends StatelessWidget {
                   width: double.infinity,
                   child: OutlinedButton(
                     onPressed: debt.hasInstallments
-                        ? () => context.push(
+                        ? () async {
+                            final bloc = context.read<DebtsBloc>();
+                            await context.push(
                               RouteNames.debtDetail(debt.id),
                               extra: debt,
-                            )
+                            );
+                            if (context.mounted) {
+                              bloc.add(const DebtsRefreshRequested());
+                            }
+                          }
                         : () => _showPaymentSheet(context),
                     style: OutlinedButton.styleFrom(
                       side: BorderSide(color: color, width: 1.5),

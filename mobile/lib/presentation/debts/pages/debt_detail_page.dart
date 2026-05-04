@@ -309,7 +309,7 @@ class _DetailPaymentSheetState extends State<_DetailPaymentSheet> {
             'Tutar (₺)',
             Icons.attach_money_rounded,
             numeric: true,
-            readOnly: widget.installment == null,
+            readOnly: widget.installment != null,
           ),
           const SizedBox(height: AppSpacing.md),
           Text(

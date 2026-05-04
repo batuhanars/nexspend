@@ -77,6 +77,8 @@ class AddTransactionBloc
       final isRecurring = data.remove('isRecurring') as bool? ?? false;
 
       if (isRecurring) {
+        data.remove('transactionDate');
+        data.remove('transferToAccountId');
         await _txRepo.createRecurringTransaction(data);
         emit(AddTransactionSuccess(TransactionModel(
           id: '',

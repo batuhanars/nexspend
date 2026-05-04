@@ -26,24 +26,55 @@ export class RecurringTransactionsService {
     const startDate = dto.startDate ? new Date(dto.startDate) : new Date();
     const nextRunDate = this.calcNextRunDate(startDate, dto.frequency);
 
-    return this.prisma.recurringTransaction.create({
-      data: {
-        userId,
-        accountId: dto.accountId,
-        categoryId: dto.categoryId ?? null,
-        type: dto.type,
-        amount: dto.amount,
-        title: dto.title,
-        note: dto.note ?? null,
-        frequency: dto.frequency,
-        startDate,
-        endDate: dto.endDate ? new Date(dto.endDate) : null,
-        nextRunDate,
-      },
-      include: {
-        account: { select: { id: true, name: true, icon: true, color: true } },
-        category: true,
-      },
+    return this.prisma.$transaction(async (tx) => {
+      const template = await tx.recurringTransaction.create({
+        data: {
+          userId,
+          accountId: dto.accountId,
+          categoryId: dto.categoryId ?? null,
+          type: dto.type,
+          amount: dto.amount,
+          title: dto.title,
+          note: dto.note ?? null,
+          frequency: dto.frequency,
+          startDate,
+          endDate: dto.endDate ? new Date(dto.endDate) : null,
+          nextRunDate,
+        },
+        include: {
+          account: { select: { id: true, name: true, icon: true, color: true } },
+          category: true,
+        },
+      });
+
+      // İlk işlemi hemen oluştur (startDate bugün veya geçmişte)
+      await tx.transaction.create({
+        data: {
+          userId,
+          accountId: dto.accountId,
+          categoryId: dto.categoryId ?? null,
+          type: dto.type,
+          amount: dto.amount,
+          title: dto.title,
+          note: dto.note ?? null,
+          transactionDate: startDate,
+          source: 'RECURRING',
+        },
+      });
+
+      if (dto.type === 'INCOME') {
+        await tx.account.update({
+          where: { id: dto.accountId },
+          data: { balance: { increment: Number(dto.amount) } },
+        });
+      } else if (dto.type === 'EXPENSE') {
+        await tx.account.update({
+          where: { id: dto.accountId },
+          data: { balance: { decrement: Number(dto.amount) } },
+        });
+      }
+
+      return template;
     });
   }
 

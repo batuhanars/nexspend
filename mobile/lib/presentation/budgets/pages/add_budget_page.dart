@@ -322,6 +322,7 @@ class _AddBudgetPageState extends State<AddBudgetPage> {
                               'Bütçe Oluştur',
                               style: AppTypography.bodyMd.copyWith(
                                 fontWeight: FontWeight.w600,
+                                color: AppColors.surface,
                               ),
                             ),
                     ),

@@ -91,9 +91,9 @@ class DebtSummaryModel {
       DebtSummaryModel(
         totalLent: (json['totalLent'] as num? ?? 0).toDouble(),
         totalBorrowed: (json['totalBorrowed'] as num? ?? 0).toDouble(),
-        totalLentRemaining: (json['totalLentRemaining'] as num? ?? 0).toDouble(),
+        totalLentRemaining: (json['remainingLent'] as num? ?? 0).toDouble(),
         totalBorrowedRemaining:
-            (json['totalBorrowedRemaining'] as num? ?? 0).toDouble(),
+            (json['remainingBorrowed'] as num? ?? 0).toDouble(),
       );
 
   factory DebtSummaryModel.empty() => const DebtSummaryModel(

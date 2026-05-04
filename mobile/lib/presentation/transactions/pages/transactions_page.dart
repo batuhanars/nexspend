@@ -84,7 +84,18 @@ class _TransactionsViewState extends State<_TransactionsView> {
                     child: FilterChips(activeFilter: state.filter),
                   ),
                   if (state.transactions.isEmpty)
-                    const SliverFillRemaining(child: EmptyView())
+                    SliverFillRemaining(
+                      child: EmptyView(
+                        onAdd: () async {
+                          final bloc = context.read<TransactionsBloc>();
+                          final added =
+                              await context.push(RouteNames.addTransaction);
+                          if (added == true && mounted) {
+                            bloc.add(TransactionsRefreshRequested());
+                          }
+                        },
+                      ),
+                    )
                   else ...[
                     TransactionList(grouped: state.grouped),
                     if (state.isLoadingMore)
@@ -110,17 +121,6 @@ class _TransactionsViewState extends State<_TransactionsView> {
           );
         },
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          final added = await context.push(RouteNames.addTransaction);
-          if (added == true && context.mounted) {
-            context.read<TransactionsBloc>().add(TransactionsRefreshRequested());
-          }
-        },
-        backgroundColor: AppColors.primary,
-        foregroundColor: AppColors.onPrimary,
-        child: const Icon(Icons.add_rounded),
-      ),
     );
   }
 
@@ -131,6 +131,18 @@ class _TransactionsViewState extends State<_TransactionsView> {
       centerTitle: false,
       backgroundColor: AppColors.surface,
       surfaceTintColor: Colors.transparent,
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.add_rounded, color: AppColors.primary),
+          onPressed: () async {
+            final bloc = context.read<TransactionsBloc>();
+            final added = await context.push(RouteNames.addTransaction);
+            if (added == true && mounted) {
+              bloc.add(TransactionsRefreshRequested());
+            }
+          },
+        ),
+      ],
     );
   }
 }

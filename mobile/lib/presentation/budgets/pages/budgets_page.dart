@@ -52,31 +52,27 @@ class _BudgetsView extends StatelessWidget {
                   backgroundColor: AppColors.surface,
                   surfaceTintColor: Colors.transparent,
                   title: Text('Bütçeler', style: AppTypography.headlineSm),
+                  actions: [
+                    IconButton(
+                      icon: const Icon(
+                        Icons.add_rounded,
+                        color: AppColors.primary,
+                      ),
+                      onPressed: () async {
+                        await context.push(RouteNames.addBudget);
+                        if (context.mounted) {
+                          context
+                              .read<BudgetsBloc>()
+                              .add(const BudgetsRefreshRequested());
+                        }
+                      },
+                    ),
+                  ],
                 ),
                 _buildBody(context, state),
                 const SliverToBoxAdapter(child: SizedBox(height: 96)),
               ],
             ),
-          );
-        },
-      ),
-      floatingActionButton: BlocBuilder<BudgetsBloc, BudgetsState>(
-        builder: (context, state) {
-          if (state is! BudgetsLoaded || state.budgets.isEmpty) {
-            return const SizedBox.shrink();
-          }
-          return FloatingActionButton(
-            onPressed: () async {
-              await context.push(RouteNames.addBudget);
-              if (context.mounted) {
-                context
-                    .read<BudgetsBloc>()
-                    .add(const BudgetsRefreshRequested());
-              }
-            },
-            backgroundColor: AppColors.primary,
-            foregroundColor: AppColors.surface,
-            child: const Icon(Icons.add),
           );
         },
       ),

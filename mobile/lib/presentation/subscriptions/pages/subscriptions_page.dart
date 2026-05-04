@@ -59,7 +59,11 @@ class _SubscriptionsView extends StatelessWidget {
                       child: UpcomingBanner(renewals: state.upcomingRenewals),
                     ),
                   if (state.subscriptions.isEmpty)
-                    const SliverFillRemaining(child: EmptyView())
+                    SliverFillRemaining(
+                      child: EmptyView(
+                        onAdd: () => _showAddSheet(context),
+                      ),
+                    )
                   else
                     SubscriptionList(subscriptions: state.subscriptions),
                 ],
@@ -67,12 +71,6 @@ class _SubscriptionsView extends StatelessWidget {
             ),
           );
         },
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => _showAddSheet(context),
-        backgroundColor: AppColors.primary,
-        foregroundColor: AppColors.onPrimary,
-        child: const Icon(Icons.add_rounded),
       ),
     );
   }
@@ -84,6 +82,12 @@ class _SubscriptionsView extends StatelessWidget {
       centerTitle: false,
       backgroundColor: AppColors.surface,
       surfaceTintColor: Colors.transparent,
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.add_rounded, color: AppColors.primary),
+          onPressed: () => _showAddSheet(context),
+        ),
+      ],
     );
   }
 

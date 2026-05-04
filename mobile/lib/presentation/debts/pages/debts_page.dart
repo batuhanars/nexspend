@@ -59,7 +59,11 @@ class _DebtsView extends StatelessWidget {
                     child: FilterChips(activeFilter: state.filter),
                   ),
                   if (state.debts.isEmpty)
-                    const SliverFillRemaining(child: EmptyView())
+                    SliverFillRemaining(
+                      child: EmptyView(
+                        onAdd: () => _showAddDebtSheet(context),
+                      ),
+                    )
                   else
                     DebtList(debts: state.debts),
                 ],
@@ -67,12 +71,6 @@ class _DebtsView extends StatelessWidget {
             ),
           );
         },
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => _showAddDebtSheet(context),
-        backgroundColor: AppColors.primary,
-        foregroundColor: AppColors.onPrimary,
-        child: const Icon(Icons.add_rounded),
       ),
     );
   }
@@ -84,6 +82,12 @@ class _DebtsView extends StatelessWidget {
       centerTitle: false,
       backgroundColor: AppColors.surface,
       surfaceTintColor: Colors.transparent,
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.add_rounded, color: AppColors.primary),
+          onPressed: () => _showAddDebtSheet(context),
+        ),
+      ],
     );
   }
 

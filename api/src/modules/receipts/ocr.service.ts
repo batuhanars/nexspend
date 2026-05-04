@@ -13,9 +13,10 @@ export class OcrService {
     const credentialsJson = config.get<string>('GOOGLE_APPLICATION_CREDENTIALS_JSON');
 
     if (credentialsJson) {
-      const jsonStr = credentialsJson.trim().startsWith('{')
+      const cleaned = credentialsJson.replace(/\s+/g, '');
+      const jsonStr = cleaned.startsWith('{')
         ? credentialsJson
-        : Buffer.from(credentialsJson, 'base64').toString('utf-8');
+        : Buffer.from(cleaned, 'base64').toString('utf-8');
       const parsed = JSON.parse(jsonStr) as Record<string, string>;
       if (typeof parsed.private_key === 'string') {
         parsed.private_key = parsed.private_key.replace(/\\n/g, '\n');

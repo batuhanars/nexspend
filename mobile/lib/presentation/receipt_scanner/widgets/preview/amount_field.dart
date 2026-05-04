@@ -23,7 +23,22 @@ class AmountField extends StatelessWidget {
           );
         }
       },
-      decoration: inputDecoration(hint: '0,00', prefixText: '₺'),
+      decoration: inputDecoration(
+        hint: '0,00',
+        prefix: SizedBox(
+          width: 40,
+          child: Center(
+            child: Text(
+              '₺',
+              style: TextStyle(
+                color: AppColors.onSurfaceVariant,
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

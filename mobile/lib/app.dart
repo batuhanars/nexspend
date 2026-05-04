@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
+import 'package:go_router/go_router.dart';
 import 'core/theme/app_theme.dart';
 import 'navigation/app_router.dart';
 
@@ -11,6 +13,14 @@ class WalletApp extends StatefulWidget {
 
 class _WalletAppState extends State<WalletApp> {
   late final _router = createRouter();
+
+  @override
+  void initState() {
+    super.initState();
+    if (!GetIt.instance.isRegistered<GoRouter>()) {
+      GetIt.instance.registerSingleton<GoRouter>(_router);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {

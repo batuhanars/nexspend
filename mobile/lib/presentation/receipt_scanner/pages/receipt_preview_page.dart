@@ -45,10 +45,10 @@ class _ReceiptPreviewView extends StatelessWidget {
     return BlocConsumer<ReceiptPreviewBloc, ReceiptPreviewState>(
       listener: (context, state) {
         if (state is ReceiptPreviewSuccess) {
+          ScaffoldMessenger.of(context).clearSnackBars();
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('İşlem başarıyla oluşturuldu')),
           );
-          // Pop back to scanner, then close scanner too
           Navigator.of(context).pop();
           context.pop();
         }

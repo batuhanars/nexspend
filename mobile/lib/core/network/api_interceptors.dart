@@ -1,6 +1,9 @@
 import 'package:dio/dio.dart';
+import 'package:get_it/get_it.dart';
+import 'package:go_router/go_router.dart';
 import '../constants/api_endpoints.dart';
 import '../storage/secure_storage.dart';
+import '../../navigation/route_names.dart';
 
 class AuthInterceptor extends Interceptor {
   AuthInterceptor(this._storage, this._dio);
@@ -32,6 +35,7 @@ class AuthInterceptor extends Interceptor {
         final refreshToken = await _storage.getRefreshToken();
         if (refreshToken == null) {
           await _storage.clearTokens();
+          _navigateToLogin();
           return handler.next(err);
         }
 
@@ -54,11 +58,20 @@ class AuthInterceptor extends Interceptor {
         return handler.resolve(retryResponse);
       } catch (_) {
         await _storage.clearTokens();
+        _navigateToLogin();
         return handler.next(err);
       } finally {
         _isRefreshing = false;
       }
     }
     handler.next(err);
+  }
+
+  void _navigateToLogin() {
+    try {
+      GetIt.instance<GoRouter>().go(RouteNames.login);
+    } catch (_) {
+      // Router henüz kayıtlı değilse sessizce geç
+    }
   }
 }

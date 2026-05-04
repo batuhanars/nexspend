@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 
 export interface ParsedReceipt {
   amount: number | null;
@@ -19,11 +19,15 @@ export interface ParsedReceiptItem {
 
 @Injectable()
 export class ReceiptParserService {
+  private readonly logger = new Logger(ReceiptParserService.name);
+
   parse(rawText: string): ParsedReceipt {
     const lines = rawText
       .split('\n')
       .map((l) => l.trim())
       .filter(Boolean);
+
+    this.logger.debug(`OCR ham metin (${lines.length} satır):\n${rawText.slice(0, 1000)}`);
 
     const amount = this.extractAmount(lines);
     const date = this.extractDate(lines);
@@ -38,25 +42,60 @@ export class ReceiptParserService {
   }
 
   private extractAmount(lines: string[]): number | null {
-    // Öncelik sırası: en spesifik → en genel
-    // [\s:*.]* → boşluk, iki nokta, yıldız (*), nokta gibi ayraçları geç
-    const patterns = [
-      /GENEL\s*TOPLAM[\s:*.]*(\d[\d.,]*)/i,
-      /ÖDENECEK[\s\w]*TUTAR[\s:*.]*(\d[\d.,]*)/i, // "Ödenecek KDV Dahil Tutar *351.54"
-      /TOPLAM\s+TUTAR[\s:*.]*(\d[\d.,]*)/i,
-      /TOP\.\s*TUTAR[\s:*.]*(\d[\d.,]*)/i,
-      /TUTAR[\s:*.]*(\d[\d.,]*)/i,
-      /TOPLAM[\s:*.]*(\d[\d.,]*)/i,
-      /TOP\.[\s:*.]*(\d[\d.,]*)/i,
+    // Öncelik 1: etiket + tutar AYNI satırda
+    const inlinePatterns = [
+      /GENEL\s*TOPLAM[\s:*.\-]*(\d[\d.,]+)/i,
+      /(?:ÖDENECEK|ODENECEK)[\s\S]{0,30}TUTAR[\s:*.\-]*(\d[\d.,]+)/i,
+      /TOPLAM\s+TUTAR[\s:*.\-]*(\d[\d.,]+)/i,
+      /TOP\.?\s*TUTAR[\s:*.\-]*(\d[\d.,]+)/i,
+      /TAH[Sİsi][İi]LAT[\s:*.\-]*(\d[\d.,]+)/i,
+      /TUTAR[\s:*.\-]*(\d[\d.,]+)/i,
+      /TOPLAM[\s:*.\-]*(\d[\d.,]+)/i,
+      /TOP\.[\s:*.\-]*(\d[\d.,]+)/i,
     ];
 
     for (const line of lines) {
-      for (const pattern of patterns) {
+      for (const pattern of inlinePatterns) {
         const m = line.match(pattern);
         if (m) return this.parseDecimal(m[1]);
       }
     }
-    return null;
+
+    // Öncelik 2: etiket satırın tamamını kaplarken tutar BİR SONRAKI satırda
+    const labelPatterns = [
+      /GENEL\s*TOPLAM/i,
+      /(?:ÖDENECEK|ODENECEK)[\s\S]{0,30}TUTAR/i,
+      /TOPLAM\s+TUTAR/i,
+      /TOP\.?\s*TUTAR/i,
+      /TAH[Sİsi][İi]LAT/i,
+      /TOPLAM/i,
+    ];
+    const amountOnly = /^[\s*\-]*(\d[\d.,]+)[\s*\-]*$/;
+
+    for (let i = 0; i < lines.length - 1; i++) {
+      for (const lp of labelPatterns) {
+        if (lp.test(lines[i])) {
+          const next = lines[i + 1];
+          const m = next.match(amountOnly);
+          if (m) return this.parseDecimal(m[1]);
+          // Sonraki satırda inline rakam varsa ilk rakamı al
+          const inline = next.match(/(\d[\d.,]+)/);
+          if (inline) return this.parseDecimal(inline[1]);
+        }
+      }
+    }
+
+    // Öncelik 3 (fallback): fişteki en büyük para miktarı — toplam genellikle en büyüktür
+    const moneyPattern = /\b(\d{1,6}[.,]\d{2})\b/g;
+    const fullText = lines.join('\n');
+    let max: number | null = null;
+    let match: RegExpExecArray | null;
+    while ((match = moneyPattern.exec(fullText)) !== null) {
+      const val = this.parseDecimal(match[1]);
+      if (val !== null && (max === null || val > max)) max = val;
+    }
+    if (max !== null) this.logger.debug(`Tutar fallback (en büyük değer): ${max}`);
+    return max;
   }
 
   private extractDate(lines: string[]): Date | null {

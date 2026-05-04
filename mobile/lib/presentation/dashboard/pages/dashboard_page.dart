@@ -10,7 +10,6 @@ import '../../../data/repositories/dashboard_repository.dart';
 import '../../../navigation/route_names.dart';
 import '../bloc/dashboard_bloc.dart';
 import '../widgets/balance_card.dart';
-import '../widgets/quick_actions_row.dart';
 import '../widgets/account_carousel.dart';
 import '../widgets/recent_transactions_section.dart';
 
@@ -110,22 +109,6 @@ class _DashboardViewState extends State<_DashboardView> {
               isBalanceHidden: _isBalanceHidden,
               onToggleVisibility: () =>
                   setState(() => _isBalanceHidden = !_isBalanceHidden),
-            ),
-            const SizedBox(height: AppSpacing.xl),
-            QuickActionsRow(
-              onIncome: () => context.push(
-                RouteNames.addTransaction,
-                extra: {'type': 'INCOME'},
-              ),
-              onExpense: () => context.push(
-                RouteNames.addTransaction,
-                extra: {'type': 'EXPENSE'},
-              ),
-              onTransfer: () => context.push(
-                RouteNames.addTransaction,
-                extra: {'type': 'TRANSFER'},
-              ),
-              onScan: () => context.push(RouteNames.receiptScanner),
             ),
             const SizedBox(height: AppSpacing.xl),
             Padding(

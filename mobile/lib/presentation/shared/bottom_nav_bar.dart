@@ -1,10 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_spacing.dart';
 import '../../core/di/injection.dart';
 import '../../core/services/notification_service.dart';
+import '../../data/repositories/debt_repository.dart';
+import '../../data/repositories/subscription_repository.dart';
 import '../../navigation/route_names.dart';
+import '../debts/bloc/debts_bloc.dart';
+import '../debts/widgets/add_debt_sheet.dart';
+import '../subscriptions/bloc/subscriptions_bloc.dart';
+import '../subscriptions/widgets/add_subscription_sheet.dart';
+import 'expandable_fab.dart';
 
 class AppShell extends StatefulWidget {
   const AppShell({super.key, required this.child});
@@ -16,6 +24,8 @@ class AppShell extends StatefulWidget {
 }
 
 class _AppShellState extends State<AppShell> {
+  bool _fabOpen = false;
+
   @override
   void initState() {
     super.initState();
@@ -23,11 +33,104 @@ class _AppShellState extends State<AppShell> {
     getIt<NotificationService>().initialize();
   }
 
+  void _toggleFab() => setState(() => _fabOpen = !_fabOpen);
+  void _closeFab() => setState(() => _fabOpen = false);
+
+  bool _isHome(String location) =>
+      location == RouteNames.home ||
+      location.startsWith('${RouteNames.home}/');
+
+  List<FabAction> _buildActions(BuildContext context) => [
+        FabAction(
+          label: 'İşlem Ekle',
+          icon: Icons.receipt_long_outlined,
+          color: AppColors.primary,
+          onTap: () => context.push(RouteNames.addTransaction),
+        ),
+        FabAction(
+          label: 'Bütçe Ekle',
+          icon: Icons.pie_chart_outline_rounded,
+          color: const Color(0xFFCE93D8),
+          onTap: () => context.push(RouteNames.addBudget),
+        ),
+        FabAction(
+          label: 'Borç Ekle',
+          icon: Icons.handshake_outlined,
+          color: const Color(0xFFFFCC80),
+          onTap: () => _showDebtSheet(context),
+        ),
+        FabAction(
+          label: 'Abonelik Ekle',
+          icon: Icons.subscriptions_outlined,
+          color: AppColors.secondary,
+          onTap: () => _showSubscriptionSheet(context),
+        ),
+        FabAction(
+          label: 'Tara',
+          icon: Icons.document_scanner_outlined,
+          color: AppColors.onSurfaceVariant,
+          onTap: () => context.push(RouteNames.receiptScanner),
+        ),
+      ];
+
+  void _showDebtSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => BlocProvider(
+        create: (_) =>
+            DebtsBloc(debtRepository: getIt<DebtRepository>()),
+        child: const AddDebtSheet(),
+      ),
+    );
+  }
+
+  void _showSubscriptionSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => BlocProvider(
+        create: (_) => SubscriptionsBloc(
+          subscriptionRepository: getIt<SubscriptionRepository>(),
+        ),
+        child: const AddSubscriptionSheet(),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final location = GoRouterState.of(context).matchedLocation;
+    final isHome = _isHome(location);
+
     return Scaffold(
-      body: widget.child,
+      body: Stack(
+        children: [
+          widget.child,
+          if (_fabOpen && isHome)
+            Positioned.fill(
+              child: GestureDetector(
+                onTap: _closeFab,
+                behavior: HitTestBehavior.opaque,
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: Colors.black.withValues(alpha: 0.55),
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
       bottomNavigationBar: const _BottomNavBar(),
+      floatingActionButton: isHome
+          ? ExpandableFab(
+              isOpen: _fabOpen,
+              onToggle: _toggleFab,
+              actions: _buildActions(context),
+            )
+          : null,
     );
   }
 }

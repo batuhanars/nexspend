@@ -14,6 +14,9 @@ export class NotificationsService {
 
       if (serviceAccountJson) {
         const parsed = JSON.parse(serviceAccountJson);
+        if (typeof parsed.private_key === 'string') {
+          parsed.private_key = parsed.private_key.replace(/\\n/g, '\n');
+        }
         credential = admin.credential.cert(parsed);
       } else {
         const projectId = process.env.FIREBASE_PROJECT_ID;

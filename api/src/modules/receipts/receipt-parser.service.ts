@@ -42,65 +42,102 @@ export class ReceiptParserService {
   }
 
   private extractAmount(lines: string[]): number | null {
-    // Öncelik 1: etiket + tutar AYNI satırda
-    const inlinePatterns = [
-      /GENEL\s*TOPLAM[\s:*.\-]*(\d[\d.,]+)/i,
-      /(?:ÖDENECEK|ODENECEK)[\s\S]{0,30}TUTAR[\s:*.\-]*(\d[\d.,]+)/i,
-      /TOPLAM\s+TUTAR[\s:*.\-]*(\d[\d.,]+)/i,
-      /TOP\.?\s*TUTAR[\s:*.\-]*(\d[\d.,]+)/i,
-      /TAH[Sİsi][İi]LAT[\s:*.\-]*(\d[\d.,]+)/i,
-      /TUTAR[\s:*.\-]*(\d[\d.,]+)/i,
-      /TOPLAM[\s:*.\-]*(\d[\d.,]+)/i,
-      /TOP\.[\s:*.\-]*(\d[\d.,]+)/i,
+    // OCR çıktısında bazen "198 ,00" gibi boşlukla ayrılmış ondalık olur
+    const normalize = (s: string): string =>
+      s.replace(/(\d)\s+([,.])/g, '$1$2').replace(/([,.])\s+(\d)/g, '$1$2');
+
+    // Ondalık ayraç içeren geçerli tutar — saf integer (TCKN, barkod) reddedilir
+    const findMoney = (s: string): number | null => {
+      const n = normalize(s);
+      const m = n.match(/\*?\s*(\d{1,7}[,.]\d{1,2})\b/);
+      if (!m) return null;
+      const v = this.parseDecimal(m[1]);
+      return v !== null && v > 0 && v < 1_000_000 ? v : null;
+    };
+
+    // Öncelik 1: Kesin tutar etiketleri (kullanıcı teyit etti: "İŞLEM TUTARI" veya
+    // "Ödenecek KDV Dahil Tutar" — aynı satır ya da altındaki satırlarda arama)
+    const p1: Array<[RegExp, string]> = [
+      [/GENEL\s*TOPLAM/i, 'GENEL TOPLAM'],
+      [/(?:ÖDENECEK|ODENECEK).{0,30}TUTAR/i, 'ÖDENECEK TUTAR'],
+      [/(?:İŞLEM|IŞLEM|ISLEM)\s+TUTAR/i, 'İŞLEM TUTARI'],
     ];
 
-    for (const line of lines) {
-      for (const pattern of inlinePatterns) {
-        const m = line.match(pattern);
-        if (m) return this.parseDecimal(m[1]);
-      }
-    }
-
-    // Öncelik 2: etiket satırın tamamını kaplarken tutar BİR SONRAKI satırda
-    const labelPatterns = [
-      /GENEL\s*TOPLAM/i,
-      /(?:ÖDENECEK|ODENECEK)[\s\S]{0,30}TUTAR/i,
-      /TOPLAM\s+TUTAR/i,
-      /TOP\.?\s*TUTAR/i,
-      /TAH[Sİsi][İi]LAT/i,
-      /TOPLAM/i,
-    ];
-    const amountOnly = /^[\s*\-]*(\d[\d.,]+)[\s*\-]*$/;
-
-    for (let i = 0; i < lines.length - 1; i++) {
-      for (const lp of labelPatterns) {
-        if (lp.test(lines[i])) {
-          const next = lines[i + 1];
-          const m = next.match(amountOnly);
-          if (m) return this.parseDecimal(m[1]);
-          // Sonraki satırda inline rakam varsa ilk rakamı al
-          const inline = next.match(/(\d[\d.,]+)/);
-          if (inline) return this.parseDecimal(inline[1]);
+    for (let i = 0; i < lines.length; i++) {
+      for (const [label, name] of p1) {
+        if (!label.test(lines[i])) continue;
+        const same = findMoney(lines[i]);
+        if (same !== null) {
+          this.logger.debug(`Tutar [${name} inline]: ${same}`);
+          return same;
+        }
+        for (let j = i + 1; j < Math.min(i + 4, lines.length); j++) {
+          const found = findMoney(lines[j]);
+          if (found !== null) {
+            this.logger.debug(`Tutar [${name}+${j - i} satır]: ${found}`);
+            return found;
+          }
         }
       }
     }
 
-    // Öncelik 3 (fallback): fişteki en büyük para miktarı — toplam genellikle en büyüktür
-    const moneyPattern = /\b(\d{1,6}[.,]\d{2})\b/g;
-    const fullText = lines.join('\n');
-    let max: number | null = null;
-    let match: RegExpExecArray | null;
-    while ((match = moneyPattern.exec(fullText)) !== null) {
-      const val = this.parseDecimal(match[1]);
-      if (val !== null && (max === null || val > max)) max = val;
+    // Öncelik 2: TOPLAM satırı — "TOPLAM KDV" hariç (KDV toplamını değil genel toplamı ister)
+    for (let i = 0; i < lines.length; i++) {
+      if (!/TOPLAM/i.test(lines[i])) continue;
+      if (/TOPLAM\s+KDV/i.test(lines[i])) continue;
+      const same = findMoney(lines[i]);
+      if (same !== null) {
+        this.logger.debug(`Tutar [TOPLAM inline]: ${same}`);
+        return same;
+      }
+      for (let j = i + 1; j < Math.min(i + 3, lines.length); j++) {
+        const found = findMoney(lines[j]);
+        if (found !== null) {
+          this.logger.debug(`Tutar [TOPLAM+${j - i} satır]: ${found}`);
+          return found;
+        }
+      }
     }
-    if (max !== null) this.logger.debug(`Tutar fallback (en büyük değer): ${max}`);
+
+    // Öncelik 3: Kart/nakit ödeme satırı ("Banka/Kredi Kartı *198,00")
+    for (const line of lines) {
+      if (
+        /BANKA|KREDİ\s*KART|KREDI\s*KART|NAKİT|NAKIT|CONTACTLESS|TEMASSIZ/i.test(
+          line,
+        )
+      ) {
+        const found = findMoney(line);
+        if (found !== null) {
+          this.logger.debug(`Tutar [Ödeme satırı]: ${found}`);
+          return found;
+        }
+      }
+    }
+
+    // Fallback: fişteki en büyük ondalıklı değer (barkod/TCKN gibi saf int'ler elenmiş)
+    let max: number | null = null;
+    for (const line of lines) {
+      const n = normalize(line);
+      const pattern = /\b(\d{1,6}[,.]\d{2})\b/g;
+      let m: RegExpExecArray | null;
+      while ((m = pattern.exec(n)) !== null) {
+        const val = this.parseDecimal(m[1]);
+        if (
+          val !== null &&
+          val > 0 &&
+          val < 1_000_000 &&
+          (max === null || val > max)
+        )
+          max = val;
+      }
+    }
+    if (max !== null) this.logger.debug(`Tutar fallback (en büyük): ${max}`);
     return max;
   }
 
   private extractDate(lines: string[]): Date | null {
     const patterns = [
-      /(\d{2})[./](\d{2})[./](\d{4})/, // DD.MM.YYYY veya DD/MM/YYYY
+      /(\d{2})[./]\s*(\d{2})[./]\s*(\d{4})/, // DD.MM.YYYY veya "03.05. 2026"
       /(\d{4})[./-](\d{2})[./-](\d{2})/, // YYYY-MM-DD
     ];
 

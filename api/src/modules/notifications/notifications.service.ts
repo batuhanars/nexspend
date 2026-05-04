@@ -13,7 +13,10 @@ export class NotificationsService {
       let credential: admin.credential.Credential;
 
       if (serviceAccountJson) {
-        const parsed = JSON.parse(serviceAccountJson);
+        const jsonStr = serviceAccountJson.trim().startsWith('{')
+          ? serviceAccountJson
+          : Buffer.from(serviceAccountJson, 'base64').toString('utf-8');
+        const parsed = JSON.parse(jsonStr);
         if (typeof parsed.private_key === 'string') {
           parsed.private_key = parsed.private_key.replace(/\\n/g, '\n');
         }

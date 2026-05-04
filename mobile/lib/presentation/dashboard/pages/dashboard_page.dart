@@ -128,18 +128,17 @@ class _DashboardViewState extends State<_DashboardView> {
               onScan: () => context.push(RouteNames.receiptScanner),
             ),
             const SizedBox(height: AppSpacing.xl),
-            if (dashboard.accounts.isNotEmpty) ...[
-              Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.pagePadding,
-                ),
-                child: Row(
-                  children: [
-                    Text('Hesaplarım', style: AppTypography.titleSm),
-                    const Spacer(),
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.pagePadding,
+              ),
+              child: Row(
+                children: [
+                  Text('Hesaplarım', style: AppTypography.titleSm),
+                  const Spacer(),
+                  if (dashboard.accounts.isNotEmpty)
                     TextButton(
-                      onPressed: () =>
-                          context.push(RouteNames.addAccount),
+                      onPressed: () => context.push(RouteNames.addAccount),
                       style: TextButton.styleFrom(
                         padding: EdgeInsets.zero,
                         minimumSize: Size.zero,
@@ -151,10 +150,15 @@ class _DashboardViewState extends State<_DashboardView> {
                             .copyWith(color: AppColors.primary),
                       ),
                     ),
-                  ],
-                ),
+                ],
               ),
-              const SizedBox(height: AppSpacing.md),
+            ),
+            const SizedBox(height: AppSpacing.md),
+            if (dashboard.accounts.isEmpty)
+              _EmptyAccountsCard(
+                onTap: () => context.push(RouteNames.addAccount),
+              )
+            else
               AccountCarousel(
                 accounts: dashboard.accounts,
                 isBalanceHidden: _isBalanceHidden,
@@ -164,8 +168,7 @@ class _DashboardViewState extends State<_DashboardView> {
                 ),
                 onAddAccount: () => context.push(RouteNames.addAccount),
               ),
-              const SizedBox(height: AppSpacing.xl),
-            ],
+            const SizedBox(height: AppSpacing.xl),
             RecentTransactionsSection(
               transactions: dashboard.recentTransactions,
               onViewAll: () => context.go(RouteNames.transactions),
@@ -174,6 +177,83 @@ class _DashboardViewState extends State<_DashboardView> {
         ),
       _ => const SizedBox.shrink(),
     };
+  }
+}
+
+class _EmptyAccountsCard extends StatelessWidget {
+  const _EmptyAccountsCard({required this.onTap});
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.pagePadding),
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(AppSpacing.xl),
+          decoration: BoxDecoration(
+            color: AppColors.surfaceContainerHigh,
+            borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+            border: Border.all(
+              color: AppColors.primary.withValues(alpha: 0.2),
+              width: 1.5,
+            ),
+          ),
+          child: Column(
+            children: [
+              Container(
+                width: 56,
+                height: 56,
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withValues(alpha: 0.12),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.account_balance_wallet_outlined,
+                  color: AppColors.primary,
+                  size: 26,
+                ),
+              ),
+              const SizedBox(height: AppSpacing.md),
+              Text(
+                'Henüz hesap eklemediniz',
+                style: AppTypography.titleSm,
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: AppSpacing.xs),
+              Text(
+                'Gelir ve giderlerinizi takip etmek için\nilk hesabınızı oluşturun.',
+                style: AppTypography.bodyMd.copyWith(
+                  color: AppColors.onSurfaceVariant,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: AppSpacing.lg),
+              SizedBox(
+                width: double.infinity,
+                height: 48,
+                child: ElevatedButton.icon(
+                  onPressed: onTap,
+                  icon: const Icon(Icons.add_rounded, size: 20),
+                  label: const Text('İlk Hesabı Ekle'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: AppColors.surface,
+                    shape: RoundedRectangleBorder(
+                      borderRadius:
+                          BorderRadius.circular(AppSpacing.radiusXl),
+                    ),
+                    elevation: 0,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }
 

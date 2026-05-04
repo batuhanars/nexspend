@@ -1,13 +1,16 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import '../constants/api_endpoints.dart';
 import '../network/api_client.dart';
 
+const _channelId = 'high_importance_channel';
+const _channelName = 'Bildirimler';
+
+final _localNotifications = FlutterLocalNotificationsPlugin();
+
 @pragma('vm:entry-point')
-Future<void> _firebaseBackgroundHandler(RemoteMessage message) async {
-  // Arka planda gelen mesajlar OS tarafından otomatik gösterilir.
-  // Burada sadece veri mesajları için ek işlem yapılabilir.
-}
+Future<void> _firebaseBackgroundHandler(RemoteMessage message) async {}
 
 class NotificationService {
   final ApiClient _apiClient;
@@ -16,6 +19,22 @@ class NotificationService {
 
   Future<void> initialize() async {
     FirebaseMessaging.onBackgroundMessage(_firebaseBackgroundHandler);
+
+    const androidSettings =
+        AndroidInitializationSettings('@mipmap/ic_launcher');
+    await _localNotifications.initialize(
+      const InitializationSettings(android: androidSettings),
+    );
+
+    const channel = AndroidNotificationChannel(
+      _channelId,
+      _channelName,
+      importance: Importance.high,
+    );
+    await _localNotifications
+        .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin>()
+        ?.createNotificationChannel(channel);
 
     final settings = await FirebaseMessaging.instance.requestPermission(
       alert: true,
@@ -50,13 +69,27 @@ class NotificationService {
 
     FirebaseMessaging.instance.onTokenRefresh.listen(_registerToken);
 
-    // Foreground mesajlar — uygulama açıkken bildirim gelirse
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      final notification = message.notification;
+      if (notification == null) return;
       if (kDebugMode) {
         print(
-          '[FCM] Foreground mesaj: ${message.notification?.title} — ${message.notification?.body}',
+          '[FCM] Foreground mesaj: ${notification.title} — ${notification.body}',
         );
       }
+      _localNotifications.show(
+        notification.hashCode,
+        notification.title,
+        notification.body,
+        const NotificationDetails(
+          android: AndroidNotificationDetails(
+            _channelId,
+            _channelName,
+            importance: Importance.high,
+            priority: Priority.high,
+          ),
+        ),
+      );
     });
   }
 

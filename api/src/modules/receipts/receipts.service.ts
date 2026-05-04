@@ -86,9 +86,13 @@ export class ReceiptsService {
 
     if (rawText) {
       parsed = this.parser.parse(rawText);
-      // Client güveni düşükse Cloud Vision ile yeniden dene
-      if ((dto.confidence ?? parsed.confidence) < 0.5 && absoluteImagePath) {
-        this.logger.log(`Düşük OCR güveni (${dto.confidence ?? parsed.confidence}) — Cloud Vision devreye giriyor`);
+      // Client yüksek confidence verse bile parser tutar/tarihi bulamadıysa Cloud Vision'a düş
+      const needsCloudVision =
+        parsed.confidence < 0.5 || (dto.confidence ?? 1) < 0.5;
+      if (needsCloudVision && absoluteImagePath) {
+        this.logger.log(
+          `Cloud Vision devreye giriyor — client: ${dto.confidence}, parser: ${parsed.confidence}`,
+        );
         const cloudText = await this.ocr.extractText(absoluteImagePath);
         if (cloudText) {
           rawText = cloudText;

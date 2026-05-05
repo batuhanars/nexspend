@@ -14,6 +14,7 @@ class SubscriptionsBloc extends Bloc<SubscriptionsEvent, SubscriptionsState> {
     on<SubscriptionToggleRequested>(_onToggle);
     on<SubscriptionDeleteRequested>(_onDelete);
     on<SubscriptionCreated>(_onCreate);
+    on<SubscriptionUpdateRequested>(_onUpdate);
   }
 
   final SubscriptionRepository _repo;
@@ -99,6 +100,22 @@ class SubscriptionsBloc extends Bloc<SubscriptionsEvent, SubscriptionsState> {
       await _fetch(emit);
     } catch (e) {
       emit(SubscriptionsError(_parseError(e)));
+    }
+  }
+
+  Future<void> _onUpdate(
+      SubscriptionUpdateRequested event, Emitter<SubscriptionsState> emit) async {
+    final current = state;
+    if (current is! SubscriptionsLoaded) return;
+    final updated = current.subscriptions.map((s) {
+      if (s.id == event.id) return s.copyWith(name: event.name, amount: event.amount);
+      return s;
+    }).toList();
+    emit(current.copyWith(subscriptions: updated));
+    try {
+      await _repo.update(event.id, {'name': event.name, 'amount': event.amount});
+    } catch (_) {
+      emit(current);
     }
   }
 

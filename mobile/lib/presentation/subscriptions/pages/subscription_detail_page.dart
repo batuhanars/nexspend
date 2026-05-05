@@ -5,6 +5,7 @@ import 'package:wallet_app/core/constants/app_colors.dart';
 import 'package:wallet_app/core/constants/app_spacing.dart';
 import 'package:wallet_app/core/constants/app_typography.dart';
 import 'package:wallet_app/data/models/subscription_model.dart';
+import 'package:wallet_app/presentation/shared/widgets/split_amount_field.dart';
 import 'package:wallet_app/presentation/subscriptions/bloc/subscriptions_bloc.dart';
 import 'package:wallet_app/presentation/subscriptions/widgets/subscription_details_card.dart';
 import 'package:wallet_app/presentation/subscriptions/widgets/subscription_header_card.dart';
@@ -46,6 +47,110 @@ class _SubscriptionDetailPageState extends State<SubscriptionDetailPage> {
         categoryName: _sub.categoryName,
       );
     });
+  }
+
+  Future<void> _showEditSheet() async {
+    final nameCtrl = TextEditingController(text: _sub.name);
+    double? amount = _sub.amount;
+
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: AppColors.surfaceContainerHigh,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(AppSpacing.radiusLg)),
+      ),
+      builder: (sheetCtx) {
+        return StatefulBuilder(
+          builder: (ctx, setSheetState) {
+            return Padding(
+              padding: EdgeInsets.fromLTRB(
+                AppSpacing.pagePadding,
+                AppSpacing.xl,
+                AppSpacing.pagePadding,
+                MediaQuery.of(ctx).viewInsets.bottom + AppSpacing.xl,
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text('Aboneliği Düzenle', style: AppTypography.headlineSm),
+                      IconButton(
+                        onPressed: () => Navigator.of(ctx).pop(),
+                        icon: const Icon(Icons.close_rounded),
+                        color: AppColors.onSurfaceVariant,
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: AppSpacing.xl),
+                  Center(
+                    child: SplitAmountField(
+                      initialValue: _sub.amount,
+                      onChanged: (v) => amount = v,
+                      color: AppColors.tertiary,
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.xl),
+                  TextField(
+                    controller: nameCtrl,
+                    style: const TextStyle(color: AppColors.onSurface, fontSize: 14),
+                    decoration: InputDecoration(
+                      hintText: 'Abonelik adı',
+                      hintStyle: const TextStyle(color: AppColors.onSurfaceVariant, fontSize: 14),
+                      prefixIcon: const Icon(Icons.subscriptions_outlined, size: 20, color: AppColors.onSurfaceVariant),
+                      filled: true,
+                      fillColor: AppColors.surfaceContainerHighest,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                        borderSide: BorderSide.none,
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                        borderSide: BorderSide.none,
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                        borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.xl),
+                  FilledButton(
+                    onPressed: () {
+                      final name = nameCtrl.text.trim();
+                      if (name.isEmpty || amount == null || amount! <= 0) return;
+                      context.read<SubscriptionsBloc>().add(
+                        SubscriptionUpdateRequested(
+                          id: _sub.id,
+                          name: name,
+                          amount: amount!,
+                        ),
+                      );
+                      setState(() {
+                        _sub = _sub.copyWith(name: name, amount: amount);
+                      });
+                      Navigator.of(ctx).pop();
+                    },
+                    style: FilledButton.styleFrom(
+                      minimumSize: const Size.fromHeight(56),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
+                      ),
+                    ),
+                    child: Text(AppStrings.of(context).save),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+
+    nameCtrl.dispose();
   }
 
   Future<void> _delete() async {
@@ -93,6 +198,10 @@ class _SubscriptionDetailPageState extends State<SubscriptionDetailPage> {
         title: Text(_sub.name, style: AppTypography.headlineSm),
         centerTitle: false,
         actions: [
+          IconButton(
+            icon: const Icon(Icons.edit_outlined),
+            onPressed: _showEditSheet,
+          ),
           IconButton(
             icon: Icon(Icons.delete_outline_rounded, color: AppColors.error),
             onPressed: _delete,

@@ -26,3 +26,14 @@ class SubscriptionCreated extends SubscriptionsEvent {
   const SubscriptionCreated(this.data);
   final Map<String, dynamic> data;
 }
+
+class SubscriptionUpdateRequested extends SubscriptionsEvent {
+  const SubscriptionUpdateRequested({
+    required this.id,
+    required this.name,
+    required this.amount,
+  });
+  final String id;
+  final String name;
+  final double amount;
+}

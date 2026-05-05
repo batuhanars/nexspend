@@ -9,11 +9,13 @@ class SplitAmountField extends StatefulWidget {
     required this.onChanged,
     this.color = AppColors.primary,
     this.autofocus = true,
+    this.initialValue,
   });
 
   final ValueChanged<double?> onChanged;
   final Color color;
   final bool autofocus;
+  final double? initialValue;
 
   @override
   State<SplitAmountField> createState() => _SplitAmountFieldState();
@@ -27,6 +29,11 @@ class _SplitAmountFieldState extends State<SplitAmountField> {
   @override
   void initState() {
     super.initState();
+    if (widget.initialValue != null && widget.initialValue! > 0) {
+      final parts = widget.initialValue!.toStringAsFixed(2).split('.');
+      _intCtrl.text = parts[0];
+      _decCtrl.text = parts[1];
+    }
     _intCtrl.addListener(() => setState(() {}));
   }
 
@@ -75,7 +82,7 @@ class _SplitAmountFieldState extends State<SplitAmountField> {
       fontFamily: 'Inter',
       fontSize: 56,
       fontWeight: FontWeight.w700,
-      color: Colors.white,
+      color: AppColors.onSurface,
       height: 1.0,
     );
 

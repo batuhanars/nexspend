@@ -55,6 +55,38 @@ class SubscriptionModel {
     return AppColors.primary;
   }
 
+  SubscriptionModel copyWith({
+    String? name,
+    double? amount,
+    BillingCycle? billingCycle,
+    bool? isActive,
+    bool? autoDeduct,
+    String? description,
+    String? icon,
+    String? color,
+    String? accountId,
+    String? accountName,
+    DateTime? nextRenewalDate,
+    String? categoryId,
+    String? categoryName,
+  }) =>
+      SubscriptionModel(
+        id: id,
+        name: name ?? this.name,
+        amount: amount ?? this.amount,
+        billingCycle: billingCycle ?? this.billingCycle,
+        isActive: isActive ?? this.isActive,
+        autoDeduct: autoDeduct ?? this.autoDeduct,
+        description: description ?? this.description,
+        icon: icon ?? this.icon,
+        color: color ?? this.color,
+        accountId: accountId ?? this.accountId,
+        accountName: accountName ?? this.accountName,
+        nextRenewalDate: nextRenewalDate ?? this.nextRenewalDate,
+        categoryId: categoryId ?? this.categoryId,
+        categoryName: categoryName ?? this.categoryName,
+      );
+
   bool get isRenewingSoon {
     if (nextRenewalDate == null) return false;
     final diff = nextRenewalDate!.difference(DateTime.now()).inDays;

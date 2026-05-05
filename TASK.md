@@ -431,9 +431,9 @@
 - [x] "Çıkış Yap" butonu (onay dialog, kırmızı)
 - [x] EditProfilePage (avatar değiştirme, ad düzenleme)
 - [x] SettingsBloc
-- [ ] Para Birimi seçici (₺ TRY)
-- [ ] Dil seçici (Türkçe/English)
-- [ ] l10n yapılandırması (app_tr.arb, app_en.arb)
+- [x] Para Birimi: TRY-only (seçici kaldırıldı — çoklu para birimi Sprint 10'a ertelendi, TCMB kur altyapısı orada kurulacak)
+- [x] Dil seçici (Türkçe/English)
+- [x] l10n yapılandırması (app_tr.arb, app_en.arb)
 
 ---
 

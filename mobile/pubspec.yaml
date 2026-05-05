@@ -9,6 +9,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_localizations:
+    sdk: flutter
 
   # State Management
   flutter_bloc: ^9.1.1
@@ -71,6 +73,7 @@ dev_dependencies:
   flutter_native_splash: ^2.4.3
 
 flutter:
+  generate: true
   uses-material-design: true
 
   assets:

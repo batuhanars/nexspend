@@ -231,8 +231,12 @@ class _SubscriptionDetailPageState extends State<SubscriptionDetailPage> {
             ),
             child: Text(
               _sub.isActive ? 'Aboneliği Durdur' : 'Aboneliği Etkinleştir',
-              style:
-                  AppTypography.bodyMd.copyWith(fontWeight: FontWeight.w600),
+              style: AppTypography.bodyMd.copyWith(
+                fontWeight: FontWeight.w600,
+                color: _sub.isActive
+                    ? AppColors.onSurfaceVariant
+                    : AppColors.surface,
+              ),
             ),
           ),
         ],

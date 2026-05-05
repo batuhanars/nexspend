@@ -73,6 +73,12 @@ class _EditAccountPageState extends State<EditAccountPage> {
     return BlocListener<AccountBloc, AccountState>(
       listener: (context, state) {
         if (state is AccountSuccess) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(AppStrings.of(context).accountUpdatedSuccess),
+              backgroundColor: AppColors.secondary,
+            ),
+          );
           Navigator.of(context).pop(state.account);
         } else if (state is AccountError) {
           ScaffoldMessenger.of(context).showSnackBar(

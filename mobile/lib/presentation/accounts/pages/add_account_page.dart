@@ -96,6 +96,12 @@ class _AddAccountPageState extends State<AddAccountPage> {
     return BlocListener<AccountBloc, AccountState>(
       listener: (context, state) {
         if (state is AccountSuccess) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(AppStrings.of(context).accountCreatedSuccess),
+              backgroundColor: AppColors.secondary,
+            ),
+          );
           context.pop(state.account);
         } else if (state is AccountError) {
           ScaffoldMessenger.of(context).showSnackBar(

@@ -46,6 +46,7 @@ class _PaymentSheetState extends State<PaymentSheet> {
     if (amount == null || amount <= 0) return;
     if (_selectedAccountId == null) return;
 
+    final isLent = widget.debt.type == DebtType.LENT;
     context.read<DebtsBloc>().add(
       DebtPaymentRecorded(
         debtId: widget.debt.id,
@@ -55,6 +56,14 @@ class _PaymentSheetState extends State<PaymentSheet> {
           if (_noteController.text.trim().isNotEmpty)
             'note': _noteController.text.trim(),
         },
+      ),
+    );
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(isLent
+            ? AppStrings.of(context).debtCollectionSuccess
+            : AppStrings.of(context).debtPaymentSuccess),
+        backgroundColor: AppColors.secondary,
       ),
     );
     Navigator.of(context).pop();

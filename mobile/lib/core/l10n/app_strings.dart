@@ -172,7 +172,11 @@ abstract class AppStrings {
   String get budgetCreatedSuccess;
   String get budgetUpdatedSuccess;
   String get debtCreatedSuccess;
+  String get debtPaymentSuccess;
+  String get debtCollectionSuccess;
   String get subscriptionCreatedSuccess;
+  String get accountCreatedSuccess;
+  String get accountUpdatedSuccess;
   String get subscriptionUpdatedSuccess;
   String get enterValidAmount;
   String get selectAccount;
@@ -557,7 +561,11 @@ class _Tr extends AppStrings {
   @override String get budgetCreatedSuccess => 'Bütçe başarıyla oluşturuldu';
   @override String get budgetUpdatedSuccess => 'Bütçe başarıyla güncellendi';
   @override String get debtCreatedSuccess => 'Borç başarıyla eklendi';
+  @override String get debtPaymentSuccess => 'Ödeme başarıyla kaydedildi';
+  @override String get debtCollectionSuccess => 'Tahsilat başarıyla kaydedildi';
   @override String get subscriptionCreatedSuccess => 'Abonelik başarıyla eklendi';
+  @override String get accountCreatedSuccess => 'Hesap başarıyla oluşturuldu';
+  @override String get accountUpdatedSuccess => 'Hesap başarıyla güncellendi';
   @override String get subscriptionUpdatedSuccess => 'Abonelik başarıyla güncellendi';
   @override String get enterValidAmount => 'Geçerli bir tutar girin.';
   @override String get selectAccount => 'Bir hesap seçin.';
@@ -924,7 +932,11 @@ class _En extends AppStrings {
   @override String get budgetCreatedSuccess => 'Budget created successfully';
   @override String get budgetUpdatedSuccess => 'Budget updated successfully';
   @override String get debtCreatedSuccess => 'Debt added successfully';
+  @override String get debtPaymentSuccess => 'Payment recorded successfully';
+  @override String get debtCollectionSuccess => 'Collection recorded successfully';
   @override String get subscriptionCreatedSuccess => 'Subscription added successfully';
+  @override String get accountCreatedSuccess => 'Account created successfully';
+  @override String get accountUpdatedSuccess => 'Account updated successfully';
   @override String get subscriptionUpdatedSuccess => 'Subscription updated successfully';
   @override String get enterValidAmount => 'Enter a valid amount.';
   @override String get selectAccount => 'Select an account.';

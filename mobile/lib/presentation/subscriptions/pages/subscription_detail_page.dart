@@ -122,6 +122,8 @@ class _SubscriptionDetailPageState extends State<SubscriptionDetailPage> {
                     onPressed: () {
                       final name = nameCtrl.text.trim();
                       if (name.isEmpty || amount == null || amount! <= 0) return;
+                      final messenger = ScaffoldMessenger.of(context);
+                      final msg = AppStrings.of(context).subscriptionUpdatedSuccess;
                       context.read<SubscriptionsBloc>().add(
                         SubscriptionUpdateRequested(
                           id: _sub.id,
@@ -132,13 +134,13 @@ class _SubscriptionDetailPageState extends State<SubscriptionDetailPage> {
                       setState(() {
                         _sub = _sub.copyWith(name: name, amount: amount);
                       });
-                      ScaffoldMessenger.of(context).showSnackBar(
+                      Navigator.of(ctx).pop();
+                      messenger.showSnackBar(
                         SnackBar(
-                          content: Text(AppStrings.of(context).subscriptionUpdatedSuccess),
+                          content: Text(msg),
                           backgroundColor: AppColors.secondary,
                         ),
                       );
-                      Navigator.of(ctx).pop();
                     },
                     style: FilledButton.styleFrom(
                       minimumSize: const Size.fromHeight(56),

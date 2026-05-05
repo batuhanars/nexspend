@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
+import '../../../core/l10n/app_strings.dart';
 import '../../../data/models/account_model.dart';
 import 'account_card.dart';
 
@@ -126,7 +127,7 @@ class _AddAccountCard extends StatelessWidget {
             ),
             const SizedBox(height: AppSpacing.sm),
             Text(
-              'Hesap Ekle',
+              AppStrings.of(context).addAccountTitle,
               style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w500,

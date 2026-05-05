@@ -5,6 +5,7 @@ import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
 import '../../../core/di/injection.dart';
+import '../../../core/l10n/app_strings.dart';
 import '../../../core/services/local_auth_service.dart';
 import '../../../core/storage/secure_storage.dart';
 import '../../../core/utils/validators.dart';
@@ -111,7 +112,7 @@ class _LoginPageState extends State<LoginPage> {
                   _Header(),
                   const SizedBox(height: AppSpacing.xxl),
                   AuthInputField(
-                    label: 'E-posta',
+                    label: AppStrings.of(context).emailLabel,
                     controller: _emailController,
                     icon: Icons.email_outlined,
                     keyboardType: TextInputType.emailAddress,
@@ -123,7 +124,7 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                   const SizedBox(height: AppSpacing.md),
                   AuthInputField(
-                    label: 'Şifre',
+                    label: AppStrings.of(context).passwordLabel,
                     controller: _passwordController,
                     icon: Icons.lock_outline,
                     isPassword: true,
@@ -139,7 +140,7 @@ class _LoginPageState extends State<LoginPage> {
                     child: TextButton(
                       onPressed: () => context.push(RouteNames.forgotPassword),
                       child: Text(
-                        'Şifremi unuttum',
+                        AppStrings.of(context).forgotPasswordAction,
                         style: AppTypography.bodySm.copyWith(
                           color: AppColors.primary,
                         ),
@@ -151,7 +152,7 @@ class _LoginPageState extends State<LoginPage> {
                     builder: (context, state) {
                       final isLoading = state is AuthLoading;
                       return AuthButton(
-                        label: 'Giriş Yap',
+                        label: AppStrings.of(context).loginAction,
                         onPressed: isLoading ? null : _submit,
                         isLoading: isLoading,
                       );
@@ -214,13 +215,13 @@ class _Header extends StatelessWidget {
         ),
         const SizedBox(height: AppSpacing.lg),
         Text(
-          'Wallet\'a Tekrar\nHoş Geldiniz',
+          AppStrings.of(context).welcomeBack,
           textAlign: TextAlign.center,
           style: AppTypography.headlineMd.copyWith(color: AppColors.onSurface),
         ),
         const SizedBox(height: AppSpacing.sm),
         Text(
-          'Hesabınıza giriş yapın',
+          AppStrings.of(context).signInSubtitle,
           style: AppTypography.bodyMd.copyWith(color: AppColors.onSurfaceVariant),
         ),
       ],
@@ -242,7 +243,7 @@ class _Divider extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
           child: Text(
-            'veya',
+            AppStrings.of(context).orDivider,
             style: AppTypography.bodySm.copyWith(color: AppColors.onSurfaceVariant),
           ),
         ),
@@ -270,7 +271,7 @@ class _BiometricButton extends StatelessWidget {
         onPressed: onPressed,
         icon: const Icon(Icons.fingerprint_rounded, size: 24),
         label: Text(
-          'Parmak İzi ile Giriş',
+          AppStrings.of(context).biometricLoginBtn,
           style: AppTypography.bodyMd.copyWith(fontWeight: FontWeight.w600),
         ),
         style: OutlinedButton.styleFrom(
@@ -294,14 +295,14 @@ class _RegisterLink extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Text(
-          'Hesabın yok mu?',
+          AppStrings.of(context).noAccount,
           style: AppTypography.bodyMd.copyWith(color: AppColors.onSurfaceVariant),
         ),
         TextButton(
           onPressed: () => context.push(RouteNames.register),
           style: TextButton.styleFrom(padding: const EdgeInsets.only(left: AppSpacing.xs)),
           child: Text(
-            'Kayıt Ol',
+            AppStrings.of(context).registerAction,
             style: AppTypography.bodyMd.copyWith(
               color: AppColors.primary,
               fontWeight: FontWeight.w600,

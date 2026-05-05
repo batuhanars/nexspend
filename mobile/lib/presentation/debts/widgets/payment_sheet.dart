@@ -4,6 +4,7 @@ import 'package:wallet_app/core/constants/app_colors.dart';
 import 'package:wallet_app/core/constants/app_spacing.dart';
 import 'package:wallet_app/core/constants/app_typography.dart';
 import 'package:wallet_app/core/di/injection.dart';
+import 'package:wallet_app/core/l10n/app_strings.dart';
 import 'package:wallet_app/data/models/account_model.dart';
 import 'package:wallet_app/data/models/debt_model.dart';
 import 'package:wallet_app/data/repositories/account_repository.dart';
@@ -77,7 +78,7 @@ class _PaymentSheetState extends State<PaymentSheet> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                isLent ? 'Ödeme Aldım' : 'Ödeme Yap',
+                isLent ? AppStrings.of(context).receivedPaymentTitle : AppStrings.of(context).payDebtTitle,
                 style: AppTypography.headlineSm,
               ),
               IconButton(
@@ -101,7 +102,7 @@ class _PaymentSheetState extends State<PaymentSheet> {
             readOnly: true,
             style: AppTypography.headlineSm,
             decoration: InputDecoration(
-              labelText: 'Tutar (₺)',
+              labelText: AppStrings.of(context).amountHint,
               labelStyle: AppTypography.bodyMd.copyWith(
                 color: AppColors.onSurfaceVariant,
               ),
@@ -122,7 +123,7 @@ class _PaymentSheetState extends State<PaymentSheet> {
           ),
           const SizedBox(height: AppSpacing.md),
           Text(
-            'Hesap',
+            AppStrings.of(context).accountLabel,
             style: AppTypography.labelSm.copyWith(
               color: AppColors.onSurfaceVariant,
             ),
@@ -150,7 +151,7 @@ class _PaymentSheetState extends State<PaymentSheet> {
                   snapshot.data!.where((a) => !a.isArchived).toList();
               if (accounts.isEmpty) {
                 return Text(
-                  'Hesap bulunamadı',
+                  AppStrings.of(context).noAccountsFound,
                   style: AppTypography.bodySm
                       .copyWith(color: AppColors.onSurfaceVariant),
                 );
@@ -212,7 +213,7 @@ class _PaymentSheetState extends State<PaymentSheet> {
             controller: _noteController,
             style: AppTypography.bodyMd,
             decoration: InputDecoration(
-              hintText: 'Not (opsiyonel)',
+              hintText: AppStrings.of(context).noteOptionalHint,
               hintStyle: AppTypography.bodyMd.copyWith(
                 color: AppColors.onSurfaceVariant,
               ),
@@ -240,7 +241,7 @@ class _PaymentSheetState extends State<PaymentSheet> {
                 borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
               ),
             ),
-            child: Text(isLent ? 'Tahsil Et' : 'Borç Öde'),
+            child: Text(isLent ? AppStrings.of(context).collectPaymentBtn : AppStrings.of(context).makePaymentBtn),
           ),
         ],
       ),

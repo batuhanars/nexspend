@@ -1,4 +1,5 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
+import 'package:wallet_app/core/l10n/app_strings.dart';
 import 'package:wallet_app/core/constants/app_colors.dart';
 import 'package:wallet_app/core/constants/app_spacing.dart';
 import 'package:wallet_app/core/constants/app_typography.dart';
@@ -23,7 +24,7 @@ class ErrorView extends StatelessWidget {
             ),
             const SizedBox(height: AppSpacing.lg),
             Text(
-              'Kamera başlatılamadı',
+              AppStrings.of(context).cameraStartFailed,
               style: AppTypography.titleSm.copyWith(color: AppColors.onSurface),
             ),
             const SizedBox(height: AppSpacing.sm),
@@ -35,7 +36,7 @@ class ErrorView extends StatelessWidget {
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: AppSpacing.xl),
-            FilledButton(onPressed: onRetry, child: const Text('Tekrar Dene')),
+            FilledButton(onPressed: onRetry, child: Text(AppStrings.of(context).retry)),
           ],
         ),
       ),

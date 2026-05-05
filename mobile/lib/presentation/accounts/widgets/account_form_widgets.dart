@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
+import '../../../core/l10n/app_strings.dart';
 import '../../../data/models/account_model.dart';
 
 // ── Account type grid selector ─────────────────────────────────────────────
@@ -52,7 +53,7 @@ class AccountTypeSelector extends StatelessWidget {
                 ),
                 const SizedBox(width: AppSpacing.sm),
                 Text(
-                  type.label,
+                  type.labelOf(context),
                   style: AppTypography.bodyMd.copyWith(
                     color: isSelected ? accent : AppColors.onSurfaceVariant,
                     fontWeight:
@@ -309,14 +310,14 @@ class AccountDefaultToggle extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Varsayılan hesap',
+                    AppStrings.of(context).defaultAccountLabel,
                     style: AppTypography.bodyMd.copyWith(
                       color: AppColors.onSurface,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
                   Text(
-                    'Yeni işlemlerde otomatik seçilir',
+                    AppStrings.of(context).defaultAccountSubtitle,
                     style: AppTypography.bodySm.copyWith(
                       color: AppColors.onSurfaceVariant,
                     ),

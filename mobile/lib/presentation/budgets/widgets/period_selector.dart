@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
+import '../../../core/l10n/app_strings.dart';
 import '../../../data/models/budget_model.dart';
 
 class PeriodSelector extends StatelessWidget {
@@ -9,15 +10,16 @@ class PeriodSelector extends StatelessWidget {
   final BudgetPeriod selected;
   final ValueChanged<BudgetPeriod> onSelect;
 
-  static const _labels = {
-    BudgetPeriod.MONTHLY: 'Aylık',
-    BudgetPeriod.WEEKLY: 'Haftalık',
-    BudgetPeriod.YEARLY: 'Yıllık',
-    BudgetPeriod.CUSTOM: 'Özel',
-  };
+  String _label(BudgetPeriod p, AppStrings s) => switch (p) {
+        BudgetPeriod.MONTHLY => s.billingCycleMonthly,
+        BudgetPeriod.WEEKLY => s.billingCycleWeekly,
+        BudgetPeriod.YEARLY => s.billingCycleYearly,
+        BudgetPeriod.CUSTOM => s.periodCustom,
+      };
 
   @override
   Widget build(BuildContext context) {
+    final s = AppStrings.of(context);
     return Row(
       children: BudgetPeriod.values.map((p) {
         final isSelected = p == selected;
@@ -41,7 +43,7 @@ class PeriodSelector extends StatelessWidget {
                 ),
               ),
               child: Text(
-                _labels[p]!,
+                _label(p, s),
                 textAlign: TextAlign.center,
                 style: AppTypography.bodySm.copyWith(
                   color: isSelected ? AppColors.primary : AppColors.onSurface,

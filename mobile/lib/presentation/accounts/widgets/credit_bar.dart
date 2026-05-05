@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
+import '../../../core/l10n/app_strings.dart';
 import '../../../core/utils/currency_formatter.dart';
 import '../../../data/models/account_model.dart';
 
@@ -37,11 +38,11 @@ class CreditBar extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Kullanılan: ${CurrencyFormatter.format(account.creditUsed)}',
+                AppStrings.of(context).usedAmount(CurrencyFormatter.format(account.creditUsed)),
                 style: AppTypography.bodySm.copyWith(color: AppColors.onSurfaceVariant),
               ),
               Text(
-                'Limit: ${CurrencyFormatter.format(account.creditLimit!)}',
+                AppStrings.of(context).limitAmount(CurrencyFormatter.format(account.creditLimit!)),
                 style: AppTypography.bodySm.copyWith(color: AppColors.onSurfaceVariant),
               ),
             ],
@@ -57,7 +58,7 @@ class CreditBar extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              'Kullanılan / Limit',
+              AppStrings.of(context).usedSlashLimit,
               style: AppTypography.bodySm.copyWith(color: AppColors.onSurfaceVariant),
             ),
             Text(

@@ -1,4 +1,5 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
+import 'package:wallet_app/core/l10n/app_strings.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:wallet_app/core/constants/app_colors.dart';
 import 'package:wallet_app/core/constants/app_spacing.dart';
@@ -54,14 +55,14 @@ class ReceiptHistoryTile extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      receipt.merchantName ?? 'Bilinmeyen Market',
+                      receipt.merchantName ?? AppStrings.of(context).unknownMerchant,
                       style: AppTypography.bodyMd
                           .copyWith(fontWeight: FontWeight.w600),
                     ),
                     Text(
                       receipt.date != null
                           ? _formatDate(receipt.date!)
-                          : 'Tarih bilinmiyor',
+                          : AppStrings.of(context).unknownDate,
                       style: AppTypography.bodySm
                           .copyWith(color: AppColors.onSurfaceVariant),
                     ),
@@ -110,20 +111,20 @@ class ReceiptHistoryTile extends StatelessWidget {
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: AppColors.surfaceContainerHigh,
-        title: Text('Fişi Sil', style: AppTypography.titleSm),
+        title: Text(AppStrings.of(context).deleteReceiptTitle, style: AppTypography.titleSm),
         content: Text(
-          'Bu fiş kaydı kalıcı olarak silinecek.',
+          AppStrings.of(context).receiptDeleteContent,
           style:
               AppTypography.bodyMd.copyWith(color: AppColors.onSurfaceVariant),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('İptal'),
+            child: Text(AppStrings.of(context).cancel),
           ),
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(true),
-            child: Text('Sil', style: TextStyle(color: AppColors.error)),
+            child: Text(AppStrings.of(context).delete, style: TextStyle(color: AppColors.error)),
           ),
         ],
       ),
@@ -137,11 +138,12 @@ class _StatusBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final s = AppStrings.of(context);
     final (label, color) = switch (status) {
-      ReceiptStatus.CONFIRMED => ('Onaylandı', AppColors.secondary),
-      ReceiptStatus.PARSED => ('Tarandı', AppColors.primary),
-      ReceiptStatus.PROCESSING => ('İşleniyor', AppColors.warning),
-      ReceiptStatus.FAILED => ('Başarısız', AppColors.error),
+      ReceiptStatus.CONFIRMED => (s.receiptStatusConfirmed, AppColors.secondary),
+      ReceiptStatus.PARSED => (s.receiptStatusParsed, AppColors.primary),
+      ReceiptStatus.PROCESSING => (s.receiptStatusProcessing, AppColors.warning),
+      ReceiptStatus.FAILED => (s.receiptStatusFailed, AppColors.error),
     };
     return Container(
       padding: const EdgeInsets.symmetric(

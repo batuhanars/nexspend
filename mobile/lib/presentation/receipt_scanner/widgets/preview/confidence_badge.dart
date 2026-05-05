@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:wallet_app/core/constants/app_colors.dart';
 import 'package:wallet_app/core/constants/app_typography.dart';
+import 'package:wallet_app/core/l10n/app_strings.dart';
 
 class ConfidenceBadge extends StatelessWidget {
   const ConfidenceBadge({super.key, required this.confidence});
@@ -20,7 +21,7 @@ class ConfidenceBadge extends StatelessWidget {
         Icon(Icons.auto_awesome, size: 14, color: color),
         const SizedBox(width: 4),
         Text(
-          'OCR güven skoru: %$pct',
+          AppStrings.of(context).ocrConfidence(pct),
           style: AppTypography.labelSm.copyWith(color: color),
         ),
       ],

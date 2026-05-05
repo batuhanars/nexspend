@@ -1,4 +1,5 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
+import '../../../core/l10n/app_strings.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
@@ -24,12 +25,15 @@ class _AddSubscriptionSheetState extends State<AddSubscriptionSheet> {
   String? _selectedAccountId;
   late final Future<List<AccountModel>> _accountsFuture;
 
-  static const _cycles = [
-    (label: 'Günlük', value: 'DAILY'),
-    (label: 'Haftalık', value: 'WEEKLY'),
-    (label: 'Aylık', value: 'MONTHLY'),
-    (label: 'Yıllık', value: 'YEARLY'),
-  ];
+  List<({String label, String value})> _cycles(BuildContext context) {
+    final s = AppStrings.of(context);
+    return [
+      (label: s.billingCycleDaily, value: 'DAILY'),
+      (label: s.billingCycleWeekly, value: 'WEEKLY'),
+      (label: s.billingCycleMonthly, value: 'MONTHLY'),
+      (label: s.billingCycleYearly, value: 'YEARLY'),
+    ];
+  }
 
   @override
   void initState() {
@@ -101,7 +105,7 @@ class _AddSubscriptionSheetState extends State<AddSubscriptionSheet> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('Abonelik Ekle', style: AppTypography.headlineSm),
+              Text(AppStrings.of(context).addSubscriptionTitle, style: AppTypography.headlineSm),
               IconButton(
                 onPressed: () => Navigator.of(context).pop(),
                 icon: const Icon(Icons.close_rounded),
@@ -112,19 +116,19 @@ class _AddSubscriptionSheetState extends State<AddSubscriptionSheet> {
           const SizedBox(height: AppSpacing.lg),
           _field(
             _nameController,
-            'Abonelik adı (Netflix, Spotify...)',
+            AppStrings.of(context).subscriptionNameHint,
             Icons.subscriptions_outlined,
           ),
           const SizedBox(height: AppSpacing.md),
           _field(
             _amountController,
-            'Tutar (₺)',
+            AppStrings.of(context).amountHint,
             Icons.attach_money_rounded,
             numeric: true,
           ),
           const SizedBox(height: AppSpacing.lg),
           Text(
-            'Hesap',
+            AppStrings.of(context).accountLabel,
             style: AppTypography.labelSm.copyWith(
               color: AppColors.onSurfaceVariant,
             ),
@@ -153,7 +157,7 @@ class _AddSubscriptionSheetState extends State<AddSubscriptionSheet> {
                   .toList();
               if (accounts.isEmpty) {
                 return Text(
-                  'Hesap bulunamadı',
+                  AppStrings.of(context).noAccountsFound,
                   style: AppTypography.bodySm.copyWith(
                     color: AppColors.onSurfaceVariant,
                   ),
@@ -213,16 +217,16 @@ class _AddSubscriptionSheetState extends State<AddSubscriptionSheet> {
           ),
           const SizedBox(height: AppSpacing.lg),
           Text(
-            'Fatura Dönemi',
+            AppStrings.of(context).billingCycleLabel,
             style: AppTypography.labelSm.copyWith(
               color: AppColors.onSurfaceVariant,
             ),
           ),
           const SizedBox(height: AppSpacing.sm),
           Row(
-            children: _cycles.map((c) {
+            children: _cycles(context).map((c) {
               final isActive = _period == c.value;
-              final isLast = c == _cycles.last;
+              final isLast = c == _cycles(context).last;
               return Expanded(
                 child: Padding(
                   padding: EdgeInsets.only(right: isLast ? 0 : AppSpacing.xs),
@@ -282,7 +286,7 @@ class _AddSubscriptionSheetState extends State<AddSubscriptionSheet> {
                   const SizedBox(width: AppSpacing.md),
                   Expanded(
                     child: Text(
-                      'Otomatik Kesinti',
+                      AppStrings.of(context).autoDeductLabel,
                       style: AppTypography.bodyMd,
                     ),
                   ),
@@ -305,7 +309,7 @@ class _AddSubscriptionSheetState extends State<AddSubscriptionSheet> {
                 borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
               ),
             ),
-            child: const Text('Kaydet'),
+            child: Text(AppStrings.of(context).save),
           ),
         ],
       ),

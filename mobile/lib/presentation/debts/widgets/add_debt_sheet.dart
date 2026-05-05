@@ -1,4 +1,5 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
+import 'package:wallet_app/core/l10n/app_strings.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:wallet_app/core/constants/app_colors.dart';
 import 'package:wallet_app/core/constants/app_spacing.dart';
@@ -23,21 +24,6 @@ class _AddDebtSheetState extends State<AddDebtSheet> {
   DateTime? _dueDate;
   bool _hasInstallments = false;
   int _installmentCount = 3;
-
-  static const _months = [
-    'Ocak',
-    'Şubat',
-    'Mart',
-    'Nisan',
-    'Mayıs',
-    'Haziran',
-    'Temmuz',
-    'Ağustos',
-    'Eylül',
-    'Ekim',
-    'Kasım',
-    'Aralık',
-  ];
 
   @override
   void dispose() {
@@ -91,7 +77,7 @@ class _AddDebtSheetState extends State<AddDebtSheet> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text('Borç Ekle', style: AppTypography.headlineSm),
+                Text(AppStrings.of(context).addDebtTitle, style: AppTypography.headlineSm),
                 IconButton(
                   onPressed: () => Navigator.of(context).pop(),
                   icon: const Icon(Icons.close_rounded),
@@ -107,20 +93,21 @@ class _AddDebtSheetState extends State<AddDebtSheet> {
             const SizedBox(height: AppSpacing.lg),
             _inputField(
               _nameController,
-              'Kişi / Kurum Adı',
+              AppStrings.of(context).personNameHint,
               Icons.person_outline,
             ),
             const SizedBox(height: AppSpacing.md),
             _inputField(
               _amountController,
-              'Tutar (₺)',
-              Icons.attach_money_rounded,
+              AppStrings.of(context).amountHint,
+              null,
+              prefixSymbol: '₺',
               numeric: true,
             ),
             const SizedBox(height: AppSpacing.md),
             _inputField(
               _descController,
-              'Açıklama (opsiyonel)',
+              AppStrings.of(context).descriptionOptionalHint,
               Icons.notes_outlined,
             ),
             const SizedBox(height: AppSpacing.md),
@@ -163,8 +150,8 @@ class _AddDebtSheetState extends State<AddDebtSheet> {
                     const SizedBox(width: AppSpacing.md),
                     Text(
                       _dueDate == null
-                          ? 'Vade tarihi (opsiyonel)'
-                          : '${_dueDate!.day} ${_months[_dueDate!.month - 1]} ${_dueDate!.year}',
+                          ? AppStrings.of(context).dueDateHint
+                          : '${_dueDate!.day.toString().padLeft(2, '0')}.${_dueDate!.month.toString().padLeft(2, '0')}.${_dueDate!.year}',
                       style: TextStyle(
                         color: _dueDate == null
                             ? AppColors.onSurfaceVariant
@@ -198,7 +185,7 @@ class _AddDebtSheetState extends State<AddDebtSheet> {
                         ),
                         const SizedBox(width: AppSpacing.md),
                         Expanded(
-                          child: Text('Taksitli', style: AppTypography.bodyMd),
+                          child: Text(AppStrings.of(context).installment, style: AppTypography.bodyMd),
                         ),
                         Switch(
                           value: _hasInstallments,
@@ -222,7 +209,7 @@ class _AddDebtSheetState extends State<AddDebtSheet> {
                       ),
                       child: Row(
                         children: [
-                          Text('Taksit Sayısı:', style: AppTypography.bodyMd),
+                          Text(AppStrings.of(context).installmentCountLabel, style: AppTypography.bodyMd),
                           const Spacer(),
                           IconButton(
                             onPressed: () {
@@ -258,7 +245,7 @@ class _AddDebtSheetState extends State<AddDebtSheet> {
                   borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
                 ),
               ),
-              child: const Text('Kaydet'),
+              child: Text(AppStrings.of(context).save),
             ),
           ],
         ),
@@ -269,7 +256,8 @@ class _AddDebtSheetState extends State<AddDebtSheet> {
   Widget _inputField(
     TextEditingController ctrl,
     String hint,
-    IconData icon, {
+    IconData? icon, {
+    String? prefixSymbol,
     bool numeric = false,
   }) {
     return TextField(
@@ -284,7 +272,22 @@ class _AddDebtSheetState extends State<AddDebtSheet> {
           color: AppColors.onSurfaceVariant,
           fontSize: 14,
         ),
-        prefixIcon: Icon(icon, size: 20, color: AppColors.onSurfaceVariant),
+        prefixIcon: prefixSymbol != null
+            ? SizedBox(
+                width: 48,
+                child: Center(
+                  child: Text(
+                    prefixSymbol,
+                    style: const TextStyle(
+                      color: AppColors.onSurfaceVariant,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w500,
+                      fontFamily: 'Inter',
+                    ),
+                  ),
+                ),
+              )
+            : Icon(icon, size: 20, color: AppColors.onSurfaceVariant),
         filled: true,
         fillColor: AppColors.surfaceContainerHighest,
         border: OutlineInputBorder(

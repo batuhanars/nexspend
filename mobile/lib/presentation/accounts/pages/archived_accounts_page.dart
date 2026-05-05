@@ -1,4 +1,5 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
+import '../../../core/l10n/app_strings.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
@@ -43,7 +44,7 @@ class _ArchivedAccountsPageState extends State<ArchivedAccountsPage> {
       },
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Arşivlenmiş Hesaplar'),
+          title: Text(AppStrings.of(context).archivedAccounts),
           backgroundColor: AppColors.surface,
           surfaceTintColor: Colors.transparent,
         ),
@@ -59,7 +60,7 @@ class _ArchivedAccountsPageState extends State<ArchivedAccountsPage> {
             if (snapshot.hasError) {
               return Center(
                 child: Text(
-                  'Yüklenemedi',
+                  AppStrings.of(context).loadFailed,
                   style: AppTypography.bodyMd
                       .copyWith(color: AppColors.onSurfaceVariant),
                 ),
@@ -77,11 +78,11 @@ class _ArchivedAccountsPageState extends State<ArchivedAccountsPage> {
                       color: AppColors.onSurfaceVariant.withValues(alpha: 0.4),
                     ),
                     const SizedBox(height: AppSpacing.lg),
-                    Text('Arşivlenmiş hesap yok',
+                    Text(AppStrings.of(context).noArchivedAccounts,
                         style: AppTypography.titleSm),
                     const SizedBox(height: AppSpacing.sm),
                     Text(
-                      'Hesap detayından arşivleyebilirsiniz',
+                      AppStrings.of(context).archiveHint,
                       style: AppTypography.bodyMd
                           .copyWith(color: AppColors.onSurfaceVariant),
                     ),

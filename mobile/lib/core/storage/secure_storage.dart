@@ -43,4 +43,14 @@ class SecureStorage {
     final val = await _storage.read(key: _biometricEnabledKey);
     return val == 'true';
   }
+
+  static const _languageKey = 'language';
+
+  Future<void> saveLanguage(String languageCode) =>
+      _storage.write(key: _languageKey, value: languageCode);
+
+  Future<String> getLanguage() async {
+    final val = await _storage.read(key: _languageKey);
+    return val ?? 'tr';
+  }
 }

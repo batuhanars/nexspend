@@ -1,0 +1,64 @@
+{
+  "@@locale": "tr",
+
+  "appTitle": "Dijital Cüzdan",
+  "@appTitle": { "description": "App name" },
+
+  "hello": "Merhaba",
+  "helloName": "Merhaba, {name}",
+  "@helloName": {
+    "placeholders": { "name": { "type": "String" } }
+  },
+
+  "settings": "Ayarlar",
+  "account": "Hesap",
+  "editProfile": "Profili Düzenle",
+  "myAccounts": "Hesaplarım",
+  "archivedAccounts": "Arşivlenmiş Hesaplar",
+  "preferences": "Tercihler",
+  "notifications": "Bildirimler",
+  "biometricLogin": "Biyometrik Giriş",
+  "currency": "Para Birimi",
+  "language": "Dil",
+  "tools": "Araçlar",
+  "receiptHistory": "Fiş Geçmişi",
+  "security": "Güvenlik",
+  "changePassword": "Şifre Değiştir",
+  "session": "Oturum",
+  "logout": "Çıkış Yap",
+  "logoutConfirmTitle": "Çıkış Yap",
+  "logoutConfirmContent": "Hesabınızdan çıkış yapmak istediğinize emin misiniz?",
+
+  "selectCurrency": "Para Birimi Seç",
+  "selectLanguage": "Dil Seç",
+  "currencyTRY": "Türk Lirası",
+  "currencyUSD": "Amerikan Doları",
+  "currencyEUR": "Euro",
+  "currencyGBP": "İngiliz Sterlini",
+  "languageTurkish": "Türkçe",
+  "languageEnglish": "English",
+
+  "cancel": "İptal",
+  "save": "Kaydet",
+  "retry": "Tekrar Dene",
+  "close": "Kapat",
+  "add": "Ekle",
+  "delete": "Sil",
+  "edit": "Düzenle",
+  "confirm": "Onayla",
+
+  "dashboard": "Ana Sayfa",
+  "transactions": "İşlemler",
+  "budgets": "Bütçeler",
+  "debts": "Borçlar",
+  "subscriptions": "Abonelikler",
+
+  "income": "Gelir",
+  "expense": "Gider",
+  "transfer": "Transfer",
+
+  "noDataFound": "Veri bulunamadı",
+  "errorOccurred": "Bir hata oluştu",
+  "networkError": "İnternet bağlantınızı kontrol edin.",
+  "tryAgain": "Tekrar Dene"
+}

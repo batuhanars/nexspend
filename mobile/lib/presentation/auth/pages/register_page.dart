@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
+import '../../../core/l10n/app_strings.dart';
 import '../../../core/utils/validators.dart';
 import '../../../navigation/route_names.dart';
 import '../bloc/auth_bloc.dart';
@@ -23,11 +24,11 @@ class _PasswordChecklist extends StatelessWidget {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _CheckItem('En az 8 karakter', Validators.hasMinLength(p)),
+            _CheckItem(AppStrings.of(context).reqMinChars, Validators.hasMinLength(p)),
             const SizedBox(height: AppSpacing.xs),
-            _CheckItem('Büyük harf içeriyor', Validators.hasUppercase(p)),
+            _CheckItem(AppStrings.of(context).reqUppercase, Validators.hasUppercase(p)),
             const SizedBox(height: AppSpacing.xs),
-            _CheckItem('Rakam içeriyor', Validators.hasNumber(p)),
+            _CheckItem(AppStrings.of(context).reqNumber, Validators.hasNumber(p)),
           ],
         );
       },
@@ -137,17 +138,17 @@ class _RegisterPageState extends State<RegisterPage> {
                 children: [
                   const SizedBox(height: AppSpacing.lg),
                   Text(
-                    'Hesap Oluştur',
+                    AppStrings.of(context).createAccount,
                     style: AppTypography.headlineMd.copyWith(color: AppColors.onSurface),
                   ),
                   const SizedBox(height: AppSpacing.xs),
                   Text(
-                    'Finansal özgürlüğünüze başlayın',
+                    AppStrings.of(context).createAccountSubtitle,
                     style: AppTypography.bodyMd.copyWith(color: AppColors.onSurfaceVariant),
                   ),
                   const SizedBox(height: AppSpacing.xxl),
                   AuthInputField(
-                    label: 'Ad Soyad',
+                    label: AppStrings.of(context).fullNameLabel,
                     controller: _nameController,
                     icon: Icons.person_outline_rounded,
                     keyboardType: TextInputType.name,
@@ -159,7 +160,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   ),
                   const SizedBox(height: AppSpacing.md),
                   AuthInputField(
-                    label: 'E-posta',
+                    label: AppStrings.of(context).emailLabel,
                     controller: _emailController,
                     icon: Icons.email_outlined,
                     keyboardType: TextInputType.emailAddress,
@@ -171,7 +172,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   ),
                   const SizedBox(height: AppSpacing.md),
                   AuthInputField(
-                    label: 'Şifre',
+                    label: AppStrings.of(context).passwordLabel,
                     controller: _passwordController,
                     icon: Icons.lock_outline,
                     isPassword: true,
@@ -190,7 +191,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   ),
                   const SizedBox(height: AppSpacing.md),
                   AuthInputField(
-                    label: 'Şifre Tekrar',
+                    label: AppStrings.of(context).passwordRepeatLabel,
                     controller: _confirmPasswordController,
                     icon: Icons.lock_outline,
                     isPassword: true,
@@ -208,7 +209,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     builder: (context, state) {
                       final isLoading = state is AuthLoading;
                       return AuthButton(
-                        label: 'Kayıt Ol',
+                        label: AppStrings.of(context).registerAction,
                         onPressed: isLoading ? null : _submit,
                         isLoading: isLoading,
                       );
@@ -219,7 +220,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
-                        'Zaten hesabın var mı?',
+                        AppStrings.of(context).hasAccount,
                         style: AppTypography.bodyMd.copyWith(
                           color: AppColors.onSurfaceVariant,
                         ),
@@ -230,7 +231,7 @@ class _RegisterPageState extends State<RegisterPage> {
                           padding: const EdgeInsets.only(left: AppSpacing.xs),
                         ),
                         child: Text(
-                          'Giriş Yap',
+                          AppStrings.of(context).loginAction,
                           style: AppTypography.bodyMd.copyWith(
                             color: AppColors.primary,
                             fontWeight: FontWeight.w600,

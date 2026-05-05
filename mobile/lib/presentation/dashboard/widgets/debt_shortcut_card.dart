@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
+import '../../../core/l10n/app_strings.dart';
 
 class DebtShortcutCard extends StatelessWidget {
   const DebtShortcutCard({super.key, required this.onTap});
@@ -9,6 +10,7 @@ class DebtShortcutCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final s = AppStrings.of(context);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.pagePadding),
       child: GestureDetector(
@@ -39,7 +41,7 @@ class DebtShortcutCard extends StatelessWidget {
               ),
               const SizedBox(width: AppSpacing.md),
               Expanded(
-                child: Text('Borçlarım', style: AppTypography.titleSm),
+                child: Text(s.myDebts, style: AppTypography.titleSm),
               ),
               const Icon(
                 Icons.arrow_forward_ios_rounded,

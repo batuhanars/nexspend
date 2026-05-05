@@ -1,4 +1,5 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
+import '../../../core/l10n/app_strings.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
@@ -49,11 +50,11 @@ class _EditBudgetSheetState extends State<EditBudgetSheet> {
         _amountController.text.trim().replaceAll(',', '.');
     final amount = double.tryParse(amountStr);
     if (amount == null || amount <= 0) {
-      _showError('Geçerli bir tutar girin.');
+      _showError(AppStrings.of(context).enterValidAmount);
       return;
     }
     if (_nameController.text.trim().isEmpty) {
-      _showError('Bütçe adı girin.');
+      _showError(AppStrings.of(context).enterBudgetName);
       return;
     }
 
@@ -105,12 +106,15 @@ class _EditBudgetSheetState extends State<EditBudgetSheet> {
   String _fmtDate(DateTime dt) =>
       '${dt.day.toString().padLeft(2, '0')}.${dt.month.toString().padLeft(2, '0')}.${dt.year}';
 
-  static const _periodLabels = {
-    BudgetPeriod.MONTHLY: 'Aylık',
-    BudgetPeriod.WEEKLY: 'Haftalık',
-    BudgetPeriod.YEARLY: 'Yıllık',
-    BudgetPeriod.CUSTOM: 'Özel',
-  };
+  Map<BudgetPeriod, String> _periodLabels(BuildContext context) {
+    final s = AppStrings.of(context);
+    return {
+      BudgetPeriod.MONTHLY: s.billingCycleMonthly,
+      BudgetPeriod.WEEKLY: s.billingCycleWeekly,
+      BudgetPeriod.YEARLY: s.billingCycleYearly,
+      BudgetPeriod.CUSTOM: s.periodCustom,
+    };
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -139,7 +143,7 @@ class _EditBudgetSheetState extends State<EditBudgetSheet> {
                 ),
               ),
             ),
-            Text('Bütçeyi Düzenle', style: AppTypography.titleSm),
+            Text(AppStrings.of(context).editBudgetTitle, style: AppTypography.titleSm),
             const SizedBox(height: AppSpacing.xl),
 
             // Amount
@@ -149,7 +153,7 @@ class _EditBudgetSheetState extends State<EditBudgetSheet> {
                   const TextInputType.numberWithOptions(decimal: true),
               style: AppTypography.bodyMd,
               decoration: InputDecoration(
-                labelText: 'Tutar (₺)',
+                labelText: AppStrings.of(context).amountTRY,
                 prefixIcon: const Icon(Icons.attach_money,
                     color: AppColors.onSurfaceVariant, size: 20),
                 filled: true,
@@ -169,7 +173,7 @@ class _EditBudgetSheetState extends State<EditBudgetSheet> {
               controller: _nameController,
               style: AppTypography.bodyMd,
               decoration: InputDecoration(
-                labelText: 'Bütçe Adı',
+                labelText: AppStrings.of(context).budgetNameLabel,
                 prefixIcon: const Icon(Icons.label_outline,
                     color: AppColors.onSurfaceVariant, size: 20),
                 filled: true,
@@ -185,7 +189,7 @@ class _EditBudgetSheetState extends State<EditBudgetSheet> {
             const SizedBox(height: AppSpacing.xl),
 
             // Period
-            Text('Dönem', style: AppTypography.titleSm),
+            Text(AppStrings.of(context).periodLabel, style: AppTypography.titleSm),
             const SizedBox(height: AppSpacing.sm),
             Row(
               children: BudgetPeriod.values.map((p) {
@@ -216,7 +220,7 @@ class _EditBudgetSheetState extends State<EditBudgetSheet> {
                         ),
                       ),
                       child: Text(
-                        _periodLabels[p]!,
+                        _periodLabels(context)[p]!,
                         style: AppTypography.bodySm.copyWith(
                           color: isSelected
                               ? AppColors.primary
@@ -255,7 +259,7 @@ class _EditBudgetSheetState extends State<EditBudgetSheet> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Bitiş Tarihi',
+                            AppStrings.of(context).budgetEndDate,
                             style: AppTypography.labelSm.copyWith(
                               color: AppColors.onSurfaceVariant,
                               fontSize: 10,
@@ -264,7 +268,7 @@ class _EditBudgetSheetState extends State<EditBudgetSheet> {
                           Text(
                             _endDate != null
                                 ? _fmtDate(_endDate!)
-                                : 'Belirsiz',
+                                : AppStrings.of(context).budgetEndDateUnset,
                             style: AppTypography.bodySm,
                           ),
                         ],
@@ -297,7 +301,7 @@ class _EditBudgetSheetState extends State<EditBudgetSheet> {
               child: Row(
                 children: [
                   Expanded(
-                    child: Text('Akıllı Takip',
+                    child: Text(AppStrings.of(context).smartTracking,
                         style: AppTypography.bodyMd),
                   ),
                   Switch(
@@ -328,7 +332,7 @@ class _EditBudgetSheetState extends State<EditBudgetSheet> {
                   ),
                 ),
                 child: Text(
-                  'Kaydet',
+                  AppStrings.of(context).save,
                   style: AppTypography.bodyMd
                       .copyWith(fontWeight: FontWeight.w600),
                 ),

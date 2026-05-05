@@ -1,4 +1,5 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
+import 'package:wallet_app/core/l10n/app_strings.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:wallet_app/presentation/debts/widgets/add_debt_sheet.dart';
 import 'package:wallet_app/presentation/debts/widgets/debt_list.dart';
@@ -60,10 +61,10 @@ class _DebtsView extends StatelessWidget {
                   ),
                   SliverToBoxAdapter(
                     child: FilterChipBar(
-                      filters: const [
-                        (label: 'Tümü', value: null),
-                        (label: 'Alacak', value: 'LENT'),
-                        (label: 'Borç', value: 'BORROWED'),
+                      filters: [
+                        (label: AppStrings.of(context).allOption, value: null),
+                        (label: AppStrings.of(context).debtTypeLent, value: 'LENT'),
+                        (label: AppStrings.of(context).debtTypeBorrowed, value: 'BORROWED'),
                       ],
                       activeFilter: state.filter,
                       onChanged: (v) => context
@@ -75,9 +76,9 @@ class _DebtsView extends StatelessWidget {
                     SliverFillRemaining(
                       child: EmptyStateView(
                         icon: Icons.handshake_outlined,
-                        title: 'Borç kaydı yok',
-                        subtitle: 'Borç ve alacaklarınızı takip etmek\niçin ilk kaydı oluşturun.',
-                        buttonLabel: 'Borç Ekle',
+                        title: AppStrings.of(context).noDebtsTitle,
+                        subtitle: AppStrings.of(context).noDebtsSubtitle,
+                        buttonLabel: AppStrings.of(context).addDebtBtn,
                         onAction: () => _showAddDebtSheet(context),
                       ),
                     )
@@ -95,7 +96,7 @@ class _DebtsView extends StatelessWidget {
   SliverAppBar _buildAppBar(BuildContext context) {
     return SliverAppBar(
       floating: true,
-      title: Text('Borçlar', style: AppTypography.headlineSm),
+      title: Text(AppStrings.of(context).debtsTitle, style: AppTypography.headlineSm),
       centerTitle: false,
       backgroundColor: AppColors.surface,
       surfaceTintColor: Colors.transparent,

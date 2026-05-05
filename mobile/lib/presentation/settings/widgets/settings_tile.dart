@@ -9,6 +9,7 @@ class SettingsTile extends StatelessWidget {
     required this.icon,
     required this.label,
     required this.onTap,
+    this.subtitle,
     this.labelColor,
     this.iconColor,
     this.showChevron = true,
@@ -16,6 +17,7 @@ class SettingsTile extends StatelessWidget {
   final IconData icon;
   final String label;
   final VoidCallback onTap;
+  final String? subtitle;
   final Color? labelColor;
   final Color? iconColor;
   final bool showChevron;
@@ -37,6 +39,15 @@ class SettingsTile extends StatelessWidget {
           color: labelColor ?? AppColors.onSurface,
         ),
       ),
+      subtitle: subtitle != null
+          ? Text(
+              subtitle!,
+              style: AppTypography.labelSm.copyWith(
+                color: AppColors.onSurfaceVariant,
+                letterSpacing: 0,
+              ),
+            )
+          : null,
       trailing: showChevron
           ? Icon(
               Icons.chevron_right_rounded,

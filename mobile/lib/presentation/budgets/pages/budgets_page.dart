@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
+import '../../../core/l10n/app_strings.dart';
 import '../../../navigation/route_names.dart';
 import '../bloc/budgets_bloc.dart';
 import '../bloc/budgets_event.dart';
@@ -30,6 +31,7 @@ class _BudgetsView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final s = AppStrings.of(context);
     return Scaffold(
       backgroundColor: AppColors.surface,
       body: BlocBuilder<BudgetsBloc, BudgetsState>(
@@ -51,7 +53,7 @@ class _BudgetsView extends StatelessWidget {
                   floating: true,
                   backgroundColor: AppColors.surface,
                   surfaceTintColor: Colors.transparent,
-                  title: Text('Bütçeler', style: AppTypography.headlineSm),
+                  title: Text(s.budgetsTitle, style: AppTypography.headlineSm),
                   actions: [
                     IconButton(
                       icon: const Icon(
@@ -69,7 +71,7 @@ class _BudgetsView extends StatelessWidget {
                     ),
                   ],
                 ),
-                _buildBody(context, state),
+                _buildBody(context, state, s),
                 const SliverToBoxAdapter(child: SizedBox(height: 96)),
               ],
             ),
@@ -79,7 +81,7 @@ class _BudgetsView extends StatelessWidget {
     );
   }
 
-  Widget _buildBody(BuildContext context, BudgetsState state) {
+  Widget _buildBody(BuildContext context, BudgetsState state, AppStrings s) {
     return switch (state) {
       BudgetsInitial() || BudgetsLoading() => const SliverFillRemaining(
           child: BudgetsShimmer(),
@@ -101,9 +103,9 @@ class _BudgetsView extends StatelessWidget {
             if (budgets.isEmpty)
               EmptyStateView(
                 icon: Icons.account_balance_wallet_outlined,
-                title: 'Henüz bütçe yok',
-                subtitle: 'Harcamalarını takip etmek için\nbir bütçe oluştur.',
-                buttonLabel: 'Bütçe Oluştur',
+                title: s.noBudgets,
+                subtitle: s.noBudgetsSubtitle,
+                buttonLabel: s.createBudgetBtn,
                 onAction: () async {
                   await context.push(RouteNames.addBudget);
                   if (context.mounted) {
@@ -122,7 +124,7 @@ class _BudgetsView extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     WarningBanner(budgets: budgets),
-                    Text('Aktif Bütçeler', style: AppTypography.titleSm),
+                    Text(s.activeBudgets, style: AppTypography.titleSm),
                     const SizedBox(height: AppSpacing.md),
                     ...budgets.map(
                       (b) => Padding(

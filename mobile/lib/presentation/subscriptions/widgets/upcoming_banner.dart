@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:wallet_app/core/l10n/app_strings.dart';
 import 'package:wallet_app/data/models/subscription_model.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
@@ -34,7 +35,7 @@ class UpcomingBanner extends StatelessWidget {
             const SizedBox(width: AppSpacing.sm),
             Expanded(
               child: Text(
-                '${renewals.length} abonelik önümüzdeki 7 günde yenileniyor',
+                AppStrings.of(context).upcomingRenewals(renewals.length),
                 style: AppTypography.bodySm.copyWith(color: AppColors.warning),
               ),
             ),

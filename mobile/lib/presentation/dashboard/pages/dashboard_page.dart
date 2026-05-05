@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
+import '../../../core/l10n/app_strings.dart';
 import '../../../core/di/injection.dart';
 import '../../../core/services/app_events.dart';
 import '../../../data/repositories/dashboard_repository.dart';
@@ -92,9 +93,12 @@ class _DashboardViewState extends State<_DashboardView> {
   }
 
   Widget _buildAppBar(BuildContext context, DashboardState state) {
-    String greeting = 'Merhaba';
+    final s = AppStrings.of(context);
+    final String greeting;
     if (state is DashboardLoaded && state.dashboard.userFirstName != null) {
-      greeting = 'Merhaba, ${state.dashboard.userFirstName}';
+      greeting = s.helloName(state.dashboard.userFirstName!);
+    } else {
+      greeting = s.hello;
     }
 
     return SliverAppBar(
@@ -138,7 +142,7 @@ class _DashboardViewState extends State<_DashboardView> {
               ),
               child: Row(
                 children: [
-                  Text('Hesaplarım', style: AppTypography.titleSm),
+                  Text(AppStrings.of(context).myAccountsTitle, style: AppTypography.titleSm),
                   const Spacer(),
                   if (dashboard.accounts.isNotEmpty)
                     TextButton(
@@ -155,7 +159,7 @@ class _DashboardViewState extends State<_DashboardView> {
                         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                       ),
                       child: Text(
-                        '+ Ekle',
+                        AppStrings.of(context).addAccount,
                         style: AppTypography.bodySm
                             .copyWith(color: AppColors.primary),
                       ),

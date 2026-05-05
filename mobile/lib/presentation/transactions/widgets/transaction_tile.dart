@@ -3,6 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
+import '../../../core/l10n/app_strings.dart';
+import '../../../core/utils/category_extensions.dart';
 import '../../../core/utils/currency_formatter.dart';
 import '../../../core/utils/date_formatter.dart';
 import '../../../core/utils/icon_mapper.dart';
@@ -73,8 +75,8 @@ class TransactionTile extends StatelessWidget {
                 children: [
                   Text(
                     transaction.description ??
-                        transaction.category?.name ??
-                        (isTransfer ? 'Transfer' : 'İşlem'),
+                        transaction.category?.localizedName(context) ??
+                        (isTransfer ? AppStrings.of(context).transfer : AppStrings.of(context).transactionFallback),
                     style: AppTypography.bodyMd
                         .copyWith(fontWeight: FontWeight.w500),
                     maxLines: 1,
@@ -133,21 +135,21 @@ class TransactionTile extends StatelessWidget {
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: AppColors.surfaceContainerHigh,
-        title: Text('İşlemi Sil', style: AppTypography.titleSm),
+        title: Text(AppStrings.of(context).deleteTransactionTitle, style: AppTypography.titleSm),
         content: Text(
-          'Bu işlem silinecek ve hesap bakiyesi güncellenecek.',
+          AppStrings.of(context).deleteTransactionContent,
           style: AppTypography.bodyMd
               .copyWith(color: AppColors.onSurfaceVariant),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('İptal'),
+            child: Text(AppStrings.of(context).cancel),
           ),
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(true),
-            child: const Text('Sil',
-                style: TextStyle(color: AppColors.error)),
+            child: Text(AppStrings.of(context).delete,
+                style: const TextStyle(color: AppColors.error)),
           ),
         ],
       ),

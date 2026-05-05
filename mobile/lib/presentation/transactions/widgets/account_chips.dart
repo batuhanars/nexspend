@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
+import '../../../core/l10n/app_strings.dart';
 import '../../../data/models/account_model.dart';
 
 class AccountChips extends StatelessWidget {
@@ -19,7 +20,7 @@ class AccountChips extends StatelessWidget {
   Widget build(BuildContext context) {
     if (accounts.isEmpty) {
       return Text(
-        'Hesap bulunamadı',
+        AppStrings.of(context).noAccountsFound,
         style: AppTypography.bodySm
             .copyWith(color: AppColors.onSurfaceVariant),
       );

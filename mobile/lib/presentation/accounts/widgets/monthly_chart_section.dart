@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
+import '../../../core/l10n/app_strings.dart';
 import '../../../core/utils/currency_formatter.dart';
 import '../../../data/models/account_analytics_model.dart';
 
@@ -11,14 +12,9 @@ class MonthlyChartSection extends StatelessWidget {
   const MonthlyChartSection({super.key, required this.months});
   final List<MonthlyFlowModel> months;
 
-  static const _monthAbbr = [
-    'Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz',
-    'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara',
-  ];
-
-  String _abbr(String monthStr) {
+  String _abbr(String monthStr, BuildContext context) {
     final m = int.tryParse(monthStr.split('-').last) ?? 1;
-    return _monthAbbr[(m - 1).clamp(0, 11)];
+    return AppStrings.of(context).monthAbbr(m.clamp(1, 12));
   }
 
   @override
@@ -35,11 +31,11 @@ class MonthlyChartSection extends StatelessWidget {
         children: [
           Row(
             children: [
-              Text('Son 6 Ay', style: AppTypography.titleSm),
+              Text(AppStrings.of(context).lastSixMonths, style: AppTypography.titleSm),
               const Spacer(),
-              ChartLegendDot(color: AppColors.secondary, label: 'Gelir'),
+              ChartLegendDot(color: AppColors.secondary, label: AppStrings.of(context).incomeChartLabel),
               const SizedBox(width: AppSpacing.md),
-              ChartLegendDot(color: AppColors.tertiary, label: 'Gider'),
+              ChartLegendDot(color: AppColors.tertiary, label: AppStrings.of(context).expenseChartLabel),
             ],
           ),
           const SizedBox(height: AppSpacing.md),
@@ -90,7 +86,7 @@ class MonthlyChartSection extends StatelessWidget {
                           return const SizedBox.shrink();
                         }
                         return Text(
-                          _abbr(months[i].month),
+                          _abbr(months[i].month, context),
                           style: AppTypography.labelSm.copyWith(
                             color: AppColors.onSurfaceVariant,
                             fontSize: 10,
@@ -106,7 +102,7 @@ class MonthlyChartSection extends StatelessWidget {
                   touchTooltipData: BarTouchTooltipData(
                     getTooltipColor: (_) => AppColors.surfaceContainerHighest,
                     getTooltipItem: (group, groupIndex, rod, rodIndex) {
-                      final label = rodIndex == 0 ? 'Gelir' : 'Gider';
+                      final label = rodIndex == 0 ? AppStrings.of(context).incomeChartLabel : AppStrings.of(context).expenseChartLabel;
                       return BarTooltipItem(
                         '$label\n${CurrencyFormatter.formatCompact(rod.toY)}',
                         AppTypography.labelSm.copyWith(color: rod.color),

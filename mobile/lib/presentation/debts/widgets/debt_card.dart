@@ -1,4 +1,5 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
+import 'package:wallet_app/core/l10n/app_strings.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:wallet_app/core/constants/app_colors.dart';
@@ -130,7 +131,7 @@ class DebtCard extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    '${CurrencyFormatter.formatCompact(debt.paidAmount)} ödendi',
+                    AppStrings.of(context).paidLabel(CurrencyFormatter.formatCompact(debt.paidAmount)),
                     style: AppTypography.bodySm.copyWith(
                       color: AppColors.onSurfaceVariant,
                     ),
@@ -159,7 +160,7 @@ class DebtCard extends StatelessWidget {
                               ),
                               const SizedBox(width: 3),
                               Text(
-                                'Taksitli',
+                                AppStrings.of(context).installment,
                                 style: AppTypography.labelSm.copyWith(
                                   color: AppColors.primary,
                                   fontWeight: FontWeight.w600,
@@ -171,7 +172,7 @@ class DebtCard extends StatelessWidget {
                         ),
                       if (debt.dueDate != null)
                         Text(
-                          _dueDateLabel(debt.dueDate!),
+                          _dueDateLabel(debt.dueDate!, context),
                           style: AppTypography.bodySm.copyWith(
                             color: _dueDateColor(debt.dueDate!),
                           ),
@@ -211,8 +212,8 @@ class DebtCard extends StatelessWidget {
                     ),
                     child: Text(
                       debt.hasInstallments
-                          ? 'Taksitleri Gör'
-                          : (isLent ? 'Ödeme Aldım' : 'Ödeme Yap'),
+                          ? AppStrings.of(context).viewInstallmentsBtn
+                          : (isLent ? AppStrings.of(context).receivedPaymentTitle : AppStrings.of(context).makePaymentBtn),
                       style: AppTypography.bodyMd.copyWith(
                         fontWeight: FontWeight.w600,
                       ),
@@ -228,11 +229,12 @@ class DebtCard extends StatelessWidget {
     );
   }
 
-  String _dueDateLabel(DateTime due) {
+  String _dueDateLabel(DateTime due, BuildContext context) {
+    final s = AppStrings.of(context);
     final diff = due.difference(DateTime.now()).inDays;
-    if (diff < 0) return 'Vadesi geçti';
-    if (diff == 0) return 'Bugün vadesi doluyor';
-    if (diff == 1) return 'Yarın vadesi doluyor';
+    if (diff < 0) return s.dueDatePassed;
+    if (diff == 0) return s.dueDateToday;
+    if (diff == 1) return s.dueDateTomorrow;
     return '${due.day}.${due.month.toString().padLeft(2, '0')}.${due.year}';
   }
 
@@ -248,7 +250,7 @@ class DebtCard extends StatelessWidget {
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: AppColors.surfaceContainerHigh,
-        title: Text('Borcu Sil', style: AppTypography.titleSm),
+        title: Text(AppStrings.of(context).deleteDebtTitle, style: AppTypography.titleSm),
         content: Text(
           '${debt.personName} ile olan borç kaydı silinecek.',
           style: AppTypography.bodyMd.copyWith(
@@ -258,11 +260,11 @@ class DebtCard extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('İptal'),
+            child: Text(AppStrings.of(context).cancel),
           ),
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(true),
-            child: Text('Sil', style: TextStyle(color: AppColors.error)),
+            child: Text(AppStrings.of(context).delete, style: TextStyle(color: AppColors.error)),
           ),
         ],
       ),

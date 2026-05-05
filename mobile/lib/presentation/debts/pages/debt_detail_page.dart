@@ -1,4 +1,5 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
+import 'package:wallet_app/core/l10n/app_strings.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:wallet_app/core/constants/app_colors.dart';
 import 'package:wallet_app/core/constants/app_spacing.dart';
@@ -69,7 +70,7 @@ class _DebtDetailView extends StatelessWidget {
                       onPressed: () => context
                           .read<DebtDetailBloc>()
                           .add(DebtDetailRefreshRequested()),
-                      child: const Text('Tekrar Dene'),
+                      child: Text(AppStrings.of(context).retry),
                     ),
                   ],
                 ),
@@ -87,8 +88,11 @@ class _DebtDetailView extends StatelessWidget {
                     const SizedBox(height: AppSpacing.xl),
                     if (debt.hasInstallments && installments.isNotEmpty) ...[
                       _SectionCard(
-                        title: 'Taksitler',
-                        subtitle: '${installments.where((i) => i.status == DebtStatus.PAID).length}/${installments.length} ödendi',
+                        title: AppStrings.of(context).installmentsSection,
+                        subtitle: AppStrings.of(context).installmentsPaid(
+                          installments.where((i) => i.status == DebtStatus.PAID).length.toString(),
+                          installments.length.toString(),
+                        ),
                         children: installments
                             .map((i) => InstallmentRow(
                                   installment: i,
@@ -103,8 +107,8 @@ class _DebtDetailView extends StatelessWidget {
                     ],
                     if (payments.isNotEmpty)
                       _SectionCard(
-                        title: 'Ödeme Geçmişi',
-                        subtitle: '${payments.length} işlem',
+                        title: AppStrings.of(context).paymentHistoryTitle,
+                        subtitle: AppStrings.of(context).paymentsCount(payments.length),
                         children: payments
                             .map((p) => PaymentRow(
                                   payment: p,
@@ -118,7 +122,7 @@ class _DebtDetailView extends StatelessWidget {
                           padding:
                               const EdgeInsets.symmetric(vertical: AppSpacing.xl),
                           child: Text(
-                            'Henüz ödeme yapılmadı.',
+                            AppStrings.of(context).noPaymentsYet,
                             style: AppTypography.bodyMd.copyWith(
                               color: AppColors.onSurfaceVariant,
                             ),
@@ -158,8 +162,8 @@ class _DebtDetailView extends StatelessWidget {
                         ),
                         child: Text(
                           state.debt.type == DebtType.LENT
-                              ? 'Tahsil Et'
-                              : 'Borç Öde',
+                              ? AppStrings.of(context).collectPaymentBtn
+                              : AppStrings.of(context).makePaymentBtn,
                           style: AppTypography.bodyMd
                               .copyWith(fontWeight: FontWeight.w600),
                         ),
@@ -285,8 +289,8 @@ class _DetailPaymentSheetState extends State<_DetailPaymentSheet> {
             children: [
               Text(
                 widget.installment != null
-                    ? '${widget.installment!.installmentNo}. Taksit Ödemesi'
-                    : (isLent ? 'Ödeme Aldım' : 'Ödeme Yap'),
+                    ? AppStrings.of(context).installmentPaymentTitle(widget.installment!.installmentNo)
+                    : (isLent ? AppStrings.of(context).receivedPaymentTitle : AppStrings.of(context).payDebtTitle),
                 style: AppTypography.headlineSm,
               ),
               IconButton(
@@ -299,21 +303,21 @@ class _DetailPaymentSheetState extends State<_DetailPaymentSheet> {
           const SizedBox(height: AppSpacing.sm),
           Text(
             widget.installment != null
-                ? 'Taksit tutarı: ${CurrencyFormatter.format(widget.installment!.amount)}'
-                : 'Kalan: ${CurrencyFormatter.format(widget.debt.remainingAmount)}',
+                ? AppStrings.of(context).installmentAmountLabel(CurrencyFormatter.format(widget.installment!.amount))
+                : AppStrings.of(context).remainingAmountLabel(CurrencyFormatter.format(widget.debt.remainingAmount)),
             style: AppTypography.bodySm,
           ),
           const SizedBox(height: AppSpacing.lg),
           _inputField(
             _amountCtrl,
-            'Tutar (₺)',
+            AppStrings.of(context).amountHint,
             Icons.attach_money_rounded,
             numeric: true,
             readOnly: widget.installment != null,
           ),
           const SizedBox(height: AppSpacing.md),
           Text(
-            'Hesap',
+            AppStrings.of(context).accountLabel,
             style: AppTypography.labelSm.copyWith(
               color: AppColors.onSurfaceVariant,
             ),
@@ -342,7 +346,7 @@ class _DetailPaymentSheetState extends State<_DetailPaymentSheet> {
                   .toList();
               if (accounts.isEmpty) {
                 return Text(
-                  'Hesap bulunamadı',
+                  AppStrings.of(context).noAccountsFound,
                   style: AppTypography.bodySm
                       .copyWith(color: AppColors.onSurfaceVariant),
                 );
@@ -400,7 +404,7 @@ class _DetailPaymentSheetState extends State<_DetailPaymentSheet> {
             },
           ),
           const SizedBox(height: AppSpacing.md),
-          _inputField(_noteCtrl, 'Not (opsiyonel)', Icons.notes_outlined),
+          _inputField(_noteCtrl, AppStrings.of(context).noteOptionalHint, Icons.notes_outlined),
           const SizedBox(height: AppSpacing.xl),
           FilledButton(
             onPressed: _submit,
@@ -410,7 +414,7 @@ class _DetailPaymentSheetState extends State<_DetailPaymentSheet> {
                 borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
               ),
             ),
-            child: const Text('Kaydet'),
+            child: Text(AppStrings.of(context).save),
           ),
         ],
       ),
@@ -515,7 +519,7 @@ class _HeaderCard extends StatelessWidget {
             style: AppTypography.headlineMd.copyWith(color: color),
           ),
           Text(
-            'Kalan tutar',
+            AppStrings.of(context).remainingLabel,
             style: AppTypography.bodySm,
           ),
           const SizedBox(height: AppSpacing.lg),
@@ -533,11 +537,11 @@ class _HeaderCard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                '${CurrencyFormatter.formatCompact(debt.paidAmount)} ödendi',
+                AppStrings.of(context).paidLabel(CurrencyFormatter.formatCompact(debt.paidAmount)),
                 style: AppTypography.bodySm,
               ),
               Text(
-                'Toplam: ${CurrencyFormatter.format(debt.totalAmount)}',
+                AppStrings.of(context).totalLabel(CurrencyFormatter.format(debt.totalAmount)),
                 style: AppTypography.bodySm,
               ),
             ],

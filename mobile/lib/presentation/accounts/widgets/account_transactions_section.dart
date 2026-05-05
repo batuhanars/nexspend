@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
+import '../../../core/l10n/app_strings.dart';
+import '../../../core/utils/category_extensions.dart';
 import '../../../core/utils/currency_formatter.dart';
 import '../../../core/utils/date_formatter.dart';
 import '../../../core/utils/icon_mapper.dart';
@@ -24,7 +26,7 @@ class AccountTransactionsSection extends StatelessWidget {
         Padding(
           padding:
               const EdgeInsets.symmetric(horizontal: AppSpacing.pagePadding),
-          child: Text('İşlem Geçmişi', style: AppTypography.titleSm),
+          child: Text(AppStrings.of(context).transactionHistory, style: AppTypography.titleSm),
         ),
         const SizedBox(height: AppSpacing.md),
         if (transactions.isEmpty)
@@ -40,7 +42,7 @@ class AccountTransactionsSection extends StatelessWidget {
                   ),
                   const SizedBox(height: AppSpacing.md),
                   Text(
-                    'Henüz işlem yok',
+                    AppStrings.of(context).noTransactions,
                     style: AppTypography.bodyMd
                         .copyWith(color: AppColors.onSurfaceVariant),
                   ),
@@ -48,7 +50,7 @@ class AccountTransactionsSection extends StatelessWidget {
                   FilledButton.icon(
                     onPressed: onAddTransaction,
                     icon: const Icon(Icons.add_rounded, size: 18),
-                    label: const Text('İşlem Ekle'),
+                    label: Text(AppStrings.of(context).addTransactionBtn),
                     style: FilledButton.styleFrom(
                       backgroundColor: AppColors.primary,
                       foregroundColor: AppColors.surface,
@@ -119,8 +121,8 @@ class AccountTransactionTile extends StatelessWidget {
               children: [
                 Text(
                   transaction.description ??
-                      transaction.category?.name ??
-                      (isTransfer ? 'Transfer' : 'İşlem'),
+                      transaction.category?.localizedName(context) ??
+                      (isTransfer ? AppStrings.of(context).transfer : AppStrings.of(context).transactionFallback),
                   style: AppTypography.bodyMd
                       .copyWith(fontWeight: FontWeight.w500),
                   maxLines: 1,

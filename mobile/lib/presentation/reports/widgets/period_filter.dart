@@ -3,24 +3,26 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:wallet_app/core/constants/app_colors.dart';
 import 'package:wallet_app/core/constants/app_spacing.dart';
 import 'package:wallet_app/core/constants/app_typography.dart';
+import 'package:wallet_app/core/l10n/app_strings.dart';
 import 'package:wallet_app/presentation/reports/bloc/reports_bloc.dart';
 
 class PeriodFilter extends StatelessWidget {
   const PeriodFilter({super.key, required this.activePeriod});
   final String activePeriod;
 
-  static const _periods = [
-    (label: 'Bu Ay', value: 'THIS_MONTH'),
-    (label: '3 Ay', value: 'LAST_3_MONTHS'),
-    (label: 'Bu Yıl', value: 'THIS_YEAR'),
-  ];
-
   @override
   Widget build(BuildContext context) {
+    final s = AppStrings.of(context);
+    final periods = [
+      (label: s.periodThisMonth, value: 'THIS_MONTH'),
+      (label: s.period3Months, value: 'LAST_3_MONTHS'),
+      (label: s.periodThisYear, value: 'THIS_YEAR'),
+    ];
+
     return Row(
-      children: _periods.map((p) {
+      children: periods.map((p) {
         final isActive = activePeriod == p.value;
-        final isLast = p == _periods.last;
+        final isLast = p == periods.last;
         return Expanded(
           child: Padding(
             padding: EdgeInsets.only(right: isLast ? 0 : AppSpacing.sm),

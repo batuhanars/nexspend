@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:wallet_app/core/constants/app_colors.dart';
 import 'package:wallet_app/core/constants/app_spacing.dart';
+import 'package:wallet_app/core/l10n/app_strings.dart';
 import 'package:wallet_app/data/models/debt_model.dart';
 import 'package:wallet_app/presentation/debts/bloc/debts_bloc.dart';
 import 'summary_card.dart';
@@ -30,7 +31,7 @@ class SummaryCards extends StatelessWidget {
         children: [
           Expanded(
             child: SummaryCard(
-              label: 'Alacaklarım',
+              label: AppStrings.of(context).summaryLent,
               total: summary.totalLent,
               remaining: summary.totalLentRemaining,
               color: AppColors.secondary,
@@ -46,7 +47,7 @@ class SummaryCards extends StatelessWidget {
           const SizedBox(width: AppSpacing.sm),
           Expanded(
             child: SummaryCard(
-              label: 'Borçlarım',
+              label: AppStrings.of(context).summaryBorrowed,
               total: summary.totalBorrowed,
               remaining: summary.totalBorrowedRemaining,
               color: AppColors.tertiary,

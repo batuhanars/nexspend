@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
+import '../../../core/l10n/app_strings.dart';
 import '../../../core/utils/currency_formatter.dart';
 import '../../../data/models/account_model.dart';
 import 'credit_bar.dart';
@@ -50,7 +51,7 @@ class AccountListTile extends StatelessWidget {
                         ],
                       ),
                       Text(
-                        account.type.label,
+                        account.type.labelOf(context),
                         style: AppTypography.bodySm
                             .copyWith(color: AppColors.onSurfaceVariant),
                       ),
@@ -102,7 +103,7 @@ class AccountDefaultBadge extends StatelessWidget {
         borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
       ),
       child: Text(
-        'Varsayılan',
+        AppStrings.of(context).defaultBadge,
         style: AppTypography.labelSm
             .copyWith(color: AppColors.primary, fontSize: 10),
       ),

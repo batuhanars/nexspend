@@ -1,4 +1,5 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
+import '../../../core/l10n/app_strings.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
@@ -41,13 +42,13 @@ class EmptyAccountsCard extends StatelessWidget {
               ),
               const SizedBox(height: AppSpacing.md),
               Text(
-                'Henüz hesap eklemediniz',
+                AppStrings.of(context).noAccountsYet,
                 style: AppTypography.titleSm,
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: AppSpacing.xs),
               Text(
-                'Gelir ve giderlerinizi takip etmek için\nilk hesabınızı oluşturun.',
+                AppStrings.of(context).noAccountsSubtitle,
                 style: AppTypography.bodyMd.copyWith(
                   color: AppColors.onSurfaceVariant,
                 ),
@@ -60,7 +61,7 @@ class EmptyAccountsCard extends StatelessWidget {
                 child: ElevatedButton.icon(
                   onPressed: onTap,
                   icon: const Icon(Icons.add_rounded, size: 20),
-                  label: const Text('İlk Hesabı Ekle'),
+                  label: Text(AppStrings.of(context).addFirstAccount),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,
                     foregroundColor: AppColors.surface,

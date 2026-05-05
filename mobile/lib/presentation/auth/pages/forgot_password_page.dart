@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
+import '../../../core/l10n/app_strings.dart';
 import '../../../core/utils/validators.dart';
 import '../bloc/auth_bloc.dart';
 import '../widgets/auth_button.dart';
@@ -82,17 +83,17 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                   ),
                   const SizedBox(height: AppSpacing.lg),
                   Text(
-                    'Şifremi Unuttum',
+                    AppStrings.of(context).forgotPasswordTitle,
                     style: AppTypography.headlineMd.copyWith(color: AppColors.onSurface),
                   ),
                   const SizedBox(height: AppSpacing.xs),
                   Text(
-                    'E-posta adresinizi girin, şifre sıfırlama bağlantısı gönderelim.',
+                    AppStrings.of(context).forgotPasswordSubtitle,
                     style: AppTypography.bodyMd.copyWith(color: AppColors.onSurfaceVariant),
                   ),
                   const SizedBox(height: AppSpacing.xxl),
                   AuthInputField(
-                    label: 'E-posta',
+                    label: AppStrings.of(context).emailLabel,
                     controller: _emailController,
                     icon: Icons.email_outlined,
                     keyboardType: TextInputType.emailAddress,
@@ -106,7 +107,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                     builder: (context, state) {
                       final isLoading = state is AuthLoading;
                       return AuthButton(
-                        label: 'Bağlantı Gönder',
+                        label: AppStrings.of(context).sendResetLink,
                         onPressed: isLoading ? null : _submit,
                         isLoading: isLoading,
                       );
@@ -148,12 +149,12 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
             ),
             const SizedBox(height: AppSpacing.lg),
             Text(
-              'Bağlantı Gönderildi!',
+              AppStrings.of(context).resetLinkSentTitle,
               style: AppTypography.titleSm.copyWith(color: AppColors.onSurface),
             ),
             const SizedBox(height: AppSpacing.sm),
             Text(
-              '$email adresine şifre sıfırlama bağlantısı gönderildi.',
+              AppStrings.of(context).resetLinkSentContent(email),
               textAlign: TextAlign.center,
               style: AppTypography.bodyMd.copyWith(color: AppColors.onSurfaceVariant),
             ),
@@ -165,7 +166,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                   Navigator.of(context).pop();
                   context.pop();
                 },
-                child: const Text('Tamam'),
+                child: Text(AppStrings.of(context).ok),
               ),
             ),
           ],

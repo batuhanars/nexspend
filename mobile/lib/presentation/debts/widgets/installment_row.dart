@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:wallet_app/core/constants/app_colors.dart';
 import 'package:wallet_app/core/constants/app_spacing.dart';
 import 'package:wallet_app/core/constants/app_typography.dart';
+import 'package:wallet_app/core/l10n/app_strings.dart';
 import 'package:wallet_app/core/utils/currency_formatter.dart';
 import 'package:wallet_app/core/utils/date_formatter.dart';
 import 'package:wallet_app/data/models/debt_model.dart';
@@ -52,7 +53,7 @@ class InstallmentRow extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  '${installment.installmentNo}. Taksit',
+                  AppStrings.of(context).installmentNo(installment.installmentNo),
                   style: AppTypography.bodyMd.copyWith(
                     fontWeight: FontWeight.w600,
                     color: isPaid
@@ -86,7 +87,7 @@ class InstallmentRow extends StatelessWidget {
                 tapTargetSize: MaterialTapTargetSize.shrinkWrap,
               ),
               child: Text(
-                isLent ? 'Tahsil Et' : 'Öde',
+                isLent ? AppStrings.of(context).collectBtn : AppStrings.of(context).payBtn,
                 style: AppTypography.labelSm.copyWith(
                   color: color,
                   fontWeight: FontWeight.w700,
@@ -107,7 +108,7 @@ class InstallmentRow extends StatelessWidget {
                 ),
                 if (installment.paidAmount > 0 && !isPaid)
                   Text(
-                    '${CurrencyFormatter.formatCompact(installment.paidAmount)} ödendi',
+                    AppStrings.of(context).partiallyPaid(CurrencyFormatter.formatCompact(installment.paidAmount)),
                     style: AppTypography.bodySm,
                   ),
               ],

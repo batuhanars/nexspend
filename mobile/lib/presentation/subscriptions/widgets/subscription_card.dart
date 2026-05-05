@@ -1,4 +1,5 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
+import 'package:wallet_app/core/l10n/app_strings.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:wallet_app/data/models/subscription_model.dart';
@@ -176,7 +177,7 @@ class SubscriptionCard extends StatelessWidget {
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: AppColors.surfaceContainerHigh,
-        title: Text('Aboneliği İptal Et', style: AppTypography.titleSm),
+        title: Text(AppStrings.of(context).cancelSubscriptionTitle, style: AppTypography.titleSm),
         content: Text(
           '${sub.name} aboneliği silinecek. Gelecek ödemeler durur.',
           style: AppTypography.bodyMd.copyWith(
@@ -186,11 +187,11 @@ class SubscriptionCard extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('İptal'),
+            child: Text(AppStrings.of(context).cancel),
           ),
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(true),
-            child: const Text('Sil', style: TextStyle(color: AppColors.error)),
+            child: Text(AppStrings.of(context).delete, style: const TextStyle(color: AppColors.error)),
           ),
         ],
       ),

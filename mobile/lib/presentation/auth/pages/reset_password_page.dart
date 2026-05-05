@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
+import '../../../core/l10n/app_strings.dart';
 import '../../../core/utils/validators.dart';
 import '../../../navigation/route_names.dart';
 import '../bloc/auth_bloc.dart';
@@ -102,17 +103,17 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                   ),
                   const SizedBox(height: AppSpacing.lg),
                   Text(
-                    'Yeni Şifrenizi\nBelirleyin',
+                    AppStrings.of(context).resetPasswordTitle,
                     style: AppTypography.headlineMd.copyWith(color: AppColors.onSurface),
                   ),
                   const SizedBox(height: AppSpacing.xs),
                   Text(
-                    'Güvenli bir şifre oluşturun.',
+                    AppStrings.of(context).resetPasswordSubtitle,
                     style: AppTypography.bodyMd.copyWith(color: AppColors.onSurfaceVariant),
                   ),
                   const SizedBox(height: AppSpacing.xxl),
                   AuthInputField(
-                    label: 'Yeni Şifre',
+                    label: AppStrings.of(context).newPasswordLabel,
                     controller: _passwordController,
                     icon: Icons.lock_outline,
                     isPassword: true,
@@ -124,7 +125,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                   ),
                   const SizedBox(height: AppSpacing.md),
                   AuthInputField(
-                    label: 'Şifre Tekrar',
+                    label: AppStrings.of(context).passwordRepeatLabel,
                     controller: _confirmPasswordController,
                     icon: Icons.lock_outline,
                     isPassword: true,
@@ -144,7 +145,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                     builder: (context, state) {
                       final isLoading = state is AuthLoading;
                       return AuthButton(
-                        label: 'Şifreyi Güncelle',
+                        label: AppStrings.of(context).updatePasswordBtn,
                         onPressed: isLoading ? null : _submit,
                         isLoading: isLoading,
                       );
@@ -187,12 +188,12 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
             ),
             const SizedBox(height: AppSpacing.lg),
             Text(
-              'Şifre Güncellendi!',
+              AppStrings.of(context).passwordUpdatedTitle,
               style: AppTypography.titleSm.copyWith(color: AppColors.onSurface),
             ),
             const SizedBox(height: AppSpacing.sm),
             Text(
-              'Şifreniz başarıyla güncellendi. Yeni şifrenizle giriş yapabilirsiniz.',
+              AppStrings.of(context).passwordUpdatedContent,
               textAlign: TextAlign.center,
               style: AppTypography.bodyMd.copyWith(color: AppColors.onSurfaceVariant),
             ),
@@ -204,7 +205,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                   Navigator.of(context).pop();
                   context.go(RouteNames.login);
                 },
-                child: const Text('Giriş Yap'),
+                child: Text(AppStrings.of(context).loginAction),
               ),
             ),
           ],
@@ -231,20 +232,20 @@ class _PasswordChecklist extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Şifre Gereksinimleri',
+            AppStrings.of(context).passwordRequirements,
             style: AppTypography.labelMd.copyWith(color: AppColors.onSurfaceVariant),
           ),
           const SizedBox(height: AppSpacing.sm),
           _CheckItem(
-            label: 'En az 8 karakter',
+            label: AppStrings.of(context).reqMinChars,
             met: Validators.hasMinLength(password),
           ),
           _CheckItem(
-            label: 'En az 1 büyük harf',
+            label: AppStrings.of(context).reqMinUppercase,
             met: Validators.hasUppercase(password),
           ),
           _CheckItem(
-            label: 'En az 1 rakam',
+            label: AppStrings.of(context).reqMinNumber,
             met: Validators.hasNumber(password),
           ),
         ],

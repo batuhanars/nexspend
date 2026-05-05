@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
+import '../../../core/l10n/app_strings.dart';
 import '../../../data/models/budget_model.dart';
 
 class WarningBanner extends StatelessWidget {
@@ -23,8 +24,8 @@ class WarningBanner extends StatelessWidget {
     final icon =
         isExceeded ? Icons.error_outline : Icons.warning_amber_outlined;
     final message = isExceeded
-        ? '$exceededCount bütçeniz limiti aştı'
-        : '$criticalCount bütçeniz kritik seviyeye yaklaştı';
+        ? AppStrings.of(context).budgetsExceeded(exceededCount)
+        : AppStrings.of(context).budgetsCritical(criticalCount);
 
     return Padding(
       padding: const EdgeInsets.only(bottom: AppSpacing.md),

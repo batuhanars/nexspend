@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
+import '../../../core/utils/category_extensions.dart';
 import '../../../core/utils/icon_mapper.dart';
 import '../../../data/models/category_model.dart';
 
@@ -55,7 +56,7 @@ class TransactionCategoryGrid extends StatelessWidget {
                 ),
                 const SizedBox(height: AppSpacing.xs),
                 Text(
-                  cat.name,
+                  cat.localizedName(context),
                   style: AppTypography.labelSm.copyWith(
                     color: isSelected ? color : AppColors.onSurfaceVariant,
                     fontSize: 10,

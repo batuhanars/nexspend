@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
+import '../../../core/l10n/app_strings.dart';
 import '../../../core/utils/currency_formatter.dart';
 import '../bloc/subscriptions_bloc.dart';
 
@@ -11,6 +12,7 @@ class SummaryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final s = AppStrings.of(context);
     return Padding(
       padding: const EdgeInsets.fromLTRB(
         AppSpacing.pagePadding,
@@ -31,7 +33,7 @@ class SummaryCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Aylık Toplam',
+                    s.monthlyTotal,
                     style: AppTypography.labelSm.copyWith(
                       color: AppColors.onSurfaceVariant,
                       letterSpacing: 0.8,
@@ -66,7 +68,7 @@ class SummaryCard extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    'Aktif',
+                    s.activeLabel,
                     style: AppTypography.labelSm.copyWith(
                       color: AppColors.primary,
                     ),

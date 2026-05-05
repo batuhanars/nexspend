@@ -1,4 +1,5 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
+import '../../../core/l10n/app_strings.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
@@ -55,15 +56,15 @@ class _AddBudgetPageState extends State<AddBudgetPage> {
     final amount = double.tryParse(amountStr);
 
     if (amount == null || amount <= 0) {
-      _showError('Geçerli bir tutar girin.');
+      _showError(AppStrings.of(context).enterValidAmount);
       return;
     }
     if (_nameController.text.trim().isEmpty) {
-      _showError('Bütçe adı girin.');
+      _showError(AppStrings.of(context).enterBudgetName);
       return;
     }
     if (_selectedCategory == null) {
-      _showError('Bir kategori seçin.');
+      _showError(AppStrings.of(context).selectCategoryPrompt);
       return;
     }
 
@@ -149,7 +150,7 @@ class _AddBudgetPageState extends State<AddBudgetPage> {
             icon: const Icon(Icons.close, color: AppColors.onSurface),
             onPressed: () => Navigator.of(context).pop(),
           ),
-          title: Text('Yeni Bütçe', style: AppTypography.titleSm),
+          title: Text(AppStrings.of(context).newBudgetTitle, style: AppTypography.titleSm),
           centerTitle: true,
         ),
         body: BlocBuilder<AddBudgetBloc, AddBudgetState>(
@@ -181,18 +182,18 @@ class _AddBudgetPageState extends State<AddBudgetPage> {
                   // Name input
                   AppField(
                     controller: _nameController,
-                    label: 'Bütçe Adı',
-                    hint: 'Örn. Market Bütçesi',
+                    label: AppStrings.of(context).budgetNameLabel,
+                    hint: AppStrings.of(context).budgetNameHint,
                     icon: Icons.label_outline,
                   ),
                   const SizedBox(height: AppSpacing.xl),
 
                   // Category grid
-                  Text('Kategori', style: AppTypography.titleSm),
+                  Text(AppStrings.of(context).categoryLabel, style: AppTypography.titleSm),
                   const SizedBox(height: AppSpacing.md),
                   if (categories.isEmpty)
                     Text(
-                      'Kategori bulunamadı.',
+                      AppStrings.of(context).noCategoriesFound,
                       style: AppTypography.bodyMd
                           .copyWith(color: AppColors.onSurfaceVariant),
                     )
@@ -206,7 +207,7 @@ class _AddBudgetPageState extends State<AddBudgetPage> {
                   const SizedBox(height: AppSpacing.xl),
 
                   // Period
-                  Text('Dönem', style: AppTypography.titleSm),
+                  Text(AppStrings.of(context).periodLabel, style: AppTypography.titleSm),
                   const SizedBox(height: AppSpacing.md),
                   PeriodSelector(
                     selected: _period,
@@ -222,7 +223,7 @@ class _AddBudgetPageState extends State<AddBudgetPage> {
                     children: [
                       Expanded(
                         child: DateButton(
-                          label: 'Başlangıç',
+                          label: AppStrings.of(context).startDateLabel,
                           value: _formatDate(_startDate),
                           onTap: () => _pickDate(isStart: true),
                         ),
@@ -231,10 +232,10 @@ class _AddBudgetPageState extends State<AddBudgetPage> {
                         const SizedBox(width: AppSpacing.md),
                         Expanded(
                           child: DateButton(
-                            label: 'Bitiş',
+                            label: AppStrings.of(context).endDateLabel,
                             value: _endDate != null
                                 ? _formatDate(_endDate!)
-                                : 'Seç',
+                                : AppStrings.of(context).selectPlaceholder,
                             onTap: () => _pickDate(isStart: false),
                           ),
                         ),
@@ -260,10 +261,10 @@ class _AddBudgetPageState extends State<AddBudgetPage> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text('Akıllı Takip',
+                              Text(AppStrings.of(context).smartTracking,
                                   style: AppTypography.bodyMd),
                               Text(
-                                'İşlemler otomatik hesaplanır',
+                                AppStrings.of(context).smartTrackingSubtitle,
                                 style: AppTypography.bodySm.copyWith(
                                     color: AppColors.onSurfaceVariant),
                               ),
@@ -284,8 +285,8 @@ class _AddBudgetPageState extends State<AddBudgetPage> {
                   // Note
                   AppField(
                     controller: _noteController,
-                    label: 'Not (isteğe bağlı)',
-                    hint: 'Açıklama ekle...',
+                    label: AppStrings.of(context).noteOptionalLabel,
+                    hint: AppStrings.of(context).addNoteHint,
                     icon: Icons.notes_outlined,
                     maxLines: 2,
                   ),
@@ -319,7 +320,7 @@ class _AddBudgetPageState extends State<AddBudgetPage> {
                               ),
                             )
                           : Text(
-                              'Bütçe Oluştur',
+                              AppStrings.of(context).save,
                               style: AppTypography.bodyMd.copyWith(
                                 fontWeight: FontWeight.w600,
                                 color: AppColors.surface,

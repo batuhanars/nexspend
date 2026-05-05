@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
+import '../../../core/l10n/app_strings.dart';
 import '../../../core/utils/currency_formatter.dart';
 import '../../../data/models/account_model.dart';
 import 'credit_bar.dart';
@@ -46,7 +47,7 @@ class AccountHeaderCard extends StatelessWidget {
                   children: [
                     Text(account.name, style: AppTypography.titleSm),
                     Text(
-                      account.type.label,
+                      account.type.labelOf(context),
                       style: AppTypography.bodySm
                           .copyWith(color: AppColors.onSurfaceVariant),
                     ),
@@ -69,7 +70,7 @@ class AccountHeaderCard extends StatelessWidget {
                       Icon(Icons.star_rounded, size: 12, color: AppColors.primary),
                       const SizedBox(width: 4),
                       Text(
-                        'Varsayılan',
+                        AppStrings.of(context).defaultBadge,
                         style: AppTypography.labelSm.copyWith(
                           color: AppColors.primary,
                           fontSize: 10,
@@ -82,7 +83,7 @@ class AccountHeaderCard extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.lg),
           Text(
-            isCC ? 'KULLANILAN' : 'BAKİYE',
+            isCC ? AppStrings.of(context).usedLabel : AppStrings.of(context).balanceLabel,
             style: AppTypography.labelSm
                 .copyWith(color: AppColors.onSurfaceVariant),
           ),

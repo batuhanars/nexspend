@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:wallet_app/core/l10n/app_strings.dart';
 import 'package:wallet_app/core/services/app_events.dart';
 import 'package:wallet_app/presentation/receipt_scanner/widgets/scanner/capture_button.dart';
 import 'package:wallet_app/presentation/receipt_scanner/widgets/scanner/circle_button.dart';
@@ -31,6 +32,7 @@ class _ReceiptScannerPageState extends State<ReceiptScannerPage>
   bool _isProcessing = false;
   bool _flashOn = false;
   String? _initError;
+  bool _cameraNotFound = false;
 
   @override
   void initState() {
@@ -60,10 +62,14 @@ class _ReceiptScannerPageState extends State<ReceiptScannerPage>
     setState(() {
       _isInitializing = true;
       _initError = null;
+      _cameraNotFound = false;
     });
     try {
       _cameras = await availableCameras();
-      if (_cameras.isEmpty) throw Exception('Kamera bulunamadı');
+      if (_cameras.isEmpty) {
+        if (mounted) setState(() { _cameraNotFound = true; _isInitializing = false; });
+        return;
+      }
       final back = _cameras.firstWhere(
         (c) => c.lensDirection == CameraLensDirection.back,
         orElse: () => _cameras.first,
@@ -104,7 +110,7 @@ class _ReceiptScannerPageState extends State<ReceiptScannerPage>
       if (mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text('Fotoğraf çekilemedi: $e')));
+        ).showSnackBar(SnackBar(content: Text(AppStrings.of(context).photoCaptureError(e.toString()))));
       }
     } finally {
       if (mounted) setState(() => _isProcessing = false);
@@ -159,7 +165,7 @@ class _ReceiptScannerPageState extends State<ReceiptScannerPage>
         // Snackbar MaterialApp root ScaffoldMessenger'a bağlı olduğundan
         // pop sonrasında home ekranında görünmeye devam eder.
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('İşlem başarıyla oluşturuldu')),
+          SnackBar(content: Text(AppStrings.of(context).transactionCreatedSuccess)),
         );
         // AppEvents singleton aracılığıyla DashboardPage'e refresh sinyali.
         // parentNavigatorKey route'undan BlocProvider scope'una erişilemediği
@@ -169,7 +175,7 @@ class _ReceiptScannerPageState extends State<ReceiptScannerPage>
       }
     } on DioException catch (e) {
       if (!mounted) return;
-      final msg = _parseScanError(e);
+      final msg = _parseScanError(e, context);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(msg), backgroundColor: Colors.red.shade700),
       );
@@ -177,7 +183,7 @@ class _ReceiptScannerPageState extends State<ReceiptScannerPage>
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Fiş işlenemedi: $e'),
+            content: Text(AppStrings.of(context).receiptProcessError(e.toString())),
             backgroundColor: Colors.red.shade700,
           ),
         );
@@ -185,7 +191,8 @@ class _ReceiptScannerPageState extends State<ReceiptScannerPage>
     }
   }
 
-  String _parseScanError(DioException e) {
+  String _parseScanError(DioException e, BuildContext context) {
+    final s = AppStrings.of(context);
     final data = e.response?.data;
     if (data is Map) {
       final msg = data['message'];
@@ -197,9 +204,9 @@ class _ReceiptScannerPageState extends State<ReceiptScannerPage>
       }
     }
     final status = e.response?.statusCode;
-    if (status == 400) return 'Bu fişi daha önce taradınız';
-    if (status == 413) return 'Görsel çok büyük (maks 10 MB)';
-    return 'Sunucu hatası, tekrar deneyin';
+    if (status == 400) return s.duplicateReceiptError;
+    if (status == 413) return s.imageTooLarge;
+    return s.serverError;
   }
 
   double _estimateConfidence(String text) {
@@ -224,6 +231,8 @@ class _ReceiptScannerPageState extends State<ReceiptScannerPage>
             const Center(
               child: CircularProgressIndicator(color: AppColors.primary),
             )
+          else if (_cameraNotFound)
+            ErrorView(error: AppStrings.of(context).cameraNotFound, onRetry: _initCamera)
           else if (_initError != null)
             ErrorView(error: _initError!, onRetry: _initCamera)
           else if (_controller != null && _controller!.value.isInitialized)
@@ -251,7 +260,7 @@ class _ReceiptScannerPageState extends State<ReceiptScannerPage>
                       ),
                     ),
                     Text(
-                      'Makbuz Tara',
+                      AppStrings.of(context).scanReceiptTitle,
                       style: AppTypography.titleSm.copyWith(color: Colors.white),
                     ),
                     IconButton(
@@ -297,7 +306,7 @@ class _ReceiptScannerPageState extends State<ReceiptScannerPage>
                   CircleButton(
                     icon: Icons.photo_library_outlined,
                     onTap: _isProcessing ? null : _pickFromGallery,
-                    label: 'Galeri',
+                    label: AppStrings.of(context).gallery,
                   ),
                   // Capture button
                   CaptureButton(
@@ -315,15 +324,15 @@ class _ReceiptScannerPageState extends State<ReceiptScannerPage>
           if (_isProcessing)
             Container(
               color: Colors.black54,
-              child: const Center(
+              child: Center(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    CircularProgressIndicator(color: AppColors.primary),
-                    SizedBox(height: AppSpacing.md),
+                    const CircularProgressIndicator(color: AppColors.primary),
+                    const SizedBox(height: AppSpacing.md),
                     Text(
-                      'Makbuz analiz ediliyor...',
-                      style: TextStyle(color: Colors.white),
+                      AppStrings.of(context).receiptAnalyzing,
+                      style: const TextStyle(color: Colors.white),
                     ),
                   ],
                 ),

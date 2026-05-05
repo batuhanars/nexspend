@@ -1,4 +1,5 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
+import 'package:wallet_app/core/l10n/app_strings.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:wallet_app/core/constants/app_colors.dart';
 import 'package:wallet_app/core/constants/app_spacing.dart';
@@ -36,7 +37,7 @@ class _ReceiptHistoryView extends StatelessWidget {
           icon: const Icon(Icons.arrow_back_rounded),
           onPressed: () => Navigator.of(context).pop(),
         ),
-        title: Text('Fiş Geçmişi', style: AppTypography.headlineSm),
+        title: Text(AppStrings.of(context).receiptHistory, style: AppTypography.headlineSm),
         centerTitle: false,
       ),
       body: BlocBuilder<ReceiptHistoryBloc, ReceiptHistoryState>(
@@ -58,7 +59,7 @@ class _ReceiptHistoryView extends StatelessWidget {
                     onPressed: () => context
                         .read<ReceiptHistoryBloc>()
                         .add(ReceiptHistoryRefreshRequested()),
-                    child: const Text('Tekrar Dene'),
+                    child: Text(AppStrings.of(context).retry),
                   ),
                 ],
               ),
@@ -75,7 +76,7 @@ class _ReceiptHistoryView extends StatelessWidget {
                   ),
                   const SizedBox(height: AppSpacing.lg),
                   Text(
-                    'Henüz fiş taranmadı.',
+                    AppStrings.of(context).noReceiptsYet,
                     style: AppTypography.bodyMd
                         .copyWith(color: AppColors.onSurfaceVariant),
                   ),

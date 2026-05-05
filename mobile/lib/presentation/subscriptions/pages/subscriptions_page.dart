@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
+import '../../../core/l10n/app_strings.dart';
 import '../bloc/subscriptions_bloc.dart';
 import '../widgets/add_subscription_sheet.dart';
 import '../../shared/widgets/empty_state_view.dart';
@@ -27,6 +28,7 @@ class _SubscriptionsView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final s = AppStrings.of(context);
     return Scaffold(
       body: BlocBuilder<SubscriptionsBloc, SubscriptionsState>(
         builder: (context, state) {
@@ -37,7 +39,19 @@ class _SubscriptionsView extends StatelessWidget {
             ),
             child: CustomScrollView(
               slivers: [
-                _buildAppBar(context),
+                SliverAppBar(
+                  floating: true,
+                  title: Text(s.subscriptionsTitle, style: AppTypography.headlineSm),
+                  centerTitle: false,
+                  backgroundColor: AppColors.surface,
+                  surfaceTintColor: Colors.transparent,
+                  actions: [
+                    IconButton(
+                      icon: const Icon(Icons.add_rounded, color: AppColors.primary),
+                      onPressed: () => _showAddSheet(context),
+                    ),
+                  ],
+                ),
                 if (state is SubscriptionsLoading)
                   const SliverFillRemaining(
                     hasScrollBody: false,
@@ -62,9 +76,9 @@ class _SubscriptionsView extends StatelessWidget {
                     SliverFillRemaining(
                       child: EmptyStateView(
                         icon: Icons.subscriptions_outlined,
-                        title: 'Abonelik yok',
-                        subtitle: 'Netflix, Spotify gibi aboneliklerinizi\nekleyerek otomatik takip edin.',
-                        buttonLabel: 'Abonelik Ekle',
+                        title: s.noSubscriptions,
+                        subtitle: s.noSubscriptionsSubtitle,
+                        buttonLabel: s.addSubscriptionBtn,
                         onAction: () => _showAddSheet(context),
                       ),
                     )
@@ -76,22 +90,6 @@ class _SubscriptionsView extends StatelessWidget {
           );
         },
       ),
-    );
-  }
-
-  SliverAppBar _buildAppBar(BuildContext context) {
-    return SliverAppBar(
-      floating: true,
-      title: Text('Abonelikler', style: AppTypography.headlineSm),
-      centerTitle: false,
-      backgroundColor: AppColors.surface,
-      surfaceTintColor: Colors.transparent,
-      actions: [
-        IconButton(
-          icon: const Icon(Icons.add_rounded, color: AppColors.primary),
-          onPressed: () => _showAddSheet(context),
-        ),
-      ],
     );
   }
 

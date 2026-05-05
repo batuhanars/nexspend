@@ -1,17 +1,21 @@
 // ignore_for_file: constant_identifier_names
 import 'package:flutter/material.dart';
 import '../../core/constants/app_colors.dart';
+import '../../core/l10n/app_strings.dart';
 import '../../core/utils/icon_mapper.dart';
 
 enum AccountType { BANK, CASH, CREDIT_CARD, INVESTMENT }
 
 extension AccountTypeX on AccountType {
-  String get label => switch (this) {
-        AccountType.BANK => 'Banka',
-        AccountType.CASH => 'Nakit',
-        AccountType.CREDIT_CARD => 'Kredi Kartı',
-        AccountType.INVESTMENT => 'Yatırım',
-      };
+  String labelOf(BuildContext context) {
+    final s = AppStrings.of(context);
+    return switch (this) {
+      AccountType.BANK => s.accountTypeBank,
+      AccountType.CASH => s.accountTypeCash,
+      AccountType.CREDIT_CARD => s.accountTypeCreditCard,
+      AccountType.INVESTMENT => s.accountTypeInvestment,
+    };
+  }
 
   IconData get defaultIcon => switch (this) {
         AccountType.BANK => Icons.account_balance_outlined,

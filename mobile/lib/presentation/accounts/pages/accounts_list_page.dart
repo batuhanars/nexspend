@@ -1,4 +1,5 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
+import 'package:wallet_app/core/l10n/app_strings.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/constants/app_colors.dart';
@@ -68,7 +69,7 @@ class _AccountsListPageState extends State<AccountsListPage> {
         } else if (state is AccountSuccess || state is AccountDeleted) {
           if (state is AccountDeleted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Hesap silindi')),
+              SnackBar(content: Text(AppStrings.of(context).accountDeleted)),
             );
           }
           _load();
@@ -84,7 +85,7 @@ class _AccountsListPageState extends State<AccountsListPage> {
       child: Scaffold(
         backgroundColor: AppColors.surface,
         appBar: AppBar(
-          title: const Text('Hesaplarım'),
+          title: Text(AppStrings.of(context).myAccountsTitle),
           backgroundColor: AppColors.surface,
           surfaceTintColor: Colors.transparent,
           actions: [
@@ -104,7 +105,7 @@ class _AccountsListPageState extends State<AccountsListPage> {
               IconButton(
                 onPressed: _load,
                 icon: const Icon(Icons.refresh_rounded),
-                tooltip: 'Yenile',
+                tooltip: AppStrings.of(context).refreshTooltip,
               ),
           ],
         ),
@@ -128,14 +129,14 @@ class _AccountsListPageState extends State<AccountsListPage> {
       );
     }
     if (_hasError) {
-      return ErrorView(message: 'Hesaplar yüklenemedi', onRetry: _load);
+      return ErrorView(message: AppStrings.of(context).accountsLoadFailed, onRetry: _load);
     }
     if (accounts.isEmpty) {
       return EmptyStateView(
         icon: Icons.account_balance_wallet_outlined,
-        title: 'Henüz hesap yok',
-        subtitle: 'İlk hesabınızı ekleyerek başlayın',
-        buttonLabel: 'Hesap Ekle',
+        title: AppStrings.of(context).noAccountsYet,
+        subtitle: AppStrings.of(context).noAccountsSubtitle,
+        buttonLabel: AppStrings.of(context).addAccountTitle,
         onAction: _goToAdd,
       );
     }

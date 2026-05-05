@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:wallet_app/core/l10n/app_strings.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 
@@ -7,9 +8,9 @@ class TransactionTitleField extends StatelessWidget {
   final TextEditingController controller;
 
   @override
-  Widget build(BuildContext context) => transactionInputField(
+  Widget build(BuildContext context) => _transactionInputField(
         controller: controller,
-        hint: 'Açıklama (opsiyonel)',
+        hint: AppStrings.of(context).descriptionOptional,
         icon: Icons.edit_outlined,
         maxLines: 1,
         action: TextInputAction.next,
@@ -21,16 +22,16 @@ class TransactionNoteField extends StatelessWidget {
   final TextEditingController controller;
 
   @override
-  Widget build(BuildContext context) => transactionInputField(
+  Widget build(BuildContext context) => _transactionInputField(
         controller: controller,
-        hint: 'Not (opsiyonel)',
+        hint: AppStrings.of(context).noteOptional,
         icon: Icons.notes_outlined,
         maxLines: 2,
         action: TextInputAction.done,
       );
 }
 
-Widget transactionInputField({
+Widget _transactionInputField({
   required TextEditingController controller,
   required String hint,
   required IconData icon,

@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
+import '../../../core/l10n/app_strings.dart';
 import '../../../data/models/account_model.dart';
 import '../../../data/models/category_model.dart';
 import '../bloc/add_transaction_bloc.dart';
@@ -64,26 +65,27 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
     final amountStr = _amountController.text.trim().replaceAll(',', '.');
     final amount = double.tryParse(amountStr);
 
+    final s = AppStrings.of(context);
     if (amount == null || amount <= 0) {
-      _showError('Geçerli bir tutar girin.');
+      _showError(s.enterValidAmount);
       return;
     }
     if (_selectedAccount == null) {
-      _showError('Bir hesap seçin.');
+      _showError(s.selectAccount);
       return;
     }
     if (_type == 'TRANSFER' && _transferToAccount == null) {
-      _showError('Hedef hesap seçin.');
+      _showError(s.selectTargetAccount);
       return;
     }
     if (_type != 'TRANSFER' && _selectedCategory == null) {
-      _showError('Bir kategori seçin.');
+      _showError(s.selectCategory);
       return;
     }
 
     final title = _titleController.text.trim().isNotEmpty
         ? _titleController.text.trim()
-        : _selectedCategory?.name ?? 'İşlem';
+        : _selectedCategory?.name ?? AppStrings.of(context).transactionFallback;
 
     final now = DateTime.now();
     final isToday = _date.year == now.year &&
@@ -143,7 +145,7 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
       },
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('İşlem Ekle'),
+          title: Text(AppStrings.of(context).addTransactionBtn),
           leading: IconButton(
             icon: const Icon(Icons.close_rounded),
             onPressed: () => context.pop(),
@@ -198,7 +200,7 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                     controller: _amountController, type: _type),
                 if (_type != 'TRANSFER' && filtered.isNotEmpty) ...[
                   const SizedBox(height: AppSpacing.xl),
-                  _sectionLabel('Kategori'),
+                  _sectionLabel(AppStrings.of(context).categoryLabel),
                   const SizedBox(height: AppSpacing.sm),
                   TransactionCategoryGrid(
                     categories: filtered,
@@ -208,7 +210,7 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                   ),
                 ],
                 const SizedBox(height: AppSpacing.xl),
-                _sectionLabel('Hesap'),
+                _sectionLabel(AppStrings.of(context).accountLabel),
                 const SizedBox(height: AppSpacing.sm),
                 AccountChips(
                   accounts: accounts,
@@ -217,7 +219,7 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                 ),
                 if (_type == 'TRANSFER') ...[
                   const SizedBox(height: AppSpacing.lg),
-                  _sectionLabel('Hedef Hesap'),
+                  _sectionLabel(AppStrings.of(context).targetAccountLabel),
                   const SizedBox(height: AppSpacing.sm),
                   AccountChips(
                     accounts: accounts
@@ -282,7 +284,7 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                           height: 24,
                           child: CircularProgressIndicator(strokeWidth: 2.5),
                         )
-                      : const Text('Kaydet'),
+                      : Text(AppStrings.of(context).save),
                 );
               },
             ),

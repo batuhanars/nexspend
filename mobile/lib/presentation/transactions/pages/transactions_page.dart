@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_typography.dart';
+import '../../../core/l10n/app_strings.dart';
 import '../../../navigation/route_names.dart';
 import '../bloc/transactions_bloc.dart';
 import '../widgets/summary_row.dart';
@@ -53,6 +54,7 @@ class _TransactionsViewState extends State<_TransactionsView> {
 
   @override
   Widget build(BuildContext context) {
+    final s = AppStrings.of(context);
     return Scaffold(
       body: RefreshIndicator(
         color: AppColors.primary,
@@ -71,7 +73,25 @@ class _TransactionsViewState extends State<_TransactionsView> {
               controller: _scrollController,
               physics: const AlwaysScrollableScrollPhysics(),
               slivers: [
-                _buildAppBar(),
+                SliverAppBar(
+                  floating: true,
+                  title: Text(s.transactionsTitle, style: AppTypography.headlineSm),
+                  centerTitle: false,
+                  backgroundColor: AppColors.surface,
+                  surfaceTintColor: Colors.transparent,
+                  actions: [
+                    IconButton(
+                      icon: const Icon(Icons.add_rounded, color: AppColors.primary),
+                      onPressed: () async {
+                        final bloc = context.read<TransactionsBloc>();
+                        final added = await context.push(RouteNames.addTransaction);
+                        if (added == true && mounted) {
+                          bloc.add(TransactionsRefreshRequested());
+                        }
+                      },
+                    ),
+                  ],
+                ),
                 if (state is TransactionsLoading)
                   const SliverFillRemaining(
                     hasScrollBody: false,
@@ -90,11 +110,11 @@ class _TransactionsViewState extends State<_TransactionsView> {
                   SliverToBoxAdapter(child: SummaryRow(state: state)),
                   SliverToBoxAdapter(
                     child: FilterChipBar(
-                      filters: const [
-                        (label: 'Hepsi', value: null),
-                        (label: 'Gelir', value: 'INCOME'),
-                        (label: 'Gider', value: 'EXPENSE'),
-                        (label: 'Transfer', value: 'TRANSFER'),
+                      filters: [
+                        (label: s.filterAll, value: null),
+                        (label: s.income, value: 'INCOME'),
+                        (label: s.expense, value: 'EXPENSE'),
+                        (label: s.transfer, value: 'TRANSFER'),
                       ],
                       activeFilter: state.filter,
                       onChanged: (v) => context
@@ -106,9 +126,9 @@ class _TransactionsViewState extends State<_TransactionsView> {
                     SliverFillRemaining(
                       child: EmptyStateView(
                         icon: Icons.receipt_long_outlined,
-                        title: 'Henüz işlem yok',
-                        subtitle: 'İlk işleminizi ekleyerek\ngelir ve giderlerinizi takip edin.',
-                        buttonLabel: 'İşlem Ekle',
+                        title: s.noTransactions,
+                        subtitle: s.noTransactionsSubtitle,
+                        buttonLabel: s.addTransactionBtn,
                         onAction: () async {
                           final bloc = context.read<TransactionsBloc>();
                           final added =
@@ -120,7 +140,7 @@ class _TransactionsViewState extends State<_TransactionsView> {
                       ),
                     )
                   else ...[
-                    TransactionList(grouped: state.grouped),
+                    TransactionList(transactions: state.transactions),
                     if (state.isLoadingMore)
                       const SliverToBoxAdapter(
                         child: Padding(
@@ -144,28 +164,6 @@ class _TransactionsViewState extends State<_TransactionsView> {
           },
         ),
       ),
-    );
-  }
-
-  SliverAppBar _buildAppBar() {
-    return SliverAppBar(
-      floating: true,
-      title: Text('İşlemler', style: AppTypography.headlineSm),
-      centerTitle: false,
-      backgroundColor: AppColors.surface,
-      surfaceTintColor: Colors.transparent,
-      actions: [
-        IconButton(
-          icon: const Icon(Icons.add_rounded, color: AppColors.primary),
-          onPressed: () async {
-            final bloc = context.read<TransactionsBloc>();
-            final added = await context.push(RouteNames.addTransaction);
-            if (added == true && mounted) {
-              bloc.add(TransactionsRefreshRequested());
-            }
-          },
-        ),
-      ],
     );
   }
 }

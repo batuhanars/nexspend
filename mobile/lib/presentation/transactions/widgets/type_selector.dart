@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
+import '../../../core/l10n/app_strings.dart';
 
 class TransactionTypeSelector extends StatelessWidget {
   const TransactionTypeSelector({
@@ -14,10 +15,11 @@ class TransactionTypeSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const types = [
-      (label: 'Gider', value: 'EXPENSE', color: AppColors.tertiary),
-      (label: 'Gelir', value: 'INCOME', color: AppColors.secondary),
-      (label: 'Transfer', value: 'TRANSFER', color: AppColors.primary),
+    final s = AppStrings.of(context);
+    final types = [
+      (label: s.expense, value: 'EXPENSE', color: AppColors.tertiary),
+      (label: s.income, value: 'INCOME', color: AppColors.secondary),
+      (label: s.transfer, value: 'TRANSFER', color: AppColors.primary),
     ];
 
     return Container(

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
+import '../../../core/utils/category_extensions.dart';
 import '../../../core/utils/icon_mapper.dart';
 import '../../../data/models/category_model.dart';
 
@@ -53,7 +54,7 @@ class CategoryGrid extends StatelessWidget {
                 ),
                 const SizedBox(width: AppSpacing.xs),
                 Text(
-                  cat.name,
+                  cat.localizedName(context),
                   style: AppTypography.bodySm.copyWith(
                     color: isSelected ? cat.cardColor : AppColors.onSurface,
                     fontWeight:

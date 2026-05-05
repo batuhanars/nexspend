@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'app.dart';
 import 'core/di/injection.dart';
+import 'core/storage/secure_storage.dart';
+import 'core/utils/locale_notifier.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
 void main() async {
@@ -24,7 +26,14 @@ void main() async {
   );
 
   await configureDependencies();
-  await initializeDateFormatting('tr_TR', null);
+
+  final language = await getIt<SecureStorage>().getLanguage();
+  getIt.registerSingleton<LocaleNotifier>(LocaleNotifier(language));
+
+  await Future.wait([
+    initializeDateFormatting('tr_TR', null),
+    initializeDateFormatting('en_US', null),
+  ]);
 
   runApp(const WalletApp());
 }

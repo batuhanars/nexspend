@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:wallet_app/core/l10n/app_strings.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
@@ -20,20 +21,21 @@ class RecurringSection extends StatelessWidget {
   final ValueChanged<String> onFrequencyChanged;
   final ValueChanged<DateTime?> onEndDateChanged;
 
-  static const _frequencies = [
-    (label: 'Günlük', value: 'DAILY'),
-    (label: 'Haftalık', value: 'WEEKLY'),
-    (label: 'Aylık', value: 'MONTHLY'),
-    (label: 'Yıllık', value: 'YEARLY'),
-  ];
-
-  static const _months = [
-    'Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran',
-    'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık',
-  ];
+  List<({String label, String value})> _frequencies(BuildContext context) {
+    final s = AppStrings.of(context);
+    return [
+      (label: s.billingCycleDaily, value: 'DAILY'),
+      (label: s.billingCycleWeekly, value: 'WEEKLY'),
+      (label: s.billingCycleMonthly, value: 'MONTHLY'),
+      (label: s.billingCycleYearly, value: 'YEARLY'),
+    ];
+  }
 
   @override
   Widget build(BuildContext context) {
+    final s = AppStrings.of(context);
+    final freqs = _frequencies(context);
+
     return Container(
       decoration: BoxDecoration(
         color: AppColors.surfaceContainerHigh,
@@ -53,7 +55,7 @@ class RecurringSection extends StatelessWidget {
                 const SizedBox(width: AppSpacing.md),
                 Expanded(
                   child: Text(
-                    'Tekrarlayan İşlem',
+                    s.recurringTransaction,
                     style: AppTypography.bodyMd,
                   ),
                 ),
@@ -77,15 +79,15 @@ class RecurringSection extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Sıklık',
+                    s.recurringFrequencyLabel,
                     style: AppTypography.labelSm
                         .copyWith(color: AppColors.onSurfaceVariant),
                   ),
                   const SizedBox(height: AppSpacing.sm),
                   Row(
-                    children: _frequencies.map((f) {
+                    children: freqs.map((f) {
                       final isActive = frequency == f.value;
-                      final isLast = f == _frequencies.last;
+                      final isLast = f == freqs.last;
                       return Expanded(
                         child: Padding(
                           padding: EdgeInsets.only(
@@ -166,8 +168,8 @@ class RecurringSection extends StatelessWidget {
                           const SizedBox(width: AppSpacing.sm),
                           Text(
                             endDate == null
-                                ? 'Bitiş tarihi (opsiyonel)'
-                                : '${endDate!.day} ${_months[endDate!.month - 1]} ${endDate!.year}',
+                                ? s.endDateOptional
+                                : '${endDate!.day} ${s.monthName(endDate!.month)} ${endDate!.year}',
                             style: TextStyle(
                               fontFamily: 'Inter',
                               fontSize: 12,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:wallet_app/core/l10n/app_strings.dart';
 import 'package:wallet_app/presentation/receipt_scanner/widgets/scanner/corner_marks.dart';
 
 import '../../../../core/constants/app_spacing.dart';
@@ -56,10 +57,10 @@ class ScannerOverlay extends StatelessWidget {
           left: 0,
           right: 0,
           top: top + cutoutH + AppSpacing.lg,
-          child: const Text(
-            'Makbuzu çerçeve içine hizalayın',
+          child: Text(
+            AppStrings.of(context).alignReceiptHint,
             textAlign: TextAlign.center,
-            style: TextStyle(color: Colors.white70, fontSize: 13),
+            style: const TextStyle(color: Colors.white70, fontSize: 13),
           ),
         ),
       ],

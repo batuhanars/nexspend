@@ -1,4 +1,5 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
+import 'package:wallet_app/core/l10n/app_strings.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../core/constants/app_colors.dart';
@@ -73,7 +74,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
           return Scaffold(
             appBar: AppBar(
-              title: const Text('Profili Düzenle'),
+              title: Text(AppStrings.of(context).editProfile),
               backgroundColor: AppColors.surface,
               surfaceTintColor: Colors.transparent,
               actions: [
@@ -91,7 +92,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                   TextButton(
                     onPressed: _save,
                     child: Text(
-                      'Kaydet',
+                      AppStrings.of(context).save,
                       style: AppTypography.bodyMd.copyWith(
                         color: AppColors.primary,
                         fontWeight: FontWeight.w600,
@@ -162,15 +163,15 @@ class _EditProfilePageState extends State<EditProfilePage> {
                               .read<SettingsBloc>()
                               .add(const SettingsAvatarDeleted()),
                       child: Text(
-                        'Fotoğrafı Kaldır',
-                        style: TextStyle(color: AppColors.error),
+                        AppStrings.of(context).removePhoto,
+                        style: const TextStyle(color: AppColors.error),
                       ),
                     ),
                   ),
                 ],
                 const SizedBox(height: AppSpacing.xl),
                 // Ad Soyad
-                _label('Ad Soyad'),
+                _label(AppStrings.of(context).fullNameLabel),
                 const SizedBox(height: AppSpacing.sm),
                 TextField(
                   controller: _nameController,
@@ -178,7 +179,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                   style: const TextStyle(
                       color: AppColors.onSurface, fontSize: 14),
                   decoration: InputDecoration(
-                    hintText: 'Adınızı girin',
+                    hintText: AppStrings.of(context).fullNameHint,
                     hintStyle: const TextStyle(
                         color: AppColors.onSurfaceVariant, fontSize: 14),
                     prefixIcon: const Icon(Icons.person_outline_rounded,
@@ -204,7 +205,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                   ),
                 ),
                 const SizedBox(height: AppSpacing.lg),
-                _label('E-posta'),
+                _label(AppStrings.of(context).emailLabel),
                 const SizedBox(height: AppSpacing.sm),
                 Container(
                   padding: const EdgeInsets.symmetric(
@@ -233,7 +234,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                 ),
                 const SizedBox(height: AppSpacing.xs),
                 Text(
-                  'E-posta adresi değiştirilemez',
+                  AppStrings.of(context).emailNotEditable,
                   style: AppTypography.bodySm
                       .copyWith(color: AppColors.onSurfaceVariant),
                 ),
@@ -260,17 +261,17 @@ class _EditProfilePageState extends State<EditProfilePage> {
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: AppColors.surfaceContainerHigh,
-        title: Text('Fotoğraf Seç', style: AppTypography.titleSm),
+        title: Text(AppStrings.of(context).selectPhotoTitle, style: AppTypography.titleSm),
         actions: [
           TextButton(
             onPressed: () =>
                 Navigator.of(ctx).pop(ImageSource.camera),
-            child: const Text('Kamera'),
+            child: Text(AppStrings.of(context).camera),
           ),
           TextButton(
             onPressed: () =>
                 Navigator.of(ctx).pop(ImageSource.gallery),
-            child: const Text('Galeri'),
+            child: Text(AppStrings.of(context).gallery),
           ),
         ],
       ),

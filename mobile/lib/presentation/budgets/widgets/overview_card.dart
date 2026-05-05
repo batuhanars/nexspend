@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
+import '../../../core/l10n/app_strings.dart';
 import '../../../core/utils/currency_formatter.dart';
 import '../../../data/models/budget_model.dart';
 
@@ -53,7 +54,7 @@ class OverviewCard extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      'harcandı',
+                      AppStrings.of(context).spentArc,
                       style: AppTypography.labelSm.copyWith(
                         color: AppColors.onSurfaceVariant,
                       ),
@@ -64,32 +65,37 @@ class OverviewCard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: AppSpacing.lg),
-          Row(
-            children: [
-              Expanded(
-                child: _StatChip(
-                  label: 'Toplam Bütçe',
-                  value: CurrencyFormatter.format(overview.totalBudget),
-                  color: AppColors.primary,
-                ),
-              ),
-              const SizedBox(width: AppSpacing.md),
-              Expanded(
-                child: _StatChip(
-                  label: 'Harcanan',
-                  value: CurrencyFormatter.format(overview.totalSpent),
-                  color: AppColors.tertiary,
-                ),
-              ),
-              const SizedBox(width: AppSpacing.md),
-              Expanded(
-                child: _StatChip(
-                  label: 'Kalan',
-                  value: CurrencyFormatter.format(overview.remaining),
-                  color: AppColors.secondary,
-                ),
-              ),
-            ],
+          Builder(
+            builder: (context) {
+              final s = AppStrings.of(context);
+              return Row(
+                children: [
+                  Expanded(
+                    child: _StatChip(
+                      label: s.totalBudget,
+                      value: CurrencyFormatter.format(overview.totalBudget),
+                      color: AppColors.primary,
+                    ),
+                  ),
+                  const SizedBox(width: AppSpacing.md),
+                  Expanded(
+                    child: _StatChip(
+                      label: s.spent,
+                      value: CurrencyFormatter.format(overview.totalSpent),
+                      color: AppColors.tertiary,
+                    ),
+                  ),
+                  const SizedBox(width: AppSpacing.md),
+                  Expanded(
+                    child: _StatChip(
+                      label: s.remaining,
+                      value: CurrencyFormatter.format(overview.remaining),
+                      color: AppColors.secondary,
+                    ),
+                  ),
+                ],
+              );
+            },
           ),
         ],
       ),

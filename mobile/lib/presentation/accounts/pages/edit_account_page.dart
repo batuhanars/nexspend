@@ -1,4 +1,5 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
+import '../../../core/l10n/app_strings.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../core/constants/app_colors.dart';
@@ -84,7 +85,7 @@ class _EditAccountPageState extends State<EditAccountPage> {
       },
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Hesabı Düzenle'),
+          title: Text(AppStrings.of(context).editAccountTitle),
           leading: IconButton(
             icon: const Icon(Icons.close_rounded),
             onPressed: () => Navigator.of(context).pop(),
@@ -108,12 +109,12 @@ class _EditAccountPageState extends State<EditAccountPage> {
                 }),
               ),
               const SizedBox(height: AppSpacing.xl),
-              _label('Hesap Adı'),
+              _label(AppStrings.of(context).accountNameLabel),
               const SizedBox(height: AppSpacing.sm),
               AccountFormField(
                 controller: _nameController,
                 focusNode: _nameFocus,
-                hintText: _type.label,
+                hintText: _type.labelOf(context),
                 prefixIcon: _type.defaultIcon,
                 textInputAction: _type == AccountType.CREDIT_CARD
                     ? TextInputAction.next
@@ -124,7 +125,7 @@ class _EditAccountPageState extends State<EditAccountPage> {
                   }
                 },
                 validator: (v) =>
-                    (v == null || v.trim().isEmpty) ? 'Hesap adı gerekli' : null,
+                    (v == null || v.trim().isEmpty) ? AppStrings.of(context).accountNameRequired : null,
               ),
               const SizedBox(height: AppSpacing.sm),
               AccountCurrencySelector(
@@ -133,12 +134,12 @@ class _EditAccountPageState extends State<EditAccountPage> {
               ),
               if (_type == AccountType.CREDIT_CARD) ...[
                 const SizedBox(height: AppSpacing.xl),
-                _label('Kredi Kartı Detayları'),
+                _label(AppStrings.of(context).creditCardDetailsLabel),
                 const SizedBox(height: AppSpacing.sm),
                 AccountFormField(
                   controller: _creditLimitController,
                   focusNode: _creditLimitFocus,
-                  hintText: 'Kredi limiti',
+                  hintText: AppStrings.of(context).creditLimitHint,
                   prefixIcon: Icons.credit_card_outlined,
                   keyboardType:
                       const TextInputType.numberWithOptions(decimal: true),
@@ -149,10 +150,10 @@ class _EditAccountPageState extends State<EditAccountPage> {
                   validator: (v) {
                     if (_type != AccountType.CREDIT_CARD) return null;
                     if (v == null || v.trim().isEmpty) {
-                      return 'Kredi limiti gerekli';
+                      return AppStrings.of(context).creditLimitRequired;
                     }
                     final n = double.tryParse(v.replaceAll(',', '.'));
-                    if (n == null || n <= 0) return 'Geçerli bir limit girin';
+                    if (n == null || n <= 0) return AppStrings.of(context).creditLimitInvalid;
                     return null;
                   },
                 ),
@@ -161,7 +162,7 @@ class _EditAccountPageState extends State<EditAccountPage> {
                   children: [
                     Expanded(
                       child: AccountDayDropdown(
-                        label: 'Ekstre Günü',
+                        label: AppStrings.of(context).statementDayLabel,
                         value: _statementDay,
                         onChanged: (d) =>
                             setState(() => _statementDay = d),
@@ -170,7 +171,7 @@ class _EditAccountPageState extends State<EditAccountPage> {
                     const SizedBox(width: AppSpacing.md),
                     Expanded(
                       child: AccountDayDropdown(
-                        label: 'Son Ödeme Günü',
+                        label: AppStrings.of(context).paymentDueDayLabel,
                         value: _paymentDueDay,
                         onChanged: (d) =>
                             setState(() => _paymentDueDay = d),
@@ -215,7 +216,7 @@ class _EditAccountPageState extends State<EditAccountPage> {
                           child:
                               CircularProgressIndicator(strokeWidth: 2.5),
                         )
-                      : const Text('Değişiklikleri Kaydet'),
+                      : Text(AppStrings.of(context).saveChanges),
                 );
               },
             ),

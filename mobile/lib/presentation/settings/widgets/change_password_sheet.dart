@@ -1,4 +1,5 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
+import 'package:wallet_app/core/l10n/app_strings.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:wallet_app/core/constants/app_colors.dart';
 import 'package:wallet_app/core/constants/app_spacing.dart';
@@ -36,13 +37,13 @@ class _ChangePasswordSheetState extends State<ChangePasswordSheet> {
       return;
     if (_newCtrl.text != _confirmCtrl.text) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Yeni şifreler eşleşmiyor.')),
+        SnackBar(content: Text(AppStrings.of(context).passwordMismatch)),
       );
       return;
     }
     if (_newCtrl.text.length < 8) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Şifre en az 8 karakter olmalı.')),
+        SnackBar(content: Text(AppStrings.of(context).passwordTooShort)),
       );
       return;
     }
@@ -71,7 +72,7 @@ class _ChangePasswordSheetState extends State<ChangePasswordSheet> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('Şifre Değiştir', style: AppTypography.headlineSm),
+              Text(AppStrings.of(context).changePassword, style: AppTypography.headlineSm),
               IconButton(
                 onPressed: () => Navigator.of(context).pop(),
                 icon: const Icon(Icons.close_rounded),
@@ -82,21 +83,21 @@ class _ChangePasswordSheetState extends State<ChangePasswordSheet> {
           const SizedBox(height: AppSpacing.lg),
           PasswordField(
             ctrl: _currentCtrl,
-            hint: 'Mevcut şifre',
+            hint: AppStrings.of(context).currentPasswordHint,
             obscure: _obscureCurrent,
             onToggle: () => setState(() => _obscureCurrent = !_obscureCurrent),
           ),
           const SizedBox(height: AppSpacing.md),
           PasswordField(
             ctrl: _newCtrl,
-            hint: 'Yeni şifre',
+            hint: AppStrings.of(context).newPasswordHint,
             obscure: _obscureNew,
             onToggle: () => setState(() => _obscureNew = !_obscureNew),
           ),
           const SizedBox(height: AppSpacing.md),
           PasswordField(
             ctrl: _confirmCtrl,
-            hint: 'Yeni şifre tekrar',
+            hint: AppStrings.of(context).confirmPasswordHint,
             obscure: _obscureConfirm,
             onToggle: () => setState(() => _obscureConfirm = !_obscureConfirm),
           ),
@@ -109,7 +110,7 @@ class _ChangePasswordSheetState extends State<ChangePasswordSheet> {
                 borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
               ),
             ),
-            child: const Text('Güncelle'),
+            child: Text(AppStrings.of(context).update),
           ),
         ],
       ),

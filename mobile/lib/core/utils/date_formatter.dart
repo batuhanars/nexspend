@@ -24,18 +24,28 @@ class DateFormatter {
   /// 15 Oca 2026, 14:30
   static String formatFull(DateTime date) => _fullDateTime.format(date.toLocal());
 
-  /// BUGÜN / DÜN / 15 Ocak — işlem listesi grup başlıkları için
+  /// BUGÜN / DÜN / 15 Ocak — işlem listesi grup başlıkları için (tr_TR sabit)
   static String formatGroupHeader(DateTime date) {
+    return formatGroupHeaderLocalized(date, 'tr');
+  }
+
+  /// Locale-aware grup başlığı (tr → BUGÜN/DÜN, en → TODAY/YESTERDAY)
+  static String formatGroupHeaderLocalized(DateTime date, String locale) {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final yesterday = today.subtract(const Duration(days: 1));
     final local = date.toLocal();
     final d = DateTime(local.year, local.month, local.day);
 
-    if (d == today) return 'BUGÜN';
-    if (d == yesterday) return 'DÜN';
-    if (d.year == now.year) return _dayMonth.format(local).toUpperCase();
-    return _dayMonthYear.format(local).toUpperCase();
+    final isEn = locale == 'en';
+    if (d == today) return isEn ? 'TODAY' : 'BUGÜN';
+    if (d == yesterday) return isEn ? 'YESTERDAY' : 'DÜN';
+
+    final intlLocale = isEn ? 'en_US' : 'tr_TR';
+    if (d.year == now.year) {
+      return DateFormat('d MMMM', intlLocale).format(local).toUpperCase();
+    }
+    return DateFormat('d MMMM yyyy', intlLocale).format(local).toUpperCase();
   }
 
   /// Kalan gün sayısı: "3 gün sonra" / "Bugün" / "2 gün önce"

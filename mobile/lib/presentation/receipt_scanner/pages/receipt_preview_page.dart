@@ -1,4 +1,5 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
+import 'package:wallet_app/core/l10n/app_strings.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:wallet_app/presentation/receipt_scanner/widgets/preview/ready_view.dart';
 import '../../../core/constants/app_colors.dart';
@@ -70,7 +71,7 @@ class _ReceiptPreviewView extends StatelessWidget {
           return Scaffold(
             backgroundColor: AppColors.surface,
             appBar: AppBar(
-              title: const Text('Makbuz Önizleme'),
+              title: Text(AppStrings.of(context).receiptPreviewTitle),
               backgroundColor: AppColors.surface,
               surfaceTintColor: Colors.transparent,
             ),
@@ -93,7 +94,7 @@ class _ReceiptPreviewView extends StatelessWidget {
                   const SizedBox(height: AppSpacing.xl),
                   ElevatedButton(
                     onPressed: () => Navigator.of(context).pop(),
-                    child: const Text('Geri Dön'),
+                    child: Text(AppStrings.of(context).goBack),
                   ),
                 ],
               ),

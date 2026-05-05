@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
+import '../../../core/l10n/app_strings.dart';
 import '../../../core/utils/currency_formatter.dart';
 import '../../../data/models/dashboard_model.dart';
 
@@ -38,7 +39,7 @@ class BalanceCard extends StatelessWidget {
           Row(
             children: [
               Text(
-                'TOPLAM VARLIK',
+                AppStrings.of(context).totalAssets,
                 style: AppTypography.labelSm.copyWith(
                   color: Colors.white.withValues(alpha: 0.7),
                 ),
@@ -129,14 +130,14 @@ class BalanceCard extends StatelessWidget {
             Row(
               children: [
                 _BottomStat(
-                  label: 'Net Varlık',
+                  label: AppStrings.of(context).netAssets,
                   value: isBalanceHidden
                       ? '₺ ••••'
                       : CurrencyFormatter.format(dashboard.netAssets),
                 ),
                 const Spacer(),
                 _BottomStat(
-                  label: 'CC Borcu',
+                  label: AppStrings.of(context).creditCardDebt,
                   value: isBalanceHidden
                       ? '₺ ••••'
                       : CurrencyFormatter.format(dashboard.creditCardDebt),

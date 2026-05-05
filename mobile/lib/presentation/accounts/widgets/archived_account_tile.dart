@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
+import '../../../core/l10n/app_strings.dart';
 import '../../../data/models/account_model.dart';
 import '../bloc/account_bloc.dart';
 
@@ -52,7 +53,7 @@ class ArchivedAccountTile extends StatelessWidget {
                             .copyWith(fontWeight: FontWeight.w500),
                       ),
                       Text(
-                        account.type.label,
+                        account.type.labelOf(context),
                         style: AppTypography.bodySm
                             .copyWith(color: AppColors.onSurfaceVariant),
                       ),
@@ -66,7 +67,7 @@ class ArchivedAccountTile extends StatelessWidget {
                             AccountRestoreRequested(account.id),
                           ),
                   child: Text(
-                    'Geri Yükle',
+                    AppStrings.of(context).restoreBtn,
                     style: TextStyle(color: AppColors.primary),
                   ),
                 ),

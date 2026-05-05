@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
+import '../../../core/l10n/app_strings.dart';
 import '../../../core/utils/currency_formatter.dart';
 import '../bloc/transactions_bloc.dart';
 
@@ -11,6 +12,7 @@ class SummaryRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final s = AppStrings.of(context);
     return Padding(
       padding: const EdgeInsets.fromLTRB(
         AppSpacing.pagePadding,
@@ -22,7 +24,7 @@ class SummaryRow extends StatelessWidget {
         children: [
           Expanded(
             child: SummaryCard(
-              label: 'Gelir',
+              label: s.income,
               amount: state.income,
               color: AppColors.secondary,
               icon: Icons.arrow_downward_rounded,
@@ -31,7 +33,7 @@ class SummaryRow extends StatelessWidget {
           const SizedBox(width: AppSpacing.sm),
           Expanded(
             child: SummaryCard(
-              label: 'Gider',
+              label: s.expense,
               amount: state.expense,
               color: AppColors.tertiary,
               icon: Icons.arrow_upward_rounded,
@@ -40,7 +42,7 @@ class SummaryRow extends StatelessWidget {
           const SizedBox(width: AppSpacing.sm),
           Expanded(
             child: SummaryCard(
-              label: 'Net',
+              label: s.summaryNet,
               amount: state.net,
               color: state.net >= 0 ? AppColors.secondary : AppColors.tertiary,
               icon: Icons.account_balance_wallet_outlined,

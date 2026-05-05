@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:wallet_app/core/constants/app_colors.dart';
 import 'package:wallet_app/core/constants/app_spacing.dart';
 import 'package:wallet_app/core/constants/app_typography.dart';
+import 'package:wallet_app/core/l10n/app_strings.dart';
 import 'package:wallet_app/data/models/receipt_model.dart';
 import 'package:wallet_app/presentation/receipt_scanner/widgets/preview/item_row.dart';
 
@@ -15,7 +16,7 @@ class ItemsSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'ÜRÜNLER',
+          AppStrings.of(context).productsLabel,
           style: AppTypography.labelSm.copyWith(
             color: AppColors.onSurfaceVariant,
           ),

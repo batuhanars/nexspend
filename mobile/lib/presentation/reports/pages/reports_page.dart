@@ -1,4 +1,5 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
+import 'package:wallet_app/core/l10n/app_strings.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:wallet_app/presentation/reports/widgets/cash_flow_chart.dart';
 import 'package:wallet_app/presentation/reports/widgets/expense_distribution_section.dart';
@@ -33,7 +34,7 @@ class _ReportsView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Raporlar', style: AppTypography.headlineSm),
+        title: Text(AppStrings.of(context).reportsTitle, style: AppTypography.headlineSm),
         centerTitle: false,
         backgroundColor: AppColors.surface,
         surfaceTintColor: Colors.transparent,
@@ -71,7 +72,7 @@ class _ReportsView extends StatelessWidget {
                     onPressed: () => context.read<ReportsBloc>().add(
                       const ReportsLoadRequested(),
                     ),
-                    child: const Text('Tekrar Dene'),
+                    child: Text(AppStrings.of(context).retry),
                   ),
                 ],
               ),
@@ -87,19 +88,19 @@ class _ReportsView extends StatelessWidget {
               PeriodFilter(activePeriod: loaded.period),
               const SizedBox(height: AppSpacing.xl),
               if (loaded.cashFlow.isNotEmpty) ...[
-                SectionTitle(title: 'Nakit Akışı'),
+                SectionTitle(title: AppStrings.of(context).cashFlowTitle),
                 const SizedBox(height: AppSpacing.md),
                 CashFlowChart(items: loaded.cashFlow),
                 const SizedBox(height: AppSpacing.xl),
               ],
               if (loaded.distribution.isNotEmpty) ...[
-                SectionTitle(title: 'Harcama Dağılımı'),
+                SectionTitle(title: AppStrings.of(context).expenseDistributionTitle),
                 const SizedBox(height: AppSpacing.md),
                 ExpenseDistributionSection(items: loaded.distribution),
                 const SizedBox(height: AppSpacing.xl),
               ],
               if (loaded.trends.isNotEmpty) ...[
-                SectionTitle(title: 'Kategori Trendleri'),
+                SectionTitle(title: AppStrings.of(context).categoryTrendsTitle),
                 const SizedBox(height: AppSpacing.md),
                 TrendList(trends: loaded.trends),
               ],

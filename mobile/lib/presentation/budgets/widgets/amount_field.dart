@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
+import '../../../core/l10n/app_strings.dart';
 
 class AmountField extends StatelessWidget {
   const AmountField({super.key, required this.controller});
@@ -15,7 +16,7 @@ class AmountField extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         Text(
-          'BÜTÇE TUTARI',
+          AppStrings.of(context).budgetAmountLabel,
           style: AppTypography.labelSm.copyWith(
             color: AppColors.onSurfaceVariant,
             letterSpacing: 1.5,

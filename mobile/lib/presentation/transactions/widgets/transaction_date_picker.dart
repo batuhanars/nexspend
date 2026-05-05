@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:wallet_app/core/l10n/app_strings.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 
@@ -11,19 +12,15 @@ class TransactionDatePicker extends StatelessWidget {
   final DateTime date;
   final ValueChanged<DateTime> onChanged;
 
-  static const _months = [
-    'Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran',
-    'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık',
-  ];
-
   @override
   Widget build(BuildContext context) {
+    final s = AppStrings.of(context);
     final now = DateTime.now();
     final isToday =
         date.year == now.year && date.month == now.month && date.day == now.day;
     final label = isToday
-        ? 'Bugün'
-        : '${date.day} ${_months[date.month - 1]} ${date.year}';
+        ? s.todayLabel
+        : '${date.day} ${s.monthName(date.month)} ${date.year}';
 
     return GestureDetector(
       onTap: () async {

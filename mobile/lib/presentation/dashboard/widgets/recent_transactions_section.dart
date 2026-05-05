@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
+import '../../../core/l10n/app_strings.dart';
+import '../../../core/utils/category_extensions.dart';
 import '../../../core/utils/currency_formatter.dart';
 import '../../../core/utils/date_formatter.dart';
 import '../../../core/utils/icon_mapper.dart';
@@ -19,7 +21,8 @@ class RecentTransactionsSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (transactions.isEmpty) return const _EmptyTransactions();
+    final s = AppStrings.of(context);
+    if (transactions.isEmpty) return _EmptyTransactions(s: s);
 
     return Column(
       children: [
@@ -27,7 +30,7 @@ class RecentTransactionsSection extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: AppSpacing.pagePadding),
           child: Row(
             children: [
-              Text('Son İşlemler', style: AppTypography.titleSm),
+              Text(s.recentTransactions, style: AppTypography.titleSm),
               const Spacer(),
               TextButton(
                 onPressed: onViewAll,
@@ -37,7 +40,7 @@ class RecentTransactionsSection extends StatelessWidget {
                   tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                 ),
                 child: Text(
-                  'Tümünü Gör',
+                  s.viewAll,
                   style: AppTypography.bodySm.copyWith(color: AppColors.primary),
                 ),
               ),
@@ -46,7 +49,7 @@ class RecentTransactionsSection extends StatelessWidget {
         ),
         const SizedBox(height: AppSpacing.sm),
         ...transactions.take(5).map(
-              (t) => _TransactionTile(transaction: t),
+              (t) => _TransactionTile(transaction: t, s: s),
             ),
       ],
     );
@@ -54,8 +57,9 @@ class RecentTransactionsSection extends StatelessWidget {
 }
 
 class _TransactionTile extends StatelessWidget {
-  const _TransactionTile({required this.transaction});
+  const _TransactionTile({required this.transaction, required this.s});
   final TransactionModel transaction;
+  final AppStrings s;
 
   @override
   Widget build(BuildContext context) {
@@ -102,8 +106,8 @@ class _TransactionTile extends StatelessWidget {
               children: [
                 Text(
                   transaction.description ??
-                      transaction.category?.name ??
-                      'İşlem',
+                      transaction.category?.localizedName(context) ??
+                      s.transactionFallback,
                   style: AppTypography.bodyMd.copyWith(
                     fontWeight: FontWeight.w500,
                   ),
@@ -169,7 +173,8 @@ class _SourceBadge extends StatelessWidget {
 }
 
 class _EmptyTransactions extends StatelessWidget {
-  const _EmptyTransactions();
+  const _EmptyTransactions({required this.s});
+  final AppStrings s;
 
   @override
   Widget build(BuildContext context) {
@@ -182,7 +187,7 @@ class _EmptyTransactions extends StatelessWidget {
         children: [
           Row(
             children: [
-              Text('Son İşlemler', style: AppTypography.titleSm),
+              Text(s.recentTransactions, style: AppTypography.titleSm),
             ],
           ),
           const SizedBox(height: AppSpacing.xl),
@@ -193,16 +198,13 @@ class _EmptyTransactions extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.md),
           Text(
-            'Henüz işlem yok',
+            s.noTransactionsYet,
             style: AppTypography.bodyMd.copyWith(
               color: AppColors.onSurfaceVariant,
             ),
           ),
           const SizedBox(height: AppSpacing.sm),
-          Text(
-            'İlk işleminizi ekleyin',
-            style: AppTypography.bodySm,
-          ),
+          Text(s.addFirstTransaction, style: AppTypography.bodySm),
         ],
       ),
     );

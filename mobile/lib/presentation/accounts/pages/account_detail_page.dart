@@ -1,4 +1,5 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
+import 'package:wallet_app/core/l10n/app_strings.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/constants/app_colors.dart';
@@ -84,7 +85,7 @@ class _AccountDetailPageState extends State<AccountDetailPage> {
           actions: [
             TextButton(
               onPressed: () => Navigator.of(ctx).pop(false),
-              child: const Text('İptal'),
+              child: Text(AppStrings.of(context).cancel),
             ),
             TextButton(
               onPressed: () => Navigator.of(ctx).pop(true),
@@ -177,7 +178,7 @@ class _AccountDetailPageState extends State<AccountDetailPage> {
         onPressed: () => context.pop(),
       ),
       title: Text(
-        account?.name ?? 'Hesap Detayı',
+        account?.name ?? AppStrings.of(context).accountDetailTitle,
         style: AppTypography.headlineSm,
       ),
       actions: [
@@ -211,40 +212,40 @@ class _AccountDetailPageState extends State<AccountDetailPage> {
                 ),
                 onSelected: (value) => _handleMenuAction(value, account),
                 itemBuilder: (_) => [
-                  const PopupMenuItem(
+                  PopupMenuItem(
                     value: 'edit',
                     child: Row(
                       children: [
-                        Icon(Icons.edit_outlined,
+                        const Icon(Icons.edit_outlined,
                             size: 18,
                             color: AppColors.onSurfaceVariant),
-                        SizedBox(width: AppSpacing.md),
-                        Text('Düzenle'),
+                        const SizedBox(width: AppSpacing.md),
+                        Text(AppStrings.of(context).edit),
                       ],
                     ),
                   ),
                   if (!account.isDefault)
-                    const PopupMenuItem(
+                    PopupMenuItem(
                       value: 'set_default',
                       child: Row(
                         children: [
-                          Icon(Icons.star_outline_rounded,
+                          const Icon(Icons.star_outline_rounded,
                               size: 18,
                               color: AppColors.onSurfaceVariant),
-                          SizedBox(width: AppSpacing.md),
-                          Text('Varsayılan Yap'),
+                          const SizedBox(width: AppSpacing.md),
+                          Text(AppStrings.of(context).setAsDefault),
                         ],
                       ),
                     ),
-                  const PopupMenuItem(
+                  PopupMenuItem(
                     value: 'archive',
                     child: Row(
                       children: [
-                        Icon(Icons.archive_outlined,
+                        const Icon(Icons.archive_outlined,
                             size: 18,
                             color: AppColors.onSurfaceVariant),
-                        SizedBox(width: AppSpacing.md),
-                        Text('Arşivle'),
+                        const SizedBox(width: AppSpacing.md),
+                        Text(AppStrings.of(context).archive),
                       ],
                     ),
                   ),
@@ -256,8 +257,8 @@ class _AccountDetailPageState extends State<AccountDetailPage> {
                             size: 18, color: AppColors.error),
                         const SizedBox(width: AppSpacing.md),
                         Text(
-                          'Hesabı Sil',
-                          style: TextStyle(color: AppColors.error),
+                          AppStrings.of(context).deleteAccountTitle,
+                          style: const TextStyle(color: AppColors.error),
                         ),
                       ],
                     ),
@@ -281,10 +282,9 @@ class _AccountDetailPageState extends State<AccountDetailPage> {
             );
       case 'archive':
         final confirm = await _confirmAction(
-          title: 'Hesabı Arşivle',
-          content:
-              'Hesap gizlenecek, işlem geçmişi korunacak. Arşivlenen hesapları ayarlardan geri getirebilirsiniz.',
-          confirm: 'Arşivle',
+          title: AppStrings.of(context).archiveAccountTitle,
+          content: AppStrings.of(context).archiveAccountContent,
+          confirm: AppStrings.of(context).archiveConfirm,
         );
         if (confirm == true && mounted) {
           context.read<AccountBloc>().add(
@@ -293,10 +293,9 @@ class _AccountDetailPageState extends State<AccountDetailPage> {
         }
       case 'delete':
         final confirm = await _confirmAction(
-          title: 'Hesabı Sil',
-          content:
-              'Bu hesap kalıcı olarak silinecek. İşlem geçmişi olan hesaplar silinemez.',
-          confirm: 'Sil',
+          title: AppStrings.of(context).deleteAccountTitle,
+          content: AppStrings.of(context).deleteAccountContent,
+          confirm: AppStrings.of(context).delete,
           isDanger: true,
         );
         if (confirm == true && mounted) {

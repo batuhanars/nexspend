@@ -4,6 +4,7 @@ import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_spacing.dart';
 import '../../core/constants/app_typography.dart';
 import '../../core/di/injection.dart';
+import '../../core/l10n/app_strings.dart';
 import '../../core/services/notification_service.dart';
 import '../../navigation/route_names.dart';
 
@@ -78,6 +79,7 @@ class _AddActionSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final s = AppStrings.of(context);
     return Padding(
       padding: EdgeInsets.fromLTRB(
         AppSpacing.pagePadding,
@@ -102,7 +104,7 @@ class _AddActionSheet extends StatelessWidget {
               Expanded(
                 child: _SheetAction(
                   icon: Icons.arrow_downward_rounded,
-                  label: 'Gelir',
+                  label: s.income,
                   color: AppColors.secondary,
                   onTap: onIncome,
                 ),
@@ -111,7 +113,7 @@ class _AddActionSheet extends StatelessWidget {
               Expanded(
                 child: _SheetAction(
                   icon: Icons.arrow_upward_rounded,
-                  label: 'Gider',
+                  label: s.expense,
                   color: AppColors.tertiary,
                   onTap: onExpense,
                 ),
@@ -124,7 +126,7 @@ class _AddActionSheet extends StatelessWidget {
               Expanded(
                 child: _SheetAction(
                   icon: Icons.swap_horiz_rounded,
-                  label: 'Transfer',
+                  label: s.transfer,
                   color: AppColors.primary,
                   onTap: onTransfer,
                 ),
@@ -133,7 +135,7 @@ class _AddActionSheet extends StatelessWidget {
               Expanded(
                 child: _SheetAction(
                   icon: Icons.document_scanner_outlined,
-                  label: 'Fiş Tara',
+                  label: s.scanReceipt,
                   color: AppColors.onSurfaceVariant,
                   onTap: onScan,
                 ),
@@ -201,36 +203,6 @@ class _BottomNavBar extends StatelessWidget {
 
   final VoidCallback onAddTap;
 
-  static const _leftTabs = [
-    _TabItem(
-      icon: Icons.dashboard_outlined,
-      activeIcon: Icons.dashboard,
-      label: 'Anasayfa',
-      route: RouteNames.home,
-    ),
-    _TabItem(
-      icon: Icons.receipt_long_outlined,
-      activeIcon: Icons.receipt_long,
-      label: 'İşlemler',
-      route: RouteNames.transactions,
-    ),
-  ];
-
-  static const _rightTabs = [
-    _TabItem(
-      icon: Icons.pie_chart_outline,
-      activeIcon: Icons.pie_chart,
-      label: 'Bütçe',
-      route: RouteNames.budgets,
-    ),
-    _TabItem(
-      icon: Icons.subscriptions_outlined,
-      activeIcon: Icons.subscriptions,
-      label: 'Abonelik',
-      route: RouteNames.subscriptions,
-    ),
-  ];
-
   int _currentIndex(String location) {
     if (location.startsWith(RouteNames.transactions)) return 1;
     if (location.startsWith(RouteNames.budgets)) return 3;
@@ -240,8 +212,39 @@ class _BottomNavBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final s = AppStrings.of(context);
     final location = GoRouterState.of(context).matchedLocation;
     final currentIndex = _currentIndex(location);
+
+    final leftTabs = [
+      _TabItem(
+        icon: Icons.dashboard_outlined,
+        activeIcon: Icons.dashboard,
+        label: s.navHome,
+        route: RouteNames.home,
+      ),
+      _TabItem(
+        icon: Icons.receipt_long_outlined,
+        activeIcon: Icons.receipt_long,
+        label: s.navTransactions,
+        route: RouteNames.transactions,
+      ),
+    ];
+
+    final rightTabs = [
+      _TabItem(
+        icon: Icons.pie_chart_outline,
+        activeIcon: Icons.pie_chart,
+        label: s.navBudgets,
+        route: RouteNames.budgets,
+      ),
+      _TabItem(
+        icon: Icons.subscriptions_outlined,
+        activeIcon: Icons.subscriptions,
+        label: s.navSubscriptions,
+        route: RouteNames.subscriptions,
+      ),
+    ];
 
     return Container(
       decoration: BoxDecoration(
@@ -258,7 +261,7 @@ class _BottomNavBar extends StatelessWidget {
           height: AppSpacing.bottomNavHeight,
           child: Row(
             children: [
-              ..._leftTabs.asMap().entries.map((e) {
+              ...leftTabs.asMap().entries.map((e) {
                 return _buildTabItem(context, e.value, e.key == currentIndex);
               }),
               // Center "+" action button
@@ -290,7 +293,7 @@ class _BottomNavBar extends StatelessWidget {
                   ),
                 ),
               ),
-              ..._rightTabs.asMap().entries.map((e) {
+              ...rightTabs.asMap().entries.map((e) {
                 return _buildTabItem(
                   context,
                   e.value,

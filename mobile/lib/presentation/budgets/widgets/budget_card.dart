@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
+import '../../../core/l10n/app_strings.dart';
+import '../../../core/utils/category_extensions.dart';
 import '../../../core/utils/currency_formatter.dart';
 import '../../../core/utils/icon_mapper.dart';
 import '../../../data/models/budget_model.dart';
@@ -39,9 +41,9 @@ class BudgetCard extends StatelessWidget {
           context: context,
           builder: (ctx) => AlertDialog(
             backgroundColor: AppColors.surfaceContainerHigh,
-            title: Text('Bütçeyi Sil', style: AppTypography.titleSm),
+            title: Text(AppStrings.of(context).deleteBudgetTitle, style: AppTypography.titleSm),
             content: Text(
-              '"${budget.name}" bütçesi silinecek.',
+              AppStrings.of(context).deleteBudgetContent(budget.name),
               style: AppTypography.bodyMd
                   .copyWith(color: AppColors.onSurfaceVariant),
             ),
@@ -49,7 +51,7 @@ class BudgetCard extends StatelessWidget {
               TextButton(
                 onPressed: () => Navigator.pop(ctx, false),
                 child: Text(
-                  'İptal',
+                  AppStrings.of(context).cancel,
                   style:
                       AppTypography.bodyMd.copyWith(color: AppColors.primary),
                 ),
@@ -57,7 +59,7 @@ class BudgetCard extends StatelessWidget {
               TextButton(
                 onPressed: () => Navigator.pop(ctx, true),
                 child: Text(
-                  'Sil',
+                  AppStrings.of(context).delete,
                   style: AppTypography.bodyMd
                       .copyWith(color: AppColors.error),
                 ),
@@ -101,7 +103,7 @@ class BudgetCard extends StatelessWidget {
                       Text(budget.name, style: AppTypography.titleSm),
                       if (category != null)
                         Text(
-                          category.name,
+                          category.localizedName(context),
                           style: AppTypography.bodySm.copyWith(
                             color: AppColors.onSurfaceVariant,
                           ),

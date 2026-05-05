@@ -1,4 +1,5 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
+import 'package:wallet_app/core/l10n/app_strings.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:wallet_app/presentation/receipt_scanner/bloc/receipt_preview_bloc.dart';
 import 'package:wallet_app/presentation/receipt_scanner/widgets/preview/account_dropdown.dart';
@@ -61,7 +62,7 @@ class _ReadyViewState extends State<ReadyView> {
     return Scaffold(
       backgroundColor: AppColors.surface,
       appBar: AppBar(
-        title: const Text('Makbuz Önizleme'),
+        title: Text(AppStrings.of(context).receiptPreviewTitle),
         backgroundColor: AppColors.surface,
         surfaceTintColor: Colors.transparent,
         actions: [
@@ -83,7 +84,7 @@ class _ReadyViewState extends State<ReadyView> {
                 const ReceiptPreviewConfirmed(),
               ),
               child: Text(
-                'Kaydet',
+                AppStrings.of(context).save,
                 style: AppTypography.bodyMd.copyWith(
                   color: AppColors.primary,
                   fontWeight: FontWeight.w600,
@@ -113,31 +114,31 @@ class _ReadyViewState extends State<ReadyView> {
           const SizedBox(height: AppSpacing.xl),
 
           // Amount
-          FieldLabel(text: 'Tutar'),
+          FieldLabel(text: AppStrings.of(context).amountLabel),
           const SizedBox(height: AppSpacing.sm),
           AmountField(controller: _amountCtrl, state: s),
           const SizedBox(height: AppSpacing.lg),
 
           // Merchant
-          FieldLabel(text: 'İşyeri'),
+          FieldLabel(text: AppStrings.of(context).merchantLabel),
           const SizedBox(height: AppSpacing.sm),
           MerchantField(controller: _merchantCtrl, state: s),
           const SizedBox(height: AppSpacing.lg),
 
           // Date
-          FieldLabel(text: 'Tarih'),
+          FieldLabel(text: AppStrings.of(context).dateLabel),
           const SizedBox(height: AppSpacing.sm),
           DateField(state: s),
           const SizedBox(height: AppSpacing.lg),
 
           // Category
-          FieldLabel(text: 'Kategori'),
+          FieldLabel(text: AppStrings.of(context).categoryLabel),
           const SizedBox(height: AppSpacing.sm),
           CategoryDropdown(state: s),
           const SizedBox(height: AppSpacing.lg),
 
           // Account
-          FieldLabel(text: 'Hesap'),
+          FieldLabel(text: AppStrings.of(context).accountLabel),
           const SizedBox(height: AppSpacing.sm),
           AccountDropdown(state: s),
           const SizedBox(height: AppSpacing.xl),
@@ -166,7 +167,7 @@ class _ReadyViewState extends State<ReadyView> {
                 ),
               ),
               child: Text(
-                'İşlem Oluştur',
+                AppStrings.of(context).addTransactionBtn,
                 style: AppTypography.titleSm.copyWith(
                   fontWeight: FontWeight.w600,
                   color: AppColors.onPrimary,
@@ -189,7 +190,7 @@ class _ReadyViewState extends State<ReadyView> {
                   borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
                 ),
               ),
-              child: const Text('Tekrar Tara'),
+              child: Text(AppStrings.of(context).scanAgain),
             ),
           ),
           const SizedBox(height: AppSpacing.xxxl),

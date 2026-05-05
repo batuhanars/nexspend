@@ -1,4 +1,5 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
+import 'package:wallet_app/core/l10n/app_strings.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:wallet_app/core/constants/app_colors.dart';
 import 'package:wallet_app/core/constants/app_spacing.dart';
@@ -52,7 +53,7 @@ class _SubscriptionDetailPageState extends State<SubscriptionDetailPage> {
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: AppColors.surfaceContainerHigh,
-        title: Text('Aboneliği Sil', style: AppTypography.titleSm),
+        title: Text(AppStrings.of(context).deleteSubscriptionTitle, style: AppTypography.titleSm),
         content: Text(
           '${_sub.name} aboneliği silinecek. Gelecek ödemeler durur.',
           style: AppTypography.bodyMd
@@ -61,11 +62,11 @@ class _SubscriptionDetailPageState extends State<SubscriptionDetailPage> {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('İptal'),
+            child: Text(AppStrings.of(context).cancel),
           ),
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(true),
-            child: Text('Sil', style: TextStyle(color: AppColors.error)),
+            child: Text(AppStrings.of(context).delete, style: TextStyle(color: AppColors.error)),
           ),
         ],
       ),

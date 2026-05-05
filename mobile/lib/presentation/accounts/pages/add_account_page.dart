@@ -1,4 +1,5 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
+import '../../../core/l10n/app_strings.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -27,6 +28,24 @@ class _AddAccountPageState extends State<AddAccountPage> {
   int _statementDay = 1;
   int _paymentDueDay = 10;
   bool _isDefault = false;
+  String? _selectedBank;
+
+  static const _turkishBanks = [
+    'Ziraat Bankası',
+    'Halkbank',
+    'Vakıfbank',
+    'İş Bankası',
+    'Garanti BBVA',
+    'Akbank',
+    'Yapı Kredi',
+    'QNB Finansbank',
+    'Denizbank',
+    'TEB',
+    'HSBC',
+    'ING',
+    'Odeabank',
+    'Şekerbank',
+  ];
 
   final _nameFocus = FocusNode();
   final _balanceFocus = FocusNode();
@@ -44,6 +63,7 @@ class _AddAccountPageState extends State<AddAccountPage> {
   }
 
   void _submit() {
+    if (_type == AccountType.BANK && _selectedBank == null) return;
     if (!(_formKey.currentState?.validate() ?? false)) return;
 
     final rawBalance =
@@ -88,7 +108,7 @@ class _AddAccountPageState extends State<AddAccountPage> {
       },
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Hesap Ekle'),
+          title: Text(AppStrings.of(context).addAccountTitle),
           leading: IconButton(
             icon: const Icon(Icons.close_rounded),
             onPressed: () => context.pop(),
@@ -106,32 +126,38 @@ class _AddAccountPageState extends State<AddAccountPage> {
                 selected: _type,
                 onChanged: (t) => setState(() {
                   _type = t;
+                  _selectedBank = null;
+                  _nameController.clear();
                   _creditLimitController.clear();
                 }),
               ),
               const SizedBox(height: AppSpacing.xl),
-              _label('Hesap Adı'),
-              const SizedBox(height: AppSpacing.sm),
-              AccountFormField(
-                controller: _nameController,
-                focusNode: _nameFocus,
-                hintText: _type.label,
-                prefixIcon: _type.defaultIcon,
-                textInputAction: TextInputAction.next,
-                onFieldSubmitted: (_) => _balanceFocus.requestFocus(),
-                validator: (v) =>
-                    (v == null || v.trim().isEmpty) ? 'Hesap adı gerekli' : null,
-              ),
+              if (_type == AccountType.BANK)
+                _buildBankPicker()
+              else ...[
+                _label(AppStrings.of(context).accountNameLabel),
+                const SizedBox(height: AppSpacing.sm),
+                AccountFormField(
+                  controller: _nameController,
+                  focusNode: _nameFocus,
+                  hintText: _type.labelOf(context),
+                  prefixIcon: _type.defaultIcon,
+                  textInputAction: TextInputAction.next,
+                  onFieldSubmitted: (_) => _balanceFocus.requestFocus(),
+                  validator: (v) =>
+                      (v == null || v.trim().isEmpty) ? AppStrings.of(context).accountNameRequired : null,
+                ),
+              ],
               const SizedBox(height: AppSpacing.lg),
               _label(_type == AccountType.CREDIT_CARD
-                  ? 'Mevcut Borç (opsiyonel)'
-                  : 'Başlangıç Bakiyesi'),
+                  ? AppStrings.of(context).currentDebt
+                  : AppStrings.of(context).startingBalance),
               const SizedBox(height: AppSpacing.sm),
               AccountFormField(
                 controller: _balanceController,
                 focusNode: _balanceFocus,
                 hintText: _type == AccountType.CREDIT_CARD
-                    ? 'Borcunuz yoksa boş bırakın'
+                    ? AppStrings.of(context).debtHint
                     : '0,00',
                 prefixIcon: Icons.account_balance_wallet_outlined,
                 keyboardType:
@@ -150,7 +176,7 @@ class _AddAccountPageState extends State<AddAccountPage> {
                 validator: (v) {
                   if (v == null || v.isEmpty) return null;
                   if (double.tryParse(v.replaceAll(',', '.')) == null) {
-                    return 'Geçersiz tutar';
+                    return AppStrings.of(context).invalidAmount;
                   }
                   return null;
                 },
@@ -162,12 +188,12 @@ class _AddAccountPageState extends State<AddAccountPage> {
               ),
               if (_type == AccountType.CREDIT_CARD) ...[
                 const SizedBox(height: AppSpacing.xl),
-                _label('Kredi Kartı Detayları'),
+                _label(AppStrings.of(context).creditCardDetailsLabel),
                 const SizedBox(height: AppSpacing.sm),
                 AccountFormField(
                   controller: _creditLimitController,
                   focusNode: _creditLimitFocus,
-                  hintText: 'Kredi limiti',
+                  hintText: AppStrings.of(context).creditLimitHint,
                   prefixIcon: Icons.credit_card_outlined,
                   keyboardType:
                       const TextInputType.numberWithOptions(decimal: true),
@@ -178,10 +204,10 @@ class _AddAccountPageState extends State<AddAccountPage> {
                   validator: (v) {
                     if (_type != AccountType.CREDIT_CARD) return null;
                     if (v == null || v.trim().isEmpty) {
-                      return 'Kredi limiti gerekli';
+                      return AppStrings.of(context).creditLimitRequired;
                     }
                     final n = double.tryParse(v.replaceAll(',', '.'));
-                    if (n == null || n <= 0) return 'Geçerli bir limit girin';
+                    if (n == null || n <= 0) return AppStrings.of(context).creditLimitInvalid;
                     return null;
                   },
                 ),
@@ -190,7 +216,7 @@ class _AddAccountPageState extends State<AddAccountPage> {
                   children: [
                     Expanded(
                       child: AccountDayDropdown(
-                        label: 'Ekstre Günü',
+                        label: AppStrings.of(context).statementDayLabel,
                         value: _statementDay,
                         onChanged: (d) => setState(() => _statementDay = d),
                       ),
@@ -198,7 +224,7 @@ class _AddAccountPageState extends State<AddAccountPage> {
                     const SizedBox(width: AppSpacing.md),
                     Expanded(
                       child: AccountDayDropdown(
-                        label: 'Son Ödeme Günü',
+                        label: AppStrings.of(context).paymentDueDayLabel,
                         value: _paymentDueDay,
                         onChanged: (d) => setState(() => _paymentDueDay = d),
                       ),
@@ -241,10 +267,80 @@ class _AddAccountPageState extends State<AddAccountPage> {
                           height: 24,
                           child: CircularProgressIndicator(strokeWidth: 2.5),
                         )
-                      : const Text('Hesabı Kaydet'),
+                      : Text(AppStrings.of(context).saveAccount),
                 );
               },
             ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildBankPicker() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _label(AppStrings.of(context).selectBankLabel),
+        const SizedBox(height: AppSpacing.sm),
+        Wrap(
+          spacing: AppSpacing.sm,
+          runSpacing: AppSpacing.sm,
+          children: [
+            ..._turkishBanks.map((bank) => _bankChip(bank)),
+            _bankChip(AppStrings.of(context).otherBankOption, key: 'other'),
+          ],
+        ),
+        if (_selectedBank == 'other') ...[
+          const SizedBox(height: AppSpacing.lg),
+          _label(AppStrings.of(context).bankNameLabel),
+          const SizedBox(height: AppSpacing.sm),
+          AccountFormField(
+            controller: _nameController,
+            focusNode: _nameFocus,
+            hintText: AppStrings.of(context).bankNameHint,
+            prefixIcon: AccountType.BANK.defaultIcon,
+            textInputAction: TextInputAction.next,
+            onFieldSubmitted: (_) => _balanceFocus.requestFocus(),
+            validator: (v) =>
+                (v == null || v.trim().isEmpty) ? AppStrings.of(context).accountNameRequired : null,
+          ),
+        ],
+      ],
+    );
+  }
+
+  Widget _bankChip(String name, {String? key}) {
+    final chipKey = key ?? name;
+    final isSelected = _selectedBank == chipKey;
+    return GestureDetector(
+      onTap: () => setState(() {
+        _selectedBank = chipKey;
+        if (key == 'other') {
+          _nameController.clear();
+        } else {
+          _nameController.text = name;
+        }
+      }),
+      child: Container(
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.md,
+          vertical: AppSpacing.sm,
+        ),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? AppColors.primary.withValues(alpha: 0.15)
+              : AppColors.surfaceContainerHighest,
+          borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+          border: Border.all(
+            color: isSelected ? AppColors.primary : Colors.transparent,
+            width: 1.5,
+          ),
+        ),
+        child: Text(
+          name,
+          style: AppTypography.bodyMd.copyWith(
+            color: isSelected ? AppColors.primary : AppColors.onSurface,
           ),
         ),
       ),

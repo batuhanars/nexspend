@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:wallet_app/core/l10n/app_strings.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
@@ -41,7 +42,7 @@ class GoogleSignInButton extends StatelessWidget {
             ),
             const SizedBox(width: AppSpacing.sm),
             Text(
-              'Google ile Devam Et',
+              AppStrings.of(context).continueWithGoogle,
               style: AppTypography.titleSm.copyWith(color: AppColors.onSurface),
             ),
           ],

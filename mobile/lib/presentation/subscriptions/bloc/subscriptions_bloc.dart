@@ -48,34 +48,34 @@ class SubscriptionsBloc extends Bloc<SubscriptionsEvent, SubscriptionsState> {
   Future<void> _onToggle(
       SubscriptionToggleRequested event, Emitter<SubscriptionsState> emit) async {
     final current = state;
-    if (current is! SubscriptionsLoaded) return;
-    // Optimistic update
-    final updated = current.subscriptions.map((s) {
-      if (s.id == event.id) {
-        return SubscriptionModel(
-          id: s.id,
-          name: s.name,
-          amount: s.amount,
-          billingCycle: s.billingCycle,
-          isActive: !s.isActive,
-          autoDeduct: s.autoDeduct,
-          description: s.description,
-          icon: s.icon,
-          color: s.color,
-          accountId: s.accountId,
-          accountName: s.accountName,
-          nextRenewalDate: s.nextRenewalDate,
-          categoryId: s.categoryId,
-          categoryName: s.categoryName,
-        );
-      }
-      return s;
-    }).toList();
-    emit(current.copyWith(subscriptions: updated));
+    if (current is SubscriptionsLoaded) {
+      final updated = current.subscriptions.map((s) {
+        if (s.id == event.id) {
+          return SubscriptionModel(
+            id: s.id,
+            name: s.name,
+            amount: s.amount,
+            billingCycle: s.billingCycle,
+            isActive: !s.isActive,
+            autoDeduct: s.autoDeduct,
+            description: s.description,
+            icon: s.icon,
+            color: s.color,
+            accountId: s.accountId,
+            accountName: s.accountName,
+            nextRenewalDate: s.nextRenewalDate,
+            categoryId: s.categoryId,
+            categoryName: s.categoryName,
+          );
+        }
+        return s;
+      }).toList();
+      emit(current.copyWith(subscriptions: updated));
+    }
     try {
       await _repo.toggle(event.id);
     } catch (_) {
-      emit(current);
+      if (current is SubscriptionsLoaded) emit(current);
     }
   }
 
@@ -107,16 +107,17 @@ class SubscriptionsBloc extends Bloc<SubscriptionsEvent, SubscriptionsState> {
   Future<void> _onUpdate(
       SubscriptionUpdateRequested event, Emitter<SubscriptionsState> emit) async {
     final current = state;
-    if (current is! SubscriptionsLoaded) return;
-    final updated = current.subscriptions.map((s) {
-      if (s.id == event.id) return s.copyWith(name: event.name, amount: event.amount);
-      return s;
-    }).toList();
-    emit(current.copyWith(subscriptions: updated));
+    if (current is SubscriptionsLoaded) {
+      final updated = current.subscriptions.map((s) {
+        if (s.id == event.id) return s.copyWith(name: event.name, amount: event.amount);
+        return s;
+      }).toList();
+      emit(current.copyWith(subscriptions: updated));
+    }
     try {
       await _repo.update(event.id, {'name': event.name, 'amount': event.amount});
     } catch (_) {
-      emit(current);
+      if (current is SubscriptionsLoaded) emit(current);
     }
   }
 

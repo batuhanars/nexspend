@@ -23,7 +23,7 @@ class AddBudgetPage extends StatefulWidget {
 }
 
 class _AddBudgetPageState extends State<AddBudgetPage> {
-  final _amountController = TextEditingController();
+  double? _amount;
   final _nameController = TextEditingController();
   final _noteController = TextEditingController();
 
@@ -45,15 +45,13 @@ class _AddBudgetPageState extends State<AddBudgetPage> {
 
   @override
   void dispose() {
-    _amountController.dispose();
     _nameController.dispose();
     _noteController.dispose();
     super.dispose();
   }
 
   void _submit(List<CategoryModel> categories) {
-    final amountStr = _amountController.text.trim().replaceAll(',', '.');
-    final amount = double.tryParse(amountStr);
+    final amount = _amount;
 
     if (amount == null || amount <= 0) {
       _showError(AppStrings.of(context).enterValidAmount);
@@ -176,7 +174,7 @@ class _AddBudgetPageState extends State<AddBudgetPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // Amount input
-                  AmountField(controller: _amountController),
+                  AmountField(onChanged: (v) => setState(() => _amount = v)),
                   const SizedBox(height: AppSpacing.xl),
 
                   // Name input

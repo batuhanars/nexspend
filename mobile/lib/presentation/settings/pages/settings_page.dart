@@ -7,7 +7,6 @@ import 'package:wallet_app/core/constants/app_typography.dart';
 import 'package:wallet_app/core/di/injection.dart';
 import 'package:wallet_app/core/l10n/app_strings.dart';
 import 'package:wallet_app/core/storage/secure_storage.dart';
-import 'package:wallet_app/core/utils/currency_notifier.dart';
 import 'package:wallet_app/core/utils/locale_notifier.dart';
 import 'package:wallet_app/data/models/user_model.dart';
 import 'package:wallet_app/data/repositories/auth_repository.dart';
@@ -37,13 +36,6 @@ class SettingsPage extends StatelessWidget {
 
 class _SettingsView extends StatelessWidget {
   const _SettingsView();
-
-  static const _currencies = [
-    ('TRY', '₺'),
-    ('USD', r'$'),
-    ('EUR', '€'),
-    ('GBP', '£'),
-  ];
 
   static const _languages = [
     ('tr', 'Türkçe'),
@@ -167,12 +159,6 @@ class _SettingsView extends StatelessWidget {
                         ),
                 ),
                 SettingsTile(
-                  icon: Icons.currency_exchange_rounded,
-                  label: s.currency,
-                  subtitle: _currencySubtitle(s, user.currency),
-                  onTap: () => _showCurrencyPicker(context, s, user),
-                ),
-                SettingsTile(
                   icon: Icons.translate_rounded,
                   label: s.language,
                   subtitle: _languageSubtitle(user.language),
@@ -212,114 +198,11 @@ class _SettingsView extends StatelessWidget {
     );
   }
 
-  String _currencySubtitle(AppStrings s, String currency) {
-    final labels = {
-      'TRY': '₺ ${s.currencyTRY}',
-      'USD': r'$ ' + s.currencyUSD,
-      'EUR': '€ ${s.currencyEUR}',
-      'GBP': '£ ${s.currencyGBP}',
-    };
-    return labels[currency] ?? currency;
-  }
-
   String _languageSubtitle(String language) {
     for (final l in _languages) {
       if (l.$1 == language) return l.$2;
     }
     return language;
-  }
-
-  void _showCurrencyPicker(
-    BuildContext context,
-    AppStrings s,
-    UserModel user,
-  ) {
-    final bloc = context.read<SettingsBloc>();
-    final currencyLabels = {
-      'TRY': s.currencyTRY,
-      'USD': s.currencyUSD,
-      'EUR': s.currencyEUR,
-      'GBP': s.currencyGBP,
-    };
-    showModalBottomSheet<void>(
-      context: context,
-      backgroundColor: AppColors.surfaceContainerHigh,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(
-          top: Radius.circular(AppSpacing.radiusXl),
-        ),
-      ),
-      builder: (ctx) => Padding(
-        padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(
-                AppSpacing.pagePadding,
-                0,
-                AppSpacing.pagePadding,
-                AppSpacing.lg,
-              ),
-              child: Text(s.selectCurrency, style: AppTypography.titleSm),
-            ),
-            ..._currencies.map(
-              (c) => ListTile(
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.pagePadding,
-                ),
-                leading: Container(
-                  width: 42,
-                  height: 42,
-                  decoration: BoxDecoration(
-                    color: AppColors.primary.withValues(alpha: 0.1),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Center(
-                    child: Text(
-                      c.$2,
-                      style: const TextStyle(
-                        fontSize: 18,
-                        color: AppColors.primary,
-                        fontFamily: 'Inter',
-                      ),
-                    ),
-                  ),
-                ),
-                title: Text(
-                  currencyLabels[c.$1] ?? c.$1,
-                  style: AppTypography.bodyMd,
-                ),
-                subtitle: Text(
-                  c.$1,
-                  style: AppTypography.labelSm.copyWith(
-                    color: AppColors.onSurfaceVariant,
-                    letterSpacing: 0.5,
-                  ),
-                ),
-                trailing: user.currency == c.$1
-                    ? const Icon(
-                        Icons.check_rounded,
-                        color: AppColors.primary,
-                        size: 20,
-                      )
-                    : null,
-                onTap: () {
-                  Navigator.of(ctx).pop();
-                  if (user.currency != c.$1) {
-                    bloc.add(SettingsProfileUpdated({'currency': c.$1}));
-                    getIt<CurrencyNotifier>().setCurrency(c.$1);
-                    getIt<SecureStorage>().saveCurrency(c.$1);
-                  }
-                },
-              ),
-            ),
-            const SizedBox(height: AppSpacing.md),
-          ],
-        ),
-      ),
-    );
   }
 
   void _showLanguagePicker(

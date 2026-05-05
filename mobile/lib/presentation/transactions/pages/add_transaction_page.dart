@@ -31,7 +31,7 @@ class AddTransactionPage extends StatefulWidget {
 }
 
 class _AddTransactionPageState extends State<AddTransactionPage> {
-  final _amountController = TextEditingController();
+  double? _amount;
   final _titleController = TextEditingController();
   final _noteController = TextEditingController();
 
@@ -55,15 +55,13 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
 
   @override
   void dispose() {
-    _amountController.dispose();
     _titleController.dispose();
     _noteController.dispose();
     super.dispose();
   }
 
   void _submit() {
-    final amountStr = _amountController.text.trim().replaceAll(',', '.');
-    final amount = double.tryParse(amountStr);
+    final amount = _amount;
 
     final s = AppStrings.of(context);
     if (amount == null || amount <= 0) {
@@ -197,7 +195,8 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                 ),
                 const SizedBox(height: AppSpacing.xl),
                 TransactionAmountField(
-                    controller: _amountController, type: _type),
+                    onChanged: (v) => setState(() => _amount = v),
+                    type: _type),
                 if (_type != 'TRANSFER' && filtered.isNotEmpty) ...[
                   const SizedBox(height: AppSpacing.xl),
                   _sectionLabel(AppStrings.of(context).categoryLabel),

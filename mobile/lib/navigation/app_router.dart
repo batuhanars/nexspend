@@ -13,6 +13,7 @@ import '../presentation/auth/pages/reset_password_page.dart';
 import '../presentation/dashboard/pages/dashboard_page.dart';
 import '../presentation/transactions/pages/transactions_page.dart';
 import '../presentation/transactions/pages/add_transaction_page.dart';
+import '../presentation/transactions/pages/transaction_detail_page.dart';
 import '../data/repositories/budget_repository.dart';
 import '../presentation/budgets/bloc/budgets_bloc.dart';
 import '../presentation/budgets/bloc/budgets_event.dart';
@@ -34,6 +35,7 @@ import '../presentation/subscriptions/pages/subscriptions_page.dart';
 import '../presentation/reports/pages/reports_page.dart';
 import '../presentation/receipt_scanner/pages/receipt_scanner_page.dart';
 import '../data/models/account_model.dart' show AccountModel;
+import '../data/models/transaction_model.dart' show TransactionModel;
 import '../data/repositories/account_repository.dart';
 import '../data/repositories/category_repository.dart';
 import '../data/repositories/debt_repository.dart';
@@ -166,6 +168,20 @@ GoRouter createRouter() {
           )..add(const DebtsLoadRequested()),
           child: const DebtsPage(),
         ),
+      ),
+      GoRoute(
+        path: '/transactions/:id',
+        name: 'transaction-detail',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) {
+          final extra = state.extra as Map<String, dynamic>;
+          final transaction = extra['transaction'] as TransactionModel;
+          final bloc = extra['bloc'] as TransactionsBloc;
+          return BlocProvider.value(
+            value: bloc,
+            child: TransactionDetailPage(transaction: transaction),
+          );
+        },
       ),
       GoRoute(
         path: RouteNames.addTransaction,

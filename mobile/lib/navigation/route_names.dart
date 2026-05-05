@@ -11,6 +11,7 @@ class RouteNames {
   static const String home = '/home';
   static const String transactions = '/transactions';
   static const String addTransaction = '/transactions/add';
+  static String transactionDetail(String id) => '/transactions/$id';
   static const String budgets = '/budgets';
   static const String addBudget = '/budgets/add';
   static const String debts = '/debts';

@@ -117,7 +117,7 @@ class _TransactionTile extends StatelessWidget {
                 const SizedBox(height: 2),
                 Text(
                   '${transaction.account?.name ?? ''}'
-                  '  •  ${DateFormatter.formatTime(transaction.date)}',
+                  '  •  ${DateFormatter.formatShort(transaction.date)}, ${DateFormatter.formatTime(transaction.date)}',
                   style: AppTypography.bodySm,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,

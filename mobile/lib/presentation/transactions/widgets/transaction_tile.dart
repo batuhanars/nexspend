@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
@@ -9,6 +10,7 @@ import '../../../core/utils/currency_formatter.dart';
 import '../../../core/utils/date_formatter.dart';
 import '../../../core/utils/icon_mapper.dart';
 import '../../../data/models/transaction_model.dart';
+import '../../../navigation/route_names.dart';
 import '../bloc/transactions_bloc.dart';
 
 class TransactionTile extends StatelessWidget {
@@ -52,12 +54,20 @@ class TransactionTile extends StatelessWidget {
       onDismissed: (_) => context
           .read<TransactionsBloc>()
           .add(TransactionDeleteRequested(transaction.id)),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.pagePadding,
-          vertical: AppSpacing.sm,
+      child: InkWell(
+        onTap: () => context.push(
+          RouteNames.transactionDetail(transaction.id),
+          extra: {
+            'transaction': transaction,
+            'bloc': context.read<TransactionsBloc>(),
+          },
         ),
-        child: Row(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.pagePadding,
+            vertical: AppSpacing.sm,
+          ),
+          child: Row(
           children: [
             Container(
               width: 44,
@@ -87,7 +97,7 @@ class TransactionTile extends StatelessWidget {
                     children: [
                       Flexible(
                         child: Text(
-                          '${transaction.account?.name ?? ''}  •  ${DateFormatter.formatTime(transaction.date)}',
+                          '${transaction.account?.name ?? ''}  •  ${DateFormatter.formatShort(transaction.date)}, ${DateFormatter.formatTime(transaction.date)}',
                           style: AppTypography.bodySm.copyWith(
                               color: AppColors.onSurfaceVariant),
                           maxLines: 1,
@@ -117,6 +127,7 @@ class TransactionTile extends StatelessWidget {
               ),
             ),
           ],
+          ),
         ),
       ),
     );

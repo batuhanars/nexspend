@@ -384,6 +384,19 @@ abstract class AppStrings {
 
   // Subscriptions — extra UI strings
   String upcomingRenewals(int count);
+
+  // Transaction detail
+  String get transactionDetailTitle;
+  String get typeLabel;
+  String get sourceLabel;
+  String get descriptionLabel;
+  String get transactionIdLabel;
+  String get timeLabel;
+  String get sourceManual;
+  String get sourceRecurring;
+  String get sourceDebtPayment;
+  String get sourceDebtCollection;
+  String get sourceSubscription;
 }
 
 // ─── Turkish ────────────────────────────────────────────────────────────────
@@ -734,6 +747,18 @@ class _Tr extends AppStrings {
   @override String get archiveHint => 'Hesap detayından arşivleyebilirsiniz';
 
   @override String upcomingRenewals(int count) => '$count abonelik önümüzdeki 7 günde yenileniyor';
+
+  @override String get transactionDetailTitle => 'İşlem Detayı';
+  @override String get typeLabel => 'Tür';
+  @override String get sourceLabel => 'Kaynak';
+  @override String get descriptionLabel => 'Açıklama';
+  @override String get transactionIdLabel => 'İşlem No';
+  @override String get timeLabel => 'Saat';
+  @override String get sourceManual => 'Manuel';
+  @override String get sourceRecurring => 'Tekrarlayan';
+  @override String get sourceDebtPayment => 'Borç Ödemesi';
+  @override String get sourceDebtCollection => 'Borç Tahsilatı';
+  @override String get sourceSubscription => 'Abonelik';
 }
 
 // ─── English ─────────────────────────────────────────────────────────────────
@@ -1084,6 +1109,18 @@ class _En extends AppStrings {
   @override String get archiveHint => 'You can archive from account details';
 
   @override String upcomingRenewals(int count) => '$count subscription(s) renewing in the next 7 days';
+
+  @override String get transactionDetailTitle => 'Transaction Detail';
+  @override String get typeLabel => 'Type';
+  @override String get sourceLabel => 'Source';
+  @override String get descriptionLabel => 'Description';
+  @override String get transactionIdLabel => 'Tx ID';
+  @override String get timeLabel => 'Time';
+  @override String get sourceManual => 'Manual';
+  @override String get sourceRecurring => 'Recurring';
+  @override String get sourceDebtPayment => 'Debt Payment';
+  @override String get sourceDebtCollection => 'Debt Collection';
+  @override String get sourceSubscription => 'Subscription';
 
   static const _categoryMap = <String, String>{
     'Market': 'Groceries',

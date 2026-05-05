@@ -5,6 +5,7 @@ import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
 import '../../../data/models/budget_model.dart';
+import '../../shared/widgets/split_amount_field.dart';
 import '../bloc/budgets_bloc.dart';
 import '../bloc/budgets_event.dart';
 
@@ -18,7 +19,7 @@ class EditBudgetSheet extends StatefulWidget {
 
 class _EditBudgetSheetState extends State<EditBudgetSheet> {
   late final TextEditingController _nameController;
-  late final TextEditingController _amountController;
+  late double? _amount;
   late BudgetPeriod _period;
   late bool _smartTracking;
   DateTime? _endDate;
@@ -26,13 +27,8 @@ class _EditBudgetSheetState extends State<EditBudgetSheet> {
   @override
   void initState() {
     super.initState();
-    _nameController =
-        TextEditingController(text: widget.budget.name);
-    _amountController = TextEditingController(
-      text: widget.budget.amount % 1 == 0
-          ? widget.budget.amount.toInt().toString()
-          : widget.budget.amount.toString(),
-    );
+    _nameController = TextEditingController(text: widget.budget.name);
+    _amount = widget.budget.amount;
     _period = widget.budget.period;
     _smartTracking = widget.budget.smartTracking;
     _endDate = widget.budget.endDate;
@@ -41,14 +37,11 @@ class _EditBudgetSheetState extends State<EditBudgetSheet> {
   @override
   void dispose() {
     _nameController.dispose();
-    _amountController.dispose();
     super.dispose();
   }
 
   void _save() {
-    final amountStr =
-        _amountController.text.trim().replaceAll(',', '.');
-    final amount = double.tryParse(amountStr);
+    final amount = _amount;
     if (amount == null || amount <= 0) {
       _showError(AppStrings.of(context).enterValidAmount);
       return;
@@ -147,26 +140,14 @@ class _EditBudgetSheetState extends State<EditBudgetSheet> {
             const SizedBox(height: AppSpacing.xl),
 
             // Amount
-            TextField(
-              controller: _amountController,
-              keyboardType:
-                  const TextInputType.numberWithOptions(decimal: true),
-              style: AppTypography.bodyMd,
-              decoration: InputDecoration(
-                labelText: AppStrings.of(context).amountTRY,
-                prefixIcon: const Icon(Icons.attach_money,
-                    color: AppColors.onSurfaceVariant, size: 20),
-                filled: true,
-                fillColor: AppColors.surfaceContainerHighest,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-                  borderSide: BorderSide.none,
-                ),
-                labelStyle: AppTypography.bodySm
-                    .copyWith(color: AppColors.onSurfaceVariant),
+            Center(
+              child: SplitAmountField(
+                initialValue: widget.budget.amount,
+                onChanged: (v) => _amount = v,
+                autofocus: false,
               ),
             ),
-            const SizedBox(height: AppSpacing.md),
+            const SizedBox(height: AppSpacing.xl),
 
             // Name
             TextField(

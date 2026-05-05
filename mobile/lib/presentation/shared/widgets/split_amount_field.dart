@@ -93,6 +93,7 @@ class _SplitAmountFieldState extends State<SplitAmountField> {
       focusedBorder: _noBorder,
       errorBorder: _noBorder,
       focusedErrorBorder: _noBorder,
+      filled: false,
       isDense: true,
       contentPadding: EdgeInsets.zero,
       hintStyle: hintStyle,

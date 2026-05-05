@@ -3,6 +3,31 @@ import 'package:flutter/services.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 
+class ThousandsFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    final digits = newValue.text.replaceAll('.', '');
+    if (digits.isEmpty) return newValue.copyWith(text: '');
+    final formatted = format(digits);
+    return TextEditingValue(
+      text: formatted,
+      selection: TextSelection.collapsed(offset: formatted.length),
+    );
+  }
+
+  static String format(String digits) {
+    final buf = StringBuffer();
+    for (int i = 0; i < digits.length; i++) {
+      if (i > 0 && (digits.length - i) % 3 == 0) buf.write('.');
+      buf.write(digits[i]);
+    }
+    return buf.toString();
+  }
+}
+
 class SplitAmountField extends StatefulWidget {
   const SplitAmountField({
     super.key,
@@ -31,7 +56,7 @@ class _SplitAmountFieldState extends State<SplitAmountField> {
     super.initState();
     if (widget.initialValue != null && widget.initialValue! > 0) {
       final parts = widget.initialValue!.toStringAsFixed(2).split('.');
-      _intCtrl.text = parts[0];
+      _intCtrl.text = ThousandsFormatter.format(parts[0]);
       _decCtrl.text = parts[1];
     }
     _intCtrl.addListener(() => setState(() {}));
@@ -46,7 +71,7 @@ class _SplitAmountFieldState extends State<SplitAmountField> {
   }
 
   void _notify() {
-    final i = _intCtrl.text;
+    final i = _intCtrl.text.replaceAll('.', '');
     final d = _decCtrl.text;
     if (i.isEmpty && d.isEmpty) {
       widget.onChanged(null);
@@ -136,7 +161,7 @@ class _SplitAmountFieldState extends State<SplitAmountField> {
                 keyboardType: TextInputType.number,
                 textInputAction: TextInputAction.next,
                 onEditingComplete: () => _decFocus.requestFocus(),
-                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                inputFormatters: [ThousandsFormatter()],
                 onChanged: (_) => _notify(),
                 textAlign: TextAlign.right,
                 style: numStyle,

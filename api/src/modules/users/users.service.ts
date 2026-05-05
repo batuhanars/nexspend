@@ -117,7 +117,7 @@ export class UsersService {
       data: { avatarUrl },
     });
 
-    return { avatarUrl };
+    return this.getProfile(userId);
   }
 
   async deleteAvatar(userId: string) {
@@ -134,7 +134,7 @@ export class UsersService {
       data: { avatarUrl: null },
     });
 
-    return { message: 'Profil fotoğrafı kaldırıldı' };
+    return this.getProfile(userId);
   }
 
   async updateFcmToken(userId: string, fcmToken: string) {

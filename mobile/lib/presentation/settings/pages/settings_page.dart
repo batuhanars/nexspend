@@ -108,12 +108,21 @@ class _SettingsView extends StatelessWidget {
                 : (state as SettingsSaving).user;
             final isSaving = state is SettingsSaving;
 
+            Future<void> openEditProfile() async {
+              await context.push(RouteNames.editProfile);
+              if (context.mounted) {
+                context
+                    .read<SettingsBloc>()
+                    .add(const SettingsLoadRequested());
+              }
+            }
+
             return ListView(
               children: [
                 const SizedBox(height: AppSpacing.lg),
                 ProfileCard(
                   user: user,
-                  onEditTap: () => context.push(RouteNames.editProfile),
+                  onEditTap: openEditProfile,
                   isSaving: isSaving,
                 ),
                 const SizedBox(height: AppSpacing.lg),
@@ -121,7 +130,7 @@ class _SettingsView extends StatelessWidget {
                 SettingsTile(
                   icon: Icons.person_outline_rounded,
                   label: s.editProfile,
-                  onTap: () => context.push(RouteNames.editProfile),
+                  onTap: openEditProfile,
                 ),
                 SettingsTile(
                   icon: Icons.account_balance_wallet_outlined,

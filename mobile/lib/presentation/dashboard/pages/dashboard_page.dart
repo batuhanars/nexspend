@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:shimmer/shimmer.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
@@ -10,8 +9,11 @@ import '../../../core/services/app_events.dart';
 import '../../../data/repositories/dashboard_repository.dart';
 import '../../../navigation/route_names.dart';
 import '../bloc/dashboard_bloc.dart';
-import '../widgets/balance_card.dart';
 import '../widgets/account_carousel.dart';
+import '../widgets/balance_card.dart';
+import '../widgets/dashboard_shimmer.dart';
+import '../widgets/debt_shortcut_card.dart';
+import '../widgets/empty_accounts_card.dart';
 import '../widgets/recent_transactions_section.dart';
 import '../../shared/widgets/error_view.dart';
 
@@ -91,8 +93,7 @@ class _DashboardViewState extends State<_DashboardView> {
 
   Widget _buildAppBar(BuildContext context, DashboardState state) {
     String greeting = 'Merhaba';
-    if (state is DashboardLoaded &&
-        state.dashboard.userFirstName != null) {
+    if (state is DashboardLoaded && state.dashboard.userFirstName != null) {
       greeting = 'Merhaba, ${state.dashboard.userFirstName}';
     }
 
@@ -113,7 +114,7 @@ class _DashboardViewState extends State<_DashboardView> {
 
   Widget _buildBody(BuildContext context, DashboardState state) {
     return switch (state) {
-      DashboardLoading() || DashboardInitial() => const _DashboardShimmer(),
+      DashboardLoading() || DashboardInitial() => const DashboardShimmer(),
       DashboardError(:final message) => ErrorView(
           message: message,
           onRetry: () => context
@@ -144,7 +145,9 @@ class _DashboardViewState extends State<_DashboardView> {
                       onPressed: () async {
                         final bloc = context.read<DashboardBloc>();
                         await context.push(RouteNames.addAccount);
-                        if (mounted) bloc.add(const DashboardRefreshRequested());
+                        if (mounted) {
+                          bloc.add(const DashboardRefreshRequested());
+                        }
                       },
                       style: TextButton.styleFrom(
                         padding: EdgeInsets.zero,
@@ -162,7 +165,7 @@ class _DashboardViewState extends State<_DashboardView> {
             ),
             const SizedBox(height: AppSpacing.md),
             if (dashboard.accounts.isEmpty)
-              _EmptyAccountsCard(
+              EmptyAccountsCard(
                 onTap: () async {
                   final bloc = context.read<DashboardBloc>();
                   await context.push(RouteNames.addAccount);
@@ -184,7 +187,7 @@ class _DashboardViewState extends State<_DashboardView> {
                 },
               ),
             const SizedBox(height: AppSpacing.xl),
-            _DebtShortcutCard(
+            DebtShortcutCard(
               onTap: () => context.push(RouteNames.debts),
             ),
             const SizedBox(height: AppSpacing.xl),
@@ -196,277 +199,5 @@ class _DashboardViewState extends State<_DashboardView> {
         ),
       _ => const SizedBox.shrink(),
     };
-  }
-}
-
-class _DebtShortcutCard extends StatelessWidget {
-  const _DebtShortcutCard({required this.onTap});
-
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.pagePadding),
-      child: GestureDetector(
-        onTap: onTap,
-        child: Container(
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.lg,
-            vertical: AppSpacing.md,
-          ),
-          decoration: BoxDecoration(
-            color: AppColors.surfaceContainerHigh,
-            borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-          ),
-          child: Row(
-            children: [
-              Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: AppColors.primary.withValues(alpha: 0.12),
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(
-                  Icons.handshake_outlined,
-                  color: AppColors.primary,
-                  size: 20,
-                ),
-              ),
-              const SizedBox(width: AppSpacing.md),
-              Expanded(
-                child: Text(
-                  'Borçlarım',
-                  style: AppTypography.titleSm,
-                ),
-              ),
-              const Icon(
-                Icons.arrow_forward_ios_rounded,
-                color: AppColors.onSurfaceVariant,
-                size: 16,
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _EmptyAccountsCard extends StatelessWidget {
-  const _EmptyAccountsCard({required this.onTap});
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.pagePadding),
-      child: GestureDetector(
-        onTap: onTap,
-        child: Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(AppSpacing.xl),
-          decoration: BoxDecoration(
-            color: AppColors.surfaceContainerHigh,
-            borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-            border: Border.all(
-              color: AppColors.primary.withValues(alpha: 0.2),
-              width: 1.5,
-            ),
-          ),
-          child: Column(
-            children: [
-              Container(
-                width: 56,
-                height: 56,
-                decoration: BoxDecoration(
-                  color: AppColors.primary.withValues(alpha: 0.12),
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(
-                  Icons.account_balance_wallet_outlined,
-                  color: AppColors.primary,
-                  size: 26,
-                ),
-              ),
-              const SizedBox(height: AppSpacing.md),
-              Text(
-                'Henüz hesap eklemediniz',
-                style: AppTypography.titleSm,
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: AppSpacing.xs),
-              Text(
-                'Gelir ve giderlerinizi takip etmek için\nilk hesabınızı oluşturun.',
-                style: AppTypography.bodyMd.copyWith(
-                  color: AppColors.onSurfaceVariant,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: AppSpacing.lg),
-              SizedBox(
-                width: double.infinity,
-                height: 48,
-                child: ElevatedButton.icon(
-                  onPressed: onTap,
-                  icon: const Icon(Icons.add_rounded, size: 20),
-                  label: const Text('İlk Hesabı Ekle'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    foregroundColor: AppColors.surface,
-                    shape: RoundedRectangleBorder(
-                      borderRadius:
-                          BorderRadius.circular(AppSpacing.radiusXl),
-                    ),
-                    elevation: 0,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _DashboardShimmer extends StatelessWidget {
-  const _DashboardShimmer();
-
-  @override
-  Widget build(BuildContext context) {
-    return Shimmer.fromColors(
-      baseColor: AppColors.surfaceContainerHigh,
-      highlightColor: AppColors.surfaceContainerHighest,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const SizedBox(height: AppSpacing.md),
-          // Balance card shimmer
-          Container(
-            margin: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.pagePadding,
-            ),
-            height: 160,
-            decoration: BoxDecoration(
-              color: AppColors.surfaceContainerHigh,
-              borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
-            ),
-          ),
-          const SizedBox(height: AppSpacing.xl),
-          // Quick actions shimmer
-          Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.pagePadding,
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: List.generate(
-                4,
-                (_) => Column(
-                  children: [
-                    Container(
-                      width: 56,
-                      height: 56,
-                      decoration: BoxDecoration(
-                        color: AppColors.surfaceContainerHigh,
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-                    const SizedBox(height: AppSpacing.xs),
-                    Container(
-                      width: 40,
-                      height: 12,
-                      decoration: BoxDecoration(
-                        color: AppColors.surfaceContainerHigh,
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(height: AppSpacing.xl),
-          // Accounts shimmer
-          SizedBox(
-            height: 150,
-            child: ListView.separated(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.pagePadding,
-              ),
-              itemCount: 3,
-              separatorBuilder: (_, index) =>
-                  const SizedBox(width: AppSpacing.md),
-              itemBuilder: (_, index) => Container(
-                width: 200,
-                decoration: BoxDecoration(
-                  color: AppColors.surfaceContainerHigh,
-                  borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(height: AppSpacing.xl),
-          // Transactions shimmer
-          ...List.generate(
-            4,
-            (_) => Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.pagePadding,
-                vertical: AppSpacing.sm,
-              ),
-              child: Row(
-                children: [
-                  Container(
-                    width: 44,
-                    height: 44,
-                    decoration: BoxDecoration(
-                      color: AppColors.surfaceContainerHigh,
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-                  const SizedBox(width: AppSpacing.md),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Container(
-                          height: 14,
-                          width: 120,
-                          decoration: BoxDecoration(
-                            color: AppColors.surfaceContainerHigh,
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                        ),
-                        const SizedBox(height: 6),
-                        Container(
-                          height: 10,
-                          width: 80,
-                          decoration: BoxDecoration(
-                            color: AppColors.surfaceContainerHigh,
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Container(
-                    height: 14,
-                    width: 70,
-                    decoration: BoxDecoration(
-                      color: AppColors.surfaceContainerHigh,
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
   }
 }

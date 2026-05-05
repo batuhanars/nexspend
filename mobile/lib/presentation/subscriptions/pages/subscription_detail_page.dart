@@ -51,7 +51,9 @@ class _SubscriptionDetailPageState extends State<SubscriptionDetailPage> {
 
   Future<void> _showEditSheet() async {
     final nameCtrl = TextEditingController(text: _sub.name);
-    double? amount = _sub.amount;
+    double? pendingAmount = _sub.amount;
+    String? savedName;
+    double? savedAmount;
 
     await showModalBottomSheet<void>(
       context: context,
@@ -89,7 +91,7 @@ class _SubscriptionDetailPageState extends State<SubscriptionDetailPage> {
                   Center(
                     child: SplitAmountField(
                       initialValue: _sub.amount,
-                      onChanged: (v) => amount = v,
+                      onChanged: (v) => pendingAmount = v,
                       color: AppColors.tertiary,
                     ),
                   ),
@@ -121,26 +123,10 @@ class _SubscriptionDetailPageState extends State<SubscriptionDetailPage> {
                   FilledButton(
                     onPressed: () {
                       final name = nameCtrl.text.trim();
-                      if (name.isEmpty || amount == null || amount! <= 0) return;
-                      final messenger = ScaffoldMessenger.of(context);
-                      final msg = AppStrings.of(context).subscriptionUpdatedSuccess;
-                      context.read<SubscriptionsBloc>().add(
-                        SubscriptionUpdateRequested(
-                          id: _sub.id,
-                          name: name,
-                          amount: amount!,
-                        ),
-                      );
-                      setState(() {
-                        _sub = _sub.copyWith(name: name, amount: amount);
-                      });
+                      if (name.isEmpty || pendingAmount == null || pendingAmount! <= 0) return;
+                      savedName = name;
+                      savedAmount = pendingAmount;
                       Navigator.of(ctx).pop();
-                      messenger.showSnackBar(
-                        SnackBar(
-                          content: Text(msg),
-                          backgroundColor: AppColors.secondary,
-                        ),
-                      );
                     },
                     style: FilledButton.styleFrom(
                       minimumSize: const Size.fromHeight(56),
@@ -148,7 +134,7 @@ class _SubscriptionDetailPageState extends State<SubscriptionDetailPage> {
                         borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
                       ),
                     ),
-                    child: Text(AppStrings.of(context).save),
+                    child: Text(AppStrings.of(ctx).save),
                   ),
                 ],
               ),
@@ -159,6 +145,25 @@ class _SubscriptionDetailPageState extends State<SubscriptionDetailPage> {
     );
 
     nameCtrl.dispose();
+
+    if (savedName != null && savedAmount != null && mounted) {
+      context.read<SubscriptionsBloc>().add(
+        SubscriptionUpdateRequested(
+          id: _sub.id,
+          name: savedName!,
+          amount: savedAmount!,
+        ),
+      );
+      setState(() {
+        _sub = _sub.copyWith(name: savedName, amount: savedAmount);
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(AppStrings.of(context).subscriptionUpdatedSuccess),
+          backgroundColor: AppColors.secondary,
+        ),
+      );
+    }
   }
 
   Future<void> _delete() async {

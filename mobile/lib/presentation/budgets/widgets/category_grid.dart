@@ -54,15 +54,17 @@ class CategoryGrid extends StatelessWidget {
         ),
         if (hasMore) ...[
           const SizedBox(height: AppSpacing.xs),
-          TextButton(
-            onPressed: () => _showAll(context),
-            style: TextButton.styleFrom(
-              padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
-              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            ),
-            child: Text(
-              '${AppStrings.of(context).viewAll} (${categories.length})',
-              style: AppTypography.bodySm.copyWith(color: AppColors.primary),
+          Center(
+            child: TextButton(
+              onPressed: () => _showAll(context),
+              style: TextButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              ),
+              child: Text(
+                '${AppStrings.of(context).viewAll} (${categories.length})',
+                style: AppTypography.bodySm.copyWith(color: AppColors.primary),
+              ),
             ),
           ),
         ],

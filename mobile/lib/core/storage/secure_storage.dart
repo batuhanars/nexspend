@@ -53,4 +53,14 @@ class SecureStorage {
     final val = await _storage.read(key: _languageKey);
     return val ?? 'tr';
   }
+
+  static const _currencyKey = 'currency';
+
+  Future<void> saveCurrency(String code) =>
+      _storage.write(key: _currencyKey, value: code);
+
+  Future<String> getCurrency() async {
+    final val = await _storage.read(key: _currencyKey);
+    return val ?? 'TRY';
+  }
 }

@@ -7,6 +7,7 @@ import 'package:wallet_app/core/constants/app_typography.dart';
 import 'package:wallet_app/core/di/injection.dart';
 import 'package:wallet_app/core/l10n/app_strings.dart';
 import 'package:wallet_app/core/storage/secure_storage.dart';
+import 'package:wallet_app/core/utils/currency_notifier.dart';
 import 'package:wallet_app/core/utils/locale_notifier.dart';
 import 'package:wallet_app/data/models/user_model.dart';
 import 'package:wallet_app/data/repositories/auth_repository.dart';
@@ -308,6 +309,8 @@ class _SettingsView extends StatelessWidget {
                   Navigator.of(ctx).pop();
                   if (user.currency != c.$1) {
                     bloc.add(SettingsProfileUpdated({'currency': c.$1}));
+                    getIt<CurrencyNotifier>().setCurrency(c.$1);
+                    getIt<SecureStorage>().saveCurrency(c.$1);
                   }
                 },
               ),

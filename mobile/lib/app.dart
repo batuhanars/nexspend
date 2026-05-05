@@ -4,6 +4,7 @@ import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 import 'core/di/injection.dart';
 import 'core/theme/app_theme.dart';
+import 'core/utils/currency_notifier.dart';
 import 'core/utils/locale_notifier.dart';
 import 'navigation/app_router.dart';
 
@@ -24,15 +25,18 @@ class _WalletAppState extends State<WalletApp> {
       GetIt.instance.registerSingleton<GoRouter>(_router);
     }
     getIt<LocaleNotifier>().addListener(_onLocaleChanged);
+    getIt<CurrencyNotifier>().addListener(_onCurrencyChanged);
   }
 
   @override
   void dispose() {
     getIt<LocaleNotifier>().removeListener(_onLocaleChanged);
+    getIt<CurrencyNotifier>().removeListener(_onCurrencyChanged);
     super.dispose();
   }
 
   void _onLocaleChanged() => setState(() {});
+  void _onCurrencyChanged() => setState(() {});
 
   @override
   Widget build(BuildContext context) {

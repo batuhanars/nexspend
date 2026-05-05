@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'app.dart';
 import 'core/di/injection.dart';
 import 'core/storage/secure_storage.dart';
+import 'core/utils/currency_notifier.dart';
 import 'core/utils/locale_notifier.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
@@ -29,6 +30,9 @@ void main() async {
 
   final language = await getIt<SecureStorage>().getLanguage();
   getIt.registerSingleton<LocaleNotifier>(LocaleNotifier(language));
+
+  final currency = await getIt<SecureStorage>().getCurrency();
+  getIt.registerSingleton<CurrencyNotifier>(CurrencyNotifier(currency));
 
   await Future.wait([
     initializeDateFormatting('tr_TR', null),

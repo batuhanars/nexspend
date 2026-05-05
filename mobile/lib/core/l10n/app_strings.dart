@@ -172,6 +172,7 @@ abstract class AppStrings {
   String get budgetCreatedSuccess;
   String get budgetUpdatedSuccess;
   String get debtCreatedSuccess;
+  String get debtLentCreatedSuccess;
   String get debtPaymentSuccess;
   String get debtCollectionSuccess;
   String get subscriptionCreatedSuccess;
@@ -561,6 +562,7 @@ class _Tr extends AppStrings {
   @override String get budgetCreatedSuccess => 'Bütçe başarıyla oluşturuldu';
   @override String get budgetUpdatedSuccess => 'Bütçe başarıyla güncellendi';
   @override String get debtCreatedSuccess => 'Borç başarıyla eklendi';
+  @override String get debtLentCreatedSuccess => 'Alacak başarıyla eklendi';
   @override String get debtPaymentSuccess => 'Ödeme başarıyla kaydedildi';
   @override String get debtCollectionSuccess => 'Tahsilat başarıyla kaydedildi';
   @override String get subscriptionCreatedSuccess => 'Abonelik başarıyla eklendi';
@@ -932,6 +934,7 @@ class _En extends AppStrings {
   @override String get budgetCreatedSuccess => 'Budget created successfully';
   @override String get budgetUpdatedSuccess => 'Budget updated successfully';
   @override String get debtCreatedSuccess => 'Debt added successfully';
+  @override String get debtLentCreatedSuccess => 'Receivable added successfully';
   @override String get debtPaymentSuccess => 'Payment recorded successfully';
   @override String get debtCollectionSuccess => 'Collection recorded successfully';
   @override String get subscriptionCreatedSuccess => 'Subscription added successfully';

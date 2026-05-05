@@ -58,7 +58,9 @@ class _AddDebtSheetState extends State<AddDebtSheet> {
     context.read<DebtsBloc>().add(DebtCreated(data));
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(AppStrings.of(context).debtCreatedSuccess),
+        content: Text(_type == DebtType.LENT
+            ? AppStrings.of(context).debtLentCreatedSuccess
+            : AppStrings.of(context).debtCreatedSuccess),
         backgroundColor: AppColors.secondary,
       ),
     );

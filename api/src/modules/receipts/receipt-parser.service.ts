@@ -27,7 +27,9 @@ export class ReceiptParserService {
       .map((l) => l.trim())
       .filter(Boolean);
 
-    this.logger.debug(`OCR ham metin (${lines.length} satır):\n${rawText.slice(0, 1000)}`);
+    this.logger.debug(
+      `OCR ham metin (${lines.length} satır):\n${rawText.slice(0, 1000)}`,
+    );
 
     const amount = this.extractAmount(lines);
     const date = this.extractDate(lines);

@@ -7,6 +7,8 @@ import {
   SubscriptionPeriod,
 } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
+import { BalanceService } from '../../common/services/balance.service';
+import { advanceByFrequency } from '../../common/utils/frequency.utils';
 import { TransactionCreatedEvent } from '../../common/events/transaction.events';
 import { CreateSubscriptionDto } from './dto/create-subscription.dto';
 import { UpdateSubscriptionDto } from './dto/update-subscription.dto';
@@ -17,6 +19,7 @@ export class SubscriptionsService {
 
   constructor(
     private readonly prisma: PrismaService,
+    private readonly balanceService: BalanceService,
     private readonly eventEmitter: EventEmitter2,
   ) {}
 
@@ -200,7 +203,7 @@ export class SubscriptionsService {
   }
 
   private async processOneRenewal(sub: any) {
-    const nextRenewal = this.calcNextRenewal(
+    const nextRenewal = advanceByFrequency(
       new Date(sub.nextRenewal),
       sub.period,
     );
@@ -217,10 +220,12 @@ export class SubscriptionsService {
     const now = new Date();
 
     const transaction = await this.prisma.$transaction(async (tx) => {
-      await tx.account.update({
-        where: { id: sub.accountId },
-        data: { balance: { decrement: Number(sub.amount) } },
-      });
+      await this.balanceService.apply(
+        tx,
+        sub.accountId,
+        TransactionType.EXPENSE,
+        Number(sub.amount),
+      );
 
       return tx.transaction.create({
         data: {
@@ -250,22 +255,6 @@ export class SubscriptionsService {
         now,
       ),
     );
-  }
-
-  private calcNextRenewal(from: Date, period: SubscriptionPeriod): Date {
-    const d = new Date(from);
-    switch (period) {
-      case SubscriptionPeriod.WEEKLY:
-        d.setDate(d.getDate() + 7);
-        break;
-      case SubscriptionPeriod.MONTHLY:
-        d.setMonth(d.getMonth() + 1);
-        break;
-      case SubscriptionPeriod.YEARLY:
-        d.setFullYear(d.getFullYear() + 1);
-        break;
-    }
-    return d;
   }
 
   private async findOwned(userId: string, id: string) {

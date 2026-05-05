@@ -1,11 +1,16 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
+import { BalanceService } from '../../common/services/balance.service';
+import { advanceByFrequency } from '../../common/utils/frequency.utils';
 import { CreateRecurringTransactionDto } from './dto/create-recurring-transaction.dto';
 import { UpdateRecurringTransactionDto } from './dto/update-recurring-transaction.dto';
 
 @Injectable()
 export class RecurringTransactionsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly balanceService: BalanceService,
+  ) {}
 
   findAll(userId: string) {
     return this.prisma.recurringTransaction.findMany({
@@ -24,7 +29,7 @@ export class RecurringTransactionsService {
 
   async create(userId: string, dto: CreateRecurringTransactionDto) {
     const startDate = dto.startDate ? new Date(dto.startDate) : new Date();
-    const nextRunDate = this.calcNextRunDate(startDate, dto.frequency);
+    const nextRunDate = advanceByFrequency(startDate, dto.frequency);
 
     return this.prisma.$transaction(async (tx) => {
       const template = await tx.recurringTransaction.create({
@@ -42,7 +47,9 @@ export class RecurringTransactionsService {
           nextRunDate,
         },
         include: {
-          account: { select: { id: true, name: true, icon: true, color: true } },
+          account: {
+            select: { id: true, name: true, icon: true, color: true },
+          },
           category: true,
         },
       });
@@ -62,17 +69,12 @@ export class RecurringTransactionsService {
         },
       });
 
-      if (dto.type === 'INCOME') {
-        await tx.account.update({
-          where: { id: dto.accountId },
-          data: { balance: { increment: Number(dto.amount) } },
-        });
-      } else if (dto.type === 'EXPENSE') {
-        await tx.account.update({
-          where: { id: dto.accountId },
-          data: { balance: { decrement: Number(dto.amount) } },
-        });
-      }
+      await this.balanceService.apply(
+        tx,
+        dto.accountId,
+        dto.type,
+        Number(dto.amount),
+      );
 
       return template;
     });
@@ -116,24 +118,5 @@ export class RecurringTransactionsService {
     });
     if (!record) throw new NotFoundException('Tekrarlayan işlem bulunamadı');
     return record;
-  }
-
-  private calcNextRunDate(from: Date, frequency: string): Date {
-    const d = new Date(from);
-    switch (frequency) {
-      case 'DAILY':
-        d.setDate(d.getDate() + 1);
-        break;
-      case 'WEEKLY':
-        d.setDate(d.getDate() + 7);
-        break;
-      case 'MONTHLY':
-        d.setMonth(d.getMonth() + 1);
-        break;
-      case 'YEARLY':
-        d.setFullYear(d.getFullYear() + 1);
-        break;
-    }
-    return d;
   }
 }

@@ -13,6 +13,7 @@ import {
 } from '@prisma/client';
 import { join } from 'path';
 import { PrismaService } from '../../prisma/prisma.service';
+import { BalanceService } from '../../common/services/balance.service';
 import { TransactionCreatedEvent } from '../../common/events/transaction.events';
 import { ReceiptParserService } from './receipt-parser.service';
 import { OcrService } from './ocr.service';
@@ -26,6 +27,7 @@ export class ReceiptsService {
 
   constructor(
     private readonly prisma: PrismaService,
+    private readonly balanceService: BalanceService,
     private readonly parser: ReceiptParserService,
     private readonly ocr: OcrService,
     private readonly eventEmitter: EventEmitter2,
@@ -218,10 +220,12 @@ export class ReceiptsService {
       : (receipt.parsedDate ?? new Date());
 
     const result = await this.prisma.$transaction(async (tx) => {
-      await tx.account.update({
-        where: { id: dto.accountId },
-        data: { balance: { decrement: amount } },
-      });
+      await this.balanceService.apply(
+        tx,
+        dto.accountId,
+        TransactionType.EXPENSE,
+        amount,
+      );
 
       const transaction = await tx.transaction.create({
         data: {

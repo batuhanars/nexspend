@@ -13,6 +13,7 @@ import {
   TransactionUpdatedEvent,
   TransactionDeletedEvent,
 } from '../../common/events/transaction.events';
+import { advanceByFrequency } from '../../common/utils/frequency.utils';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { UpdateTransactionDto } from './dto/update-transaction.dto';
 import { QueryTransactionDto } from './dto/query-transaction.dto';
@@ -180,29 +181,13 @@ export class TransactionsService {
       });
 
       // Bakiyeyi güncelle
-      if (dto.type === TransactionType.INCOME) {
-        await tx.account.update({
-          where: { id: dto.accountId },
-          data: { balance: { increment: dto.amount } },
-        });
-      } else if (dto.type === TransactionType.EXPENSE) {
-        await tx.account.update({
-          where: { id: dto.accountId },
-          data: { balance: { decrement: dto.amount } },
-        });
-      } else if (
-        dto.type === TransactionType.TRANSFER &&
-        dto.transferToAccountId
-      ) {
-        await tx.account.update({
-          where: { id: dto.accountId },
-          data: { balance: { decrement: dto.amount } },
-        });
-        await tx.account.update({
-          where: { id: dto.transferToAccountId },
-          data: { balance: { increment: dto.amount } },
-        });
-      }
+      await this.balanceService.apply(
+        tx,
+        dto.accountId,
+        dto.type,
+        dto.amount,
+        dto.transferToAccountId ?? undefined,
+      );
 
       return created;
     });
@@ -243,42 +228,21 @@ export class TransactionsService {
     // Bakiye düzeltmesi: eski işlemi geri al, yeni işlemi uygula
     const transaction = await this.prisma.$transaction(async (tx) => {
       // Eski bakiye etkisini geri al
-      if (existing.type === TransactionType.INCOME) {
-        await tx.account.update({
-          where: { id: existing.accountId },
-          data: { balance: { decrement: oldAmount } },
-        });
-      } else if (existing.type === TransactionType.EXPENSE) {
-        await tx.account.update({
-          where: { id: existing.accountId },
-          data: { balance: { increment: oldAmount } },
-        });
-      } else if (
-        existing.type === TransactionType.TRANSFER &&
-        existing.transferToAccountId
-      ) {
-        await tx.account.update({
-          where: { id: existing.accountId },
-          data: { balance: { increment: oldAmount } },
-        });
-        await tx.account.update({
-          where: { id: existing.transferToAccountId },
-          data: { balance: { decrement: oldAmount } },
-        });
-      }
+      await this.balanceService.revert(
+        tx,
+        existing.accountId,
+        existing.type,
+        oldAmount,
+        existing.transferToAccountId ?? undefined,
+      );
 
-      // Yeni bakiye etkisini uygula
-      if (newType === TransactionType.INCOME) {
-        await tx.account.update({
-          where: { id: existing.accountId },
-          data: { balance: { increment: newAmount } },
-        });
-      } else if (newType === TransactionType.EXPENSE) {
-        await tx.account.update({
-          where: { id: existing.accountId },
-          data: { balance: { decrement: newAmount } },
-        });
-      }
+      // Yeni bakiye etkisini uygula (TRANSFER güncelleme desteklenmez)
+      await this.balanceService.apply(
+        tx,
+        existing.accountId,
+        newType,
+        newAmount,
+      );
 
       // Tag'leri güncelle
       if (dto.tagIds !== undefined) {
@@ -346,30 +310,13 @@ export class TransactionsService {
 
     await this.prisma.$transaction(async (tx) => {
       // Bakiyeyi geri al
-      if (existing.type === TransactionType.INCOME) {
-        await tx.account.update({
-          where: { id: existing.accountId },
-          data: { balance: { decrement: amount } },
-        });
-      } else if (existing.type === TransactionType.EXPENSE) {
-        await tx.account.update({
-          where: { id: existing.accountId },
-          data: { balance: { increment: amount } },
-        });
-      } else if (
-        existing.type === TransactionType.TRANSFER &&
-        existing.transferToAccountId
-      ) {
-        await tx.account.update({
-          where: { id: existing.accountId },
-          data: { balance: { increment: amount } },
-        });
-        await tx.account.update({
-          where: { id: existing.transferToAccountId },
-          data: { balance: { decrement: amount } },
-        });
-      }
-
+      await this.balanceService.revert(
+        tx,
+        existing.accountId,
+        existing.type,
+        amount,
+        existing.transferToAccountId ?? undefined,
+      );
       await tx.transaction.delete({ where: { id } });
     });
 
@@ -393,7 +340,7 @@ export class TransactionsService {
     dto: CreateTransactionDto,
     startDate: Date,
   ) {
-    const nextRunDate = this.calcNextRunDate(startDate, dto.frequency!);
+    const nextRunDate = advanceByFrequency(startDate, dto.frequency!);
 
     await this.prisma.recurringTransaction.create({
       data: {
@@ -410,25 +357,6 @@ export class TransactionsService {
         nextRunDate,
       },
     });
-  }
-
-  private calcNextRunDate(from: Date, frequency: string): Date {
-    const d = new Date(from);
-    switch (frequency) {
-      case 'DAILY':
-        d.setDate(d.getDate() + 1);
-        break;
-      case 'WEEKLY':
-        d.setDate(d.getDate() + 7);
-        break;
-      case 'MONTHLY':
-        d.setMonth(d.getMonth() + 1);
-        break;
-      case 'YEARLY':
-        d.setFullYear(d.getFullYear() + 1);
-        break;
-    }
-    return d;
   }
 
   private format(t: any) {

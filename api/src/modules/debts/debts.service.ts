@@ -13,6 +13,7 @@ import {
   TransactionSource,
 } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
+import { BalanceService } from '../../common/services/balance.service';
 import { TransactionCreatedEvent } from '../../common/events/transaction.events';
 import { CreateDebtDto } from './dto/create-debt.dto';
 import { UpdateDebtDto } from './dto/update-debt.dto';
@@ -24,6 +25,7 @@ export class DebtsService {
 
   constructor(
     private readonly prisma: PrismaService,
+    private readonly balanceService: BalanceService,
     private readonly eventEmitter: EventEmitter2,
   ) {}
 
@@ -213,17 +215,7 @@ export class DebtsService {
           ? TransactionSource.DEBT_PAYMENT
           : TransactionSource.DEBT_COLLECTION;
 
-      if (txType === TransactionType.EXPENSE) {
-        await tx.account.update({
-          where: { id: dto.accountId },
-          data: { balance: { decrement: dto.amount } },
-        });
-      } else {
-        await tx.account.update({
-          where: { id: dto.accountId },
-          data: { balance: { increment: dto.amount } },
-        });
-      }
+      await this.balanceService.apply(tx, dto.accountId, txType, dto.amount);
 
       const transaction = await tx.transaction.create({
         data: {

@@ -8,7 +8,9 @@ export class OcrService {
   private readonly client: ImageAnnotatorClient;
 
   constructor(config: ConfigService) {
-    const credentialsJson = config.get<string>('GOOGLE_APPLICATION_CREDENTIALS_JSON');
+    const credentialsJson = config.get<string>(
+      'GOOGLE_APPLICATION_CREDENTIALS_JSON',
+    );
     const keyFilename = config.get<string>('GOOGLE_APPLICATION_CREDENTIALS');
 
     if (credentialsJson) {
@@ -21,10 +23,12 @@ export class OcrService {
         if (typeof parsed.private_key === 'string') {
           parsed.private_key = parsed.private_key.replace(/\\n/g, '\n');
         }
-        this.client = new ImageAnnotatorClient({ credentials: parsed as any });
+        this.client = new ImageAnnotatorClient({ credentials: parsed });
         this.logger.log('Cloud Vision: JSON credentials ile başlatıldı');
       } catch (err) {
-        this.logger.error(`Cloud Vision credentials parse hatası: ${(err as Error).message}`);
+        this.logger.error(
+          `Cloud Vision credentials parse hatası: ${(err as Error).message}`,
+        );
         this.client = new ImageAnnotatorClient();
       }
     } else if (keyFilename) {

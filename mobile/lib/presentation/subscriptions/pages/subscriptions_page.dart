@@ -5,8 +5,8 @@ import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
 import '../bloc/subscriptions_bloc.dart';
 import '../widgets/add_subscription_sheet.dart';
-import '../widgets/empty_view.dart';
-import '../widgets/error_view.dart';
+import '../../shared/widgets/empty_state_view.dart';
+import '../../shared/widgets/error_view.dart';
 import '../widgets/subscription_list.dart';
 import '../widgets/subscriptions_shimmer.dart';
 import '../widgets/summary_card.dart';
@@ -60,8 +60,12 @@ class _SubscriptionsView extends StatelessWidget {
                     ),
                   if (state.subscriptions.isEmpty)
                     SliverFillRemaining(
-                      child: EmptyView(
-                        onAdd: () => _showAddSheet(context),
+                      child: EmptyStateView(
+                        icon: Icons.subscriptions_outlined,
+                        title: 'Abonelik yok',
+                        subtitle: 'Netflix, Spotify gibi aboneliklerinizi\nekleyerek otomatik takip edin.',
+                        buttonLabel: 'Abonelik Ekle',
+                        onAction: () => _showAddSheet(context),
                       ),
                     )
                   else

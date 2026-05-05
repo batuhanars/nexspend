@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:wallet_app/core/constants/app_colors.dart';
-import 'package:wallet_app/core/constants/app_spacing.dart';
-import 'package:wallet_app/core/constants/app_typography.dart';
+import '../../../core/constants/app_colors.dart';
+import '../../../core/constants/app_spacing.dart';
+import '../../../core/constants/app_typography.dart';
 
 class ErrorView extends StatelessWidget {
   const ErrorView({super.key, required this.message, required this.onRetry});
+
   final String message;
   final VoidCallback onRetry;
 

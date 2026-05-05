@@ -11,8 +11,8 @@ import '../bloc/budgets_state.dart';
 import '../widgets/budget_card.dart';
 import '../widgets/budgets_shimmer.dart';
 import '../widgets/edit_budget_sheet.dart';
-import '../widgets/empty_budgets_view.dart';
-import '../widgets/error_view.dart';
+import '../../shared/widgets/empty_state_view.dart';
+import '../../shared/widgets/error_view.dart';
 import '../widgets/overview_card.dart';
 import '../widgets/warning_banner.dart';
 
@@ -99,8 +99,12 @@ class _BudgetsView extends StatelessWidget {
               const SizedBox(height: AppSpacing.xl),
             ],
             if (budgets.isEmpty)
-              EmptyBudgetsView(
-                onAdd: () async {
+              EmptyStateView(
+                icon: Icons.account_balance_wallet_outlined,
+                title: 'Henüz bütçe yok',
+                subtitle: 'Harcamalarını takip etmek için\nbir bütçe oluştur.',
+                buttonLabel: 'Bütçe Oluştur',
+                onAction: () async {
                   await context.push(RouteNames.addBudget);
                   if (context.mounted) {
                     context

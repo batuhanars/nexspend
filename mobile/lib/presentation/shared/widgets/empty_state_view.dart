@@ -3,9 +3,21 @@ import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
 
-class EmptyView extends StatelessWidget {
-  const EmptyView({super.key, required this.onAdd});
-  final VoidCallback onAdd;
+class EmptyStateView extends StatelessWidget {
+  const EmptyStateView({
+    super.key,
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.buttonLabel,
+    required this.onAction,
+  });
+
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final String buttonLabel;
+  final VoidCallback onAction;
 
   @override
   Widget build(BuildContext context) {
@@ -16,15 +28,15 @@ class EmptyView extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
-              Icons.subscriptions_outlined,
+              icon,
               size: 64,
               color: AppColors.onSurfaceVariant.withValues(alpha: 0.4),
             ),
             const SizedBox(height: AppSpacing.lg),
-            Text('Abonelik yok', style: AppTypography.titleSm),
+            Text(title, style: AppTypography.titleSm),
             const SizedBox(height: AppSpacing.sm),
             Text(
-              'Netflix, Spotify gibi aboneliklerinizi\nekleyerek otomatik takip edin.',
+              subtitle,
               style: AppTypography.bodyMd.copyWith(
                 color: AppColors.onSurfaceVariant,
               ),
@@ -35,9 +47,9 @@ class EmptyView extends StatelessWidget {
               width: double.infinity,
               height: 52,
               child: FilledButton.icon(
-                onPressed: onAdd,
+                onPressed: onAction,
                 icon: const Icon(Icons.add_rounded, size: 20),
-                label: const Text('Abonelik Ekle'),
+                label: Text(buttonLabel),
                 style: FilledButton.styleFrom(
                   backgroundColor: AppColors.primary,
                   foregroundColor: AppColors.surface,

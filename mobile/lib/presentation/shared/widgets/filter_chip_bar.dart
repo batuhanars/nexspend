@@ -1,20 +1,19 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
-import '../bloc/transactions_bloc.dart';
 
-class FilterChips extends StatelessWidget {
-  const FilterChips({super.key, required this.activeFilter});
+class FilterChipBar extends StatelessWidget {
+  const FilterChipBar({
+    super.key,
+    required this.filters,
+    required this.activeFilter,
+    required this.onChanged,
+  });
+
+  final List<({String label, String? value})> filters;
   final String? activeFilter;
-
-  static const _filters = [
-    (label: 'Hepsi', value: null),
-    (label: 'Gelir', value: 'INCOME'),
-    (label: 'Gider', value: 'EXPENSE'),
-    (label: 'Transfer', value: 'TRANSFER'),
-  ];
+  final void Function(String?) onChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -24,16 +23,14 @@ class FilterChips extends StatelessWidget {
         vertical: AppSpacing.sm,
       ),
       child: Row(
-        children: _filters.map((f) {
+        children: filters.map((f) {
           final isActive = activeFilter == f.value;
-          final isLast = f == _filters.last;
+          final isLast = f == filters.last;
           return Expanded(
             child: Padding(
               padding: EdgeInsets.only(right: isLast ? 0 : AppSpacing.sm),
               child: GestureDetector(
-                onTap: () => context
-                    .read<TransactionsBloc>()
-                    .add(TransactionsFilterChanged(f.value)),
+                onTap: () => onChanged(f.value),
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 150),
                   height: 36,
@@ -42,8 +39,7 @@ class FilterChips extends StatelessWidget {
                     color: isActive
                         ? AppColors.primary.withValues(alpha: 0.15)
                         : AppColors.surfaceContainerHigh,
-                    borderRadius:
-                        BorderRadius.circular(AppSpacing.radiusFull),
+                    borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
                     border: isActive
                         ? Border.all(color: AppColors.primary, width: 1.5)
                         : null,

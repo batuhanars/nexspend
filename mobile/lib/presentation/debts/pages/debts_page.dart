@@ -3,9 +3,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:wallet_app/presentation/debts/widgets/add_debt_sheet.dart';
 import 'package:wallet_app/presentation/debts/widgets/debt_list.dart';
 import 'package:wallet_app/presentation/debts/widgets/debts_shimmer.dart';
-import 'package:wallet_app/presentation/debts/widgets/empty_view.dart';
-import 'package:wallet_app/presentation/debts/widgets/error_view.dart';
-import 'package:wallet_app/presentation/debts/widgets/filter_chips.dart';
+import 'package:wallet_app/presentation/shared/widgets/empty_state_view.dart';
+import 'package:wallet_app/presentation/shared/widgets/error_view.dart';
+import 'package:wallet_app/presentation/shared/widgets/filter_chip_bar.dart';
 import 'package:wallet_app/presentation/debts/widgets/summary_cards.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
@@ -59,12 +59,26 @@ class _DebtsView extends StatelessWidget {
                     ),
                   ),
                   SliverToBoxAdapter(
-                    child: FilterChips(activeFilter: state.filter),
+                    child: FilterChipBar(
+                      filters: const [
+                        (label: 'Tümü', value: null),
+                        (label: 'Alacak', value: 'LENT'),
+                        (label: 'Borç', value: 'BORROWED'),
+                      ],
+                      activeFilter: state.filter,
+                      onChanged: (v) => context
+                          .read<DebtsBloc>()
+                          .add(DebtsFilterChanged(v)),
+                    ),
                   ),
                   if (state.debts.isEmpty)
                     SliverFillRemaining(
-                      child: EmptyView(
-                        onAdd: () => _showAddDebtSheet(context),
+                      child: EmptyStateView(
+                        icon: Icons.handshake_outlined,
+                        title: 'Borç kaydı yok',
+                        subtitle: 'Borç ve alacaklarınızı takip etmek\niçin ilk kaydı oluşturun.',
+                        buttonLabel: 'Borç Ekle',
+                        onAction: () => _showAddDebtSheet(context),
                       ),
                     )
                   else

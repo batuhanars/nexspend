@@ -13,6 +13,7 @@ import '../bloc/dashboard_bloc.dart';
 import '../widgets/balance_card.dart';
 import '../widgets/account_carousel.dart';
 import '../widgets/recent_transactions_section.dart';
+import '../../shared/widgets/error_view.dart';
 
 class DashboardPage extends StatelessWidget {
   const DashboardPage({super.key});
@@ -113,7 +114,7 @@ class _DashboardViewState extends State<_DashboardView> {
   Widget _buildBody(BuildContext context, DashboardState state) {
     return switch (state) {
       DashboardLoading() || DashboardInitial() => const _DashboardShimmer(),
-      DashboardError(:final message) => _DashboardError(
+      DashboardError(:final message) => ErrorView(
           message: message,
           onRetry: () => context
               .read<DashboardBloc>()
@@ -325,45 +326,6 @@ class _EmptyAccountsCard extends StatelessWidget {
             ],
           ),
         ),
-      ),
-    );
-  }
-}
-
-class _DashboardError extends StatelessWidget {
-  const _DashboardError({required this.message, required this.onRetry});
-  final String message;
-  final VoidCallback onRetry;
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      height: MediaQuery.of(context).size.height * 0.6,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.wifi_off_rounded,
-            size: 64,
-            color: AppColors.onSurfaceVariant.withValues(alpha: 0.4),
-          ),
-          const SizedBox(height: AppSpacing.lg),
-          Text(
-            message,
-            textAlign: TextAlign.center,
-            style: AppTypography.bodyMd.copyWith(
-              color: AppColors.onSurfaceVariant,
-            ),
-          ),
-          const SizedBox(height: AppSpacing.xl),
-          TextButton(
-            onPressed: onRetry,
-            child: Text(
-              'Tekrar Dene',
-              style: AppTypography.bodyMd.copyWith(color: AppColors.primary),
-            ),
-          ),
-        ],
       ),
     );
   }

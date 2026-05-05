@@ -5,10 +5,10 @@ import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_typography.dart';
 import '../../../navigation/route_names.dart';
 import '../bloc/transactions_bloc.dart';
-import '../widgets/empty_view.dart';
-import '../widgets/error_view.dart';
-import '../widgets/filter_chips.dart';
 import '../widgets/summary_row.dart';
+import '../../shared/widgets/empty_state_view.dart';
+import '../../shared/widgets/error_view.dart';
+import '../../shared/widgets/filter_chip_bar.dart';
 import '../widgets/transaction_list.dart';
 import '../widgets/transactions_shimmer.dart';
 
@@ -89,12 +89,27 @@ class _TransactionsViewState extends State<_TransactionsView> {
                 else if (state is TransactionsLoaded) ...[
                   SliverToBoxAdapter(child: SummaryRow(state: state)),
                   SliverToBoxAdapter(
-                    child: FilterChips(activeFilter: state.filter),
+                    child: FilterChipBar(
+                      filters: const [
+                        (label: 'Hepsi', value: null),
+                        (label: 'Gelir', value: 'INCOME'),
+                        (label: 'Gider', value: 'EXPENSE'),
+                        (label: 'Transfer', value: 'TRANSFER'),
+                      ],
+                      activeFilter: state.filter,
+                      onChanged: (v) => context
+                          .read<TransactionsBloc>()
+                          .add(TransactionsFilterChanged(v)),
+                    ),
                   ),
                   if (state.transactions.isEmpty)
                     SliverFillRemaining(
-                      child: EmptyView(
-                        onAdd: () async {
+                      child: EmptyStateView(
+                        icon: Icons.receipt_long_outlined,
+                        title: 'Henüz işlem yok',
+                        subtitle: 'İlk işleminizi ekleyerek\ngelir ve giderlerinizi takip edin.',
+                        buttonLabel: 'İşlem Ekle',
+                        onAction: () async {
                           final bloc = context.read<TransactionsBloc>();
                           final added =
                               await context.push(RouteNames.addTransaction);

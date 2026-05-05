@@ -30,8 +30,13 @@ class DebtCard extends StatelessWidget {
         child: const Icon(Icons.delete_outline_rounded, color: AppColors.error),
       ),
       confirmDismiss: (_) => _confirmDelete(context),
-      onDismissed: (_) =>
-          context.read<DebtsBloc>().add(DebtDeleteRequested(debt.id)),
+      onDismissed: (_) {
+        context.read<DebtsBloc>().add(DebtDeleteRequested(debt.id));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(AppStrings.of(context).debtDeletedSuccess),
+          backgroundColor: AppColors.secondary,
+        ));
+      },
       child: GestureDetector(
         onTap: () async {
           final bloc = context.read<DebtsBloc>();

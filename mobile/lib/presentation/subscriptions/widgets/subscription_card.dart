@@ -26,14 +26,19 @@ class SubscriptionCard extends StatelessWidget {
         child: const Icon(Icons.delete_outline_rounded, color: AppColors.error),
       ),
       confirmDismiss: (_) => _confirmDelete(context),
-      onDismissed: (_) => context.read<SubscriptionsBloc>().add(
-        SubscriptionDeleteRequested(sub.id),
-      ),
+      onDismissed: (_) {
+        context.read<SubscriptionsBloc>().add(SubscriptionDeleteRequested(sub.id));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(AppStrings.of(context).subscriptionDeletedSuccess),
+          backgroundColor: AppColors.secondary,
+        ));
+      },
       child: GestureDetector(
-        onTap: () => context.push(
-          RouteNames.subscriptionDetail(sub.id),
-          extra: sub,
-        ),
+        onTap: () async {
+          final bloc = context.read<SubscriptionsBloc>();
+          await context.push(RouteNames.subscriptionDetail(sub.id), extra: sub);
+          if (context.mounted) bloc.add(const SubscriptionsRefreshRequested());
+        },
         child: Padding(
         padding: const EdgeInsets.symmetric(
           horizontal: AppSpacing.pagePadding,

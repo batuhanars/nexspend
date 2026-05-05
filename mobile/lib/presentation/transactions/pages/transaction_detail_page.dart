@@ -110,10 +110,14 @@ class TransactionDetailPage extends StatelessWidget {
     );
 
     if (confirmed == true && context.mounted) {
-      context
-          .read<TransactionsBloc>()
-          .add(TransactionDeleteRequested(transaction.id));
+      final messenger = ScaffoldMessenger.of(context);
+      final deleteMsg = AppStrings.of(context).transactionDeletedSuccess;
+      context.read<TransactionsBloc>().add(TransactionDeleteRequested(transaction.id));
       context.pop(true);
+      messenger.showSnackBar(SnackBar(
+        content: Text(deleteMsg),
+        backgroundColor: AppColors.secondary,
+      ));
     }
   }
 

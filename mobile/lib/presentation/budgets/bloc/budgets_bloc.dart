@@ -58,12 +58,54 @@ class BudgetsBloc extends Bloc<BudgetsEvent, BudgetsState> {
 
   Future<void> _onUpdate(
       BudgetUpdateRequested event, Emitter<BudgetsState> emit) async {
+    final current = state;
+    if (current is BudgetsLoaded) {
+      final name = event.data['name'] as String?;
+      final amount = (event.data['amount'] as num?)?.toDouble();
+      final periodStr = event.data['period'] as String?;
+      final period = periodStr != null
+          ? BudgetPeriod.values.firstWhere((p) => p.name == periodStr, orElse: () => BudgetPeriod.MONTHLY)
+          : null;
+      final smartTracking = event.data['smartTracking'] as bool?;
+      final hasEndDate = event.data.containsKey('endDate');
+      final endDateStr = event.data['endDate'] as String?;
+
+      final optimistic = current.budgets.map((b) {
+        if (b.id != event.id) return b;
+        final newAmount = amount ?? b.amount;
+        final newRemaining = newAmount - b.spent;
+        final newPct = newAmount > 0 ? ((b.spent / newAmount) * 100).round() : 0;
+        return BudgetModel(
+          id: b.id,
+          name: name ?? b.name,
+          amount: newAmount,
+          spent: b.spent,
+          remaining: newRemaining,
+          percentage: newPct,
+          status: _statusForPct(newPct),
+          period: period ?? b.period,
+          smartTracking: smartTracking ?? b.smartTracking,
+          isActive: b.isActive,
+          startDate: b.startDate,
+          endDate: hasEndDate ? (endDateStr != null ? DateTime.parse(endDateStr) : null) : b.endDate,
+          category: b.category,
+        );
+      }).toList();
+      emit(BudgetsLoaded(overview: current.overview, budgets: optimistic));
+    }
     try {
       await _repo.update(event.id, event.data);
       await _fetch(emit);
     } catch (_) {
-      // keep current state on update error
+      if (current is BudgetsLoaded) emit(current);
     }
+  }
+
+  BudgetStatus _statusForPct(int pct) {
+    if (pct >= 100) return BudgetStatus.EXCEEDED;
+    if (pct >= 90) return BudgetStatus.CRITICAL;
+    if (pct >= 75) return BudgetStatus.WARNING;
+    return BudgetStatus.OK;
   }
 
   Future<void> _fetch(Emitter<BudgetsState> emit) async {

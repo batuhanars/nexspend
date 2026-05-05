@@ -131,9 +131,13 @@ class _BudgetsView extends StatelessWidget {
                         padding: const EdgeInsets.only(bottom: AppSpacing.md),
                         child: BudgetCard(
                           budget: b,
-                          onDelete: () => context
-                              .read<BudgetsBloc>()
-                              .add(BudgetDeleteRequested(b.id)),
+                          onDelete: () {
+                            context.read<BudgetsBloc>().add(BudgetDeleteRequested(b.id));
+                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                              content: Text(AppStrings.of(context).budgetDeletedSuccess),
+                              backgroundColor: AppColors.secondary,
+                            ));
+                          },
                           onEdit: () {
                             final bloc = context.read<BudgetsBloc>();
                             showModalBottomSheet(

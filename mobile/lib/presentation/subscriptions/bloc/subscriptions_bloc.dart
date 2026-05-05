@@ -82,14 +82,15 @@ class SubscriptionsBloc extends Bloc<SubscriptionsEvent, SubscriptionsState> {
   Future<void> _onDelete(
       SubscriptionDeleteRequested event, Emitter<SubscriptionsState> emit) async {
     final current = state;
-    if (current is! SubscriptionsLoaded) return;
-    final updated =
-        current.subscriptions.where((s) => s.id != event.id).toList();
-    emit(current.copyWith(subscriptions: updated));
+    if (current is SubscriptionsLoaded) {
+      final updated =
+          current.subscriptions.where((s) => s.id != event.id).toList();
+      emit(current.copyWith(subscriptions: updated));
+    }
     try {
       await _repo.delete(event.id);
     } catch (_) {
-      emit(current);
+      if (current is SubscriptionsLoaded) emit(current);
     }
   }
 

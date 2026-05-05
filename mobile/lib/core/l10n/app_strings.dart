@@ -179,6 +179,10 @@ abstract class AppStrings {
   String get accountCreatedSuccess;
   String get accountUpdatedSuccess;
   String get subscriptionUpdatedSuccess;
+  String get transactionDeletedSuccess;
+  String get budgetDeletedSuccess;
+  String get debtDeletedSuccess;
+  String get subscriptionDeletedSuccess;
   String get enterValidAmount;
   String get selectAccount;
   String get selectTargetAccount;
@@ -569,6 +573,10 @@ class _Tr extends AppStrings {
   @override String get accountCreatedSuccess => 'Hesap başarıyla oluşturuldu';
   @override String get accountUpdatedSuccess => 'Hesap başarıyla güncellendi';
   @override String get subscriptionUpdatedSuccess => 'Abonelik başarıyla güncellendi';
+  @override String get transactionDeletedSuccess => 'İşlem başarıyla silindi';
+  @override String get budgetDeletedSuccess => 'Bütçe başarıyla silindi';
+  @override String get debtDeletedSuccess => 'Borç kaydı başarıyla silindi';
+  @override String get subscriptionDeletedSuccess => 'Abonelik başarıyla silindi';
   @override String get enterValidAmount => 'Geçerli bir tutar girin.';
   @override String get selectAccount => 'Bir hesap seçin.';
   @override String get selectTargetAccount => 'Hedef hesap seçin.';
@@ -941,6 +949,10 @@ class _En extends AppStrings {
   @override String get accountCreatedSuccess => 'Account created successfully';
   @override String get accountUpdatedSuccess => 'Account updated successfully';
   @override String get subscriptionUpdatedSuccess => 'Subscription updated successfully';
+  @override String get transactionDeletedSuccess => 'Transaction deleted successfully';
+  @override String get budgetDeletedSuccess => 'Budget deleted successfully';
+  @override String get debtDeletedSuccess => 'Debt record deleted successfully';
+  @override String get subscriptionDeletedSuccess => 'Subscription deleted successfully';
   @override String get enterValidAmount => 'Enter a valid amount.';
   @override String get selectAccount => 'Select an account.';
   @override String get selectTargetAccount => 'Select a target account.';

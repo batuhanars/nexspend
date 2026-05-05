@@ -107,6 +107,10 @@ class _AccountDetailPageState extends State<AccountDetailPage> {
         BlocListener<AccountBloc, AccountState>(
           listener: (context, state) {
             if (state is AccountDeleted) {
+              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                content: Text(AppStrings.of(context).accountDeleted),
+                backgroundColor: AppColors.secondary,
+              ));
               context.pop();
             } else if (state is AccountActionDone) {
               ScaffoldMessenger.of(context).showSnackBar(

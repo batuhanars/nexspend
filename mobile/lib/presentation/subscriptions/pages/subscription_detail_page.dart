@@ -4,7 +4,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:wallet_app/core/constants/app_colors.dart';
 import 'package:wallet_app/core/constants/app_spacing.dart';
 import 'package:wallet_app/core/constants/app_typography.dart';
+import 'package:wallet_app/core/di/injection.dart';
 import 'package:wallet_app/data/models/subscription_model.dart';
+import 'package:wallet_app/data/repositories/subscription_repository.dart';
 import 'package:wallet_app/presentation/shared/widgets/split_amount_field.dart';
 import 'package:wallet_app/presentation/subscriptions/bloc/subscriptions_bloc.dart';
 import 'package:wallet_app/presentation/subscriptions/widgets/subscription_details_card.dart';
@@ -20,11 +22,19 @@ class SubscriptionDetailPage extends StatefulWidget {
 
 class _SubscriptionDetailPageState extends State<SubscriptionDetailPage> {
   late SubscriptionModel _sub;
+  late final TextEditingController _editNameCtrl;
 
   @override
   void initState() {
     super.initState();
     _sub = widget.subscription;
+    _editNameCtrl = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    _editNameCtrl.dispose();
+    super.dispose();
   }
 
   void _toggle() {
@@ -50,7 +60,7 @@ class _SubscriptionDetailPageState extends State<SubscriptionDetailPage> {
   }
 
   Future<void> _showEditSheet() async {
-    final nameCtrl = TextEditingController(text: _sub.name);
+    _editNameCtrl.text = _sub.name;
     double? pendingAmount = _sub.amount;
     String? savedName;
     double? savedAmount;
@@ -97,7 +107,7 @@ class _SubscriptionDetailPageState extends State<SubscriptionDetailPage> {
                   ),
                   const SizedBox(height: AppSpacing.xl),
                   TextField(
-                    controller: nameCtrl,
+                    controller: _editNameCtrl,
                     style: const TextStyle(color: AppColors.onSurface, fontSize: 14),
                     decoration: InputDecoration(
                       hintText: 'Abonelik adı',
@@ -122,7 +132,7 @@ class _SubscriptionDetailPageState extends State<SubscriptionDetailPage> {
                   const SizedBox(height: AppSpacing.xl),
                   FilledButton(
                     onPressed: () {
-                      final name = nameCtrl.text.trim();
+                      final name = _editNameCtrl.text.trim();
                       if (name.isEmpty || pendingAmount == null || pendingAmount! <= 0) return;
                       savedName = name;
                       savedAmount = pendingAmount;
@@ -143,8 +153,6 @@ class _SubscriptionDetailPageState extends State<SubscriptionDetailPage> {
         );
       },
     );
-
-    nameCtrl.dispose();
 
     if (savedName != null && savedAmount != null && mounted) {
       context.read<SubscriptionsBloc>().add(
@@ -190,10 +198,15 @@ class _SubscriptionDetailPageState extends State<SubscriptionDetailPage> {
       ),
     );
     if (confirmed == true && mounted) {
-      context
-          .read<SubscriptionsBloc>()
-          .add(SubscriptionDeleteRequested(_sub.id));
+      await getIt<SubscriptionRepository>().delete(_sub.id);
+      if (!mounted) return;
+      final messenger = ScaffoldMessenger.of(context);
+      final deleteMsg = AppStrings.of(context).subscriptionDeletedSuccess;
       Navigator.of(context).pop();
+      messenger.showSnackBar(SnackBar(
+        content: Text(deleteMsg),
+        backgroundColor: AppColors.secondary,
+      ));
     }
   }
 

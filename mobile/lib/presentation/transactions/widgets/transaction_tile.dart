@@ -51,9 +51,13 @@ class TransactionTile extends StatelessWidget {
         child: const Icon(Icons.delete_outline_rounded, color: AppColors.error),
       ),
       confirmDismiss: (_) => _confirmDelete(context),
-      onDismissed: (_) => context
-          .read<TransactionsBloc>()
-          .add(TransactionDeleteRequested(transaction.id)),
+      onDismissed: (_) {
+        context.read<TransactionsBloc>().add(TransactionDeleteRequested(transaction.id));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(AppStrings.of(context).transactionDeletedSuccess),
+          backgroundColor: AppColors.secondary,
+        ));
+      },
       child: InkWell(
         onTap: () => context.push(
           RouteNames.transactionDetail(transaction.id),

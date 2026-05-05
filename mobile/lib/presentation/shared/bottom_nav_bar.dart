@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_spacing.dart';
+import '../../core/constants/app_typography.dart';
 import '../../core/di/injection.dart';
 import '../../core/services/notification_service.dart';
 import '../../navigation/route_names.dart';
-import 'expandable_fab.dart';
 
 class AppShell extends StatefulWidget {
   const AppShell({super.key, required this.child});
@@ -17,8 +17,6 @@ class AppShell extends StatefulWidget {
 }
 
 class _AppShellState extends State<AppShell> {
-  bool _fabOpen = false;
-
   @override
   void initState() {
     super.initState();
@@ -26,88 +24,184 @@ class _AppShellState extends State<AppShell> {
     getIt<NotificationService>().initialize();
   }
 
-  void _toggleFab() => setState(() => _fabOpen = !_fabOpen);
-  void _closeFab() => setState(() => _fabOpen = false);
-
-  bool _isHome(String location) =>
-      location == RouteNames.home ||
-      location.startsWith('${RouteNames.home}/');
-
-  List<FabAction> _buildActions(BuildContext context) => [
-        FabAction(
-          label: 'Gelir',
-          icon: Icons.arrow_downward_rounded,
-          color: AppColors.secondary,
-          onTap: () => context.push(
-            RouteNames.addTransaction,
-            extra: {'type': 'INCOME'},
-          ),
+  void _showAddSheet() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: AppColors.surfaceContainerHigh,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(AppSpacing.radiusXl),
         ),
-        FabAction(
-          label: 'Gider',
-          icon: Icons.arrow_upward_rounded,
-          color: AppColors.tertiary,
-          onTap: () => context.push(
-            RouteNames.addTransaction,
-            extra: {'type': 'EXPENSE'},
-          ),
-        ),
-        FabAction(
-          label: 'Transfer',
-          icon: Icons.swap_horiz_rounded,
-          color: AppColors.primary,
-          onTap: () => context.push(
-            RouteNames.addTransaction,
-            extra: {'type': 'TRANSFER'},
-          ),
-        ),
-        FabAction(
-          label: 'Tara',
-          icon: Icons.document_scanner_outlined,
-          color: AppColors.onSurfaceVariant,
-          onTap: () => context.push(RouteNames.receiptScanner),
-        ),
-      ];
+      ),
+      builder: (_) => _AddActionSheet(
+        onIncome: () {
+          Navigator.pop(context);
+          context.push(RouteNames.addTransaction, extra: {'type': 'INCOME'});
+        },
+        onExpense: () {
+          Navigator.pop(context);
+          context.push(RouteNames.addTransaction, extra: {'type': 'EXPENSE'});
+        },
+        onTransfer: () {
+          Navigator.pop(context);
+          context.push(RouteNames.addTransaction, extra: {'type': 'TRANSFER'});
+        },
+        onScan: () {
+          Navigator.pop(context);
+          context.push(RouteNames.receiptScanner);
+        },
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
-    final location = GoRouterState.of(context).matchedLocation;
-    final isHome = _isHome(location);
-
     return Scaffold(
-      body: Stack(
+      body: widget.child,
+      bottomNavigationBar: _BottomNavBar(onAddTap: _showAddSheet),
+    );
+  }
+}
+
+class _AddActionSheet extends StatelessWidget {
+  const _AddActionSheet({
+    required this.onIncome,
+    required this.onExpense,
+    required this.onTransfer,
+    required this.onScan,
+  });
+
+  final VoidCallback onIncome;
+  final VoidCallback onExpense;
+  final VoidCallback onTransfer;
+  final VoidCallback onScan;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.fromLTRB(
+        AppSpacing.pagePadding,
+        AppSpacing.md,
+        AppSpacing.pagePadding,
+        AppSpacing.xl + MediaQuery.of(context).viewInsets.bottom,
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          widget.child,
-          if (_fabOpen && isHome)
-            Positioned.fill(
-              child: GestureDetector(
-                onTap: _closeFab,
-                behavior: HitTestBehavior.opaque,
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    color: Colors.black.withValues(alpha: 0.55),
-                  ),
+          Container(
+            width: 36,
+            height: 4,
+            decoration: BoxDecoration(
+              color: AppColors.onSurfaceVariant.withValues(alpha: 0.3),
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+          const SizedBox(height: AppSpacing.xl),
+          Row(
+            children: [
+              Expanded(
+                child: _SheetAction(
+                  icon: Icons.arrow_downward_rounded,
+                  label: 'Gelir',
+                  color: AppColors.secondary,
+                  onTap: onIncome,
                 ),
               ),
-            ),
+              const SizedBox(width: AppSpacing.md),
+              Expanded(
+                child: _SheetAction(
+                  icon: Icons.arrow_upward_rounded,
+                  label: 'Gider',
+                  color: AppColors.tertiary,
+                  onTap: onExpense,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.md),
+          Row(
+            children: [
+              Expanded(
+                child: _SheetAction(
+                  icon: Icons.swap_horiz_rounded,
+                  label: 'Transfer',
+                  color: AppColors.primary,
+                  onTap: onTransfer,
+                ),
+              ),
+              const SizedBox(width: AppSpacing.md),
+              Expanded(
+                child: _SheetAction(
+                  icon: Icons.document_scanner_outlined,
+                  label: 'Fiş Tara',
+                  color: AppColors.onSurfaceVariant,
+                  onTap: onScan,
+                ),
+              ),
+            ],
+          ),
         ],
       ),
-      bottomNavigationBar: const _BottomNavBar(),
-      floatingActionButton: isHome
-          ? ExpandableFab(
-              isOpen: _fabOpen,
-              onToggle: _toggleFab,
-              actions: _buildActions(context),
-            )
-          : null,
+    );
+  }
+}
+
+class _SheetAction extends StatelessWidget {
+  const _SheetAction({
+    required this.icon,
+    required this.label,
+    required this.color,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String label;
+  final Color color;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                color: color.withValues(alpha: 0.15),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, color: color, size: 24),
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            Text(
+              label,
+              style: AppTypography.bodyMd.copyWith(
+                fontWeight: FontWeight.w600,
+                color: AppColors.onSurface,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
 
 class _BottomNavBar extends StatelessWidget {
-  const _BottomNavBar();
+  const _BottomNavBar({required this.onAddTap});
 
-  static const _tabs = [
+  final VoidCallback onAddTap;
+
+  static const _leftTabs = [
     _TabItem(
       icon: Icons.dashboard_outlined,
       activeIcon: Icons.dashboard,
@@ -120,17 +214,14 @@ class _BottomNavBar extends StatelessWidget {
       label: 'İşlemler',
       route: RouteNames.transactions,
     ),
+  ];
+
+  static const _rightTabs = [
     _TabItem(
       icon: Icons.pie_chart_outline,
       activeIcon: Icons.pie_chart,
       label: 'Bütçe',
       route: RouteNames.budgets,
-    ),
-    _TabItem(
-      icon: Icons.handshake_outlined,
-      activeIcon: Icons.handshake,
-      label: 'Borç',
-      route: RouteNames.debts,
     ),
     _TabItem(
       icon: Icons.subscriptions_outlined,
@@ -141,10 +232,8 @@ class _BottomNavBar extends StatelessWidget {
   ];
 
   int _currentIndex(String location) {
-    if (location.startsWith(RouteNames.home)) return 0;
     if (location.startsWith(RouteNames.transactions)) return 1;
-    if (location.startsWith(RouteNames.budgets)) return 2;
-    if (location.startsWith(RouteNames.debts)) return 3;
+    if (location.startsWith(RouteNames.budgets)) return 3;
     if (location.startsWith(RouteNames.subscriptions)) return 4;
     return 0;
   }
@@ -168,44 +257,78 @@ class _BottomNavBar extends StatelessWidget {
         child: SizedBox(
           height: AppSpacing.bottomNavHeight,
           child: Row(
-            children: _tabs.asMap().entries.map((entry) {
-              final i = entry.key;
-              final tab = entry.value;
-              final isActive = i == currentIndex;
-
-              return Expanded(
-                child: InkWell(
-                  onTap: () => context.go(tab.route),
-                  borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        isActive ? tab.activeIcon : tab.icon,
-                        color: isActive
-                            ? AppColors.primary
-                            : AppColors.onSurfaceVariant,
-                        size: 22,
+            children: [
+              ..._leftTabs.asMap().entries.map((e) {
+                return _buildTabItem(context, e.value, e.key == currentIndex);
+              }),
+              // Center "+" action button
+              Expanded(
+                child: GestureDetector(
+                  onTap: onAddTap,
+                  behavior: HitTestBehavior.opaque,
+                  child: Center(
+                    child: Container(
+                      width: 48,
+                      height: 48,
+                      decoration: BoxDecoration(
+                        color: AppColors.primary,
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppColors.primary.withValues(alpha: 0.4),
+                            blurRadius: 12,
+                            offset: const Offset(0, 3),
+                          ),
+                        ],
                       ),
-                      const SizedBox(height: 4),
-                      Text(
-                        tab.label,
-                        style: TextStyle(
-                          fontSize: 10,
-                          fontWeight: isActive
-                              ? FontWeight.w600
-                              : FontWeight.w400,
-                          color: isActive
-                              ? AppColors.primary
-                              : AppColors.onSurfaceVariant,
-                        ),
+                      child: const Icon(
+                        Icons.add_rounded,
+                        color: AppColors.surface,
+                        size: 26,
                       ),
-                    ],
+                    ),
                   ),
                 ),
-              );
-            }).toList(),
+              ),
+              ..._rightTabs.asMap().entries.map((e) {
+                return _buildTabItem(
+                  context,
+                  e.value,
+                  (e.key + 3) == currentIndex,
+                );
+              }),
+            ],
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTabItem(BuildContext context, _TabItem tab, bool isActive) {
+    return Expanded(
+      child: InkWell(
+        onTap: () => context.go(tab.route),
+        borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              isActive ? tab.activeIcon : tab.icon,
+              color: isActive ? AppColors.primary : AppColors.onSurfaceVariant,
+              size: 22,
+            ),
+            const SizedBox(height: 4),
+            Text(
+              tab.label,
+              style: TextStyle(
+                fontSize: 10,
+                fontWeight: isActive ? FontWeight.w600 : FontWeight.w400,
+                color: isActive
+                    ? AppColors.primary
+                    : AppColors.onSurfaceVariant,
+              ),
+            ),
+          ],
         ),
       ),
     );

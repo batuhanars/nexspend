@@ -101,6 +101,15 @@ class _ReceiptPreviewView extends StatelessWidget {
           );
         }
 
+        if (state is ReceiptPreviewSuccess) {
+          return const Scaffold(
+            backgroundColor: AppColors.surface,
+            body: Center(
+              child: CircularProgressIndicator(color: AppColors.primary),
+            ),
+          );
+        }
+
         final ready = state as ReceiptPreviewReady;
         return ReadyView(imagePath: imagePath, state: ready);
       },

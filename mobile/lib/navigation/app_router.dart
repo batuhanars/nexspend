@@ -143,16 +143,6 @@ GoRouter createRouter() {
             ),
           ),
           GoRoute(
-            path: RouteNames.debts,
-            name: 'debts',
-            builder: (context, _) => BlocProvider(
-              create: (_) => DebtsBloc(
-                debtRepository: getIt<DebtRepository>(),
-              )..add(const DebtsLoadRequested()),
-              child: const DebtsPage(),
-            ),
-          ),
-          GoRoute(
             path: RouteNames.subscriptions,
             name: 'subscriptions',
             builder: (context, _) => BlocProvider(
@@ -166,6 +156,17 @@ GoRouter createRouter() {
       ),
 
       // Full-screen Modals (root navigator)
+      GoRoute(
+        path: RouteNames.debts,
+        name: 'debts',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, _) => BlocProvider(
+          create: (_) => DebtsBloc(
+            debtRepository: getIt<DebtRepository>(),
+          )..add(const DebtsLoadRequested()),
+          child: const DebtsPage(),
+        ),
+      ),
       GoRoute(
         path: RouteNames.addTransaction,
         name: 'add-transaction',

@@ -54,7 +54,8 @@ class ReceiptRepository {
 
   Future<List<ReceiptHistoryModel>> getHistory() async {
     final response = await _client.dio.get(ApiEndpoints.receipts);
-    final list = response.data['data'] as List? ?? [];
+    final body = response.data['data'] as Map<String, dynamic>;
+    final list = body['data'] as List? ?? [];
     return list
         .map((e) => ReceiptHistoryModel.fromJson(e as Map<String, dynamic>))
         .toList();

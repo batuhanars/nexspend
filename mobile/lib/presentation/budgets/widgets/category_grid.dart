@@ -36,16 +36,21 @@ class CategoryGrid extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Wrap(
-          spacing: AppSpacing.sm,
-          runSpacing: AppSpacing.sm,
-          children: preview
-              .map((cat) => _CategoryChip(
-                    category: cat,
-                    isSelected: selected?.id == cat.id,
-                    onTap: () => onSelect(cat),
-                  ))
-              .toList(),
+        GridView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 4,
+            childAspectRatio: 0.85,
+            crossAxisSpacing: AppSpacing.sm,
+            mainAxisSpacing: AppSpacing.sm,
+          ),
+          itemCount: preview.length,
+          itemBuilder: (context, i) => _CategoryChip(
+            category: preview[i],
+            isSelected: selected?.id == preview[i].id,
+            onTap: () => onSelect(preview[i]),
+          ),
         ),
         if (hasMore) ...[
           const SizedBox(height: AppSpacing.xs),
@@ -104,7 +109,7 @@ class CategoryGrid extends StatelessWidget {
               ),
             ),
             Expanded(
-              child: SingleChildScrollView(
+              child: GridView.builder(
                 controller: scrollCtrl,
                 padding: const EdgeInsets.fromLTRB(
                   AppSpacing.pagePadding,
@@ -112,20 +117,24 @@ class CategoryGrid extends StatelessWidget {
                   AppSpacing.pagePadding,
                   AppSpacing.xxl,
                 ),
-                child: Wrap(
-                  spacing: AppSpacing.sm,
-                  runSpacing: AppSpacing.sm,
-                  children: categories
-                      .map((cat) => _CategoryChip(
-                            category: cat,
-                            isSelected: selected?.id == cat.id,
-                            onTap: () {
-                              onSelect(cat);
-                              Navigator.of(ctx).pop();
-                            },
-                          ))
-                      .toList(),
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 4,
+                  childAspectRatio: 0.85,
+                  crossAxisSpacing: AppSpacing.sm,
+                  mainAxisSpacing: AppSpacing.sm,
                 ),
+                itemCount: categories.length,
+                itemBuilder: (context, i) {
+                  final cat = categories[i];
+                  return _CategoryChip(
+                    category: cat,
+                    isSelected: selected?.id == cat.id,
+                    onTap: () {
+                      onSelect(cat);
+                      Navigator.of(ctx).pop();
+                    },
+                  );
+                },
               ),
             ),
           ],
@@ -153,35 +162,31 @@ class _CategoryChip extends StatelessWidget {
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 150),
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.md,
-          vertical: AppSpacing.sm,
-        ),
         decoration: BoxDecoration(
           color: isSelected
-              ? color.withValues(alpha: 0.2)
-              : AppColors.surfaceContainerHighest,
-          borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-          border: Border.all(
-            color: isSelected ? color : Colors.transparent,
-            width: 1.5,
-          ),
+              ? color.withValues(alpha: 0.15)
+              : AppColors.surfaceContainerHigh,
+          borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+          border: isSelected ? Border.all(color: color, width: 1.5) : null,
         ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
               IconMapper.fromString(category.icon),
-              size: 16,
+              size: 24,
               color: isSelected ? color : AppColors.onSurfaceVariant,
             ),
-            const SizedBox(width: AppSpacing.xs),
+            const SizedBox(height: AppSpacing.xs),
             Text(
               category.localizedName(context),
-              style: AppTypography.bodySm.copyWith(
-                color: isSelected ? color : AppColors.onSurface,
-                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+              style: AppTypography.labelSm.copyWith(
+                color: isSelected ? color : AppColors.onSurfaceVariant,
+                fontSize: 10,
               ),
+              textAlign: TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
             ),
           ],
         ),

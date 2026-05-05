@@ -3,13 +3,14 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
-import '../../../core/constants/app_typography.dart';
 import '../../../core/di/injection.dart';
-import '../../../core/utils/currency_formatter.dart';
 import '../../../data/models/account_model.dart';
 import '../../../data/repositories/account_repository.dart';
 import '../../../navigation/route_names.dart';
 import '../bloc/account_bloc.dart';
+import '../widgets/account_list_tile.dart';
+import '../../shared/widgets/empty_state_view.dart';
+import '../../shared/widgets/error_view.dart';
 
 class AccountsListPage extends StatefulWidget {
   const AccountsListPage({super.key});
@@ -127,10 +128,16 @@ class _AccountsListPageState extends State<AccountsListPage> {
       );
     }
     if (_hasError) {
-      return _ErrorView(onRetry: _load);
+      return ErrorView(message: 'Hesaplar yüklenemedi', onRetry: _load);
     }
     if (accounts.isEmpty) {
-      return _EmptyView(onAdd: _goToAdd);
+      return EmptyStateView(
+        icon: Icons.account_balance_wallet_outlined,
+        title: 'Henüz hesap yok',
+        subtitle: 'İlk hesabınızı ekleyerek başlayın',
+        buttonLabel: 'Hesap Ekle',
+        onAction: _goToAdd,
+      );
     }
     return ListView.builder(
       padding: const EdgeInsets.fromLTRB(
@@ -142,236 +149,10 @@ class _AccountsListPageState extends State<AccountsListPage> {
       itemCount: accounts.length,
       itemBuilder: (context, i) => Padding(
         padding: const EdgeInsets.only(bottom: AppSpacing.md),
-        child: _AccountCard(
+        child: AccountListTile(
           account: accounts[i],
           onTap: () => _goToDetail(accounts[i]),
         ),
-      ),
-    );
-  }
-}
-
-// ── Account card ─────────────────────────────────────────────────────────────
-
-class _AccountCard extends StatelessWidget {
-  const _AccountCard({required this.account, required this.onTap});
-  final AccountModel account;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(AppSpacing.lg),
-        decoration: BoxDecoration(
-          color: AppColors.surfaceContainerHigh,
-          borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Container(
-                  width: 44,
-                  height: 44,
-                  decoration: BoxDecoration(
-                    color: account.cardColor.withValues(alpha: 0.15),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(account.iconData, size: 22, color: account.cardColor),
-                ),
-                const SizedBox(width: AppSpacing.md),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Text(account.name, style: AppTypography.titleSm),
-                          if (account.isDefault) ...[
-                            const SizedBox(width: AppSpacing.sm),
-                            _DefaultBadge(),
-                          ],
-                        ],
-                      ),
-                      Text(
-                        account.type.label,
-                        style: AppTypography.bodySm
-                            .copyWith(color: AppColors.onSurfaceVariant),
-                      ),
-                    ],
-                  ),
-                ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Text(
-                      CurrencyFormatter.format(account.balance),
-                      style: AppTypography.titleSm.copyWith(
-                        color: account.balance >= 0
-                            ? AppColors.onSurface
-                            : AppColors.error,
-                        fontFeatures: const [FontFeature.tabularFigures()],
-                      ),
-                    ),
-                    Text(
-                      account.currency,
-                      style: AppTypography.bodySm
-                          .copyWith(color: AppColors.onSurfaceVariant),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-            if (account.type == AccountType.CREDIT_CARD &&
-                account.creditLimit != null) ...[
-              const SizedBox(height: AppSpacing.md),
-              _CreditBar(account: account),
-            ],
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _DefaultBadge extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: 2),
-      decoration: BoxDecoration(
-        color: AppColors.primary.withValues(alpha: 0.15),
-        borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
-      ),
-      child: Text(
-        'Varsayılan',
-        style: AppTypography.labelSm.copyWith(color: AppColors.primary, fontSize: 10),
-      ),
-    );
-  }
-}
-
-class _CreditBar extends StatelessWidget {
-  const _CreditBar({required this.account});
-  final AccountModel account;
-
-  @override
-  Widget build(BuildContext context) {
-    final pct = account.creditUsagePercent;
-    final barColor = pct > 0.8
-        ? AppColors.error
-        : pct > 0.5
-            ? AppColors.tertiary
-            : AppColors.secondary;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        ClipRRect(
-          borderRadius: BorderRadius.circular(2),
-          child: LinearProgressIndicator(
-            value: pct,
-            backgroundColor: AppColors.surfaceContainerHighest,
-            valueColor: AlwaysStoppedAnimation<Color>(barColor),
-            minHeight: 4,
-          ),
-        ),
-        const SizedBox(height: 4),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              'Kullanılan: ${CurrencyFormatter.format(account.creditUsed)}',
-              style: AppTypography.bodySm.copyWith(color: AppColors.onSurfaceVariant),
-            ),
-            Text(
-              'Limit: ${CurrencyFormatter.format(account.creditLimit!)}',
-              style: AppTypography.bodySm.copyWith(color: AppColors.onSurfaceVariant),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-}
-
-// ── Empty / Error states ─────────────────────────────────────────────────────
-
-class _EmptyView extends StatelessWidget {
-  const _EmptyView({required this.onAdd});
-  final VoidCallback onAdd;
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.xl),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              Icons.account_balance_wallet_outlined,
-              size: 64,
-              color: AppColors.onSurfaceVariant.withValues(alpha: 0.4),
-            ),
-            const SizedBox(height: AppSpacing.lg),
-            Text('Henüz hesap yok', style: AppTypography.titleSm),
-            const SizedBox(height: AppSpacing.sm),
-            Text(
-              'İlk hesabınızı ekleyerek başlayın',
-              style: AppTypography.bodyMd.copyWith(color: AppColors.onSurfaceVariant),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: AppSpacing.xl),
-            FilledButton.icon(
-              onPressed: onAdd,
-              icon: const Icon(Icons.add_rounded),
-              label: const Text('Hesap Ekle'),
-              style: FilledButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                foregroundColor: AppColors.onPrimary,
-                minimumSize: const Size(180, 52),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _ErrorView extends StatelessWidget {
-  const _ErrorView({required this.onRetry});
-  final VoidCallback onRetry;
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            Icons.wifi_off_rounded,
-            size: 48,
-            color: AppColors.onSurfaceVariant.withValues(alpha: 0.4),
-          ),
-          const SizedBox(height: AppSpacing.lg),
-          Text(
-            'Hesaplar yüklenemedi',
-            style: AppTypography.bodyMd.copyWith(color: AppColors.onSurfaceVariant),
-          ),
-          const SizedBox(height: AppSpacing.lg),
-          FilledButton.tonal(
-            onPressed: onRetry,
-            child: const Text('Tekrar Dene'),
-          ),
-        ],
       ),
     );
   }

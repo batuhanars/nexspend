@@ -4,7 +4,9 @@ import 'package:go_router/go_router.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
+import '../../../core/di/injection.dart';
 import '../../../core/l10n/app_strings.dart';
+import '../../../core/services/app_events.dart';
 import '../../../data/models/account_model.dart';
 import '../../../data/models/category_model.dart';
 import '../bloc/add_transaction_bloc.dart';
@@ -136,6 +138,13 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
     return BlocListener<AddTransactionBloc, AddTransactionState>(
       listener: (context, state) {
         if (state is AddTransactionSuccess) {
+          getIt<AppEvents>().transactionAdded();
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(AppStrings.of(context).transactionCreatedSuccess),
+              backgroundColor: AppColors.secondary,
+            ),
+          );
           context.pop(true);
         } else if (state is AddTransactionFailure) {
           _showError(state.message);

@@ -3,7 +3,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_typography.dart';
+import '../../../core/di/injection.dart';
 import '../../../core/l10n/app_strings.dart';
+import '../../../core/services/app_events.dart';
 import '../../../navigation/route_names.dart';
 import '../bloc/transactions_bloc.dart';
 import '../widgets/summary_row.dart';
@@ -37,12 +39,20 @@ class _TransactionsViewState extends State<_TransactionsView> {
   void initState() {
     super.initState();
     _scrollController.addListener(_onScroll);
+    getIt<AppEvents>().addListener(_onTransactionAdded);
   }
 
   @override
   void dispose() {
+    getIt<AppEvents>().removeListener(_onTransactionAdded);
     _scrollController.dispose();
     super.dispose();
+  }
+
+  void _onTransactionAdded() {
+    if (mounted) {
+      context.read<TransactionsBloc>().add(TransactionsRefreshRequested());
+    }
   }
 
   void _onScroll() {

@@ -85,6 +85,12 @@ class _AddSubscriptionSheetState extends State<AddSubscriptionSheet> {
         'nextRenewal': _calcNextRenewal(),
       }),
     );
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(AppStrings.of(context).subscriptionCreatedSuccess),
+        backgroundColor: AppColors.secondary,
+      ),
+    );
     Navigator.of(context).pop();
   }
 

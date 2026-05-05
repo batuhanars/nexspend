@@ -169,6 +169,9 @@ abstract class AppStrings {
   String get passwordMismatch;
   String get passwordTooShort;
   String get transactionCreatedSuccess;
+  String get budgetCreatedSuccess;
+  String get debtCreatedSuccess;
+  String get subscriptionCreatedSuccess;
   String get enterValidAmount;
   String get selectAccount;
   String get selectTargetAccount;
@@ -549,6 +552,9 @@ class _Tr extends AppStrings {
   @override String get passwordMismatch => 'Yeni şifreler eşleşmiyor.';
   @override String get passwordTooShort => 'Şifre en az 8 karakter olmalı.';
   @override String get transactionCreatedSuccess => 'İşlem başarıyla oluşturuldu';
+  @override String get budgetCreatedSuccess => 'Bütçe başarıyla oluşturuldu';
+  @override String get debtCreatedSuccess => 'Borç başarıyla eklendi';
+  @override String get subscriptionCreatedSuccess => 'Abonelik başarıyla eklendi';
   @override String get enterValidAmount => 'Geçerli bir tutar girin.';
   @override String get selectAccount => 'Bir hesap seçin.';
   @override String get selectTargetAccount => 'Hedef hesap seçin.';
@@ -911,6 +917,9 @@ class _En extends AppStrings {
   @override String get passwordMismatch => 'New passwords do not match.';
   @override String get passwordTooShort => 'Password must be at least 8 characters.';
   @override String get transactionCreatedSuccess => 'Transaction created successfully';
+  @override String get budgetCreatedSuccess => 'Budget created successfully';
+  @override String get debtCreatedSuccess => 'Debt added successfully';
+  @override String get subscriptionCreatedSuccess => 'Subscription added successfully';
   @override String get enterValidAmount => 'Enter a valid amount.';
   @override String get selectAccount => 'Select an account.';
   @override String get selectTargetAccount => 'Select a target account.';

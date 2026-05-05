@@ -134,6 +134,12 @@ class _AddBudgetPageState extends State<AddBudgetPage> {
     return BlocListener<AddBudgetBloc, AddBudgetState>(
       listener: (context, state) {
         if (state is AddBudgetSuccess) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(AppStrings.of(context).budgetCreatedSuccess),
+              backgroundColor: AppColors.secondary,
+            ),
+          );
           Navigator.of(context).pop(state.budget);
         } else if (state is AddBudgetFailure) {
           _showError(state.message);

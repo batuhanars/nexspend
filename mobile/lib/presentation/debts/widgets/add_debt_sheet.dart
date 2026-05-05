@@ -56,6 +56,12 @@ class _AddDebtSheetState extends State<AddDebtSheet> {
     };
 
     context.read<DebtsBloc>().add(DebtCreated(data));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(AppStrings.of(context).debtCreatedSuccess),
+        backgroundColor: AppColors.secondary,
+      ),
+    );
     Navigator.of(context).pop();
   }
 

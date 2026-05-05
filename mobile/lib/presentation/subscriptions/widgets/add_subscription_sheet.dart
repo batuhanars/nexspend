@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import '../../../core/l10n/app_strings.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../core/constants/app_colors.dart';
@@ -7,6 +7,7 @@ import '../../../core/constants/app_typography.dart';
 import '../../../core/di/injection.dart';
 import '../../../data/models/account_model.dart';
 import '../../../data/repositories/account_repository.dart';
+import '../../shared/widgets/split_amount_field.dart';
 import '../bloc/subscriptions_bloc.dart';
 
 class AddSubscriptionSheet extends StatefulWidget {
@@ -18,8 +19,8 @@ class AddSubscriptionSheet extends StatefulWidget {
 
 class _AddSubscriptionSheetState extends State<AddSubscriptionSheet> {
   final _nameController = TextEditingController();
-  final _amountController = TextEditingController();
 
+  double? _amount;
   String _period = 'MONTHLY';
   bool _autoDeduct = true;
   String? _selectedAccountId;
@@ -44,7 +45,6 @@ class _AddSubscriptionSheetState extends State<AddSubscriptionSheet> {
   @override
   void dispose() {
     _nameController.dispose();
-    _amountController.dispose();
     super.dispose();
   }
 
@@ -69,8 +69,7 @@ class _AddSubscriptionSheetState extends State<AddSubscriptionSheet> {
 
   void _submit() {
     final name = _nameController.text.trim();
-    final amountStr = _amountController.text.trim().replaceAll(',', '.');
-    final amount = double.tryParse(amountStr);
+    final amount = _amount;
     if (name.isEmpty || amount == null || amount <= 0) return;
     if (_selectedAccountId == null) return;
 
@@ -91,6 +90,7 @@ class _AddSubscriptionSheetState extends State<AddSubscriptionSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final s = AppStrings.of(context);
     return Padding(
       padding: EdgeInsets.fromLTRB(
         AppSpacing.pagePadding,
@@ -105,7 +105,7 @@ class _AddSubscriptionSheetState extends State<AddSubscriptionSheet> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(AppStrings.of(context).addSubscriptionTitle, style: AppTypography.headlineSm),
+              Text(s.addSubscriptionTitle, style: AppTypography.headlineSm),
               IconButton(
                 onPressed: () => Navigator.of(context).pop(),
                 icon: const Icon(Icons.close_rounded),
@@ -113,25 +113,19 @@ class _AddSubscriptionSheetState extends State<AddSubscriptionSheet> {
               ),
             ],
           ),
-          const SizedBox(height: AppSpacing.lg),
-          _field(
-            _nameController,
-            AppStrings.of(context).subscriptionNameHint,
-            Icons.subscriptions_outlined,
+          const SizedBox(height: AppSpacing.xl),
+          Center(
+            child: SplitAmountField(
+              onChanged: (v) => setState(() => _amount = v),
+              color: AppColors.tertiary,
+            ),
           ),
-          const SizedBox(height: AppSpacing.md),
-          _field(
-            _amountController,
-            AppStrings.of(context).amountHint,
-            Icons.attach_money_rounded,
-            numeric: true,
-          ),
+          const SizedBox(height: AppSpacing.xl),
+          _field(_nameController, s.subscriptionNameHint, Icons.subscriptions_outlined),
           const SizedBox(height: AppSpacing.lg),
           Text(
-            AppStrings.of(context).accountLabel,
-            style: AppTypography.labelSm.copyWith(
-              color: AppColors.onSurfaceVariant,
-            ),
+            s.accountLabel,
+            style: AppTypography.labelSm.copyWith(color: AppColors.onSurfaceVariant),
           ),
           const SizedBox(height: AppSpacing.sm),
           FutureBuilder<List<AccountModel>>(
@@ -152,15 +146,11 @@ class _AddSubscriptionSheetState extends State<AddSubscriptionSheet> {
                   ),
                 );
               }
-              final accounts = snapshot.data!
-                  .where((a) => !a.isArchived)
-                  .toList();
+              final accounts = snapshot.data!.where((a) => !a.isArchived).toList();
               if (accounts.isEmpty) {
                 return Text(
-                  AppStrings.of(context).noAccountsFound,
-                  style: AppTypography.bodySm.copyWith(
-                    color: AppColors.onSurfaceVariant,
-                  ),
+                  s.noAccountsFound,
+                  style: AppTypography.bodySm.copyWith(color: AppColors.onSurfaceVariant),
                 );
               }
               if (_selectedAccountId == null) {
@@ -190,11 +180,9 @@ class _AddSubscriptionSheetState extends State<AddSubscriptionSheet> {
                           color: isSelected
                               ? AppColors.primary.withValues(alpha: 0.15)
                               : AppColors.surfaceContainerHighest,
-                          borderRadius:
-                              BorderRadius.circular(AppSpacing.radiusMd),
+                          borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
                           border: isSelected
-                              ? Border.all(
-                                  color: AppColors.primary, width: 1.5)
+                              ? Border.all(color: AppColors.primary, width: 1.5)
                               : null,
                         ),
                         child: Text(
@@ -217,10 +205,8 @@ class _AddSubscriptionSheetState extends State<AddSubscriptionSheet> {
           ),
           const SizedBox(height: AppSpacing.lg),
           Text(
-            AppStrings.of(context).billingCycleLabel,
-            style: AppTypography.labelSm.copyWith(
-              color: AppColors.onSurfaceVariant,
-            ),
+            s.billingCycleLabel,
+            style: AppTypography.labelSm.copyWith(color: AppColors.onSurfaceVariant),
           ),
           const SizedBox(height: AppSpacing.sm),
           Row(
@@ -240,9 +226,7 @@ class _AddSubscriptionSheetState extends State<AddSubscriptionSheet> {
                         color: isActive
                             ? AppColors.primary.withValues(alpha: 0.15)
                             : AppColors.surfaceContainerHighest,
-                        borderRadius: BorderRadius.circular(
-                          AppSpacing.radiusMd,
-                        ),
+                        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
                         border: isActive
                             ? Border.all(color: AppColors.primary, width: 1.5)
                             : null,
@@ -250,9 +234,7 @@ class _AddSubscriptionSheetState extends State<AddSubscriptionSheet> {
                       child: Text(
                         c.label,
                         style: AppTypography.labelSm.copyWith(
-                          fontWeight: isActive
-                              ? FontWeight.w600
-                              : FontWeight.w400,
+                          fontWeight: isActive ? FontWeight.w600 : FontWeight.w400,
                           color: isActive
                               ? AppColors.primary
                               : AppColors.onSurfaceVariant,
@@ -278,17 +260,11 @@ class _AddSubscriptionSheetState extends State<AddSubscriptionSheet> {
               ),
               child: Row(
                 children: [
-                  const Icon(
-                    Icons.autorenew_rounded,
-                    size: 20,
-                    color: AppColors.onSurfaceVariant,
-                  ),
+                  const Icon(Icons.autorenew_rounded,
+                      size: 20, color: AppColors.onSurfaceVariant),
                   const SizedBox(width: AppSpacing.md),
                   Expanded(
-                    child: Text(
-                      AppStrings.of(context).autoDeductLabel,
-                      style: AppTypography.bodyMd,
-                    ),
+                    child: Text(s.autoDeductLabel, style: AppTypography.bodyMd),
                   ),
                   Switch(
                     value: _autoDeduct,
@@ -309,31 +285,20 @@ class _AddSubscriptionSheetState extends State<AddSubscriptionSheet> {
                 borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
               ),
             ),
-            child: Text(AppStrings.of(context).save),
+            child: Text(s.save),
           ),
         ],
       ),
     );
   }
 
-  Widget _field(
-    TextEditingController ctrl,
-    String hint,
-    IconData icon, {
-    bool numeric = false,
-  }) {
+  Widget _field(TextEditingController ctrl, String hint, IconData icon) {
     return TextField(
       controller: ctrl,
-      keyboardType: numeric
-          ? const TextInputType.numberWithOptions(decimal: true)
-          : TextInputType.text,
       style: const TextStyle(color: AppColors.onSurface, fontSize: 14),
       decoration: InputDecoration(
         hintText: hint,
-        hintStyle: const TextStyle(
-          color: AppColors.onSurfaceVariant,
-          fontSize: 14,
-        ),
+        hintStyle: const TextStyle(color: AppColors.onSurfaceVariant, fontSize: 14),
         prefixIcon: Icon(icon, size: 20, color: AppColors.onSurfaceVariant),
         filled: true,
         fillColor: AppColors.surfaceContainerHighest,

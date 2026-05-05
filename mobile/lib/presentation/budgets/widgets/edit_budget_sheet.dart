@@ -63,6 +63,12 @@ class _EditBudgetSheetState extends State<EditBudgetSheet> {
             },
           ),
         );
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(AppStrings.of(context).budgetUpdatedSuccess),
+        backgroundColor: AppColors.secondary,
+      ),
+    );
     Navigator.of(context).pop();
   }
 

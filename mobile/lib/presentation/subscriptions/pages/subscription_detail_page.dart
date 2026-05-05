@@ -132,6 +132,12 @@ class _SubscriptionDetailPageState extends State<SubscriptionDetailPage> {
                       setState(() {
                         _sub = _sub.copyWith(name: name, amount: amount);
                       });
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(AppStrings.of(context).subscriptionUpdatedSuccess),
+                          backgroundColor: AppColors.secondary,
+                        ),
+                      );
                       Navigator.of(ctx).pop();
                     },
                     style: FilledButton.styleFrom(

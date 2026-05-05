@@ -10,68 +10,89 @@ class AmountField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(
-        AppSpacing.xl,
-        AppSpacing.xl,
-        AppSpacing.xl,
-        AppSpacing.lg,
-      ),
-      decoration: BoxDecoration(
-        color: AppColors.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-      ),
-      child: Column(
-        children: [
-          Text(
-            'BÜTÇE TUTARI',
-            style: AppTypography.labelSm.copyWith(
-              color: AppColors.onSurfaceVariant,
-              letterSpacing: 1.2,
-            ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          'BÜTÇE TUTARI',
+          style: AppTypography.labelSm.copyWith(
+            color: AppColors.onSurfaceVariant,
+            letterSpacing: 1.5,
           ),
-          const SizedBox(height: AppSpacing.md),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.baseline,
-            textBaseline: TextBaseline.alphabetic,
-            children: [
-              Text(
+        ),
+        const SizedBox(height: AppSpacing.lg),
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(bottom: 10),
+              child: const Text(
                 '₺',
-                style: AppTypography.headlineMd.copyWith(
+                style: TextStyle(
+                  fontFamily: 'Inter',
+                  fontSize: 28,
+                  fontWeight: FontWeight.w400,
                   color: AppColors.primary,
-                  fontWeight: FontWeight.w300,
+                  height: 1.0,
                 ),
               ),
-              const SizedBox(width: AppSpacing.sm),
-              Expanded(
-                child: TextField(
-                  controller: controller,
-                  keyboardType:
-                      const TextInputType.numberWithOptions(decimal: true),
-                  inputFormatters: [
-                    FilteringTextInputFormatter.allow(RegExp(r'[\d,\.]')),
-                  ],
-                  style: AppTypography.displayLg.copyWith(
-                    color: AppColors.onSurface,
+            ),
+            const SizedBox(width: 6),
+            SizedBox(
+              width: 220,
+              child: TextField(
+                controller: controller,
+                autofocus: true,
+                keyboardType:
+                    const TextInputType.numberWithOptions(decimal: true),
+                inputFormatters: [
+                  FilteringTextInputFormatter.allow(RegExp(r'[\d,.]')),
+                ],
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontFamily: 'Inter',
+                  fontSize: 56,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.onSurface,
+                  height: 1.0,
+                ),
+                cursorColor: AppColors.primary,
+                cursorWidth: 2,
+                cursorHeight: 52,
+                decoration: InputDecoration(
+                  border: InputBorder.none,
+                  hintText: '0',
+                  hintStyle: TextStyle(
+                    fontFamily: 'Inter',
+                    fontSize: 56,
+                    fontWeight: FontWeight.w300,
+                    color: AppColors.onSurfaceVariant.withValues(alpha: 0.2),
+                    height: 1.0,
                   ),
-                  textAlign: TextAlign.center,
-                  decoration: InputDecoration(
-                    hintText: '0',
-                    hintStyle: AppTypography.displayLg.copyWith(
-                      color: AppColors.onSurfaceVariant.withValues(alpha: 0.25),
-                    ),
-                    border: InputBorder.none,
-                    isDense: true,
-                    contentPadding: EdgeInsets.zero,
-                  ),
+                  isDense: true,
+                  contentPadding: EdgeInsets.zero,
                 ),
               ),
-            ],
+            ),
+          ],
+        ),
+        const SizedBox(height: AppSpacing.md),
+        Container(
+          height: 2,
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [
+                Color(0x00BAC3FF),
+                Color(0xB3BAC3FF),
+                Color(0x00BAC3FF),
+              ],
+            ),
+            borderRadius: BorderRadius.circular(1),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }

@@ -333,8 +333,10 @@ class _EditBudgetSheetState extends State<EditBudgetSheet> {
                 ),
                 child: Text(
                   AppStrings.of(context).save,
-                  style: AppTypography.bodyMd
-                      .copyWith(fontWeight: FontWeight.w600),
+                  style: AppTypography.bodyMd.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.surface,
+                  ),
                 ),
               ),
             ),

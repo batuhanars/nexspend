@@ -1,6 +1,6 @@
 # Stitch Wallet App — Görev Takip Dosyası
 
-> Son güncelleme: 3 Mayıs 2026 (Sprint 1 backend Google OAuth güvenlik: `aud` claim doğrulaması + `GoogleMobileAuthDto` + `GOOGLE_CLIENT_ID` .env yapılandırması tamamlandı)  
+> Son güncelleme: 5 Mayıs 2026 (FCM push notification + Cloud Vision OCR entegrasyonu tamamlandı; backend DRY refactoring — BalanceService + FrequencyUtils merkezileştirme)  
 > ✅ = Tamamlandı | 🔧 = Kısmen yapıldı | ❌ = Henüz başlanmadı  
 > ☑ = Kodda mevcut ancak migration henüz çalıştırılmadı
 
@@ -231,7 +231,7 @@
 - [x] `@OnEvent('transaction.updated')` listener — kategori/tutar değişirse güncelle
 - [x] `recalculateSpent()` metodu — ilgili kategorideki EXPENSE'leri topla
 - [x] Bildirim eşikleri: %80 uyarı, %90 kritik, %100+ aşım (log olarak — FCM'siz)
-- [ ] Push notification entegrasyonu (FCM)
+- [x] Push notification entegrasyonu (FCM)
 - [x] Cron Job (09:10): `BudgetDailyCheckJob` — günlük bütçe durumu özeti
 
 ### Frontend
@@ -343,7 +343,7 @@
 
 ### Backend — Fiş Tarama (OCR + Parse)
 - [x] `POST /api/receipts/scan` — görsel yükleme (multer) + hibrit OCR tetikleme
-- [ ] Cloud Vision API entegrasyonu (`OcrService`) — backend fallback (API key gerekli, TODO)
+- [x] Cloud Vision API entegrasyonu (`OcrService`) — backend fallback
 - [x] `ReceiptParserService` — Türkçe fiş parse motoru:
   - [x] TOPLAM tutar çıkarma (TOPLAM/GENEL TOPLAM/TOP./TUTAR regex)
   - [x] Tarih çıkarma (DD/MM/YYYY, DD.MM.YYYY, YYYY-MM-DD)
@@ -617,7 +617,7 @@
 - [x] `@nestjs/event-emitter` paketi kur ve EventEmitterModule'ü global olarak kaydet
 - [x] `@nestjs/schedule` paketi kur ve ScheduleModule'ü kaydet
 - [x] `BalanceService` oluştur (increment/decrement/transfer — Prisma $transaction ile atomik)
-- [ ] `NotificationService` oluştur (FCM entegrasyonu)
+- [x] `NotificationService` oluştur (FCM entegrasyonu)
 - [x] Sistem kategorileri seed data güncelle (+ "Borç Ödemesi", "Alacak Tahsilatı", "Abonelik")
 
 ### Event Akışı
@@ -642,18 +642,18 @@
 | Sprint 1 | Auth | ✅ %100 | ✅ %100 | ✅ Tamamlandı |
 | Sprint 2 | Hesaplar + Dashboard | ✅ %100 | ✅ %100 | ✅ Tamamlandı |
 | Sprint 3 | İşlemler | ✅ %100 | 🔧 %93 | 🔧 Frontend: yalnızca tag seçici eksik (ertelendi) |
-| Sprint 4 | Bütçeler | 🔧 %95 | ✅ %100 | 🔧 Backend FCM bildirim eksik, frontend tamamlandı |
+| Sprint 4 | Bütçeler | ✅ %100 | ✅ %100 | ✅ Tamamlandı |
 | Sprint 5 | Borçlar + Abonelikler | ✅ %100 | ✅ %100 | ✅ Borç detay + Abonelik detay tamamlandı |
-| Sprint 6 | Raporlar + Fiş Tarama | 🔧 %95 | ✅ %100 | 🔧 Backend Cloud Vision stub; frontend tamamlandı |
+| Sprint 6 | Raporlar + Fiş Tarama | ✅ %100 | ✅ %100 | ✅ Tamamlandı |
 | Sprint 7 | Ayarlar + Profil | ✅ %100 | 🔧 %88 | 🔧 Para birimi/dil seçici, l10n eksik |
 | Sprint 8 | Test + Optimizasyon | ✅ %90 | 🔧 %88 | 🔧 Backend: 76 unit + 25 e2e ✅, ESLint 0 hata ✅, Railway ✅; Frontend: shimmer ✅, BLoC testleri 32/32 ✅, empty states ✅, infinite scroll ✅, splash screen ✅; widget/integration testleri + app icon eksik |
 | **Sprint 9** | **Enflasyon Bütçeleme** | ❌ %0 | ❌ %0 | ❌ Başlanmadı |
 | **Sprint 10** | **Altın/Döviz Portföy** | ❌ %0 | ❌ %0 | ❌ Başlanmadı |
 | **Sprint 11** | **Akıllı Harcama Analizi** | ❌ %0 | ❌ %0 | ❌ Başlanmadı |
 | **Sprint 12** | **Aile/Ortak Bütçe (v2)** | ❌ %0 | ❌ %0 | ❌ Başlanmadı |
-| Çapraz | Merkezi Entegrasyon | 🔧 %90 | — | 🔧 Event akışı ✅, Report/Dashboard source filtresi ✅, FCM bildirimleri eksik |
+| Çapraz | Merkezi Entegrasyon | ✅ %100 | — | ✅ Event akışı ✅, Report/Dashboard source filtresi ✅, FCM bildirimleri ✅ |
 
-**Tahmini genel ilerleme: ~%83** — V1 backend ✅ (Sprint 0-8), frontend Sprint 0-8 ~%95  
+**Tahmini genel ilerleme: ~%86** — V1 backend ✅ (Sprint 0-8), frontend Sprint 0-8 ~%95  
 **Toplam sprint: 13** (Sprint 0-8 temel + Sprint 9-12 fark yaratan özellikler)  
 **Sıradaki (Backend):** Sprint 9 (Enflasyon) — V1 backend tamamlandı, Railway'de yayında  
 **Sıradaki (Frontend):** App icon tasarımı veya Sprint 9 başlangıcı

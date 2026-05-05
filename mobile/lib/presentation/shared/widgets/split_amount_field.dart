@@ -75,7 +75,7 @@ class _SplitAmountFieldState extends State<SplitAmountField> {
       fontFamily: 'Inter',
       fontSize: 56,
       fontWeight: FontWeight.w700,
-      color: AppColors.onSurface,
+      color: Colors.white,
       height: 1.0,
     );
 
@@ -83,7 +83,7 @@ class _SplitAmountFieldState extends State<SplitAmountField> {
       fontFamily: 'Inter',
       fontSize: 56,
       fontWeight: FontWeight.w300,
-      color: AppColors.onSurfaceVariant.withValues(alpha: 0.2),
+      color: Colors.white.withValues(alpha: 0.2),
       height: 1.0,
     );
 

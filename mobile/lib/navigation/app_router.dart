@@ -170,20 +170,6 @@ GoRouter createRouter() {
         ),
       ),
       GoRoute(
-        path: '/transactions/:id',
-        name: 'transaction-detail',
-        parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) {
-          final extra = state.extra as Map<String, dynamic>;
-          final transaction = extra['transaction'] as TransactionModel;
-          final bloc = extra['bloc'] as TransactionsBloc;
-          return BlocProvider.value(
-            value: bloc,
-            child: TransactionDetailPage(transaction: transaction),
-          );
-        },
-      ),
-      GoRoute(
         path: RouteNames.addTransaction,
         name: 'add-transaction',
         parentNavigatorKey: _rootNavigatorKey,
@@ -200,6 +186,20 @@ GoRouter createRouter() {
               initialAccountId: extra?['accountId'],
               initialType: extra?['type'],
             ),
+          );
+        },
+      ),
+      GoRoute(
+        path: '/transactions/:id',
+        name: 'transaction-detail',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) {
+          final extra = state.extra as Map<String, dynamic>;
+          final transaction = extra['transaction'] as TransactionModel;
+          final bloc = extra['bloc'] as TransactionsBloc;
+          return BlocProvider.value(
+            value: bloc,
+            child: TransactionDetailPage(transaction: transaction),
           );
         },
       ),

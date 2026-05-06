@@ -1,6 +1,6 @@
 # Stitch Wallet App — Görev Takip Dosyası
 
-> Son güncelleme: 5 Mayıs 2026 (FCM push notification + Cloud Vision OCR entegrasyonu tamamlandı; backend DRY refactoring — BalanceService + FrequencyUtils merkezileştirme)  
+> Son güncelleme: 6 Mayıs 2026 (Sprint 0 CI/CD pipeline tamamlandı — GitHub Actions workflow'ları `api-ci.yml` + `mobile-ci.yml`; PR #1 sırasında ortaya çıkan teknik borç da temizlendi)  
 > ✅ = Tamamlandı | 🔧 = Kısmen yapıldı | ❌ = Henüz başlanmadı  
 > ☑ = Kodda mevcut ancak migration henüz çalıştırılmadı
 
@@ -26,14 +26,14 @@
 - [x] NestJS projesi oluşturuldu (`api/` dizini)
 - [x] Prisma entegrasyonu yapıldı (`prisma/schema.prisma`) — tüm V1+V2 modelleri şemada tanımlı
 - [x] PrismaService + PrismaModule (global) oluşturuldu
-- [x] Migration çalıştırıldı (tüm modeller hazır) — şema hazır, migration henüz çalıştırılmadı
+- [x] Migration çalıştırıldı (V1 modelleri için; V2 modelleri `schema.prisma`'da mevcut — Sprint 9-12 başlangıcında migrate edilecek)
 - [x] Docker Compose yapılandırması (MySQL/MariaDB)
 - [x] Global ValidationPipe, ExceptionFilter, TransformInterceptor
 - [x] CORS yapılandırması
 - [x] Environment değişkenleri (.env)
 - [x] Seed script — 2 seviyeli kategori sistemi (17 gider + 5 gelir ana kategori + alt kategoriler)
 - [x] Seed script — CategoryInflationMap (kategori → TÜİK TÜFE eşleştirmesi)
-- [ ] CI/CD pipeline (lint + test)
+- [x] CI/CD pipeline — GitHub Actions `api-ci.yml`: lint + build + unit (76) + e2e (25, MariaDB container) — `061bbe5`
 
 ### Frontend (Flutter)
 - [x] Flutter projesi oluşturuldu (`mobile/` dizini)
@@ -45,7 +45,7 @@
 - [x] Secure storage (token saklama)
 - [x] CurrencyFormatter utility
 - [x] IconMapper utility
-- [ ] CI/CD pipeline (lint + test)
+- [x] CI/CD pipeline — GitHub Actions `mobile-ci.yml`: flutter analyze + test (33) — `061bbe5`
 
 ---
 
@@ -483,11 +483,13 @@
 > 📖 Detay: `DEVELOPMENT_PLAN_V2.md` → Section 8.6
 
 ### Backend
-- [ ] `InflationRate` modeli + migration (categoryKey, year, month, monthlyRate, yearlyRate)
-- [ ] `CategoryInflationMap` modeli + migration (kategori → TÜİK eşleştirme)
+
+> ☑ Modeller hazır: `InflationRate`, `CategoryInflationMap` — `schema.prisma`'da tanımlı, CategoryInflationMap seed'i Sprint 0'da girildi.
+
+- [ ] Migration çalıştır: `npx prisma migrate dev --name add_inflation_models`
 - [ ] `InflationService` — TÜİK EVDS API entegrasyonu
 - [ ] Cron Job (her ayın 5'i, 10:00): `InflationFetchJob` — aylık TÜFE verilerini çek
-- [ ] TÜİK kategori eşleştirme seed data (Market→Gıda, Ulaşım→Ulaştırma, vb.)
+- [x] TÜİK kategori eşleştirme seed data — Sprint 0'da `CategoryInflationMap` seed olarak girildi
 - [ ] `GET /api/inflation/current` — güncel enflasyon oranları
 - [ ] `GET /api/inflation/history` — geçmiş veriler (?months=6)
 - [ ] `GET /api/budgets/:id/inflation-suggestion` — bütçe ayarlama önerisi hesapla
@@ -507,10 +509,10 @@
 > 📖 Detay: `DEVELOPMENT_PLAN_V2.md` → Section 8.7
 
 ### Backend
-- [ ] `AssetType` enum (USD, EUR, GBP, GOLD_GRAM, GOLD_QUARTER, GOLD_HALF, GOLD_FULL)
-- [ ] `PortfolioAsset` modeli + migration (accountId, assetType, quantity, avgBuyPrice, totalCost)
-- [ ] `PortfolioTx` modeli + migration (alım/satım geçmişi)
-- [ ] `ExchangeRate` modeli + migration (kur cache)
+
+> ☑ Modeller hazır: `AssetType` enum, `PortfolioAsset`, `PortfolioTx`, `ExchangeRate` — `schema.prisma`'da tanımlı.
+
+- [ ] Migration çalıştır: `npx prisma migrate dev --name add_portfolio_models`
 - [ ] `ExchangeRateService` — TCMB + altın API entegrasyonu
 - [ ] Cron Job (saatlik, 08:00-22:00): `ExchangeRateFetchJob` — kur güncelleme
 - [ ] `GET /api/exchange-rates` — güncel tüm kurlar
@@ -540,7 +542,10 @@
 > 📖 Detay: `DEVELOPMENT_PLAN_V2.md` → Section 8.8
 
 ### Backend
-- [ ] `Insight` modeli + migration (ruleId, title, message, severity, period, isRead, isDismissed)
+
+> ☑ Model hazır: `Insight` — `schema.prisma`'da tanımlı.
+
+- [ ] Migration çalıştır: `npx prisma migrate dev --name add_insight_model`
 - [ ] `InsightRulesService` — 7 kural tabanlı analiz motoru:
   - [ ] spending_spike: kategori harcama artışı (%30+ artış tespiti)
   - [ ] unused_subscription: 60 gündür kullanılmayan abonelik
@@ -572,11 +577,10 @@
 > 📖 Detay: `DEVELOPMENT_PLAN_V2.md` → Section 8.9
 
 ### Backend
-- [ ] `FamilyGroup` modeli + migration
-- [ ] `FamilyMember` modeli + migration (role: OWNER/MEMBER)
-- [ ] `FamilyInvite` modeli + migration (token, status, expiresAt)
-- [ ] `SharedBudget` modeli + migration
-- [ ] `SharedExpense` modeli + migration (transactionId, userId, amount)
+
+> ☑ Modeller hazır: `FamilyGroup`, `FamilyMember`, `FamilyInvite`, `SharedBudget`, `SharedExpense` — `schema.prisma`'da tanımlı.
+
+- [ ] Migration çalıştır: `npx prisma migrate dev --name add_family_models`
 - [ ] `FamilyService` — grup oluşturma, davet, üye yönetimi
 - [ ] E-posta davet sistemi (token üretimi + doğrulama)
 - [ ] `@OnEvent('transaction.created')` → SharedBudgetListener:
@@ -638,7 +642,7 @@
 
 | Sprint | Modül | Backend | Frontend | Durum |
 |--------|-------|---------|----------|-------|
-| Sprint 0 | Proje Kurulumu | 🔧 %90 | 🔧 %90 | 🔧 CI/CD eksik |
+| Sprint 0 | Proje Kurulumu | ✅ %100 | ✅ %100 | ✅ CI/CD pipeline tamamlandı (PR #1) |
 | Sprint 1 | Auth | ✅ %100 | ✅ %100 | ✅ Tamamlandı |
 | Sprint 2 | Hesaplar + Dashboard | ✅ %100 | ✅ %100 | ✅ Tamamlandı |
 | Sprint 3 | İşlemler | ✅ %100 | 🔧 %93 | 🔧 Frontend: yalnızca tag seçici eksik (ertelendi) |
@@ -653,7 +657,7 @@
 | **Sprint 12** | **Aile/Ortak Bütçe (v2)** | ❌ %0 | ❌ %0 | ❌ Başlanmadı |
 | Çapraz | Merkezi Entegrasyon | ✅ %100 | — | ✅ Event akışı ✅, Report/Dashboard source filtresi ✅, FCM bildirimleri ✅ |
 
-**Tahmini genel ilerleme: ~%86** — V1 backend ✅ (Sprint 0-8), frontend Sprint 0-8 ~%95  
+**Tahmini genel ilerleme: ~%88** — V1 backend ✅ (Sprint 0-8 + CI/CD), frontend Sprint 0-8 ~%95  
 **Toplam sprint: 13** (Sprint 0-8 temel + Sprint 9-12 fark yaratan özellikler)  
 **Sıradaki (Backend):** Sprint 9 (Enflasyon) — V1 backend tamamlandı, Railway'de yayında  
 **Sıradaki (Frontend):** App icon tasarımı veya Sprint 9 başlangıcı

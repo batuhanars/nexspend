@@ -2,7 +2,6 @@ import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestExpressApplication } from '@nestjs/platform-express';
-import { join } from 'path';
 import { AppModule } from './app.module';
 import { GlobalExceptionFilter } from './common/filters/http-exception.filter';
 import { TransformInterceptor } from './common/interceptors/transform.interceptor';
@@ -10,7 +9,9 @@ import { TransformInterceptor } from './common/interceptors/transform.intercepto
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
-  app.useStaticAssets(join(process.cwd(), 'uploads'), { prefix: '/uploads' });
+  // /uploads klasörü artık public servis edilmiyor — avatar ve fiş görselleri
+  // sadece JWT korumalı streaming endpoint'leri üzerinden erişilebilir
+  // (GET /api/users/me/avatar, GET /api/receipts/:id/image).
 
   const configService = app.get(ConfigService);
   const port = configService.get<number>('port') ?? 3000;
@@ -38,7 +39,7 @@ async function bootstrap() {
   app.useGlobalFilters(new GlobalExceptionFilter());
   app.useGlobalInterceptors(new TransformInterceptor());
 
-  await app.listen(port);
+  await app.listen(port, '0.0.0.0');
   console.log(`Application running on http://localhost:${port}/api`);
 }
 void bootstrap();

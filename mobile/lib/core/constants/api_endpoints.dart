@@ -2,7 +2,7 @@ class ApiEndpoints {
   ApiEndpoints._();
 
   static const String baseUrl =
-      'https://wallet-api.up.railway.app'; // Android emulator → localhost
+      'http://192.168.1.50:3000'; // Android emulator → localhost
 
   // Auth
   static const String register = '/api/auth/register';
@@ -84,6 +84,7 @@ class ApiEndpoints {
   static const String receiptsScan = '/api/receipts/scan';
   static const String receipts = '/api/receipts';
   static String receiptById(String id) => '/api/receipts/$id';
+  static String receiptImage(String id) => '/api/receipts/$id/image';
   static String receiptCreateTransaction(String id) =>
       '/api/receipts/$id/confirm';
   static const String receiptsCheckDuplicate = '/api/receipts/check-duplicate';

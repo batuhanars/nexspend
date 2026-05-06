@@ -24,11 +24,11 @@ class TransactionRepository {
       queryParameters: {
         'page': page,
         'limit': limit,
-        if (type != null) 'type': type,
-        if (accountId != null) 'accountId': accountId,
-        if (startDate != null) 'startDate': startDate,
-        if (endDate != null) 'endDate': endDate,
-        if (search != null) 'search': search,
+        'type': ?type,
+        'accountId': ?accountId,
+        'startDate': ?startDate,
+        'endDate': ?endDate,
+        'search': ?search,
       },
     );
     final envelope = response.data['data'] as Map<String, dynamic>;
@@ -49,8 +49,8 @@ class TransactionRepository {
     final response = await _dio.get(
       ApiEndpoints.transactionsSummary,
       queryParameters: {
-        if (startDate != null) 'startDate': startDate,
-        if (endDate != null) 'endDate': endDate,
+        'startDate': ?startDate,
+        'endDate': ?endDate,
       },
     );
     final d = response.data['data'] as Map<String, dynamic>;

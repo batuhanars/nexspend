@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:wallet_app/core/l10n/app_strings.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:wallet_app/core/constants/app_colors.dart';
@@ -33,8 +33,9 @@ class _ChangePasswordSheetState extends State<ChangePasswordSheet> {
   void _submit() {
     if (_currentCtrl.text.isEmpty ||
         _newCtrl.text.isEmpty ||
-        _confirmCtrl.text.isEmpty)
+        _confirmCtrl.text.isEmpty) {
       return;
+    }
     if (_newCtrl.text != _confirmCtrl.text) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(AppStrings.of(context).passwordMismatch)),

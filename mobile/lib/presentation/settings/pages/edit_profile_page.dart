@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:wallet_app/core/l10n/app_strings.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
@@ -289,7 +289,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
         child: Image.network(
           googleUrl,
           fit: BoxFit.cover,
-          errorBuilder: (_, __, ___) => _InitialsWidget(initials: initials),
+          errorBuilder: (_, _, _) => _InitialsWidget(initials: initials),
         ),
       );
     }

@@ -16,9 +16,9 @@ class ReportRepository {
     final response = await _dio.get(
       ApiEndpoints.reportsExpenseDistribution,
       queryParameters: {
-        if (period != null) 'period': period,
-        if (startDate != null) 'startDate': startDate,
-        if (endDate != null) 'endDate': endDate,
+        'period': ?period,
+        'startDate': ?startDate,
+        'endDate': ?endDate,
       },
     );
     final list = response.data['data'] as List;
@@ -35,9 +35,9 @@ class ReportRepository {
     final response = await _dio.get(
       ApiEndpoints.reportsCashFlow,
       queryParameters: {
-        if (period != null) 'period': period,
-        if (startDate != null) 'startDate': startDate,
-        if (endDate != null) 'endDate': endDate,
+        'period': ?period,
+        'startDate': ?startDate,
+        'endDate': ?endDate,
       },
     );
     final list = response.data['data'] as List;
@@ -52,7 +52,7 @@ class ReportRepository {
     final response = await _dio.get(
       ApiEndpoints.reportsTrends,
       queryParameters: {
-        if (period != null) 'period': period,
+        'period': ?period,
       },
     );
     final list = response.data['data'] as List? ?? [];

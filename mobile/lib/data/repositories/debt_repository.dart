@@ -12,8 +12,8 @@ class DebtRepository {
     final response = await _dio.get(
       ApiEndpoints.debts,
       queryParameters: {
-        if (type != null) 'type': type,
-        if (status != null) 'status': status,
+        'type': ?type,
+        'status': ?status,
       },
     );
     final list = response.data['data'] as List;

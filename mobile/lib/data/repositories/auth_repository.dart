@@ -48,6 +48,10 @@ class AuthRepository {
     await _dio.post(ApiEndpoints.forgotPassword, data: {'email': email});
   }
 
+  Future<void> verifyResetCode({required String token}) async {
+    await _dio.post(ApiEndpoints.verifyResetCode, data: {'token': token});
+  }
+
   Future<void> resetPassword({
     required String token,
     required String newPassword,

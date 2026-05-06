@@ -39,6 +39,14 @@ final class ForgotPasswordSuccess extends AuthState {
   List<Object?> get props => [email];
 }
 
+final class VerifyResetCodeSuccess extends AuthState {
+  const VerifyResetCodeSuccess({required this.token});
+  final String token;
+
+  @override
+  List<Object?> get props => [token];
+}
+
 final class ResetPasswordSuccess extends AuthState {
   const ResetPasswordSuccess();
 }

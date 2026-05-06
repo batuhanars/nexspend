@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/constants/app_colors.dart';
@@ -13,11 +12,11 @@ import '../widgets/auth_button.dart';
 import '../widgets/auth_input_field.dart';
 
 class ResetPasswordPage extends StatefulWidget {
-  const ResetPasswordPage({super.key, this.token});
+  const ResetPasswordPage({super.key, required this.token});
 
-  /// Opsiyonel pre-fill — deep link veya query param'dan gelirse otomatik
-  /// dolar; aksi halde kullanıcı 6 haneli kodu manuel girer.
-  final String? token;
+  /// VerifyResetCodePage'de doğrulanmış 6 haneli kod — bu sayfa direkt
+  /// erişilemez, mutlaka token ile gelinmeli.
+  final String token;
 
   @override
   State<ResetPasswordPage> createState() => _ResetPasswordPageState();
@@ -25,28 +24,21 @@ class ResetPasswordPage extends StatefulWidget {
 
 class _ResetPasswordPageState extends State<ResetPasswordPage> {
   final _formKey = GlobalKey<FormState>();
-  final _tokenController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
-  final _tokenFocus = FocusNode();
   final _passwordFocus = FocusNode();
   final _confirmFocus = FocusNode();
 
   @override
   void initState() {
     super.initState();
-    if (widget.token != null && widget.token!.isNotEmpty) {
-      _tokenController.text = widget.token!;
-    }
     _passwordController.addListener(() => setState(() {}));
   }
 
   @override
   void dispose() {
-    _tokenController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
-    _tokenFocus.dispose();
     _passwordFocus.dispose();
     _confirmFocus.dispose();
     super.dispose();
@@ -56,7 +48,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
     if (_formKey.currentState?.validate() ?? false) {
       context.read<AuthBloc>().add(
             ResetPasswordRequested(
-              token: _tokenController.text.trim(),
+              token: widget.token,
               newPassword: _passwordController.text,
             ),
           );
@@ -122,30 +114,6 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                     style: AppTypography.bodyMd.copyWith(color: AppColors.onSurfaceVariant),
                   ),
                   const SizedBox(height: AppSpacing.xxl),
-                  AuthInputField(
-                    label: AppStrings.of(context).resetCodeLabel,
-                    controller: _tokenController,
-                    icon: Icons.pin_outlined,
-                    keyboardType: TextInputType.number,
-                    textInputAction: TextInputAction.next,
-                    focusNode: _tokenFocus,
-                    inputFormatters: [
-                      FilteringTextInputFormatter.digitsOnly,
-                      LengthLimitingTextInputFormatter(6),
-                    ],
-                    validator: (v) {
-                      final t = v?.trim() ?? '';
-                      if (t.isEmpty) {
-                        return AppStrings.of(context).resetCodeRequired;
-                      }
-                      if (t.length != 6) {
-                        return AppStrings.of(context).resetCodeInvalid;
-                      }
-                      return null;
-                    },
-                    onFieldSubmitted: (_) => _passwordFocus.requestFocus(),
-                  ),
-                  const SizedBox(height: AppSpacing.md),
                   AuthInputField(
                     label: AppStrings.of(context).newPasswordLabel,
                     controller: _passwordController,

@@ -29,7 +29,7 @@ export class MailService {
       await this.transporter.sendMail({
         from,
         to,
-        subject: 'Stitch Wallet — Şifre Sıfırlama Kodu',
+        subject: 'Wallet — Şifre Sıfırlama Kodu',
         html: `
           <div style="font-family: Inter, sans-serif; max-width: 480px; margin: 0 auto; background: #131313; color: #E5E2E1; padding: 32px; border-radius: 16px;">
             <h2 style="color: #BAC3FF; margin-bottom: 8px;">Şifre Sıfırlama</h2>

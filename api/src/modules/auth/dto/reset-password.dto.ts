@@ -11,5 +11,5 @@ export class ResetPasswordDto {
     message:
       'Şifre en az bir büyük harf, bir küçük harf ve bir rakam içermelidir',
   })
-  password: string;
+  newPassword: string;
 }

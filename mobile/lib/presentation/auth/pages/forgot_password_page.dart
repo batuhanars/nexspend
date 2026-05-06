@@ -165,7 +165,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
               child: ElevatedButton(
                 onPressed: () {
                   Navigator.of(context).pop();
-                  context.go(RouteNames.resetPassword);
+                  context.go(RouteNames.verifyResetCode);
                 },
                 child: Text(AppStrings.of(context).enterResetCode),
               ),

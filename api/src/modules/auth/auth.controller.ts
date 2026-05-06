@@ -15,6 +15,7 @@ import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
+import { VerifyResetCodeDto } from './dto/verify-reset-code.dto';
 import { GoogleMobileAuthDto } from './dto/google-mobile-auth.dto';
 import { RefreshTokenGuard } from '../../common/guards/refresh-token.guard';
 import { GoogleAuthGuard } from '../../common/guards/google-auth.guard';
@@ -62,10 +63,17 @@ export class AuthController {
     };
   }
 
+  @Post('verify-reset-code')
+  @HttpCode(HttpStatus.OK)
+  async verifyResetCode(@Body() dto: VerifyResetCodeDto) {
+    await this.authService.verifyResetCode(dto.token);
+    return { message: 'Kod doğrulandı' };
+  }
+
   @Post('reset-password')
   @HttpCode(HttpStatus.OK)
   async resetPassword(@Body() dto: ResetPasswordDto) {
-    await this.authService.resetPassword(dto.token, dto.password);
+    await this.authService.resetPassword(dto.token, dto.newPassword);
     return { message: 'Şifreniz başarıyla güncellendi' };
   }
 

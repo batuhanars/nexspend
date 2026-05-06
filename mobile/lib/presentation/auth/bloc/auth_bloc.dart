@@ -18,6 +18,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<LoginRequested>(_onLoginRequested);
     on<RegisterRequested>(_onRegisterRequested);
     on<ForgotPasswordRequested>(_onForgotPasswordRequested);
+    on<VerifyResetCodeRequested>(_onVerifyResetCodeRequested);
     on<ResetPasswordRequested>(_onResetPasswordRequested);
     on<GoogleSignInRequested>(_onGoogleSignInRequested);
     on<BiometricAuthRequested>(_onBiometricAuthRequested);
@@ -70,6 +71,19 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     try {
       await _authRepository.forgotPassword(email: event.email);
       emit(ForgotPasswordSuccess(email: event.email));
+    } catch (e) {
+      emit(AuthFailure(message: _parseError(e)));
+    }
+  }
+
+  Future<void> _onVerifyResetCodeRequested(
+    VerifyResetCodeRequested event,
+    Emitter<AuthState> emit,
+  ) async {
+    emit(const AuthLoading());
+    try {
+      await _authRepository.verifyResetCode(token: event.token);
+      emit(VerifyResetCodeSuccess(token: event.token));
     } catch (e) {
       emit(AuthFailure(message: _parseError(e)));
     }

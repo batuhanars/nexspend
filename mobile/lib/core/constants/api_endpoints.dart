@@ -10,6 +10,7 @@ class ApiEndpoints {
   static const String googleAuth = '/api/auth/google';
   static const String googleMobileAuth = '/api/auth/google/mobile';
   static const String forgotPassword = '/api/auth/forgot-password';
+  static const String verifyResetCode = '/api/auth/verify-reset-code';
   static const String resetPassword = '/api/auth/reset-password';
   static const String refresh = '/api/auth/refresh';
   static const String logout = '/api/auth/logout';

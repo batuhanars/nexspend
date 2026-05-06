@@ -193,6 +193,19 @@ export class AuthService {
     await this.mailService.sendPasswordReset(user.email, user.fullName, token);
   }
 
+  /**
+   * Token'ı kullanmadan yalnızca geçerlilik kontrolü yapar — kullanıcı kodu
+   * doğrulayıp şifre belirleme ekranına geçerken token'ı boşa harcamamak için.
+   */
+  async verifyResetCode(token: string): Promise<void> {
+    const resetToken = await this.prisma.passwordResetToken.findUnique({
+      where: { token },
+    });
+    if (!resetToken || resetToken.used || resetToken.expiresAt < new Date()) {
+      throw new BadRequestException('Kod geçersiz veya süresi dolmuş');
+    }
+  }
+
   async resetPassword(token: string, newPassword: string): Promise<void> {
     const resetToken = await this.prisma.passwordResetToken.findUnique({
       where: { token },

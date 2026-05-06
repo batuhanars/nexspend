@@ -10,6 +10,7 @@ import '../presentation/auth/pages/login_page.dart';
 import '../presentation/auth/pages/register_page.dart';
 import '../presentation/auth/pages/forgot_password_page.dart';
 import '../presentation/auth/pages/reset_password_page.dart';
+import '../presentation/auth/pages/verify_reset_code_page.dart';
 import '../presentation/dashboard/pages/dashboard_page.dart';
 import '../presentation/transactions/pages/transactions_page.dart';
 import '../presentation/transactions/pages/add_transaction_page.dart';
@@ -103,15 +104,28 @@ GoRouter createRouter() {
         ),
       ),
       GoRoute(
-        path: RouteNames.resetPassword,
-        name: 'reset-password',
-        builder: (_, state) {
-          final token = state.uri.queryParameters['token'];
-          return BlocProvider(
-            create: (_) => AuthBloc(
+        path: RouteNames.verifyResetCode,
+        name: 'verify-reset-code',
+        builder: (context, _) => BlocProvider(
+          create: (_) => AuthBloc(
             authRepository: getIt<AuthRepository>(),
             localAuthService: getIt<LocalAuthService>(),
           ),
+          child: const VerifyResetCodePage(),
+        ),
+      ),
+      GoRoute(
+        path: RouteNames.resetPassword,
+        name: 'reset-password',
+        builder: (_, state) {
+          final token = state.uri.queryParameters['token'] ?? '';
+          // Token zorunlu — kullanıcı bu sayfaya kod doğruladıktan sonra
+          // VerifyResetCodePage üzerinden yönlendirilir.
+          return BlocProvider(
+            create: (_) => AuthBloc(
+              authRepository: getIt<AuthRepository>(),
+              localAuthService: getIt<LocalAuthService>(),
+            ),
             child: ResetPasswordPage(token: token),
           );
         },
@@ -382,6 +396,7 @@ Future<String?> _redirect(BuildContext context, GoRouterState state) async {
   final isLoggedIn = await storage.hasTokens();
   final isOnAuthPage = state.matchedLocation == RouteNames.login ||
       state.matchedLocation == RouteNames.register ||
+      state.matchedLocation == RouteNames.verifyResetCode ||
       state.matchedLocation == RouteNames.forgotPassword ||
       state.matchedLocation == RouteNames.resetPassword;
 

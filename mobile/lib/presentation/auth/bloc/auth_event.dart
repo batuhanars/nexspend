@@ -38,6 +38,14 @@ final class ForgotPasswordRequested extends AuthEvent {
   List<Object?> get props => [email];
 }
 
+final class VerifyResetCodeRequested extends AuthEvent {
+  const VerifyResetCodeRequested({required this.token});
+  final String token;
+
+  @override
+  List<Object?> get props => [token];
+}
+
 final class ResetPasswordRequested extends AuthEvent {
   const ResetPasswordRequested({
     required this.token,

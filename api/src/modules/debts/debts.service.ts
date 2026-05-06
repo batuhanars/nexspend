@@ -158,6 +158,32 @@ export class DebtsService {
       );
     }
 
+    // Taksitli ödemede vade kilidi: vadesi gelmemiş taksit ön ödenemez/tahsil
+    // edilemez. UI butonu zaten disabled gönderiyor; bu kontrol manuel API
+    // çağrılarına karşı koruma.
+    if (dto.installmentId) {
+      const installment = await this.prisma.debtInstallment.findFirst({
+        where: { id: dto.installmentId, debtId },
+      });
+      if (!installment) throw new NotFoundException('Taksit bulunamadı');
+      const today = new Date();
+      const dueDay = new Date(
+        installment.dueDate.getUTCFullYear(),
+        installment.dueDate.getUTCMonth(),
+        installment.dueDate.getUTCDate(),
+      );
+      const todayDay = new Date(
+        today.getFullYear(),
+        today.getMonth(),
+        today.getDate(),
+      );
+      if (dueDay.getTime() > todayDay.getTime()) {
+        throw new BadRequestException(
+          'Vadesi gelmemiş taksit ödenemez/tahsil edilemez',
+        );
+      }
+    }
+
     const paidAt = dto.paidAt ? new Date(dto.paidAt) : new Date();
     const systemCategory = await this.getSystemCategory(debt.type);
 

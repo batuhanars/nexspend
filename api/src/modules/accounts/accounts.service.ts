@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-argument */
 import {
   Injectable,
   Logger,
@@ -32,27 +33,47 @@ export class AccountsService {
   }
 
   async create(userId: string, dto: CreateAccountDto) {
-    if (dto.isDefault) {
-      await this.prisma.account.updateMany({
-        where: { userId, isDefault: true },
-        data: { isDefault: false },
-      });
-    }
+    const account = await this.prisma.$transaction(async (tx) => {
+      if (dto.isDefault) {
+        await tx.account.updateMany({
+          where: { userId, isDefault: true },
+          data: { isDefault: false },
+        });
+      }
 
-    const account = await this.prisma.account.create({
-      data: {
-        userId,
-        name: dto.name,
-        type: dto.type,
-        balance: dto.balance ?? 0,
-        currency: dto.currency ?? 'TRY',
-        icon: dto.icon ?? null,
-        color: dto.color ?? null,
-        isDefault: dto.isDefault ?? false,
-        creditLimit: dto.creditLimit ?? null,
-        statementDay: dto.statementDay ?? null,
-        paymentDueDay: dto.paymentDueDay ?? null,
-      },
+      const created = await tx.account.create({
+        data: {
+          userId,
+          name: dto.name,
+          type: dto.type,
+          balance: dto.balance ?? 0,
+          currency: dto.currency ?? 'TRY',
+          icon: dto.icon ?? null,
+          color: dto.color ?? null,
+          isDefault: dto.isDefault ?? false,
+          creditLimit: dto.creditLimit ?? null,
+          statementDay: dto.statementDay ?? null,
+          paymentDueDay: dto.paymentDueDay ?? null,
+        },
+      });
+
+      // Kredi kartı açılış borcu varsa ekstre dönemine dahil edilmek üzere
+      // EXPENSE kaydı oluştur. Bakiye hesap üzerinde zaten set edildi,
+      // BalanceService çağrılmaz — sadece transaction kaydı yeterli.
+      if (created.type === AccountType.CREDIT_CARD && (dto.balance ?? 0) < 0) {
+        await tx.transaction.create({
+          data: {
+            userId,
+            accountId: created.id,
+            type: TransactionType.EXPENSE,
+            amount: Math.abs(dto.balance!),
+            title: 'Açılış bakiyesi',
+            transactionDate: created.createdAt,
+          },
+        });
+      }
+
+      return created;
     });
 
     return this.format(account);

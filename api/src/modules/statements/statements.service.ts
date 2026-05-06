@@ -162,8 +162,8 @@ export class StatementsService {
 
   async closeStatementsForDate(date: Date = new Date()): Promise<number> {
     const today = startOfDay(date);
-    const dayOfMonth = today.getDate();
-    const lastDay = endOfMonth(today).getDate();
+    const dayOfMonth = today.getUTCDate();
+    const lastDay = endOfMonth(today).getUTCDate();
 
     // statementDay=31 olan kart için Şubat'ta ay sonu kapatma yapmak gerekiyor.
     // O yüzden ya bugün == statementDay ya da bugün ay sonu AND statementDay > ay sonu.
@@ -431,33 +431,37 @@ export class StatementsService {
 // Tarih yardımcıları — module-private
 // =============================================
 
+/**
+ * Verilen Date'in lokal takvim gününü UTC midnight olarak döner. Prisma
+ * `@db.Date` kolonları UTC tarih portion'ı saklar, lokal midnight gönderdiğin
+ * tarih TR (UTC+3) gibi pozitif timezone'larda bir gün geriye kayar — bu yüzden
+ * tüm DB karşılaştırmaları için UTC midnight kritik.
+ */
 function startOfDay(d: Date): Date {
-  const x = new Date(d);
-  x.setHours(0, 0, 0, 0);
-  return x;
+  return new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
 }
 
 function endOfDay(d: Date): Date {
-  const x = new Date(d);
-  x.setHours(23, 59, 59, 999);
-  return x;
+  return new Date(
+    Date.UTC(d.getFullYear(), d.getMonth(), d.getDate(), 23, 59, 59, 999),
+  );
 }
 
 function endOfMonth(d: Date): Date {
-  return new Date(d.getFullYear(), d.getMonth() + 1, 0);
+  return new Date(Date.UTC(d.getFullYear(), d.getMonth() + 1, 0));
 }
 
 function addDays(d: Date, n: number): Date {
   const x = new Date(d);
-  x.setDate(x.getDate() + n);
+  x.setUTCDate(x.getUTCDate() + n);
   return x;
 }
 
 function isSameDay(a: Date, b: Date): boolean {
   return (
-    a.getFullYear() === b.getFullYear() &&
-    a.getMonth() === b.getMonth() &&
-    a.getDate() === b.getDate()
+    a.getUTCFullYear() === b.getUTCFullYear() &&
+    a.getUTCMonth() === b.getUTCMonth() &&
+    a.getUTCDate() === b.getUTCDate()
   );
 }
 
@@ -467,18 +471,18 @@ function isSameDay(a: Date, b: Date): boolean {
  * büyükse ay sonuna sıkıştırılır (örn. dueDay=31, Şubat → 28/29).
  */
 function computeDueDate(cutoffDate: Date, dueDay: number): Date {
-  let year = cutoffDate.getFullYear();
-  let month = cutoffDate.getMonth();
-  if (dueDay <= cutoffDate.getDate()) {
+  let year = cutoffDate.getUTCFullYear();
+  let month = cutoffDate.getUTCMonth();
+  if (dueDay <= cutoffDate.getUTCDate()) {
     month += 1;
     if (month > 11) {
       month = 0;
       year += 1;
     }
   }
-  const lastDayOfMonth = new Date(year, month + 1, 0).getDate();
+  const lastDayOfMonth = new Date(Date.UTC(year, month + 1, 0)).getUTCDate();
   const day = Math.min(dueDay, lastDayOfMonth);
-  return new Date(year, month, day);
+  return new Date(Date.UTC(year, month, day));
 }
 
 /**
@@ -486,16 +490,16 @@ function computeDueDate(cutoffDate: Date, dueDay: number): Date {
  * göstermek için periodEnd hesaplamasında kullanılır.
  */
 function computeNextCutoff(today: Date, statementDay: number): Date {
-  let year = today.getFullYear();
-  let month = today.getMonth();
-  if (statementDay < today.getDate()) {
+  let year = today.getUTCFullYear();
+  let month = today.getUTCMonth();
+  if (statementDay < today.getUTCDate()) {
     month += 1;
     if (month > 11) {
       month = 0;
       year += 1;
     }
   }
-  const lastDayOfMonth = new Date(year, month + 1, 0).getDate();
+  const lastDayOfMonth = new Date(Date.UTC(year, month + 1, 0)).getUTCDate();
   const day = Math.min(statementDay, lastDayOfMonth);
-  return new Date(year, month, day);
+  return new Date(Date.UTC(year, month, day));
 }

@@ -39,10 +39,11 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         password: event.password,
       );
       emit(const AuthAuthenticated());
-      getIt<NotificationService>().initialize();
     } catch (e) {
       emit(AuthFailure(message: _parseError(e)));
+      return;
     }
+    try { getIt<NotificationService>().initialize(); } catch (_) {}
   }
 
   Future<void> _onRegisterRequested(
@@ -57,10 +58,11 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         password: event.password,
       );
       emit(const AuthAuthenticated());
-      getIt<NotificationService>().initialize();
     } catch (e) {
       emit(AuthFailure(message: _parseError(e)));
+      return;
     }
+    try { getIt<NotificationService>().initialize(); } catch (_) {}
   }
 
   Future<void> _onForgotPasswordRequested(
@@ -113,10 +115,11 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     try {
       await _authRepository.googleSignIn();
       emit(const AuthAuthenticated());
-      getIt<NotificationService>().initialize();
     } catch (e) {
       emit(AuthFailure(message: _parseError(e)));
+      return;
     }
+    try { getIt<NotificationService>().initialize(); } catch (_) {}
   }
 
   Future<void> _onBiometricAuthRequested(

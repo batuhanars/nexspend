@@ -123,7 +123,7 @@ void main() {
 
   group('BudgetUpdateRequested', () {
     blocTest<BudgetsBloc, BudgetsState>(
-      'güncelleme başarılı olduğunda liste yenilenir',
+      'güncelleme başarılı olduğunda optimistic emit sonra liste yenilenir',
       build: () {
         when(() => repo.update('b-1', any())).thenAnswer((_) async => _budget1);
         stubSuccess();
@@ -132,12 +132,13 @@ void main() {
       seed: () => BudgetsLoaded(overview: _overview, budgets: [_budget1, _budget2]),
       act: (bloc) => bloc.add(BudgetUpdateRequested(id: 'b-1', data: {'amount': 3500})),
       expect: () => [
+        isA<BudgetsLoaded>().having((s) => s.budgets.length, 'optimistic', 2),
         isA<BudgetsLoaded>().having((s) => s.budgets.length, 'yenileme', 2),
       ],
     );
 
     blocTest<BudgetsBloc, BudgetsState>(
-      'güncelleme API başarısız olursa state değişmez',
+      'güncelleme API başarısız olursa optimistic emit sonra orijinal state geri yüklenir',
       build: () {
         when(() => repo.update('b-1', any()))
             .thenThrow(Exception('server error'));
@@ -145,7 +146,10 @@ void main() {
       },
       seed: () => BudgetsLoaded(overview: _overview, budgets: [_budget1, _budget2]),
       act: (bloc) => bloc.add(BudgetUpdateRequested(id: 'b-1', data: {'amount': 3500})),
-      expect: () => [],
+      expect: () => [
+        isA<BudgetsLoaded>().having((s) => s.budgets.length, 'optimistic', 2),
+        isA<BudgetsLoaded>().having((s) => s.budgets.length, 'revert', 2),
+      ],
     );
   });
 

@@ -176,7 +176,10 @@ export class AuthService {
       data: { used: true },
     });
 
-    const token = crypto.randomBytes(32).toString('hex');
+    // 6 haneli sayısal kod — kullanıcı uygulamada manuel girer.
+    // Çakışma riski 900K kombinasyon içinde düşük; çakışırsa Prisma `P2002`
+    // atar ve flow başarısız olur (kullanıcı "tekrar dene" der).
+    const token = String(crypto.randomInt(100000, 1000000));
     const expiresAt = addHours(new Date(), 1);
 
     await this.prisma.passwordResetToken.create({

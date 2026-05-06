@@ -106,7 +106,7 @@ GoRouter createRouter() {
         path: RouteNames.resetPassword,
         name: 'reset-password',
         builder: (_, state) {
-          final token = state.uri.queryParameters['token'] ?? '';
+          final token = state.uri.queryParameters['token'];
           return BlocProvider(
             create: (_) => AuthBloc(
             authRepository: getIt<AuthRepository>(),

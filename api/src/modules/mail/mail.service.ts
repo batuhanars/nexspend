@@ -23,23 +23,23 @@ export class MailService {
     fullName: string,
     token: string,
   ): Promise<void> {
-    const frontendUrl = this.configService.get<string>('frontend.url');
-    const resetUrl = `${frontendUrl}/reset-password/${token}`;
     const from = this.configService.get<string>('mail.from');
 
     try {
       await this.transporter.sendMail({
         from,
         to,
-        subject: 'Stitch Wallet — Şifre Sıfırlama',
+        subject: 'Stitch Wallet — Şifre Sıfırlama Kodu',
         html: `
           <div style="font-family: Inter, sans-serif; max-width: 480px; margin: 0 auto; background: #131313; color: #E5E2E1; padding: 32px; border-radius: 16px;">
             <h2 style="color: #BAC3FF; margin-bottom: 8px;">Şifre Sıfırlama</h2>
             <p>Merhaba <strong>${fullName}</strong>,</p>
-            <p>Şifrenizi sıfırlamak için aşağıdaki butona tıklayın. Bu bağlantı <strong>1 saat</strong> geçerlidir.</p>
-            <a href="${resetUrl}" style="display: inline-block; margin: 24px 0; padding: 14px 28px; background: #BAC3FF; color: #131313; border-radius: 24px; text-decoration: none; font-weight: 600;">
-              Şifremi Sıfırla
-            </a>
+            <p>Şifrenizi sıfırlamak için aşağıdaki kodu uygulamada girin. Bu kod <strong>1 saat</strong> geçerlidir.</p>
+            <div style="margin: 28px 0; text-align: center;">
+              <div style="display: inline-block; padding: 20px 32px; background: #2A2A2A; border-radius: 12px; letter-spacing: 12px; font-size: 32px; font-weight: 700; color: #BAC3FF; font-family: 'Courier New', monospace;">
+                ${token}
+              </div>
+            </div>
             <p style="color: #9E9E9E; font-size: 13px;">Bu isteği siz yapmadıysanız bu e-postayı görmezden gelebilirsiniz.</p>
           </div>
         `,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
@@ -16,6 +17,7 @@ class AuthInputField extends StatefulWidget {
     this.onFieldSubmitted,
     this.focusNode,
     this.autofillHints,
+    this.inputFormatters,
   });
 
   final String label;
@@ -28,6 +30,7 @@ class AuthInputField extends StatefulWidget {
   final ValueChanged<String>? onFieldSubmitted;
   final FocusNode? focusNode;
   final Iterable<String>? autofillHints;
+  final List<TextInputFormatter>? inputFormatters;
 
   @override
   State<AuthInputField> createState() => _AuthInputFieldState();
@@ -47,6 +50,7 @@ class _AuthInputFieldState extends State<AuthInputField> {
       validator: widget.validator,
       onFieldSubmitted: widget.onFieldSubmitted,
       autofillHints: widget.autofillHints,
+      inputFormatters: widget.inputFormatters,
       style: AppTypography.bodyMd.copyWith(color: AppColors.onSurface),
       decoration: InputDecoration(
         labelText: widget.label,

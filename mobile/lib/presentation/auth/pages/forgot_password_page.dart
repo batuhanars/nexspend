@@ -6,6 +6,7 @@ import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
 import '../../../core/l10n/app_strings.dart';
 import '../../../core/utils/validators.dart';
+import '../../../navigation/route_names.dart';
 import '../bloc/auth_bloc.dart';
 import '../widgets/auth_button.dart';
 import '../widgets/auth_input_field.dart';
@@ -164,9 +165,9 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
               child: ElevatedButton(
                 onPressed: () {
                   Navigator.of(context).pop();
-                  context.pop();
+                  context.go(RouteNames.resetPassword);
                 },
-                child: Text(AppStrings.of(context).ok),
+                child: Text(AppStrings.of(context).enterResetCode),
               ),
             ),
           ],

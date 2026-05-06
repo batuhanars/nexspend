@@ -222,6 +222,10 @@ abstract class AppStrings {
   String resetLinkSentContent(String email);
   String get resetPasswordTitle;
   String get resetPasswordSubtitle;
+  String get resetCodeLabel;
+  String get resetCodeRequired;
+  String get resetCodeInvalid;
+  String get enterResetCode;
   String get newPasswordLabel;
   String get updatePasswordBtn;
   String get passwordRequirements;
@@ -639,7 +643,12 @@ class _Tr extends AppStrings {
   @override String get resetLinkSentTitle => 'Bağlantı Gönderildi!';
   @override String resetLinkSentContent(String email) => '$email adresine şifre sıfırlama bağlantısı gönderildi.';
   @override String get resetPasswordTitle => 'Yeni Şifrenizi\nBelirleyin';
-  @override String get resetPasswordSubtitle => 'Güvenli bir şifre oluşturun.';
+  @override String get resetPasswordSubtitle =>
+      'E-postanıza gönderilen 6 haneli kodu girin ve yeni şifrenizi belirleyin.';
+  @override String get resetCodeLabel => 'Sıfırlama Kodu';
+  @override String get resetCodeRequired => 'Kodu girin';
+  @override String get resetCodeInvalid => 'Kod 6 haneli olmalı';
+  @override String get enterResetCode => 'Kodu Gir';
   @override String get newPasswordLabel => 'Yeni Şifre';
   @override String get updatePasswordBtn => 'Şifreyi Güncelle';
   @override String get passwordRequirements => 'Şifre Gereksinimleri';
@@ -1043,7 +1052,12 @@ class _En extends AppStrings {
   @override String get resetLinkSentTitle => 'Link Sent!';
   @override String resetLinkSentContent(String email) => 'A password reset link has been sent to $email.';
   @override String get resetPasswordTitle => 'Set Your\nNew Password';
-  @override String get resetPasswordSubtitle => 'Create a secure password.';
+  @override String get resetPasswordSubtitle =>
+      'Enter the 6-digit code sent to your email and choose a new password.';
+  @override String get resetCodeLabel => 'Reset Code';
+  @override String get resetCodeRequired => 'Enter the code';
+  @override String get resetCodeInvalid => 'Code must be 6 digits';
+  @override String get enterResetCode => 'Enter Code';
   @override String get newPasswordLabel => 'New Password';
   @override String get updatePasswordBtn => 'Update Password';
   @override String get passwordRequirements => 'Password Requirements';

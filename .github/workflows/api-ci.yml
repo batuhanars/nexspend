@@ -1,24 +1,40 @@
 name: API CI
 
+# Her PR ve main push'unda tetiklenir. İçerideki "changes" job'u
+# api/ veya bu workflow değişip değişmediğine bakar; ilgisiz değişikliklerde
+# downstream job'lar SKIPPED olur — bu da branch protection için PASS sayılır.
+# Böylece doc-only PR'lar da required check'leri yeşilleştirebilir.
+
 on:
   push:
     branches: [main]
-    paths:
-      - 'api/**'
-      - '.github/workflows/api-ci.yml'
   pull_request:
     branches: [main]
-    paths:
-      - 'api/**'
-      - '.github/workflows/api-ci.yml'
 
 defaults:
   run:
     working-directory: api
 
 jobs:
+  changes:
+    name: Detect changes
+    runs-on: ubuntu-latest
+    outputs:
+      relevant: ${{ steps.filter.outputs.relevant }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            relevant:
+              - 'api/**'
+              - '.github/workflows/api-ci.yml'
+
   lint-build-unit:
     name: Lint + Build + Unit Tests
+    needs: changes
+    if: needs.changes.outputs.relevant == 'true'
     runs-on: ubuntu-latest
 
     steps:
@@ -48,6 +64,8 @@ jobs:
 
   e2e:
     name: E2E Tests
+    needs: changes
+    if: needs.changes.outputs.relevant == 'true'
     runs-on: ubuntu-latest
 
     services:

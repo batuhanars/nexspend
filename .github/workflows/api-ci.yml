@@ -1,0 +1,122 @@
+name: API CI
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'api/**'
+      - '.github/workflows/api-ci.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'api/**'
+      - '.github/workflows/api-ci.yml'
+
+defaults:
+  run:
+    working-directory: api
+
+jobs:
+  lint-build-unit:
+    name: Lint + Build + Unit Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: api/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Prisma client
+        run: npx prisma generate
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Unit tests
+        run: npm run test
+
+      - name: Build
+        run: npm run build
+
+  e2e:
+    name: E2E Tests
+    runs-on: ubuntu-latest
+
+    services:
+      mariadb:
+        image: mariadb:10.11
+        env:
+          MARIADB_ROOT_PASSWORD: rootpw
+          MARIADB_DATABASE: wallet_test
+          MARIADB_USER: wallet_user
+          MARIADB_PASSWORD: wallet_pass
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="healthcheck.sh --connect --innodb_initialized"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+
+    env:
+      DATABASE_URL: mysql://wallet_user:wallet_pass@127.0.0.1:3306/wallet_test
+      JWT_SECRET: ci-test-jwt-secret-not-for-production
+      JWT_REFRESH_SECRET: ci-test-jwt-refresh-secret-not-for-production
+      JWT_ACCESS_EXPIRES_IN: 15m
+      JWT_REFRESH_EXPIRES_IN: 7d
+      GOOGLE_CLIENT_ID: ci-test-client-id
+      GOOGLE_CLIENT_SECRET: ci-test-client-secret
+      GOOGLE_CALLBACK_URL: http://localhost:3000/api/auth/google/callback
+      MAIL_HOST: localhost
+      MAIL_PORT: 587
+      MAIL_USER: ci-test
+      MAIL_PASS: ci-test
+      MAIL_FROM: ci@test.local
+      FRONTEND_URL: http://localhost:3001
+      UPLOAD_DIR: ./uploads
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: api/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Prisma client
+        run: npx prisma generate
+
+      - name: Wait for MariaDB
+        run: |
+          for i in {1..30}; do
+            if mysqladmin ping -h 127.0.0.1 -P 3306 -uwallet_user -pwallet_pass --silent; then
+              echo "MariaDB is ready"
+              exit 0
+            fi
+            echo "Waiting for MariaDB... ($i/30)"
+            sleep 2
+          done
+          echo "MariaDB did not become ready in time"
+          exit 1
+
+      - name: Run migrations
+        run: npx prisma migrate deploy
+
+      - name: Seed database
+        run: npm run db:seed
+
+      - name: E2E tests
+        run: npm run test:e2e

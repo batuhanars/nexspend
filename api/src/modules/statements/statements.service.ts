@@ -13,6 +13,7 @@ import {
 } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import { BalanceService } from '../../common/services/balance.service';
+import { NotificationsService } from '../notifications/notifications.service';
 import { PayStatementDto } from './dto/pay-statement.dto';
 
 /**
@@ -28,6 +29,7 @@ export class StatementsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly balanceService: BalanceService,
+    private readonly notifications: NotificationsService,
   ) {}
 
   // -----------------------------------------------------------------
@@ -271,6 +273,77 @@ export class StatementsService {
       this.logger.log(`${result.count} ekstre OVERDUE olarak işaretlendi`);
     }
     return result.count;
+  }
+
+  // -----------------------------------------------------------------
+  // Vade bildirimleri — günlük cron tarafından çağrılır
+  // -----------------------------------------------------------------
+
+  /**
+   * Eşik günlerine (-3 / 0 / +1 / +3 / +7) denk gelen açık ekstreler için
+   * push bildirimi gönderir. Cron günde bir kez çalıştığı için aynı statement
+   * aynı eşikte tek bildirim alır — ek state tutulmuyor.
+   */
+  async notifyDueStatements(date: Date = new Date()): Promise<number> {
+    const today = startOfDay(date);
+
+    const targetDates = [
+      { offset: -3, kind: 'reminder' as const }, // 3 gün sonra vade
+      { offset: 0, kind: 'today' as const }, // bugün vade
+      { offset: 1, kind: 'overdue1' as const }, // 1 gün geçti
+      { offset: 3, kind: 'overdue3' as const }, // 3 gün geçti
+      { offset: 7, kind: 'overdue7' as const }, // 1 hafta geçti
+    ];
+
+    const dueDates = targetDates.map(({ offset }) => addDays(today, -offset));
+
+    const statements = await this.prisma.creditCardStatement.findMany({
+      where: {
+        status: { not: StatementStatus.PAID },
+        dueDate: { in: dueDates },
+      },
+      include: {
+        account: { select: { id: true, name: true, userId: true } },
+      },
+    });
+
+    if (statements.length === 0) return 0;
+
+    let sent = 0;
+    for (const s of statements) {
+      const offset = Math.round(
+        (today.getTime() - new Date(s.dueDate).getTime()) /
+          (1000 * 60 * 60 * 24),
+      );
+      const remaining = Number(s.totalAmount) - Number(s.paidAmount);
+      if (remaining <= 0.005) continue;
+
+      const remainingFmt = remaining.toFixed(2);
+      let title: string;
+      let body: string;
+      if (offset === -3) {
+        title = 'Kredi kartı vadesi yaklaşıyor';
+        body = `${s.account.name} · 3 gün sonra ${remainingFmt} TL ödemeniz var`;
+      } else if (offset === 0) {
+        title = 'Kredi kartı vadesi bugün';
+        body = `${s.account.name} · ${remainingFmt} TL ödemeniz var`;
+      } else {
+        title = 'Kredi kartı borcu vadesi geçti';
+        body = `${s.account.name} · ${offset} gün gecikme · ${remainingFmt} TL`;
+      }
+
+      await this.notifications.sendToUser(s.account.userId, title, body, {
+        type: 'credit_card_statement',
+        statementId: s.id,
+        accountId: s.account.id,
+      });
+      sent++;
+    }
+
+    if (sent > 0) {
+      this.logger.log(`${sent} ekstre vade bildirimi gönderildi`);
+    }
+    return sent;
   }
 
   // -----------------------------------------------------------------

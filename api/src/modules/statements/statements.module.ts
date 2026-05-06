@@ -3,6 +3,7 @@ import { StatementsController } from './statements.controller';
 import { StatementsService } from './statements.service';
 import { StatementCloseJob } from './jobs/statement-close.job';
 import { StatementOverdueJob } from './jobs/statement-overdue.job';
+import { StatementDueNotifyJob } from './jobs/statement-due-notify.job';
 import { BalanceService } from '../../common/services/balance.service';
 
 @Module({
@@ -11,6 +12,7 @@ import { BalanceService } from '../../common/services/balance.service';
     StatementsService,
     StatementCloseJob,
     StatementOverdueJob,
+    StatementDueNotifyJob,
     BalanceService,
   ],
   exports: [StatementsService],

@@ -1,24 +1,40 @@
 name: Mobile CI
 
+# Her PR ve main push'unda tetiklenir. İçerideki "changes" job'u
+# mobile/ veya bu workflow değişip değişmediğine bakar; ilgisiz
+# değişikliklerde downstream job'u SKIPPED olur — branch protection için
+# PASS sayılır. Böylece doc-only PR'lar da required check'leri yeşilleştirebilir.
+
 on:
   push:
     branches: [main]
-    paths:
-      - 'mobile/**'
-      - '.github/workflows/mobile-ci.yml'
   pull_request:
     branches: [main]
-    paths:
-      - 'mobile/**'
-      - '.github/workflows/mobile-ci.yml'
 
 defaults:
   run:
     working-directory: mobile
 
 jobs:
+  changes:
+    name: Detect changes
+    runs-on: ubuntu-latest
+    outputs:
+      relevant: ${{ steps.filter.outputs.relevant }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            relevant:
+              - 'mobile/**'
+              - '.github/workflows/mobile-ci.yml'
+
   analyze-and-test:
     name: Analyze + Test
+    needs: changes
+    if: needs.changes.outputs.relevant == 'true'
     runs-on: ubuntu-latest
 
     steps:

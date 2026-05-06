@@ -1,9 +1,16 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
+import type { Account, Category, RecurringTransaction } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import { BalanceService } from '../../common/services/balance.service';
 import { advanceByFrequency } from '../../common/utils/frequency.utils';
 import { CreateRecurringTransactionDto } from './dto/create-recurring-transaction.dto';
 import { UpdateRecurringTransactionDto } from './dto/update-recurring-transaction.dto';
+
+type RecurringTransactionFull = RecurringTransaction & {
+  account: Pick<Account, 'id' | 'name' | 'icon' | 'color'>;
+  category: Category | null;
+};
 
 @Injectable()
 export class RecurringTransactionsService {
@@ -27,11 +34,14 @@ export class RecurringTransactionsService {
     return this.findOwned(userId, id);
   }
 
-  async create(userId: string, dto: CreateRecurringTransactionDto) {
+  create(
+    userId: string,
+    dto: CreateRecurringTransactionDto,
+  ): Promise<RecurringTransactionFull> {
     const startDate = dto.startDate ? new Date(dto.startDate) : new Date();
     const nextRunDate = advanceByFrequency(startDate, dto.frequency);
 
-    return this.prisma.$transaction(async (tx) => {
+    return this.prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       const template = await tx.recurringTransaction.create({
         data: {
           userId,
@@ -77,7 +87,7 @@ export class RecurringTransactionsService {
       );
 
       return template;
-    });
+    }) as Promise<RecurringTransactionFull>;
   }
 
   async update(userId: string, id: string, dto: UpdateRecurringTransactionDto) {

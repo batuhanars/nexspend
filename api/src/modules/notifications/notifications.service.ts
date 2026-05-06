@@ -2,6 +2,17 @@ import { Injectable, Logger } from '@nestjs/common';
 import * as admin from 'firebase-admin';
 import { PrismaService } from '../../prisma/prisma.service';
 
+interface ServiceAccountJson {
+  project_id?: string;
+  client_email?: string;
+  private_key?: string;
+}
+
+interface FirebaseMessagingError {
+  errorInfo?: { code?: string };
+  message?: string;
+}
+
 @Injectable()
 export class NotificationsService {
   private readonly logger = new Logger(NotificationsService.name);
@@ -16,11 +27,15 @@ export class NotificationsService {
         const jsonStr = serviceAccountJson.trim().startsWith('{')
           ? serviceAccountJson
           : Buffer.from(serviceAccountJson, 'base64').toString('utf-8');
-        const parsed = JSON.parse(jsonStr);
-        if (typeof parsed.private_key === 'string') {
-          parsed.private_key = parsed.private_key.replace(/\\n/g, '\n');
-        }
-        credential = admin.credential.cert(parsed);
+        const parsed = JSON.parse(jsonStr) as ServiceAccountJson;
+        credential = admin.credential.cert({
+          projectId: parsed.project_id,
+          clientEmail: parsed.client_email,
+          privateKey:
+            typeof parsed.private_key === 'string'
+              ? parsed.private_key.replace(/\\n/g, '\n')
+              : parsed.private_key,
+        });
       } else {
         const projectId = process.env.FIREBASE_PROJECT_ID;
         const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
@@ -45,8 +60,9 @@ export class NotificationsService {
       const app = admin.initializeApp({ credential });
       this.messaging = admin.messaging(app);
       this.logger.log('Firebase Admin SDK başlatıldı — FCM aktif');
-    } catch (err: any) {
-      this.logger.error(`Firebase başlatılamadı: ${err?.message}`);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err);
+      this.logger.error(`Firebase başlatılamadı: ${message}`);
     }
   }
 
@@ -78,8 +94,9 @@ export class NotificationsService {
         ...(data && { data }),
       });
       this.logger.log(`FCM gönderildi [${userId}]: ${title}`);
-    } catch (err: any) {
-      const code = err?.errorInfo?.code as string | undefined;
+    } catch (err: unknown) {
+      const fbErr = err as FirebaseMessagingError;
+      const code = fbErr.errorInfo?.code;
       if (
         code === 'messaging/registration-token-not-registered' ||
         code === 'messaging/invalid-registration-token'
@@ -89,7 +106,8 @@ export class NotificationsService {
           data: { fcmToken: null },
         });
       }
-      this.logger.error(`FCM gönderilemedi [${userId}]: ${err?.message}`);
+      const message = err instanceof Error ? err.message : String(err);
+      this.logger.error(`FCM gönderilemedi [${userId}]: ${message}`);
     }
   }
 }

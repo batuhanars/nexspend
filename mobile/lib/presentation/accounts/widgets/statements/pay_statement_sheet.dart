@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
@@ -10,9 +9,8 @@ import '../../../../data/models/account_model.dart';
 import '../../../../data/models/statement_model.dart';
 import '../../bloc/statements_bloc.dart';
 
-/// Account detail sayfasında bulunan `StatementsBloc`'a erişim gerektirir —
-/// bu yüzden `showModalBottomSheet` çağrılırken parent context'in bloc'u
-/// `BlocProvider.value` ile aktarılmalı.
+enum _PayChoice { minimum, full }
+
 class PayStatementSheet extends StatefulWidget {
   const PayStatementSheet({
     super.key,
@@ -28,15 +26,12 @@ class PayStatementSheet extends StatefulWidget {
 }
 
 class _PayStatementSheetState extends State<PayStatementSheet> {
-  late final TextEditingController _amountCtrl;
+  _PayChoice _choice = _PayChoice.full;
   String? _selectedAccountId;
 
   @override
   void initState() {
     super.initState();
-    _amountCtrl = TextEditingController(
-      text: widget.statement.remainingAmount.toStringAsFixed(2),
-    );
     if (widget.payableAccounts.isNotEmpty) {
       final def = widget.payableAccounts.firstWhere(
         (a) => a.isDefault,
@@ -44,23 +39,23 @@ class _PayStatementSheetState extends State<PayStatementSheet> {
       );
       _selectedAccountId = def.id;
     }
+    // Asgari zaten ödenmişse default tamamına çek; aksi halde asgari mantıklı.
+    final remainingMin =
+        widget.statement.minimumPayment - widget.statement.paidAmount;
+    if (remainingMin > 0.005) _choice = _PayChoice.minimum;
   }
 
-  @override
-  void dispose() {
-    _amountCtrl.dispose();
-    super.dispose();
-  }
+  double get _remainingMinimum =>
+      (widget.statement.minimumPayment - widget.statement.paidAmount)
+          .clamp(0, widget.statement.remainingAmount);
 
-  void _setAmount(double v) {
-    _amountCtrl.text = v.toStringAsFixed(2);
-    setState(() {});
-  }
+  double get _selectedAmount => _choice == _PayChoice.minimum
+      ? _remainingMinimum
+      : widget.statement.remainingAmount;
 
   void _submit() {
-    final raw = _amountCtrl.text.replaceAll(',', '.').trim();
-    final amount = double.tryParse(raw);
-    if (amount == null || amount <= 0) return;
+    final amount = _selectedAmount;
+    if (amount <= 0) return;
     final accountId = _selectedAccountId;
     if (accountId == null) return;
     context.read<StatementsBloc>().add(StatementPaymentRequested(
@@ -76,8 +71,7 @@ class _PayStatementSheetState extends State<PayStatementSheet> {
     final s = AppStrings.of(context);
     final stmt = widget.statement;
     final hasPayable = widget.payableAccounts.isNotEmpty;
-    final fullPayable = stmt.remainingAmount;
-    final minPayable = stmt.minimumPayment - stmt.paidAmount;
+    final minimumAvailable = _remainingMinimum > 0.005;
 
     return Padding(
       padding: EdgeInsets.only(
@@ -122,47 +116,22 @@ class _PayStatementSheetState extends State<PayStatementSheet> {
             if (!hasPayable)
               _Warning(message: s.noPayableAccountWarning)
             else ...[
-              _label(s.paymentAmountLabel),
-              const SizedBox(height: AppSpacing.sm),
-              TextField(
-                controller: _amountCtrl,
-                keyboardType:
-                    const TextInputType.numberWithOptions(decimal: true),
-                inputFormatters: [
-                  FilteringTextInputFormatter.allow(RegExp(r'[\d,.]')),
-                ],
-                style: const TextStyle(
-                    color: AppColors.onSurface, fontSize: 16),
-                decoration: InputDecoration(
-                  filled: true,
-                  fillColor: AppColors.surfaceContainerHighest,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-                    borderSide: BorderSide.none,
-                  ),
-                ),
+              _PayChoiceTile(
+                label: s.payMinimumButton,
+                amount: _remainingMinimum,
+                selected: _choice == _PayChoice.minimum,
+                enabled: minimumAvailable,
+                onTap: minimumAvailable
+                    ? () => setState(() => _choice = _PayChoice.minimum)
+                    : null,
               ),
               const SizedBox(height: AppSpacing.sm),
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton(
-                      onPressed: minPayable > 0.005
-                          ? () => _setAmount(minPayable)
-                          : null,
-                      style: _quickBtnStyle(),
-                      child: Text(s.payMinimumButton),
-                    ),
-                  ),
-                  const SizedBox(width: AppSpacing.sm),
-                  Expanded(
-                    child: OutlinedButton(
-                      onPressed: () => _setAmount(fullPayable),
-                      style: _quickBtnStyle(),
-                      child: Text(s.payFullButton),
-                    ),
-                  ),
-                ],
+              _PayChoiceTile(
+                label: s.payFullButton,
+                amount: stmt.remainingAmount,
+                selected: _choice == _PayChoice.full,
+                enabled: true,
+                onTap: () => setState(() => _choice = _PayChoice.full),
               ),
               const SizedBox(height: AppSpacing.lg),
               _label(s.fromAccountLabel),
@@ -194,14 +163,16 @@ class _PayStatementSheetState extends State<PayStatementSheet> {
                 width: double.infinity,
                 height: 56,
                 child: FilledButton(
-                  onPressed: _submit,
+                  onPressed: _selectedAmount > 0 ? _submit : null,
                   style: FilledButton.styleFrom(
                     shape: RoundedRectangleBorder(
                       borderRadius:
                           BorderRadius.circular(AppSpacing.radiusXl),
                     ),
                   ),
-                  child: Text(s.payButton),
+                  child: Text(
+                    '${s.payButton} · ${CurrencyFormatter.format(_selectedAmount)}',
+                  ),
                 ),
               ),
             ],
@@ -211,19 +182,81 @@ class _PayStatementSheetState extends State<PayStatementSheet> {
     );
   }
 
-  ButtonStyle _quickBtnStyle() => OutlinedButton.styleFrom(
-        side: const BorderSide(color: AppColors.onSurfaceVariant),
-        foregroundColor: AppColors.onSurface,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-        ),
-      );
-
   Widget _label(String text) => Text(
         text,
         style: AppTypography.labelSm
             .copyWith(color: AppColors.onSurfaceVariant),
       );
+}
+
+class _PayChoiceTile extends StatelessWidget {
+  const _PayChoiceTile({
+    required this.label,
+    required this.amount,
+    required this.selected,
+    required this.enabled,
+    required this.onTap,
+  });
+
+  final String label;
+  final double amount;
+  final bool selected;
+  final bool enabled;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = selected ? AppColors.primary : AppColors.onSurfaceVariant;
+    final bg = selected
+        ? AppColors.primary.withValues(alpha: 0.12)
+        : AppColors.surfaceContainerHighest;
+    return Opacity(
+      opacity: enabled ? 1 : 0.45,
+      child: Material(
+        color: bg,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.md,
+              vertical: AppSpacing.md,
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  selected
+                      ? Icons.radio_button_checked_rounded
+                      : Icons.radio_button_unchecked_rounded,
+                  size: 20,
+                  color: color,
+                ),
+                const SizedBox(width: AppSpacing.md),
+                Expanded(
+                  child: Text(
+                    label,
+                    style: AppTypography.bodyMd.copyWith(
+                      color:
+                          selected ? AppColors.onSurface : AppColors.onSurface,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+                Text(
+                  CurrencyFormatter.format(amount),
+                  style: AppTypography.bodyMd.copyWith(
+                    color: selected ? AppColors.primary : AppColors.onSurface,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 class _Warning extends StatelessWidget {

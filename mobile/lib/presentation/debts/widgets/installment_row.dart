@@ -23,6 +23,16 @@ class InstallmentRow extends StatelessWidget {
     final isPaid = installment.status == DebtStatus.PAID;
     final isOverdue = installment.status == DebtStatus.OVERDUE;
     final color = installment.status.color;
+    // Vadesi henüz gelmemiş taksit ödenemez/tahsil edilemez — kullanıcı
+    // taksitleri gününde işlemeli, ön ödeme/tahsilat şu an desteklenmiyor.
+    final today = DateTime.now();
+    final dueDay = DateTime(
+      installment.dueDate.year,
+      installment.dueDate.month,
+      installment.dueDate.day,
+    );
+    final todayDay = DateTime(today.year, today.month, today.day);
+    final isDueReached = !dueDay.isAfter(todayDay);
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
@@ -76,9 +86,11 @@ class InstallmentRow extends StatelessWidget {
           ),
           if (!isPaid && onPay != null)
             TextButton(
-              onPressed: onPay,
+              onPressed: isDueReached ? onPay : null,
               style: TextButton.styleFrom(
                 foregroundColor: color,
+                disabledForegroundColor:
+                    AppColors.onSurfaceVariant.withValues(alpha: 0.4),
                 padding: const EdgeInsets.symmetric(
                   horizontal: AppSpacing.sm,
                   vertical: 0,
@@ -89,7 +101,9 @@ class InstallmentRow extends StatelessWidget {
               child: Text(
                 isLent ? AppStrings.of(context).collectBtn : AppStrings.of(context).payBtn,
                 style: AppTypography.labelSm.copyWith(
-                  color: color,
+                  color: isDueReached
+                      ? color
+                      : AppColors.onSurfaceVariant.withValues(alpha: 0.5),
                   fontWeight: FontWeight.w700,
                 ),
               ),

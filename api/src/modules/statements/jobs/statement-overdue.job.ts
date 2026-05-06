@@ -12,7 +12,8 @@ export class StatementOverdueJob {
   async run() {
     try {
       const count = await this.statementsService.markOverdue();
-      if (count > 0) this.logger.log(`${count} ekstre OVERDUE olarak güncellendi`);
+      if (count > 0)
+        this.logger.log(`${count} ekstre OVERDUE olarak güncellendi`);
     } catch (err) {
       this.logger.error(
         `Overdue işaretleme hatası: ${(err as Error).message}`,

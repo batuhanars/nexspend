@@ -1,11 +1,4 @@
-import {
-  Body,
-  Controller,
-  Get,
-  Param,
-  Post,
-  UseGuards,
-} from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { StatementsService } from './statements.service';
@@ -25,10 +18,7 @@ export class StatementsController {
   }
 
   @Get('statements/:id')
-  getStatement(
-    @CurrentUser() user: { id: string },
-    @Param('id') id: string,
-  ) {
+  getStatement(@CurrentUser() user: { id: string }, @Param('id') id: string) {
     return this.statementsService.findOne(user.id, id);
   }
 

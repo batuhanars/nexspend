@@ -156,7 +156,9 @@ export class UsersService {
       user.avatarUrl.startsWith('http://') ||
       user.avatarUrl.startsWith('https://')
     ) {
-      throw new NotFoundException('Avatar harici bir URL üzerinden servis edilir');
+      throw new NotFoundException(
+        'Avatar harici bir URL üzerinden servis edilir',
+      );
     }
 
     const avatarsDir = path.join(process.cwd(), 'uploads', 'avatars');

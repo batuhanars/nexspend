@@ -15,9 +15,10 @@ export interface Response<T> {
 }
 
 @Injectable()
-export class TransformInterceptor<T>
-  implements NestInterceptor<T, Response<T> | StreamableFile>
-{
+export class TransformInterceptor<T> implements NestInterceptor<
+  T,
+  Response<T> | StreamableFile
+> {
   intercept(
     context: ExecutionContext,
     next: CallHandler,
@@ -32,7 +33,7 @@ export class TransformInterceptor<T>
         return {
           success: true,
           statusCode,
-          data: data as T,
+          data: data,
         };
       }),
     );

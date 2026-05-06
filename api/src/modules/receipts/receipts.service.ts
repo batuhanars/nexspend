@@ -318,10 +318,7 @@ export class ReceiptsService {
     const filename = basename(receipt.imageUrl);
     const filePath = join(receiptsDir, filename);
 
-    if (
-      !filePath.startsWith(receiptsDir + sep) ||
-      !fs.existsSync(filePath)
-    ) {
+    if (!filePath.startsWith(receiptsDir + sep) || !fs.existsSync(filePath)) {
       throw new NotFoundException('Fiş görseli bulunamadı');
     }
 

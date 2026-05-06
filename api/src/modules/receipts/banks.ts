@@ -21,7 +21,10 @@ export const TURKISH_BANKS: BankInfo[] = [
     name: 'İş Bankası',
     aliases: ['ISBANK', 'IS BANKASI', 'TURKIYE IS BANKASI'],
   },
-  { name: 'Garanti BBVA', aliases: ['GARANTI BBVA', 'GARANTI BANKASI', 'GARANTI'] },
+  {
+    name: 'Garanti BBVA',
+    aliases: ['GARANTI BBVA', 'GARANTI BANKASI', 'GARANTI'],
+  },
   { name: 'Akbank', aliases: ['AKBANK'] },
   {
     name: 'Yapı Kredi',
@@ -31,9 +34,18 @@ export const TURKISH_BANKS: BankInfo[] = [
     name: 'Ziraat Bankası',
     aliases: ['ZIRAAT BANKASI', 'TC ZIRAAT', 'ZIRAATBANK'],
   },
-  { name: 'Halkbank', aliases: ['HALKBANK', 'HALK BANKASI', 'TURKIYE HALK BANKASI'] },
-  { name: 'Vakıfbank', aliases: ['VAKIFBANK', 'VAKIF BANKASI', 'TURKIYE VAKIFLAR BANKASI'] },
-  { name: 'QNB Finansbank', aliases: ['QNB FINANSBANK', 'FINANSBANK', 'QNB FINANS'] },
+  {
+    name: 'Halkbank',
+    aliases: ['HALKBANK', 'HALK BANKASI', 'TURKIYE HALK BANKASI'],
+  },
+  {
+    name: 'Vakıfbank',
+    aliases: ['VAKIFBANK', 'VAKIF BANKASI', 'TURKIYE VAKIFLAR BANKASI'],
+  },
+  {
+    name: 'QNB Finansbank',
+    aliases: ['QNB FINANSBANK', 'FINANSBANK', 'QNB FINANS'],
+  },
   { name: 'DenizBank', aliases: ['DENIZBANK', 'DENIZ BANK'] },
   { name: 'ING', aliases: ['ING BANK'] },
   { name: 'HSBC', aliases: ['HSBC'] },

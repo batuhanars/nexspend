@@ -206,10 +206,7 @@ export class StatementsService {
     const periodEnd = today;
 
     // Aynı periyot için tekrar kapatma (idempotency)
-    if (
-      lastClosed &&
-      isSameDay(startOfDay(lastClosed.periodEnd), periodEnd)
-    ) {
+    if (lastClosed && isSameDay(startOfDay(lastClosed.periodEnd), periodEnd)) {
       return false;
     }
 

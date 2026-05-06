@@ -165,7 +165,8 @@ export class ReceiptParserService {
     // Date.UTC ile UTC midnight olarak inşa et — `new Date(y,m,d)` local tz'de
     // midnight üretir ve frontend'de off-by-one güne kayar.
     const tryParse = (y: number, m: number, d: number): Date | null => {
-      if (m < 1 || m > 12 || d < 1 || d > 31 || y < 2020 || y > 2100) return null;
+      if (m < 1 || m > 12 || d < 1 || d > 31 || y < 2020 || y > 2100)
+        return null;
       const date = new Date(Date.UTC(y, m - 1, d));
       if (
         date.getUTCFullYear() !== y ||
@@ -176,10 +177,7 @@ export class ReceiptParserService {
       return date;
     };
 
-    const matchIn = (
-      text: string,
-      source: string,
-    ): Date | null => {
+    const matchIn = (text: string, source: string): Date | null => {
       const m1 = text.match(ddmmyyyy);
       if (m1) {
         const d = tryParse(parseInt(m1[3]), parseInt(m1[2]), parseInt(m1[1]));

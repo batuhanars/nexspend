@@ -3,6 +3,7 @@ import { NotFoundException } from '@nestjs/common';
 import { SubscriptionPeriod, TransactionType } from '@prisma/client';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { SubscriptionsService } from './subscriptions.service';
+import { BalanceService } from '../../common/services/balance.service';
 
 const mockPrisma = {
   subscription: {
@@ -19,6 +20,11 @@ const mockPrisma = {
     create: jest.fn(),
   },
   $transaction: jest.fn(),
+};
+
+const mockBalanceService = {
+  apply: jest.fn(),
+  revert: jest.fn(),
 };
 
 const mockEventEmitter = {
@@ -54,6 +60,7 @@ describe('SubscriptionsService', () => {
   beforeEach(() => {
     service = new SubscriptionsService(
       mockPrisma as any,
+      mockBalanceService as any,
       mockEventEmitter as any,
     );
     jest.clearAllMocks();

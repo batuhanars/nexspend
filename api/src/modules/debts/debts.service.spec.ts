@@ -3,6 +3,7 @@ import { NotFoundException, BadRequestException } from '@nestjs/common';
 import { DebtType, DebtStatus, TransactionType } from '@prisma/client';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { DebtsService } from './debts.service';
+import { BalanceService } from '../../common/services/balance.service';
 
 const mockPrisma = {
   debt: {
@@ -35,6 +36,11 @@ const mockPrisma = {
     create: jest.fn(),
   },
   $transaction: jest.fn(),
+};
+
+const mockBalanceService = {
+  apply: jest.fn(),
+  revert: jest.fn(),
 };
 
 const mockEventEmitter = {
@@ -71,7 +77,7 @@ describe('DebtsService', () => {
   let service: DebtsService;
 
   beforeEach(() => {
-    service = new DebtsService(mockPrisma as any, mockEventEmitter as any);
+    service = new DebtsService(mockPrisma as any, mockBalanceService as any, mockEventEmitter as any);
     jest.clearAllMocks();
   });
 

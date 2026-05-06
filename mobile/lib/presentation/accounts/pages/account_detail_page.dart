@@ -70,6 +70,9 @@ class _AccountDetailPageState extends State<AccountDetailPage> {
       context.read<AccountDetailBloc>().add(
             AccountDetailAccountUpdated(updated),
           );
+      if (updated.type == AccountType.CREDIT_CARD) {
+        context.read<StatementsBloc>().add(const StatementsLoadRequested());
+      }
     }
   }
 

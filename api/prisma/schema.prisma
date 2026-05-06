@@ -74,6 +74,13 @@ enum ReceiptStatus {
   FAILED
 }
 
+enum StatementStatus {
+  DUE
+  PARTIALLY_PAID
+  PAID
+  OVERDUE
+}
+
 enum AssetType {
   USD
   EUR
@@ -173,9 +180,35 @@ model Account {
   recurringTransactions RecurringTransaction[]
   subscriptions         Subscription[]
   portfolioAssets       PortfolioAsset[]
+  statements            CreditCardStatement[]
 
   @@index([userId, isActive, isArchived], map: "idx_accounts_user_active")
   @@map("accounts")
+}
+
+// =============================================
+// KREDİ KARTI EKSTRELERİ
+// =============================================
+
+model CreditCardStatement {
+  id             String          @id @default(uuid()) @db.VarChar(36)
+  accountId      String          @map("account_id") @db.VarChar(36)
+  periodStart    DateTime        @map("period_start") @db.Date
+  periodEnd      DateTime        @map("period_end") @db.Date
+  dueDate        DateTime        @map("due_date") @db.Date
+  totalAmount    Decimal         @map("total_amount") @db.Decimal(15, 2)
+  minimumPayment Decimal         @map("minimum_payment") @db.Decimal(15, 2)
+  paidAmount     Decimal         @default(0.00) @map("paid_amount") @db.Decimal(15, 2)
+  status         StatementStatus
+  closedAt       DateTime        @default(now()) @map("closed_at") @db.DateTime(0)
+  createdAt      DateTime        @default(now()) @map("created_at") @db.DateTime(0)
+  updatedAt      DateTime        @updatedAt @map("updated_at") @db.DateTime(0)
+
+  account Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  @@index([accountId, status], map: "idx_statements_account_status")
+  @@index([dueDate], map: "idx_statements_due_date")
+  @@map("credit_card_statements")
 }
 
 // =============================================

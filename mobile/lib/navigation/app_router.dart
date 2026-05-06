@@ -40,11 +40,13 @@ import '../data/models/transaction_model.dart' show TransactionModel;
 import '../data/repositories/account_repository.dart';
 import '../data/repositories/category_repository.dart';
 import '../data/repositories/debt_repository.dart';
+import '../data/repositories/statement_repository.dart';
 import '../data/repositories/subscription_repository.dart';
 import '../data/repositories/tag_repository.dart';
 import '../data/repositories/transaction_repository.dart';
 import '../presentation/accounts/bloc/account_bloc.dart';
 import '../presentation/accounts/bloc/account_detail_bloc.dart';
+import '../presentation/accounts/bloc/statements_bloc.dart';
 import '../presentation/accounts/pages/account_detail_page.dart';
 import '../presentation/accounts/pages/add_account_page.dart';
 import '../presentation/accounts/pages/accounts_list_page.dart';
@@ -273,6 +275,15 @@ GoRouter createRouter() {
               BlocProvider(
                 create: (_) => AccountBloc(
                   accountRepository: getIt<AccountRepository>(),
+                ),
+              ),
+              // Kredi kartı için ekstre verisi; diğer hesap tiplerinde
+              // bloc tetiklenmeden idle kalır (LoadRequested gönderilmez).
+              BlocProvider(
+                create: (_) => StatementsBloc(
+                  statementRepository: getIt<StatementRepository>(),
+                  accountRepository: getIt<AccountRepository>(),
+                  accountId: id,
                 ),
               ),
             ],

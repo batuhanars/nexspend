@@ -74,6 +74,9 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
   get receiptItem() {
     return this._client.receiptItem;
   }
+  get creditCardStatement() {
+    return this._client.creditCardStatement;
+  }
   get merchantCategoryMap() {
     return this._client.merchantCategoryMap;
   }

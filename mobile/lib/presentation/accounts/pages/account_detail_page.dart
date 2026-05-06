@@ -11,10 +11,12 @@ import '../../../data/models/transaction_model.dart';
 import '../../../navigation/route_names.dart';
 import '../bloc/account_bloc.dart';
 import '../bloc/account_detail_bloc.dart';
+import '../bloc/statements_bloc.dart';
 import '../widgets/account_detail_shimmer.dart';
 import '../widgets/account_header_card.dart';
 import '../widgets/account_transactions_section.dart';
 import '../widgets/monthly_chart_section.dart';
+import '../widgets/statements/credit_card_statements_section.dart';
 import '../widgets/this_month_section.dart';
 import '../widgets/top_categories_section.dart';
 import '../../shared/widgets/error_view.dart';
@@ -42,6 +44,11 @@ class _AccountDetailPageState extends State<AccountDetailPage> {
     context.read<AccountDetailBloc>().add(
           AccountDetailLoadRequested(accountId: widget.accountId),
         );
+    // Kredi kartıysa ekstre verisini de tetikle. Açılışta initial account
+    // yoksa AccountDetailLoaded sonrası listener üstünden tetiklenir.
+    if (widget.initialAccount?.type == AccountType.CREDIT_CARD) {
+      context.read<StatementsBloc>().add(const StatementsLoadRequested());
+    }
   }
 
   Future<void> _addTransaction() async {
@@ -104,6 +111,17 @@ class _AccountDetailPageState extends State<AccountDetailPage> {
   Widget build(BuildContext context) {
     return MultiBlocListener(
       listeners: [
+        BlocListener<AccountDetailBloc, AccountDetailState>(
+          listener: (context, state) {
+            if (state is AccountDetailLoaded &&
+                state.account.type == AccountType.CREDIT_CARD &&
+                context.read<StatementsBloc>().state is StatementsInitial) {
+              context.read<StatementsBloc>().add(
+                    const StatementsLoadRequested(),
+                  );
+            }
+          },
+        ),
         BlocListener<AccountBloc, AccountState>(
           listener: (context, state) {
             if (state is AccountDeleted) {
@@ -353,11 +371,16 @@ class _DetailContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isCreditCard = account.type == AccountType.CREDIT_CARD;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SizedBox(height: AppSpacing.lg),
         AccountHeaderCard(account: account),
+        if (isCreditCard) ...[
+          const SizedBox(height: AppSpacing.xl),
+          const CreditCardStatementsSection(),
+        ],
         const SizedBox(height: AppSpacing.xl),
         ThisMonthSection(analytics: analytics),
         if (analytics.months.isNotEmpty) ...[

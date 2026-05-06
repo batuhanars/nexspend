@@ -80,6 +80,12 @@ class ApiEndpoints {
   static const String reportsCashFlow = '/api/reports/cash-flow';
   static const String reportsTrends = '/api/reports/trends';
 
+  // Credit Card Statements
+  static String accountStatementsList(String accountId) =>
+      '/api/accounts/$accountId/statements';
+  static String statementById(String id) => '/api/statements/$id';
+  static String statementPay(String id) => '/api/statements/$id/pay';
+
   // Receipts
   static const String receiptsScan = '/api/receipts/scan';
   static const String receipts = '/api/receipts';

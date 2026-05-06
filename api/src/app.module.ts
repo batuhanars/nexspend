@@ -14,6 +14,7 @@ import { DebtsModule } from './modules/debts/debts.module';
 import { SubscriptionsModule } from './modules/subscriptions/subscriptions.module';
 import { ReportsModule } from './modules/reports/reports.module';
 import { ReceiptsModule } from './modules/receipts/receipts.module';
+import { StatementsModule } from './modules/statements/statements.module';
 import { UsersModule } from './modules/users/users.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import appConfig from './config/app.config';
@@ -39,6 +40,7 @@ import appConfig from './config/app.config';
     SubscriptionsModule,
     ReportsModule,
     ReceiptsModule,
+    StatementsModule,
     UsersModule,
     NotificationsModule,
   ],

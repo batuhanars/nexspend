@@ -413,6 +413,30 @@ abstract class AppStrings {
   String get sourceDebtPayment;
   String get sourceDebtCollection;
   String get sourceSubscription;
+
+  // Credit card statements
+  String get currentPeriodTitle;
+  String get openStatementsTitle;
+  String get statementHistoryTitle;
+  String get spentThisPeriod;
+  String txCountLabel(int n);
+  String get totalAmountShortLabel;
+  String get minimumPaymentLabel;
+  String get dueDateLabel;
+  String get payButton;
+  String get statementStatusDue;
+  String get statementStatusPartiallyPaid;
+  String get statementStatusPaid;
+  String get statementStatusOverdue;
+  String get noStatementsYet;
+  String get payStatementTitle;
+  String get paymentAmountLabel;
+  String get fromAccountLabel;
+  String get paymentSuccessSnackbar;
+  String get noPayableAccountWarning;
+  String get payFullButton;
+  String get payMinimumButton;
+  String get statementPeriodFmt;
 }
 
 // ─── Turkish ────────────────────────────────────────────────────────────────
@@ -793,6 +817,30 @@ class _Tr extends AppStrings {
   @override String get sourceDebtPayment => 'Borç Ödemesi';
   @override String get sourceDebtCollection => 'Borç Tahsilatı';
   @override String get sourceSubscription => 'Abonelik';
+
+  @override String get currentPeriodTitle => 'Mevcut Dönem';
+  @override String get openStatementsTitle => 'Açık Ekstreler';
+  @override String get statementHistoryTitle => 'Geçmiş Ekstreler';
+  @override String get spentThisPeriod => 'Bu dönem harcanan';
+  @override String txCountLabel(int n) => '$n işlem';
+  @override String get totalAmountShortLabel => 'Toplam';
+  @override String get minimumPaymentLabel => 'Asgari';
+  @override String get dueDateLabel => 'Vade';
+  @override String get payButton => 'Öde';
+  @override String get statementStatusDue => 'Beklemede';
+  @override String get statementStatusPartiallyPaid => 'Kısmi Ödendi';
+  @override String get statementStatusPaid => 'Ödendi';
+  @override String get statementStatusOverdue => 'Vadesi Geçti';
+  @override String get noStatementsYet => 'Henüz kapatılmış ekstre yok';
+  @override String get payStatementTitle => 'Ekstre Öde';
+  @override String get paymentAmountLabel => 'Ödeme Tutarı';
+  @override String get fromAccountLabel => 'Kaynak Hesap';
+  @override String get paymentSuccessSnackbar => 'Ödeme alındı';
+  @override String get noPayableAccountWarning =>
+      'Ödeme yapılabilecek hesap yok. Önce nakit/banka hesabı ekleyin.';
+  @override String get payFullButton => 'Tamamını Öde';
+  @override String get payMinimumButton => 'Asgariyi Öde';
+  @override String get statementPeriodFmt => 'Dönem';
 }
 
 // ─── English ─────────────────────────────────────────────────────────────────
@@ -1173,6 +1221,30 @@ class _En extends AppStrings {
   @override String get sourceDebtPayment => 'Debt Payment';
   @override String get sourceDebtCollection => 'Debt Collection';
   @override String get sourceSubscription => 'Subscription';
+
+  @override String get currentPeriodTitle => 'Current Period';
+  @override String get openStatementsTitle => 'Open Statements';
+  @override String get statementHistoryTitle => 'Past Statements';
+  @override String get spentThisPeriod => 'Spent this period';
+  @override String txCountLabel(int n) => n == 1 ? '1 transaction' : '$n transactions';
+  @override String get totalAmountShortLabel => 'Total';
+  @override String get minimumPaymentLabel => 'Minimum';
+  @override String get dueDateLabel => 'Due';
+  @override String get payButton => 'Pay';
+  @override String get statementStatusDue => 'Due';
+  @override String get statementStatusPartiallyPaid => 'Partial';
+  @override String get statementStatusPaid => 'Paid';
+  @override String get statementStatusOverdue => 'Overdue';
+  @override String get noStatementsYet => 'No closed statements yet';
+  @override String get payStatementTitle => 'Pay Statement';
+  @override String get paymentAmountLabel => 'Payment Amount';
+  @override String get fromAccountLabel => 'From Account';
+  @override String get paymentSuccessSnackbar => 'Payment recorded';
+  @override String get noPayableAccountWarning =>
+      'No account available to pay from. Add a cash or bank account first.';
+  @override String get payFullButton => 'Pay Full';
+  @override String get payMinimumButton => 'Pay Minimum';
+  @override String get statementPeriodFmt => 'Period';
 
   static const _categoryMap = <String, String>{
     'Market': 'Groceries',

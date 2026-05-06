@@ -2,7 +2,7 @@ class ApiEndpoints {
   ApiEndpoints._();
 
   static const String baseUrl =
-      'http://192.168.1.50:3000'; // Android emulator → localhost
+      'https://wallet-api.up.railway.app'; // Android emulator → localhost
 
   // Auth
   static const String register = '/api/auth/register';

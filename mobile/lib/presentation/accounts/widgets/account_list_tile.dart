@@ -43,7 +43,14 @@ class AccountListTile extends StatelessWidget {
                     children: [
                       Row(
                         children: [
-                          Text(account.name, style: AppTypography.titleSm),
+                          Flexible(
+                            child: Text(
+                              account.name,
+                              style: AppTypography.titleSm,
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 1,
+                            ),
+                          ),
                           if (account.isDefault) ...[
                             const SizedBox(width: AppSpacing.sm),
                             const AccountDefaultBadge(),

@@ -32,6 +32,7 @@ class RouteNames {
   static const String reports = '/reports';
   static const String receiptScanner = '/receipt-scanner';
   static const String receiptHistory = '/receipt-history';
+  static String receiptImage(String id) => '/receipts/$id/image';
   static const String settings = '/settings';
   static const String editProfile = '/settings/profile';
 }

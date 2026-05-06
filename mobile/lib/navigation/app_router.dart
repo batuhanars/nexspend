@@ -28,13 +28,14 @@ import '../presentation/debts/bloc/debts_bloc.dart';
 import '../presentation/debts/pages/debt_detail_page.dart';
 import '../presentation/debts/pages/debts_page.dart';
 import '../presentation/receipt_scanner/pages/receipt_history_page.dart';
+import '../presentation/receipt_scanner/pages/receipt_image_viewer_page.dart';
 import '../presentation/subscriptions/bloc/subscriptions_bloc.dart' show SubscriptionsBloc, SubscriptionsLoadRequested;
 import '../presentation/subscriptions/pages/subscription_detail_page.dart';
 import '../presentation/subscriptions/bloc/subscriptions_bloc.dart';
 import '../presentation/subscriptions/pages/subscriptions_page.dart';
 import '../presentation/reports/pages/reports_page.dart';
 import '../presentation/receipt_scanner/pages/receipt_scanner_page.dart';
-import '../data/models/account_model.dart' show AccountModel;
+import '../data/models/account_model.dart' show AccountModel, AccountType;
 import '../data/models/transaction_model.dart' show TransactionModel;
 import '../data/repositories/account_repository.dart';
 import '../data/repositories/category_repository.dart';
@@ -242,10 +243,18 @@ GoRouter createRouter() {
         path: RouteNames.addAccount,
         name: 'add-account',
         parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, _) => BlocProvider(
-          create: (_) => AccountBloc(accountRepository: getIt<AccountRepository>()),
-          child: const AddAccountPage(),
-        ),
+        builder: (context, state) {
+          final extra = state.extra as Map<String, dynamic>?;
+          return BlocProvider(
+            create: (_) => AccountBloc(
+              accountRepository: getIt<AccountRepository>(),
+            ),
+            child: AddAccountPage(
+              initialType: extra?['type'] as AccountType?,
+              initialBankName: extra?['bankName'] as String?,
+            ),
+          );
+        },
       ),
       GoRoute(
         path: '/accounts/:id',
@@ -344,6 +353,14 @@ GoRouter createRouter() {
         name: 'receipt-history',
         parentNavigatorKey: _rootNavigatorKey,
         builder: (context, _) => const ReceiptHistoryPage(),
+      ),
+      GoRoute(
+        path: '/receipts/:id/image',
+        name: 'receipt-image',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => ReceiptImageViewerPage(
+          receiptId: state.pathParameters['id']!,
+        ),
       ),
     ],
   );

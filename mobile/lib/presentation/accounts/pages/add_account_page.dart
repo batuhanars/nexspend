@@ -11,7 +11,19 @@ import '../bloc/account_bloc.dart';
 import '../widgets/account_form_widgets.dart';
 
 class AddAccountPage extends StatefulWidget {
-  const AddAccountPage({super.key});
+  const AddAccountPage({
+    super.key,
+    this.initialType,
+    this.initialBankName,
+  });
+
+  /// Açılış tipi — fiş tarama akışından "kredi kartı tespit edildi" gibi
+  /// hint'le geliyorsa kullanıcı tip seçimini atlar.
+  final AccountType? initialType;
+
+  /// Banka adı pre-fill — `BANK` tipinde chip'lerle (case-insensitive) eşleşirse
+  /// otomatik seçilir, eşleşmezse "Diğer" chip'i seçilip alana yazılır.
+  final String? initialBankName;
 
   @override
   State<AddAccountPage> createState() => _AddAccountPageState();
@@ -23,7 +35,7 @@ class _AddAccountPageState extends State<AddAccountPage> {
   final _balanceController = TextEditingController();
   final _creditLimitController = TextEditingController();
 
-  AccountType _type = AccountType.BANK;
+  late AccountType _type;
   String _currency = 'TRY';
   int _statementDay = 1;
   int _paymentDueDay = 10;
@@ -50,6 +62,46 @@ class _AddAccountPageState extends State<AddAccountPage> {
   final _nameFocus = FocusNode();
   final _balanceFocus = FocusNode();
   final _creditLimitFocus = FocusNode();
+
+  @override
+  void initState() {
+    super.initState();
+    _type = widget.initialType ?? AccountType.BANK;
+    _applyInitialBankName();
+  }
+
+  void _applyInitialBankName() {
+    final hint = widget.initialBankName;
+    if (hint == null) return;
+    if (_type == AccountType.BANK) {
+      // Chip listesinde case/diakritik-insensitive eşleşme dene.
+      final normalized = _normalizeBankKey(hint);
+      final chip = _turkishBanks.cast<String?>().firstWhere(
+            (b) => b != null && _normalizeBankKey(b) == normalized,
+            orElse: () => null,
+          );
+      if (chip != null) {
+        _selectedBank = chip;
+        _nameController.text = chip;
+      } else {
+        _selectedBank = 'other';
+        _nameController.text = hint;
+      }
+    } else {
+      _nameController.text = hint;
+    }
+  }
+
+  static String _normalizeBankKey(String s) => s
+      .toUpperCase()
+      .replaceAll('İ', 'I')
+      .replaceAll('Ş', 'S')
+      .replaceAll('Ğ', 'G')
+      .replaceAll('Ü', 'U')
+      .replaceAll('Ö', 'O')
+      .replaceAll('Ç', 'C')
+      .replaceAll(RegExp(r'\s+'), ' ')
+      .trim();
 
   @override
   void dispose() {

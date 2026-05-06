@@ -5,6 +5,7 @@ import '../../../data/models/account_model.dart';
 import '../../../data/repositories/receipt_repository.dart';
 import '../../../data/repositories/category_repository.dart';
 import '../../../data/repositories/account_repository.dart';
+import '../helper/account_matcher.dart';
 
 part 'receipt_preview_event.dart';
 part 'receipt_preview_state.dart';
@@ -23,6 +24,7 @@ class ReceiptPreviewBloc
     on<ReceiptPreviewLoaded>(_onLoaded);
     on<ReceiptPreviewFieldUpdated>(_onFieldUpdated);
     on<ReceiptPreviewConfirmed>(_onConfirmed);
+    on<ReceiptPreviewAccountAdded>(_onAccountAdded);
 
     add(ReceiptPreviewLoaded(result: initialResult));
   }
@@ -39,16 +41,33 @@ class ReceiptPreviewBloc
     try {
       final categories = await _categoryRepo.getCategories();
       final accounts = await _accountRepo.getAccounts();
-      final defaultAccount = accounts.isNotEmpty
-          ? accounts.firstWhere((a) => a.isDefault,
-              orElse: () => accounts.first)
+
+      // Önce backend hint'iyle eşleşme dene — banka adı veya ödeme tipi.
+      final hint = event.result.suggestedAccountHint;
+      final matched = ReceiptAccountMatcher.match(hint, accounts);
+      final fallbackDefault = accounts.isNotEmpty
+          ? accounts.firstWhere(
+              (a) => a.isDefault,
+              orElse: () => accounts.first,
+            )
           : null;
+      final selectedAccountId = matched?.id ?? fallbackDefault?.id;
+
+      // Hint'te banka/nakit tespit var ama eşleşen hesap yoksa CTA için işaretle.
+      final unmatchedBankName =
+          matched == null && hint?.bankName != null ? hint!.bankName : null;
+      final unmatchedCash = matched == null &&
+          hint?.paymentMethod == 'CASH' &&
+          !accounts.any((a) => !a.isArchived && a.type == AccountType.CASH);
+
       emit(ReceiptPreviewReady(
         result: event.result,
         categories: categories,
         accounts: accounts,
         selectedCategoryId: event.result.suggestedCategoryId,
-        selectedAccountId: defaultAccount?.id,
+        selectedAccountId: selectedAccountId,
+        unmatchedBankName: unmatchedBankName,
+        unmatchedCash: unmatchedCash,
       ));
     } catch (e) {
       emit(ReceiptPreviewError(e.toString()));
@@ -67,6 +86,20 @@ class ReceiptPreviewBloc
       merchantName: event.merchantName,
       selectedCategoryId: event.categoryId,
       selectedAccountId: event.accountId,
+    ));
+  }
+
+  void _onAccountAdded(
+    ReceiptPreviewAccountAdded event,
+    Emitter<ReceiptPreviewState> emit,
+  ) {
+    if (state is! ReceiptPreviewReady) return;
+    final current = state as ReceiptPreviewReady;
+    emit(current.copyWith(
+      accounts: [...current.accounts, event.account],
+      selectedAccountId: event.account.id,
+      clearUnmatchedBankName: true,
+      unmatchedCash: false,
     ));
   }
 

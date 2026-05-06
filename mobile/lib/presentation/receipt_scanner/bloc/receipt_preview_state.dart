@@ -25,6 +25,8 @@ class ReceiptPreviewReady extends ReceiptPreviewState {
     this.overrideMerchant,
     this.isSubmitting = false,
     this.errorMessage,
+    this.unmatchedBankName,
+    this.unmatchedCash = false,
   });
 
   final ReceiptParseResult result;
@@ -37,6 +39,13 @@ class ReceiptPreviewReady extends ReceiptPreviewState {
   final String? overrideMerchant;
   final bool isSubmitting;
   final String? errorMessage;
+
+  /// Backend banka adı tespit etti ama kullanıcının hesap listesinde eşleşen
+  /// hesap yok → UI "Hesap ekle" CTA'sı gösterir.
+  final String? unmatchedBankName;
+
+  /// Backend nakit ödeme tespit etti ama kullanıcının CASH tipinde hesabı yok.
+  final bool unmatchedCash;
 
   double get effectiveAmount => overrideAmount ?? result.amount ?? 0.0;
   DateTime get effectiveDate => overrideDate ?? result.date ?? DateTime.now();
@@ -54,6 +63,9 @@ class ReceiptPreviewReady extends ReceiptPreviewState {
     String? merchantName,
     bool? isSubmitting,
     String? errorMessage,
+    String? unmatchedBankName,
+    bool clearUnmatchedBankName = false,
+    bool? unmatchedCash,
   }) =>
       ReceiptPreviewReady(
         result: result ?? this.result,
@@ -66,5 +78,9 @@ class ReceiptPreviewReady extends ReceiptPreviewState {
         overrideMerchant: merchantName ?? overrideMerchant,
         isSubmitting: isSubmitting ?? this.isSubmitting,
         errorMessage: errorMessage,
+        unmatchedBankName: clearUnmatchedBankName
+            ? null
+            : (unmatchedBankName ?? this.unmatchedBankName),
+        unmatchedCash: unmatchedCash ?? this.unmatchedCash,
       );
 }

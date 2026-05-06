@@ -2,11 +2,14 @@
 import 'package:wallet_app/core/l10n/app_strings.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
+import '../../../core/constants/api_endpoints.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
 import '../../../core/di/injection.dart';
 import '../../../core/storage/secure_storage.dart';
+import '../../../core/widgets/authenticated_image.dart';
+import '../../../data/models/user_model.dart';
 import '../../../data/repositories/user_repository.dart';
 import '../bloc/settings_bloc.dart';
 
@@ -117,16 +120,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                           color: AppColors.primary.withValues(alpha: 0.15),
                           shape: BoxShape.circle,
                         ),
-                        child: user.avatarUrl != null
-                            ? ClipOval(
-                                child: Image.network(
-                                  user.avatarUrl!,
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (_, __, ___) =>
-                                      _InitialsWidget(initials: initials),
-                                ),
-                              )
-                            : _InitialsWidget(initials: initials),
+                        child: _buildAvatar(user, initials),
                       ),
                       Positioned(
                         right: 0,
@@ -287,6 +281,36 @@ class _EditProfilePageState extends State<EditProfilePage> {
         style: AppTypography.labelSm
             .copyWith(color: AppColors.onSurfaceVariant),
       );
+
+  Widget _buildAvatar(UserModel user, String initials) {
+    final googleUrl = user.googleAvatarUrl;
+    if (googleUrl != null) {
+      return ClipOval(
+        child: Image.network(
+          googleUrl,
+          fit: BoxFit.cover,
+          errorBuilder: (_, __, ___) => _InitialsWidget(initials: initials),
+        ),
+      );
+    }
+    if (user.hasLocalAvatar) {
+      return ClipOval(
+        child: AuthenticatedImage(
+          urlPath: ApiEndpoints.meAvatar,
+          cacheKey: user.avatarUrl,
+          fit: BoxFit.cover,
+          placeholder: const Center(
+            child: CircularProgressIndicator(
+              strokeWidth: 2,
+              color: AppColors.primary,
+            ),
+          ),
+          errorWidget: _InitialsWidget(initials: initials),
+        ),
+      );
+    }
+    return _InitialsWidget(initials: initials);
+  }
 
   String _getInitials(String name) {
     final parts = name.trim().split(' ');

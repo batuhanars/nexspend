@@ -10,10 +10,13 @@ import {
   UploadedFile,
   HttpCode,
   HttpStatus,
+  Res,
+  StreamableFile,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname, join } from 'path';
+import type { Response } from 'express';
 import { UsersService } from './users.service';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
@@ -45,6 +48,14 @@ export class UsersController {
     @Body() dto: UpdateProfileDto,
   ) {
     return this.usersService.updateProfile(user.id, dto);
+  }
+
+  @Get('me/avatar')
+  getAvatar(
+    @CurrentUser() user: { id: string },
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<StreamableFile> {
+    return this.usersService.streamAvatar(user.id, res);
   }
 
   @Post('me/avatar')

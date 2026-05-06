@@ -23,6 +23,23 @@ class UserModel {
   final bool hasPassword;
   final bool isGoogleLinked;
 
+  /// Google OAuth avatarı (full https URL). Sunucuda local dosya yoksa null.
+  String? get googleAvatarUrl {
+    final url = avatarUrl;
+    if (url == null) return null;
+    if (url.startsWith('http://') || url.startsWith('https://')) return url;
+    return null;
+  }
+
+  /// Backend'de saklanan local avatar dosyası varsa true. Bu durumda görsel
+  /// JWT korumalı `/api/users/me/avatar` endpoint'i üzerinden çekilmelidir.
+  bool get hasLocalAvatar {
+    final url = avatarUrl;
+    return url != null &&
+        !url.startsWith('http://') &&
+        !url.startsWith('https://');
+  }
+
   factory UserModel.fromJson(Map<String, dynamic> json) => UserModel(
         id: json['id'] as String,
         fullName: json['fullName'] as String,

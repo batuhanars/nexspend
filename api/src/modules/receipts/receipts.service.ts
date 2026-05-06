@@ -4,6 +4,7 @@ import {
   NotFoundException,
   BadRequestException,
   Logger,
+  StreamableFile,
 } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import {
@@ -11,7 +12,9 @@ import {
   TransactionType,
   TransactionSource,
 } from '@prisma/client';
-import { join } from 'path';
+import { basename, extname, join, sep } from 'path';
+import * as fs from 'fs';
+import type { Response } from 'express';
 import { PrismaService } from '../../prisma/prisma.service';
 import { BalanceService } from '../../common/services/balance.service';
 import { TransactionCreatedEvent } from '../../common/events/transaction.events';
@@ -20,6 +23,14 @@ import { OcrService } from './ocr.service';
 import { ScanReceiptDto } from './dto/scan-receipt.dto';
 import { ConfirmReceiptDto } from './dto/confirm-receipt.dto';
 import { UpdateReceiptDto } from './dto/update-receipt.dto';
+
+const RECEIPT_CONTENT_TYPES: Record<string, string> = {
+  '.jpg': 'image/jpeg',
+  '.jpeg': 'image/jpeg',
+  '.png': 'image/png',
+  '.webp': 'image/webp',
+  '.heic': 'image/heic',
+};
 
 @Injectable()
 export class ReceiptsService {
@@ -69,6 +80,7 @@ export class ReceiptsService {
       date: Date | null;
       tax: number | null;
       paymentMethod: string | null;
+      bankName: string | null;
       items: any[];
       confidence: number;
     } = {
@@ -77,6 +89,7 @@ export class ReceiptsService {
       date: null,
       tax: null,
       paymentMethod: null,
+      bankName: null,
       items: [],
       confidence: 0,
     };
@@ -174,7 +187,15 @@ export class ReceiptsService {
       ? await this.suggestCategory(userId, parsed.merchant)
       : null;
 
-    return { ...this.format(receipt), suggestedCategory };
+    // Hesap önerisi — frontend bu hint'i kullanıcının hesap listesiyle
+    // eşleştirir; backend hesap kümesini bilmiyor, sadece OCR'dan tespit
+    // ettiklerini geri veriyor.
+    const suggestedAccountHint = {
+      paymentMethod: parsed.paymentMethod,
+      bankName: parsed.bankName,
+    };
+
+    return { ...this.format(receipt), suggestedCategory, suggestedAccountHint };
   }
 
   async update(userId: string, id: string, dto: UpdateReceiptDto) {
@@ -281,6 +302,37 @@ export class ReceiptsService {
     await this.findOwned(userId, id);
     await this.prisma.receipt.delete({ where: { id } });
     return { message: 'Fiş silindi' };
+  }
+
+  async streamImage(
+    userId: string,
+    id: string,
+    res: Response,
+  ): Promise<StreamableFile> {
+    const receipt = await this.findOwned(userId, id);
+    if (!receipt.imageUrl || receipt.imageUrl === 'pending') {
+      throw new NotFoundException('Fiş görseli yok');
+    }
+
+    const receiptsDir = join(process.cwd(), 'uploads', 'receipts');
+    const filename = basename(receipt.imageUrl);
+    const filePath = join(receiptsDir, filename);
+
+    if (
+      !filePath.startsWith(receiptsDir + sep) ||
+      !fs.existsSync(filePath)
+    ) {
+      throw new NotFoundException('Fiş görseli bulunamadı');
+    }
+
+    const ext = extname(filename).toLowerCase();
+    res.setHeader(
+      'Content-Type',
+      RECEIPT_CONTENT_TYPES[ext] ?? 'application/octet-stream',
+    );
+    res.setHeader('Cache-Control', 'private, max-age=300');
+
+    return new StreamableFile(fs.createReadStream(filePath));
   }
 
   async getMerchantMappings(userId: string) {

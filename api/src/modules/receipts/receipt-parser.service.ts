@@ -1,4 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { detectBank } from './banks';
 
 export interface ParsedReceipt {
   amount: number | null;
@@ -6,6 +7,7 @@ export interface ParsedReceipt {
   date: Date | null;
   tax: number | null;
   paymentMethod: string | null;
+  bankName: string | null;
   items: ParsedReceiptItem[];
   confidence: number;
 }
@@ -36,11 +38,23 @@ export class ReceiptParserService {
     const merchant = this.extractMerchant(lines);
     const tax = this.extractTax(lines);
     const paymentMethod = this.extractPaymentMethod(lines);
+    const bankName = detectBank(rawText)?.name ?? null;
     const items = this.extractItems(lines);
 
     const confidence = this.calcConfidence({ amount, date, merchant, items });
 
-    return { amount, merchant, date, tax, paymentMethod, items, confidence };
+    if (bankName) this.logger.debug(`Banka tespit edildi: ${bankName}`);
+
+    return {
+      amount,
+      merchant,
+      date,
+      tax,
+      paymentMethod,
+      bankName,
+      items,
+      confidence,
+    };
   }
 
   private extractAmount(lines: string[]): number | null {
@@ -138,23 +152,84 @@ export class ReceiptParserService {
   }
 
   private extractDate(lines: string[]): Date | null {
-    const patterns = [
-      /(\d{2})[./]\s*(\d{2})[./]\s*(\d{4})/, // DD.MM.YYYY veya "03.05. 2026"
-      /(\d{4})[./-](\d{2})[./-](\d{2})/, // YYYY-MM-DD
-    ];
+    // DD.MM.YYYY / DD/MM/YYYY / DD-MM-YYYY — Türk formatı, 1-2 hane gün/ay,
+    // ayırıcı çevresinde opsiyonel boşluk (OCR sıkça `03 . 05 . 2026` üretir).
+    const ddmmyyyy = /\b(\d{1,2})\s*[./-]\s*(\d{1,2})\s*[./-]\s*(\d{4})\b/;
+    // YYYY-MM-DD / YYYY.MM.DD / YYYY/MM/DD — e-fatura ve ISO formatı.
+    const yyyymmdd = /\b(\d{4})\s*[./-]\s*(\d{1,2})\s*[./-]\s*(\d{1,2})\b/;
+    // Sadece boşlukla ayrılmış varyant — OCR ayırıcıyı yutarsa (`01 04 2026`).
+    // tryParse'ın yıl/ay/gün validation'ı sayesinde rastgele 3-grup sayı
+    // sıraları (barkod, hesap no) elenir.
+    const ddmmyyyySpace = /\b(\d{1,2})\s+(\d{1,2})\s+(\d{4})\b/;
 
-    for (const line of lines) {
-      const m1 = line.match(patterns[0]);
+    // Date.UTC ile UTC midnight olarak inşa et — `new Date(y,m,d)` local tz'de
+    // midnight üretir ve frontend'de off-by-one güne kayar.
+    const tryParse = (y: number, m: number, d: number): Date | null => {
+      if (m < 1 || m > 12 || d < 1 || d > 31 || y < 2020 || y > 2100) return null;
+      const date = new Date(Date.UTC(y, m - 1, d));
+      if (
+        date.getUTCFullYear() !== y ||
+        date.getUTCMonth() !== m - 1 ||
+        date.getUTCDate() !== d
+      )
+        return null;
+      return date;
+    };
+
+    const matchIn = (
+      text: string,
+      source: string,
+    ): Date | null => {
+      const m1 = text.match(ddmmyyyy);
       if (m1) {
-        const d = new Date(`${m1[3]}-${m1[2]}-${m1[1]}`);
-        if (!isNaN(d.getTime())) return d;
+        const d = tryParse(parseInt(m1[3]), parseInt(m1[2]), parseInt(m1[1]));
+        if (d) {
+          this.logger.debug(
+            `Tarih [DD.MM.YYYY ${source}]: ${d.toISOString().slice(0, 10)} ← "${m1[0]}"`,
+          );
+          return d;
+        }
       }
-      const m2 = line.match(patterns[1]);
+      const m2 = text.match(yyyymmdd);
       if (m2) {
-        const d = new Date(`${m2[1]}-${m2[2]}-${m2[3]}`);
-        if (!isNaN(d.getTime())) return d;
+        const d = tryParse(parseInt(m2[1]), parseInt(m2[2]), parseInt(m2[3]));
+        if (d) {
+          this.logger.debug(
+            `Tarih [YYYY-MM-DD ${source}]: ${d.toISOString().slice(0, 10)} ← "${m2[0]}"`,
+          );
+          return d;
+        }
       }
+      const m3 = text.match(ddmmyyyySpace);
+      if (m3) {
+        const d = tryParse(parseInt(m3[3]), parseInt(m3[2]), parseInt(m3[1]));
+        if (d) {
+          this.logger.debug(
+            `Tarih [DD MM YYYY ${source}]: ${d.toISOString().slice(0, 10)} ← "${m3[0]}"`,
+          );
+          return d;
+        }
+      }
+      return null;
+    };
+
+    // 1. Tek satır içinde tarih ara — gürültüden uzak, en güvenilir
+    for (const line of lines) {
+      const found = matchIn(line, 'satır');
+      if (found) return found;
     }
+
+    // 2. Fallback: satırları birleştir — OCR tarihi satıra böldüyse
+    // (örn. `01/04/` \n `2026`) bu fallback yakalar.
+    const joined = matchIn(lines.join(' '), 'birleşik');
+    if (joined) return joined;
+
+    // Tarih bulunamadı — kullanıcının paylaşması için OCR'dan gelen 4 haneli
+    // sayı içeren satırları logla (büyük ihtimalle tarih oradadır).
+    const candidates = lines.filter((l) => /\d{4}/.test(l)).slice(0, 6);
+    this.logger.warn(
+      `Tarih bulunamadı. 4 haneli sayı içeren satırlar:\n${candidates.join('\n')}`,
+    );
     return null;
   }
 

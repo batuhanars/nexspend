@@ -1,11 +1,15 @@
 ﻿import 'package:flutter/material.dart';
 import 'package:wallet_app/core/l10n/app_strings.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
+import 'package:wallet_app/core/constants/api_endpoints.dart';
 import 'package:wallet_app/core/constants/app_colors.dart';
 import 'package:wallet_app/core/constants/app_spacing.dart';
 import 'package:wallet_app/core/constants/app_typography.dart';
 import 'package:wallet_app/core/utils/currency_formatter.dart';
+import 'package:wallet_app/core/widgets/authenticated_image.dart';
 import 'package:wallet_app/data/models/receipt_model.dart';
+import 'package:wallet_app/navigation/route_names.dart';
 import 'package:wallet_app/presentation/receipt_scanner/bloc/receipt_history_bloc.dart';
 
 class ReceiptHistoryTile extends StatelessWidget {
@@ -32,58 +36,84 @@ class ReceiptHistoryTile extends StatelessWidget {
           horizontal: AppSpacing.pagePadding,
           vertical: AppSpacing.xs,
         ),
-        child: Container(
-          padding: const EdgeInsets.all(AppSpacing.lg),
-          decoration: BoxDecoration(
-            color: AppColors.surfaceContainerHigh,
+        child: Material(
+          color: AppColors.surfaceContainerHigh,
+          borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+          child: InkWell(
             borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-          ),
-          child: Row(
-            children: [
-              Container(
-                width: 44,
-                height: 44,
-                decoration: BoxDecoration(
-                  color: _statusColor.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-                ),
-                child: Icon(_statusIcon, color: _statusColor, size: 22),
-              ),
-              const SizedBox(width: AppSpacing.md),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      receipt.merchantName ?? AppStrings.of(context).unknownMerchant,
-                      style: AppTypography.bodyMd
-                          .copyWith(fontWeight: FontWeight.w600),
-                    ),
-                    Text(
-                      receipt.date != null
-                          ? _formatDate(receipt.date!)
-                          : AppStrings.of(context).unknownDate,
-                      style: AppTypography.bodySm
-                          .copyWith(color: AppColors.onSurfaceVariant),
-                    ),
-                  ],
-                ),
-              ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
+            onTap: receipt.hasImage
+                ? () => context.push(RouteNames.receiptImage(receipt.id))
+                : null,
+            child: Padding(
+              padding: const EdgeInsets.all(AppSpacing.lg),
+              child: Row(
                 children: [
-                  if (receipt.amount != null)
-                    Text(
-                      CurrencyFormatter.format(receipt.amount!),
-                      style: AppTypography.titleSm
-                          .copyWith(color: AppColors.tertiary),
+                  _buildLeading(),
+                  const SizedBox(width: AppSpacing.md),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          receipt.merchantName ??
+                              AppStrings.of(context).unknownMerchant,
+                          style: AppTypography.bodyMd
+                              .copyWith(fontWeight: FontWeight.w600),
+                        ),
+                        Text(
+                          receipt.date != null
+                              ? _formatDate(receipt.date!)
+                              : AppStrings.of(context).unknownDate,
+                          style: AppTypography.bodySm
+                              .copyWith(color: AppColors.onSurfaceVariant),
+                        ),
+                      ],
                     ),
-                  const SizedBox(height: AppSpacing.xs),
-                  _StatusBadge(status: receipt.status),
+                  ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      if (receipt.amount != null)
+                        Text(
+                          CurrencyFormatter.format(receipt.amount!),
+                          style: AppTypography.titleSm
+                              .copyWith(color: AppColors.tertiary),
+                        ),
+                      const SizedBox(height: AppSpacing.xs),
+                      _StatusBadge(status: receipt.status),
+                    ],
+                  ),
                 ],
               ),
-            ],
+            ),
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLeading() {
+    final placeholder = Container(
+      width: 44,
+      height: 44,
+      decoration: BoxDecoration(
+        color: _statusColor.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+      ),
+      child: Icon(_statusIcon, color: _statusColor, size: 22),
+    );
+    if (!receipt.hasImage) return placeholder;
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+      child: SizedBox(
+        width: 44,
+        height: 44,
+        child: AuthenticatedImage(
+          urlPath: ApiEndpoints.receiptImage(receipt.id),
+          cacheKey: receipt.id,
+          fit: BoxFit.cover,
+          placeholder: placeholder,
+          errorWidget: placeholder,
         ),
       ),
     );

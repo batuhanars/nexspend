@@ -330,6 +330,8 @@ abstract class AppStrings {
   String get unknownDate;
   String photoCaptureError(String e);
   String receiptProcessError(String e);
+  String receiptDetectedBankAddPrompt(String bankName);
+  String get receiptDetectedCashAddPrompt;
 
   // Transaction widgets
   String get recurringTransaction;
@@ -714,6 +716,10 @@ class _Tr extends AppStrings {
   @override String get unknownDate => 'Tarih bilinmiyor';
   @override String photoCaptureError(String e) => 'Fotoğraf çekilemedi: $e';
   @override String receiptProcessError(String e) => 'Fiş işlenemedi: $e';
+  @override String receiptDetectedBankAddPrompt(String bankName) =>
+      '$bankName tespit edildi · Hesap ekle';
+  @override String get receiptDetectedCashAddPrompt =>
+      'Nakit ödeme tespit edildi · Hesap ekle';
 
   @override String get recurringTransaction => 'Tekrarlayan İşlem';
   @override String get recurringFrequencyLabel => 'Sıklık';
@@ -1090,6 +1096,10 @@ class _En extends AppStrings {
   @override String get unknownDate => 'Unknown date';
   @override String photoCaptureError(String e) => 'Photo capture failed: $e';
   @override String receiptProcessError(String e) => 'Receipt processing failed: $e';
+  @override String receiptDetectedBankAddPrompt(String bankName) =>
+      'Detected $bankName · Add account';
+  @override String get receiptDetectedCashAddPrompt =>
+      'Cash payment detected · Add account';
 
   @override String get recurringTransaction => 'Recurring Transaction';
   @override String get recurringFrequencyLabel => 'Frequency';

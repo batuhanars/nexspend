@@ -3,13 +3,22 @@ import {
   NotFoundException,
   BadRequestException,
   UnauthorizedException,
+  StreamableFile,
 } from '@nestjs/common';
+import type { Response } from 'express';
 import { PrismaService } from '../../prisma/prisma.service';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import * as bcrypt from 'bcrypt';
 import * as fs from 'fs';
 import * as path from 'path';
+
+const AVATAR_CONTENT_TYPES: Record<string, string> = {
+  '.jpg': 'image/jpeg',
+  '.jpeg': 'image/jpeg',
+  '.png': 'image/png',
+  '.webp': 'image/webp',
+};
 
 @Injectable()
 export class UsersService {
@@ -135,6 +144,40 @@ export class UsersService {
     });
 
     return this.getProfile(userId);
+  }
+
+  async streamAvatar(userId: string, res: Response): Promise<StreamableFile> {
+    const user = await this.findUser(userId);
+    if (!user.avatarUrl) {
+      throw new NotFoundException('Avatar yok');
+    }
+    // Google OAuth avatarları full URL olarak saklanır — local olarak servis edilemez.
+    if (
+      user.avatarUrl.startsWith('http://') ||
+      user.avatarUrl.startsWith('https://')
+    ) {
+      throw new NotFoundException('Avatar harici bir URL üzerinden servis edilir');
+    }
+
+    const avatarsDir = path.join(process.cwd(), 'uploads', 'avatars');
+    const filename = path.basename(user.avatarUrl);
+    const filePath = path.join(avatarsDir, filename);
+
+    if (
+      !filePath.startsWith(avatarsDir + path.sep) ||
+      !fs.existsSync(filePath)
+    ) {
+      throw new NotFoundException('Avatar dosyası bulunamadı');
+    }
+
+    const ext = path.extname(filename).toLowerCase();
+    res.setHeader(
+      'Content-Type',
+      AVATAR_CONTENT_TYPES[ext] ?? 'application/octet-stream',
+    );
+    res.setHeader('Cache-Control', 'private, max-age=300');
+
+    return new StreamableFile(fs.createReadStream(filePath));
   }
 
   async updateFcmToken(userId: string, fcmToken: string) {

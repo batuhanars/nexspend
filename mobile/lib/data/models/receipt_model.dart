@@ -27,6 +27,23 @@ class ReceiptItemModel {
       );
 }
 
+/// Backend'in OCR'dan çıkardığı hesap önerisi. Kullanıcının hesap kümesini
+/// bilmediği için sadece tespit ettiği ödeme tipini ve banka adını döner;
+/// frontend bu hint'i kullanıcının `accounts` listesiyle eşleştirir.
+class ReceiptAccountHint {
+  const ReceiptAccountHint({this.paymentMethod, this.bankName});
+  final String? paymentMethod;
+  final String? bankName;
+
+  bool get isEmpty => paymentMethod == null && bankName == null;
+
+  factory ReceiptAccountHint.fromJson(Map<String, dynamic> json) =>
+      ReceiptAccountHint(
+        paymentMethod: json['paymentMethod'] as String?,
+        bankName: json['bankName'] as String?,
+      );
+}
+
 class ReceiptParseResult {
   const ReceiptParseResult({
     this.receiptId,
@@ -35,6 +52,7 @@ class ReceiptParseResult {
     this.merchantName,
     this.suggestedCategoryId,
     this.suggestedCategoryName,
+    this.suggestedAccountHint,
     this.items = const [],
     this.confidence = 0.0,
     this.isDuplicate = false,
@@ -48,6 +66,7 @@ class ReceiptParseResult {
   final String? merchantName;
   final String? suggestedCategoryId;
   final String? suggestedCategoryName;
+  final ReceiptAccountHint? suggestedAccountHint;
   final List<ReceiptItemModel> items;
   final double confidence;
   final bool isDuplicate;
@@ -58,6 +77,8 @@ class ReceiptParseResult {
     final data = json['data'] as Map<String, dynamic>? ?? json;
     final suggestedCategory =
         data['suggestedCategory'] as Map<String, dynamic>?;
+    final accountHint =
+        data['suggestedAccountHint'] as Map<String, dynamic>?;
     return ReceiptParseResult(
       receiptId: data['id'] as String? ?? data['receiptId'] as String?,
       amount: (data['parsedAmount'] as num?)?.toDouble() ??
@@ -73,6 +94,8 @@ class ReceiptParseResult {
           data['suggestedCategoryId'] as String?,
       suggestedCategoryName: suggestedCategory?['name'] as String? ??
           data['suggestedCategoryName'] as String?,
+      suggestedAccountHint:
+          accountHint != null ? ReceiptAccountHint.fromJson(accountHint) : null,
       items: (data['items'] as List? ?? [])
           .map((i) => ReceiptItemModel.fromJson(i as Map<String, dynamic>))
           .toList(),
@@ -115,7 +138,7 @@ class ReceiptHistoryModel {
     this.merchantName,
     this.date,
     this.confidence,
-    this.imagePath,
+    this.imageUrl,
   });
 
   final String id;
@@ -124,7 +147,12 @@ class ReceiptHistoryModel {
   final String? merchantName;
   final DateTime? date;
   final double? confidence;
-  final String? imagePath;
+  final String? imageUrl;
+
+  /// Backend'de saklanan local dosya varsa true. `pending` veya null durumunda
+  /// görsel henüz yok — JWT korumalı `/api/receipts/:id/image` endpoint'ine
+  /// gitmek anlamsız.
+  bool get hasImage => imageUrl != null && imageUrl != 'pending';
 
   factory ReceiptHistoryModel.fromJson(Map<String, dynamic> json) =>
       ReceiptHistoryModel(
@@ -139,6 +167,6 @@ class ReceiptHistoryModel {
             ? DateTime.tryParse(json['date'] as String)
             : null,
         confidence: (json['confidence'] as num?)?.toDouble(),
-        imagePath: json['imagePath'] as String?,
+        imageUrl: json['imageUrl'] as String?,
       );
 }

@@ -1,8 +1,10 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:wallet_app/core/constants/api_endpoints.dart';
 import 'package:wallet_app/core/constants/app_colors.dart';
 import 'package:wallet_app/core/constants/app_spacing.dart';
 import 'package:wallet_app/core/constants/app_typography.dart';
+import 'package:wallet_app/core/widgets/authenticated_image.dart';
 import 'package:wallet_app/data/models/user_model.dart';
 
 class ProfileCard extends StatelessWidget {
@@ -40,20 +42,7 @@ class ProfileCard extends StatelessWidget {
                     color: AppColors.primary.withValues(alpha: 0.15),
                     shape: BoxShape.circle,
                   ),
-                  child: user.avatarUrl != null
-                      ? ClipOval(
-                          child: CachedNetworkImage(
-                            imageUrl: user.avatarUrl!,
-                            fit: BoxFit.cover,
-                            placeholder: (context, _) => const CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: AppColors.primary,
-                            ),
-                            errorWidget: (context, _, error) =>
-                                _initialsWidget(initials),
-                          ),
-                        )
-                      : _initialsWidget(initials),
+                  child: _buildAvatar(user, initials),
                 ),
                 if (isSaving)
                   const Positioned.fill(
@@ -88,6 +77,40 @@ class ProfileCard extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Widget _buildAvatar(UserModel user, String initials) {
+    final googleUrl = user.googleAvatarUrl;
+    if (googleUrl != null) {
+      return ClipOval(
+        child: CachedNetworkImage(
+          imageUrl: googleUrl,
+          fit: BoxFit.cover,
+          placeholder: (context, _) => const CircularProgressIndicator(
+            strokeWidth: 2,
+            color: AppColors.primary,
+          ),
+          errorWidget: (context, _, error) => _initialsWidget(initials),
+        ),
+      );
+    }
+    if (user.hasLocalAvatar) {
+      return ClipOval(
+        child: AuthenticatedImage(
+          urlPath: ApiEndpoints.meAvatar,
+          cacheKey: user.avatarUrl,
+          fit: BoxFit.cover,
+          placeholder: const Center(
+            child: CircularProgressIndicator(
+              strokeWidth: 2,
+              color: AppColors.primary,
+            ),
+          ),
+          errorWidget: _initialsWidget(initials),
+        ),
+      );
+    }
+    return _initialsWidget(initials);
   }
 
   Widget _initialsWidget(String initials) {

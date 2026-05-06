@@ -27,3 +27,10 @@ class ReceiptPreviewFieldUpdated extends ReceiptPreviewEvent {
 class ReceiptPreviewConfirmed extends ReceiptPreviewEvent {
   const ReceiptPreviewConfirmed();
 }
+
+/// Kullanıcı "Hesap ekle" CTA'sından yeni bir hesap oluşturduğunda tetiklenir.
+/// Hesap listesine eklenir ve seçili olarak işaretlenir; CTA gizlenir.
+class ReceiptPreviewAccountAdded extends ReceiptPreviewEvent {
+  const ReceiptPreviewAccountAdded(this.account);
+  final AccountModel account;
+}

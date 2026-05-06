@@ -12,10 +12,13 @@ import {
   UploadedFile,
   HttpCode,
   HttpStatus,
+  Res,
+  StreamableFile,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname, join } from 'path';
+import type { Response } from 'express';
 import { ReceiptsService } from './receipts.service';
 import { ScanReceiptDto } from './dto/scan-receipt.dto';
 import { ConfirmReceiptDto } from './dto/confirm-receipt.dto';
@@ -55,6 +58,15 @@ export class ReceiptsController {
   @Get(':id')
   findOne(@CurrentUser() user: { id: string }, @Param('id') id: string) {
     return this.receiptsService.findOne(user.id, id);
+  }
+
+  @Get(':id/image')
+  getImage(
+    @CurrentUser() user: { id: string },
+    @Param('id') id: string,
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<StreamableFile> {
+    return this.receiptsService.streamImage(user.id, id, res);
   }
 
   @Post('scan')

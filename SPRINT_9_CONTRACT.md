@@ -327,5 +327,5 @@ Standart `GlobalExceptionFilter` formatına uyar:
 > Sprint başlamadan önce kullanıcıya sorulacak / kullanıcı karar verecek noktalar:
 
 1. ~~**EVDS API key:** Kullanıcı `https://evds2.tcmb.gov.tr` üzerinden alıp `.env`'e yazacak.~~ ✅ `.env`'de mevcut (kullanıcı 2026-05-06).
-2. **Suggestion eşiği:** "%5 veya 100 TL" eşiği muhafazakâr mı agresif mi? V1'de muhafazakâr başlayıp telemetri ile ayarlayabiliriz.
-3. **`InflationRate` retention:** Geçmiş ne kadar saklanacak? Şimdilik sınırsız öneririm, 10 yıllık veri bile <2MB.
+2. ~~**Suggestion eşiği:**~~ ✅ Onaylandı (kullanıcı 2026-05-06): `cumulativeRate < 5%` VE `(suggestedAmount − currentAmount) < 100 TL` koşulu sağlanırsa öneri verilmez (204 No Content). Telemetri sonrası ayarlanabilir.
+3. ~~**`InflationRate` retention:**~~ ✅ Sınırsız saklanacak (kullanıcı 2026-05-06). 10 yıllık veri <2MB, retention politikasına gerek yok. Geçmiş raporlar tam veriyle çalışır.

@@ -7,7 +7,7 @@ import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
 import '../../../data/models/account_model.dart';
-import '../../shared/widgets/split_amount_field.dart' show ThousandsFormatter;
+import '../../shared/widgets/split_amount_field.dart';
 import '../bloc/account_bloc.dart';
 import '../widgets/account_form_widgets.dart';
 
@@ -33,8 +33,11 @@ class AddAccountPage extends StatefulWidget {
 class _AddAccountPageState extends State<AddAccountPage> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
-  final _balanceController = TextEditingController();
+  // Kredi kartı için klasik input (controller); diğer tipler SplitAmountField
+  // kullandığı için değer state'te tutulur.
+  final _creditCardDebtController = TextEditingController();
   final _creditLimitController = TextEditingController();
+  double? _splitBalance;
 
   late AccountType _type;
   String _currency = 'TRY';
@@ -61,7 +64,7 @@ class _AddAccountPageState extends State<AddAccountPage> {
   ];
 
   final _nameFocus = FocusNode();
-  final _balanceFocus = FocusNode();
+  final _creditCardDebtFocus = FocusNode();
   final _creditLimitFocus = FocusNode();
 
   @override
@@ -107,10 +110,10 @@ class _AddAccountPageState extends State<AddAccountPage> {
   @override
   void dispose() {
     _nameController.dispose();
-    _balanceController.dispose();
+    _creditCardDebtController.dispose();
     _creditLimitController.dispose();
     _nameFocus.dispose();
-    _balanceFocus.dispose();
+    _creditCardDebtFocus.dispose();
     _creditLimitFocus.dispose();
     super.dispose();
   }
@@ -126,10 +129,13 @@ class _AddAccountPageState extends State<AddAccountPage> {
     if (_type == AccountType.BANK && _selectedBank == null) return;
     if (!(_formKey.currentState?.validate() ?? false)) return;
 
-    final rawBalance = _parseAmount(_balanceController.text) ?? 0.0;
+    final isCreditCard = _type == AccountType.CREDIT_CARD;
+    final rawBalance = isCreditCard
+        ? (_parseAmount(_creditCardDebtController.text) ?? 0.0)
+        : (_splitBalance ?? 0.0);
     final creditLimit = _parseAmount(_creditLimitController.text) ?? 0.0;
 
-    if (_type == AccountType.CREDIT_CARD && creditLimit <= 0) {
+    if (isCreditCard && creditLimit <= 0) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text(AppStrings.of(context).creditLimitRequired),
         backgroundColor: AppColors.error,
@@ -139,8 +145,7 @@ class _AddAccountPageState extends State<AddAccountPage> {
 
     // Kredi kartında kullanıcı pozitif borç tutarı girer; backend negatif
     // bakiye olarak saklar.
-    final balance =
-        _type == AccountType.CREDIT_CARD ? -rawBalance : rawBalance;
+    final balance = isCreditCard ? -rawBalance : rawBalance;
 
     final data = <String, dynamic>{
       'name': _nameController.text.trim(),
@@ -148,7 +153,7 @@ class _AddAccountPageState extends State<AddAccountPage> {
       'balance': balance,
       'currency': _currency,
       'isDefault': _isDefault,
-      if (_type == AccountType.CREDIT_CARD) ...{
+      if (isCreditCard) ...{
         'creditLimit': creditLimit,
         'statementDay': _statementDay,
         'paymentDueDay': _paymentDueDay,
@@ -201,8 +206,9 @@ class _AddAccountPageState extends State<AddAccountPage> {
                   _type = t;
                   _selectedBank = null;
                   _nameController.clear();
-                  _balanceController.clear();
+                  _creditCardDebtController.clear();
                   _creditLimitController.clear();
+                  _splitBalance = null;
                 }),
               ),
               const SizedBox(height: AppSpacing.xl),
@@ -217,7 +223,11 @@ class _AddAccountPageState extends State<AddAccountPage> {
                   hintText: _type.labelOf(context),
                   prefixIcon: _type.defaultIcon,
                   textInputAction: TextInputAction.next,
-                  onFieldSubmitted: (_) => _balanceFocus.requestFocus(),
+                  onFieldSubmitted: (_) {
+                    if (_type == AccountType.CREDIT_CARD) {
+                      _creditCardDebtFocus.requestFocus();
+                    }
+                  },
                   validator: (v) =>
                       (v == null || v.trim().isEmpty) ? AppStrings.of(context).accountNameRequired : null,
                 ),
@@ -226,36 +236,37 @@ class _AddAccountPageState extends State<AddAccountPage> {
               _label(_type == AccountType.CREDIT_CARD
                   ? AppStrings.of(context).currentDebt
                   : AppStrings.of(context).startingBalance),
-              const SizedBox(height: AppSpacing.sm),
-              AccountFormField(
-                controller: _balanceController,
-                focusNode: _balanceFocus,
-                hintText: _type == AccountType.CREDIT_CARD
-                    ? AppStrings.of(context).debtHint
-                    : '0',
-                prefixIcon: Icons.account_balance_wallet_outlined,
-                keyboardType: TextInputType.number,
-                textInputAction: _type == AccountType.CREDIT_CARD
-                    ? TextInputAction.next
-                    : TextInputAction.done,
-                onFieldSubmitted: (_) {
-                  if (_type == AccountType.CREDIT_CARD) {
-                    _creditLimitFocus.requestFocus();
-                  }
-                },
-                inputFormatters: [
-                  FilteringTextInputFormatter.digitsOnly,
-                  ThousandsFormatter(),
-                ],
-                validator: (v) {
-                  if (v == null || v.isEmpty) return null;
-                  if (_parseAmount(v) == null) {
-                    return AppStrings.of(context).invalidAmount;
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: AppSpacing.sm),
+              const SizedBox(height: AppSpacing.md),
+              if (_type == AccountType.CREDIT_CARD)
+                AccountFormField(
+                  controller: _creditCardDebtController,
+                  focusNode: _creditCardDebtFocus,
+                  hintText: AppStrings.of(context).debtHint,
+                  prefixIcon: Icons.account_balance_wallet_outlined,
+                  keyboardType: TextInputType.number,
+                  textInputAction: TextInputAction.next,
+                  onFieldSubmitted: (_) => _creditLimitFocus.requestFocus(),
+                  inputFormatters: [
+                    FilteringTextInputFormatter.digitsOnly,
+                    ThousandsFormatter(),
+                  ],
+                  validator: (v) {
+                    if (v == null || v.isEmpty) return null;
+                    if (_parseAmount(v) == null) {
+                      return AppStrings.of(context).invalidAmount;
+                    }
+                    return null;
+                  },
+                )
+              else
+                SplitAmountField(
+                  key: ValueKey('balance-${_type.name}'),
+                  autofocus: false,
+                  color: AppColors.primary,
+                  initialValue: _splitBalance,
+                  onChanged: (v) => _splitBalance = v,
+                ),
+              const SizedBox(height: AppSpacing.lg),
               AccountCurrencySelector(
                 selected: _currency,
                 onChanged: (c) => setState(() => _currency = c),
@@ -377,7 +388,6 @@ class _AddAccountPageState extends State<AddAccountPage> {
             hintText: AppStrings.of(context).bankNameHint,
             prefixIcon: AccountType.BANK.defaultIcon,
             textInputAction: TextInputAction.next,
-            onFieldSubmitted: (_) => _balanceFocus.requestFocus(),
             validator: (v) =>
                 (v == null || v.trim().isEmpty) ? AppStrings.of(context).accountNameRequired : null,
           ),

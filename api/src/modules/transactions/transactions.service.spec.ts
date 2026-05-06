@@ -30,8 +30,8 @@ const mockEventEmitter = {
 };
 
 const mockBalanceService = {
-  applyTransaction: jest.fn(),
-  revertTransaction: jest.fn(),
+  apply: jest.fn(),
+  revert: jest.fn(),
 };
 
 const USER_ID = 'user-1';

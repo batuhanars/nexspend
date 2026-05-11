@@ -95,10 +95,22 @@ class _BudgetsView extends StatelessWidget {
                 context
                     .read<BudgetsBloc>()
                     .add(const BudgetsRefreshRequested());
-                await context
+                final newState = await context
                     .read<BudgetsBloc>()
                     .stream
                     .firstWhere((s) => s is BudgetsLoaded || s is BudgetsError);
+                // _onRefresh intermediate BudgetsLoading emit etmediği için
+                // listenWhen tetiklenmiyor → suggestion fetch'i burada açıkça
+                // tetikliyoruz, aksi halde değişen updatedAt'ler yansımıyor.
+                if (newState is BudgetsLoaded && context.mounted) {
+                  final ids = newState.budgets
+                      .where((b) => b.isActive)
+                      .map((b) => b.id)
+                      .toList();
+                  context.read<InflationBloc>().add(
+                        InflationSuggestionsFetchRequested(budgetIds: ids),
+                      );
+                }
               },
               child: CustomScrollView(
                 physics: const AlwaysScrollableScrollPhysics(),

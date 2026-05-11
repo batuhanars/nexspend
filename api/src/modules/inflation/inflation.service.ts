@@ -76,7 +76,7 @@ export class InflationService {
     const apiKey = this.config.get<string>('EVDS_API_KEY');
     const baseUrl = this.config.get<string>(
       'EVDS_BASE_URL',
-      'https://evds2.tcmb.gov.tr/service/evds/',
+      'https://evds3.tcmb.gov.tr/igmevdsms-dis/',
     );
 
     if (!apiKey) {
@@ -86,7 +86,8 @@ export class InflationService {
       return;
     }
 
-    const allSeries = Object.values(EVDS_SERIES_MAP).join(',');
+    // EVDS3 birden fazla seriyi virgül değil dash ile ayırıyor (örn. TP.FG.J0-TP.FG.J01)
+    const allSeries = Object.values(EVDS_SERIES_MAP).join('-');
     const now = new Date();
     // 25 ay öncesinden başla — 12 aylık yıllık oran hesabı için yeterli veri
     const startDate = this.toEvdsDate(
@@ -202,12 +203,15 @@ export class InflationService {
     endDate: string,
     apiKey: string,
   ): Promise<EvdsItem[]> {
-    const url = `${baseUrl}series=${series}&startDate=${startDate}&endDate=${endDate}&type=json&key=${apiKey}`;
+    const url = `${baseUrl}series=${series}&startDate=${startDate}&endDate=${endDate}&type=json`;
 
     for (let attempt = 1; attempt <= 3; attempt++) {
       try {
         const response = await firstValueFrom(
-          this.http.get<EvdsResponse>(url, { timeout: 15000 }),
+          this.http.get<EvdsResponse>(url, {
+            timeout: 15000,
+            headers: { key: apiKey },
+          }),
         );
         return response.data?.items ?? [];
       } catch (err) {
@@ -257,14 +261,15 @@ export class InflationService {
     return `01-${mm}-${yyyy}`;
   }
 
+  // EVDS3 yanıtında Tarih "YYYY-M" formatında (örn. "2024-3", "2026-1")
   private parseEvdsDate(dateStr: string): number {
-    const [dd, mm, yyyy] = dateStr.split('-');
-    return new Date(`${yyyy}-${mm}-${dd}`).getTime();
+    const [yyyy, m] = dateStr.split('-');
+    return new Date(parseInt(yyyy, 10), parseInt(m, 10) - 1, 1).getTime();
   }
 
   private evdsToPeriodKey(dateStr: string): string {
-    const [, mm, yyyy] = dateStr.split('-');
-    return `${yyyy}-${mm}`;
+    const [yyyy, m] = dateStr.split('-');
+    return `${yyyy}-${m.padStart(2, '0')}`;
   }
 
   private sleep(ms: number): Promise<void> {

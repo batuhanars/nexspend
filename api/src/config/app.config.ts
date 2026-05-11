@@ -30,7 +30,7 @@ export default () => ({
   evds: {
     apiKey: process.env.EVDS_API_KEY,
     baseUrl:
-      process.env.EVDS_BASE_URL ?? 'https://evds2.tcmb.gov.tr/service/evds/',
+      process.env.EVDS_BASE_URL ?? 'https://evds3.tcmb.gov.tr/igmevdsms-dis/',
   },
   fcm: {
     serverKey: process.env.FCM_SERVER_KEY,

@@ -482,19 +482,21 @@
 ## Sprint 9 — Enflasyon-Duyarlı Bütçeleme
 > 📖 Detay: `DEVELOPMENT_PLAN_V2.md` → Section 8.6
 
-### Backend
+### Backend ✅ Tamamlandı (PR #6 + #7)
 
 > ☑ Modeller hazır: `InflationRate`, `CategoryInflationMap` — `schema.prisma`'da tanımlı, CategoryInflationMap seed'i Sprint 0'da girildi.
 
-- [ ] Migration çalıştır: `npx prisma migrate dev --name add_inflation_models`
-- [ ] `InflationService` — TÜİK EVDS API entegrasyonu
-- [ ] Cron Job (her ayın 5'i, 10:00): `InflationFetchJob` — aylık TÜFE verilerini çek
+- [x] Migration çalıştır: `npx prisma migrate dev --name add_inflation_models`
+- [x] `InflationService` — TÜİK EVDS API entegrasyonu (PR #6, EVDS3 göçü PR #7 ile uyarlandı)
+- [x] Cron Job (her ayın 5'i, 10:00; yedek ayın 10'u): `InflationFetchJob` — aylık TÜFE verilerini çek
 - [x] TÜİK kategori eşleştirme seed data — Sprint 0'da `CategoryInflationMap` seed olarak girildi
-- [ ] `GET /api/inflation/current` — güncel enflasyon oranları
-- [ ] `GET /api/inflation/history` — geçmiş veriler (?months=6)
-- [ ] `GET /api/budgets/:id/inflation-suggestion` — bütçe ayarlama önerisi hesapla
-- [ ] `POST /api/budgets/:id/apply-inflation` — enflasyon önerisini uygula
-- [ ] `GET /api/reports/inflation-comparison` — harcama vs enflasyon raporu
+- [x] `GET /api/inflation/current` — güncel enflasyon oranları
+- [x] `GET /api/inflation/history` — geçmiş veriler (?months=6)
+- [x] `GET /api/budgets/:id/inflation-suggestion` — bütçe ayarlama önerisi hesapla
+- [x] `POST /api/budgets/:id/apply-inflation` — enflasyon önerisini uygula
+- [x] `GET /api/reports/inflation-comparison` — harcama vs enflasyon raporu
+
+> **Not (EVDS3 göçü, 2026-05-11):** TCMB EVDS API'sini `evds2.tcmb.gov.tr/service/evds/` → `evds3.tcmb.gov.tr/igmevdsms-dis/` adresine taşıdı. Üç breaking change: API anahtarı artık HTTP header (`key: ...`), çoklu seri ayırıcısı `-` (virgül değil), yanıttaki `Tarih` formatı `"YYYY-M"`. Lokal smoke test ile doğrulandı (`scripts/trigger-inflation-fetch.ts` aracı ile 261 kayıt çekildi).
 
 ### Frontend
 - [ ] InflationSuggestionCard widget (bütçe sayfasında öneri kartı)
@@ -651,13 +653,13 @@
 | Sprint 6 | Raporlar + Fiş Tarama | ✅ %100 | ✅ %100 | ✅ Tamamlandı |
 | Sprint 7 | Ayarlar + Profil | ✅ %100 | 🔧 %88 | 🔧 Para birimi/dil seçici, l10n eksik |
 | Sprint 8 | Test + Optimizasyon | ✅ %90 | 🔧 %88 | 🔧 Backend: 76 unit + 25 e2e ✅, ESLint 0 hata ✅, Railway ✅; Frontend: shimmer ✅, BLoC testleri 32/32 ✅, empty states ✅, infinite scroll ✅, splash screen ✅; widget/integration testleri + app icon eksik |
-| **Sprint 9** | **Enflasyon Bütçeleme** | ❌ %0 | ❌ %0 | ❌ Başlanmadı |
+| **Sprint 9** | **Enflasyon Bütçeleme** | ✅ %100 | ❌ %0 | 🔧 Backend tamam (PR #6 + #7), EVDS3 göçü uyarlandı; frontend bekliyor |
 | **Sprint 10** | **Altın/Döviz Portföy** | ❌ %0 | ❌ %0 | ❌ Başlanmadı |
 | **Sprint 11** | **Akıllı Harcama Analizi** | ❌ %0 | ❌ %0 | ❌ Başlanmadı |
 | **Sprint 12** | **Aile/Ortak Bütçe (v2)** | ❌ %0 | ❌ %0 | ❌ Başlanmadı |
 | Çapraz | Merkezi Entegrasyon | ✅ %100 | — | ✅ Event akışı ✅, Report/Dashboard source filtresi ✅, FCM bildirimleri ✅ |
 
-**Tahmini genel ilerleme: ~%88** — V1 backend ✅ (Sprint 0-8 + CI/CD), frontend Sprint 0-8 ~%95  
+**Tahmini genel ilerleme: ~%90** — V1 backend ✅ + Sprint 9 backend ✅, frontend Sprint 0-8 ~%95  
 **Toplam sprint: 13** (Sprint 0-8 temel + Sprint 9-12 fark yaratan özellikler)  
-**Sıradaki (Backend):** Sprint 9 (Enflasyon) — V1 backend tamamlandı, Railway'de yayında  
-**Sıradaki (Frontend):** App icon tasarımı veya Sprint 9 başlangıcı
+**Sıradaki (Backend):** Sprint 10 (Altın/Döviz Portföy)  
+**Sıradaki (Frontend):** Sprint 9 enflasyon UI bileşenleri (InflationSuggestionCard, InflationComparisonTable, InflationTrendChart + Budgets/Reports entegrasyonu)

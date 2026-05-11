@@ -16,12 +16,14 @@ import '../presentation/transactions/pages/transactions_page.dart';
 import '../presentation/transactions/pages/add_transaction_page.dart';
 import '../presentation/transactions/pages/transaction_detail_page.dart';
 import '../data/repositories/budget_repository.dart';
+import '../data/repositories/inflation_repository.dart';
 import '../presentation/budgets/bloc/budgets_bloc.dart';
 import '../presentation/budgets/bloc/budgets_event.dart';
 import '../presentation/budgets/bloc/add_budget_bloc.dart';
 import '../presentation/budgets/bloc/add_budget_event.dart';
 import '../presentation/budgets/pages/budgets_page.dart';
 import '../presentation/budgets/pages/add_budget_page.dart';
+import '../presentation/inflation/bloc/inflation_bloc.dart';
 import '../data/models/debt_model.dart' show DebtModel;
 import '../data/models/subscription_model.dart' show SubscriptionModel;
 import '../presentation/debts/bloc/debt_detail_bloc.dart';
@@ -154,10 +156,19 @@ GoRouter createRouter() {
           GoRoute(
             path: RouteNames.budgets,
             name: 'budgets',
-            builder: (context, _) => BlocProvider(
-              create: (_) => BudgetsBloc(
-                budgetRepository: getIt<BudgetRepository>(),
-              )..add(const BudgetsLoadRequested()),
+            builder: (context, _) => MultiBlocProvider(
+              providers: [
+                BlocProvider(
+                  create: (_) => BudgetsBloc(
+                    budgetRepository: getIt<BudgetRepository>(),
+                  )..add(const BudgetsLoadRequested()),
+                ),
+                BlocProvider(
+                  create: (_) => InflationBloc(
+                    inflationRepository: getIt<InflationRepository>(),
+                  ),
+                ),
+              ],
               child: const BudgetsPage(),
             ),
           ),

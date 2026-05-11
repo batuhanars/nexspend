@@ -1,0 +1,187 @@
+import 'package:flutter/material.dart';
+import '../../../core/constants/app_colors.dart';
+import '../../../core/constants/app_spacing.dart';
+import '../../../core/constants/app_typography.dart';
+import '../../../core/utils/currency_formatter.dart';
+import '../../../data/models/inflation_model.dart';
+
+class InflationSuggestionCard extends StatelessWidget {
+  const InflationSuggestionCard({
+    super.key,
+    required this.suggestion,
+    required this.budgetName,
+    required this.isApplying,
+    required this.onApply,
+  });
+
+  final InflationSuggestionModel suggestion;
+  final String budgetName;
+  final bool isApplying;
+  final VoidCallback onApply;
+
+  @override
+  Widget build(BuildContext context) {
+    final increase = suggestion.suggestedAmount - suggestion.currentAmount;
+
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.lg),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceContainerHigh,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+        border: Border.all(
+          color: AppColors.primary.withValues(alpha: 0.25),
+          width: 1,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.sm,
+                  vertical: 3,
+                ),
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+                ),
+                child: Text(
+                  'ENFLASYON ÖNERİSİ',
+                  style: AppTypography.labelSm.copyWith(
+                    color: AppColors.primary,
+                    letterSpacing: 0.8,
+                  ),
+                ),
+              ),
+              const Spacer(),
+              Icon(
+                Icons.trending_up_rounded,
+                size: 16,
+                color: AppColors.primary.withValues(alpha: 0.7),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.md),
+          Text(
+            budgetName,
+            style: AppTypography.titleSm,
+          ),
+          const SizedBox(height: AppSpacing.xs),
+          Text(
+            'Son ${suggestion.monthsSinceUpdate} ayda %${suggestion.cumulativeRate.toStringAsFixed(1)} kümülatif enflasyon',
+            style: AppTypography.bodySm.copyWith(
+              color: AppColors.onSurfaceVariant,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.md),
+          Row(
+            children: [
+              _AmountCell(
+                label: 'Mevcut',
+                amount: suggestion.currentAmount,
+                color: AppColors.onSurfaceVariant,
+              ),
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+                child: Icon(
+                  Icons.arrow_forward_rounded,
+                  size: 16,
+                  color: AppColors.onSurfaceVariant,
+                ),
+              ),
+              _AmountCell(
+                label: 'Önerilen',
+                amount: suggestion.suggestedAmount,
+                color: AppColors.primary,
+              ),
+              const Spacer(),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.sm,
+                  vertical: 3,
+                ),
+                decoration: BoxDecoration(
+                  color: AppColors.tertiary.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+                ),
+                child: Text(
+                  '+${CurrencyFormatter.formatNoDecimal(increase)}',
+                  style: AppTypography.labelSm.copyWith(
+                    color: AppColors.tertiary,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.md),
+          SizedBox(
+            width: double.infinity,
+            height: 40,
+            child: FilledButton(
+              onPressed: isApplying ? null : onApply,
+              style: FilledButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: AppColors.onPrimary,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                ),
+              ),
+              child: isApplying
+                  ? const SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: AppColors.onPrimary,
+                      ),
+                    )
+                  : Text(
+                      'Bütçeyi Güncelle  ${CurrencyFormatter.format(suggestion.suggestedAmount)}\'ye',
+                      style: AppTypography.bodySm.copyWith(
+                        color: AppColors.onPrimary,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _AmountCell extends StatelessWidget {
+  const _AmountCell({
+    required this.label,
+    required this.amount,
+    required this.color,
+  });
+
+  final String label;
+  final double amount;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: AppTypography.labelSm.copyWith(
+            color: AppColors.onSurfaceVariant,
+            fontSize: 10,
+          ),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          CurrencyFormatter.format(amount),
+          style: AppTypography.titleSm.copyWith(color: color),
+        ),
+      ],
+    );
+  }
+}

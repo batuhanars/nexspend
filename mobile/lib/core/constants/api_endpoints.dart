@@ -87,6 +87,16 @@ class ApiEndpoints {
   static String statementById(String id) => '/api/statements/$id';
   static String statementPay(String id) => '/api/statements/$id/pay';
 
+  // Inflation
+  static const String inflationCurrent = '/api/inflation/current';
+  static const String inflationHistory = '/api/inflation/history';
+  static String budgetInflationSuggestion(String id) =>
+      '/api/budgets/$id/inflation-suggestion';
+  static String budgetApplyInflation(String id) =>
+      '/api/budgets/$id/apply-inflation';
+  static const String reportsInflationComparison =
+      '/api/reports/inflation-comparison';
+
   // Receipts
   static const String receiptsScan = '/api/receipts/scan';
   static const String receipts = '/api/receipts';

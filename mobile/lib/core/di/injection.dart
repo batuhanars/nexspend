@@ -12,6 +12,7 @@ import '../../data/repositories/statement_repository.dart';
 import '../../data/repositories/subscription_repository.dart';
 import '../../data/repositories/user_repository.dart';
 import '../../data/repositories/tag_repository.dart';
+import '../../data/repositories/inflation_repository.dart';
 import '../../data/repositories/receipt_repository.dart';
 import '../../data/repositories/dashboard_repository.dart';
 import '../../data/repositories/transaction_repository.dart';
@@ -89,6 +90,10 @@ Future<void> configureDependencies() async {
 
   getIt.registerLazySingleton<ReportRepository>(
     () => ReportRepository(apiClient: getIt<ApiClient>()),
+  );
+
+  getIt.registerLazySingleton<InflationRepository>(
+    () => InflationRepository(apiClient: getIt<ApiClient>()),
   );
 
   getIt.registerLazySingleton<UserRepository>(

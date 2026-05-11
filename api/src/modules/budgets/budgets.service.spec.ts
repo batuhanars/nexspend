@@ -1,5 +1,10 @@
 /* eslint-disable */
-import { ConflictException, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  NotFoundException,
+  UnprocessableEntityException,
+  BadRequestException,
+} from '@nestjs/common';
 import { TransactionType } from '@prisma/client';
 import { BudgetsService } from './budgets.service';
 import { TransactionSource } from '@prisma/client';
@@ -21,7 +26,15 @@ const mockPrisma = {
   transaction: {
     aggregate: jest.fn(),
   },
+  categoryInflationMap: {
+    findUnique: jest.fn(),
+  },
+  inflationRate: {
+    findMany: jest.fn(),
+  },
 };
+
+const mockNotifications = { sendToUser: jest.fn() };
 
 const USER_ID = 'user-1';
 const BUDGET_ID = 'budget-1';
@@ -48,7 +61,7 @@ describe('BudgetsService', () => {
   let service: BudgetsService;
 
   beforeEach(() => {
-    service = new BudgetsService(mockPrisma as any);
+    service = new BudgetsService(mockPrisma as any, mockNotifications as any);
     jest.clearAllMocks();
   });
 
@@ -267,6 +280,141 @@ describe('BudgetsService', () => {
       );
 
       await service.onTransactionUpdated(event);
+
+      expect(mockPrisma.budget.update).toHaveBeenCalled();
+    });
+  });
+
+  // ─── Enflasyon Önerisi ────────────────────────────────────────────────────────
+
+  describe('getInflationSuggestion()', () => {
+    const budgetUpdatedAt = new Date('2026-02-01T00:00:00Z');
+    const budgetWithUpdatedAt = {
+      ...baseBudget,
+      updatedAt: budgetUpdatedAt,
+    };
+
+    it('kategori inflation map yoksa 422 fırlatır', async () => {
+      mockPrisma.budget.findFirst.mockResolvedValue(budgetWithUpdatedAt);
+      mockPrisma.categoryInflationMap.findUnique.mockResolvedValue(null);
+
+      await expect(
+        service.getInflationSuggestion(USER_ID, BUDGET_ID),
+      ).rejects.toThrow(UnprocessableEntityException);
+    });
+
+    it('anlamlılık eşiğinin altındaysa null döner (204)', async () => {
+      mockPrisma.budget.findFirst.mockResolvedValue({
+        ...budgetWithUpdatedAt,
+        amount: 3000,
+        updatedAt: new Date(), // az önce güncellendi → 0 ay geçmiş
+      });
+      mockPrisma.categoryInflationMap.findUnique.mockResolvedValue({
+        categoryId: CATEGORY_ID,
+        inflationKey: 'gida',
+      });
+      // Veri yok → kümülatif rate = 0
+      mockPrisma.inflationRate.findMany.mockResolvedValue([]);
+
+      const result = await service.getInflationSuggestion(USER_ID, BUDGET_ID);
+
+      expect(result).toBeNull();
+    });
+
+    it('anlamlı öneri varsa suggestion DTO döner', async () => {
+      mockPrisma.budget.findFirst.mockResolvedValue({
+        ...budgetWithUpdatedAt,
+        amount: 3000,
+      });
+      mockPrisma.categoryInflationMap.findUnique.mockResolvedValue({
+        categoryId: CATEGORY_ID,
+        inflationKey: 'gida',
+      });
+      // 3 ay × %3 → kümülatif ~%9.27, fark ~278 TL
+      mockPrisma.inflationRate.findMany.mockResolvedValue([
+        { categoryKey: 'gida', year: 2026, month: 3, monthlyRate: 3.0, yearlyRate: 45.0 },
+        { categoryKey: 'gida', year: 2026, month: 4, monthlyRate: 3.0, yearlyRate: 45.0 },
+        { categoryKey: 'gida', year: 2026, month: 5, monthlyRate: 3.0, yearlyRate: 45.0 },
+      ]);
+
+      const result = await service.getInflationSuggestion(USER_ID, BUDGET_ID);
+
+      expect(result).not.toBeNull();
+      expect(result!.budgetId).toBe(BUDGET_ID);
+      expect(result!.currentAmount).toBe(3000);
+      expect(result!.suggestedAmount).toBeGreaterThan(3000);
+      expect(result!.cumulativeRate).toBeGreaterThan(5);
+      expect(result!.categoryKey).toBe('gida');
+    });
+  });
+
+  // ─── applyInflation ───────────────────────────────────────────────────────────
+
+  describe('applyInflation()', () => {
+    const budgetUpdatedAt = new Date('2026-02-01T00:00:00Z');
+
+    it('öneri yoksa (204 senaryosu) 400 fırlatır', async () => {
+      mockPrisma.budget.findFirst.mockResolvedValue({
+        ...baseBudget,
+        amount: 3000,
+        updatedAt: new Date(), // az önce güncellendi
+      });
+      mockPrisma.categoryInflationMap.findUnique.mockResolvedValue({
+        categoryId: CATEGORY_ID,
+        inflationKey: 'gida',
+      });
+      mockPrisma.inflationRate.findMany.mockResolvedValue([]);
+
+      await expect(
+        service.applyInflation(USER_ID, BUDGET_ID, { newAmount: 3100 }),
+      ).rejects.toThrow(BadRequestException);
+    });
+
+    it('newAmount ±%10 dışındaysa 400 fırlatır', async () => {
+      mockPrisma.budget.findFirst.mockResolvedValue({
+        ...baseBudget,
+        amount: 3000,
+        updatedAt: budgetUpdatedAt,
+      });
+      mockPrisma.categoryInflationMap.findUnique.mockResolvedValue({
+        categoryId: CATEGORY_ID,
+        inflationKey: 'gida',
+      });
+      mockPrisma.inflationRate.findMany.mockResolvedValue([
+        { categoryKey: 'gida', year: 2026, month: 3, monthlyRate: 3.0, yearlyRate: 45.0 },
+        { categoryKey: 'gida', year: 2026, month: 4, monthlyRate: 3.0, yearlyRate: 45.0 },
+        { categoryKey: 'gida', year: 2026, month: 5, monthlyRate: 3.0, yearlyRate: 45.0 },
+      ]);
+
+      // suggestedAmount ~3278, ±%10: 2950 - 3606 aralığı
+      // 5000 aralık dışı
+      await expect(
+        service.applyInflation(USER_ID, BUDGET_ID, { newAmount: 5000 }),
+      ).rejects.toThrow(BadRequestException);
+    });
+
+    it('geçerli newAmount ile update çağrılır', async () => {
+      mockPrisma.budget.findFirst.mockResolvedValue({
+        ...baseBudget,
+        amount: 3000,
+        updatedAt: budgetUpdatedAt,
+      });
+      mockPrisma.categoryInflationMap.findUnique.mockResolvedValue({
+        categoryId: CATEGORY_ID,
+        inflationKey: 'gida',
+      });
+      mockPrisma.inflationRate.findMany.mockResolvedValue([
+        { categoryKey: 'gida', year: 2026, month: 3, monthlyRate: 3.0, yearlyRate: 45.0 },
+        { categoryKey: 'gida', year: 2026, month: 4, monthlyRate: 3.0, yearlyRate: 45.0 },
+        { categoryKey: 'gida', year: 2026, month: 5, monthlyRate: 3.0, yearlyRate: 45.0 },
+      ]);
+      // findFirst mock'u update için de kullanılıyor (update içinde findOwned)
+      mockPrisma.budget.update.mockResolvedValue({ ...baseBudget, amount: 3278 });
+
+      // suggestedAmount ~3278, ±%10: ~2950 - ~3606 → 3278 geçerli
+      const result = await service.applyInflation(USER_ID, BUDGET_ID, {
+        newAmount: 3278,
+      });
 
       expect(mockPrisma.budget.update).toHaveBeenCalled();
     });

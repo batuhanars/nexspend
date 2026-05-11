@@ -3,6 +3,13 @@ import { ReportsService } from './reports.service';
 import { QueryReportDto } from './dto/query-report.dto';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import { IsOptional, IsString } from 'class-validator';
+
+class InflationComparisonQueryDto {
+  @IsOptional()
+  @IsString()
+  period?: string;
+}
 
 @Controller('reports')
 @UseGuards(JwtAuthGuard)
@@ -31,5 +38,13 @@ export class ReportsController {
     @Query() query: QueryReportDto,
   ) {
     return this.reportsService.getTrends(user.id, query);
+  }
+
+  @Get('inflation-comparison')
+  getInflationComparison(
+    @CurrentUser() user: { id: string },
+    @Query() query: InflationComparisonQueryDto,
+  ) {
+    return this.reportsService.getInflationComparison(user.id, query.period);
   }
 }

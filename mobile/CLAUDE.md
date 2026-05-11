@@ -145,7 +145,22 @@ Font: Inter (`google_fonts` paketi).
 
 ## Lokal Backend Bağlantısı
 
-- Android emülatör: `http://10.0.2.2:3000` (host loopback)
-- iOS simulator: `http://localhost:3000`
-- Fiziksel cihaz: bilgisayarın LAN IP'si (`http://192.168.x.x:3000`) + backend `0.0.0.0`'a bind olmalı
-- Production: `ApiEndpoints.baseUrl` ortam değişkenine bağlı (Sprint 8'de eklendi)
+`ApiEndpoints.baseUrl` derleme-zamanı `--dart-define=API_BASE_URL=...` ile set edilir. Default değer **production Railway URL**'idir; release build'ler ek argüman gerektirmez. Lokal geliştirme için aşağıdaki örneklere göre override et:
+
+```bash
+# Android emülatör (host loopback):
+flutter run --dart-define=API_BASE_URL=http://10.0.2.2:3000
+
+# iOS simulator:
+flutter run --dart-define=API_BASE_URL=http://localhost:3000
+
+# Fiziksel cihaz (LAN'da PC IP'si — backend 0.0.0.0'a bind olmalı):
+flutter run --dart-define=API_BASE_URL=http://192.168.x.x:3000
+
+# Production'a karşı debug build:
+flutter run                      # default URL kullanılır
+```
+
+> **IP nasıl bulunur?** PowerShell'de `Get-NetIPAddress -AddressFamily IPv4`. Telefon ile PC aynı Wi-Fi/LAN'da olmalı; Windows Firewall'da port 3000'e inbound allow kuralı gerekir.
+
+> **VS Code launch config:** Sık kullanılan kombinasyonları `.vscode/launch.json`'da `args: ["--dart-define=API_BASE_URL=..."]` olarak kaydetmek pratik.

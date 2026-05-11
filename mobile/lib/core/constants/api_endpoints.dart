@@ -1,8 +1,13 @@
 class ApiEndpoints {
   ApiEndpoints._();
 
-  static const String baseUrl =
-      'https://wallet-api.up.railway.app'; // Android emulator → localhost
+  // Build-time --dart-define=API_BASE_URL=... ile override edilir.
+  // Default: production Railway URL'i — release build'leri çalışsın diye.
+  // Lokal geliştirme için bkz. mobile/CLAUDE.md "Lokal Backend Bağlantısı".
+  static const String baseUrl = String.fromEnvironment(
+    'API_BASE_URL',
+    defaultValue: 'https://wallet-api.up.railway.app',
+  );
 
   // Auth
   static const String register = '/api/auth/register';

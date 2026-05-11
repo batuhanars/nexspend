@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, BadRequestException } from '@nestjs/common';
 import {
   type Prisma,
   TransactionSource,
@@ -133,9 +133,145 @@ export class ReportsService {
     };
   }
 
+  async getInflationComparison(userId: string, period?: string) {
+    const { year, month } = this.resolvePeriodStr(period);
+
+    const lastMonth = month === 1 ? 12 : month - 1;
+    const lastYear = month === 1 ? year - 1 : year;
+
+    const budgets = await this.prisma.budget.findMany({
+      where: { userId, isActive: true },
+      include: {
+        category: { select: { id: true, name: true } },
+      },
+    });
+
+    const rows: Array<{
+      categoryId: string;
+      categoryName: string;
+      lastPeriodSpent: number;
+      currentPeriodSpent: number;
+      userChangeRate: number | null;
+      inflationRate: number;
+      status: 'BELOW' | 'EQUAL' | 'ABOVE';
+    }> = [];
+
+    const summary = {
+      categoriesBelow: 0,
+      categoriesAbove: 0,
+      categoriesEqual: 0,
+    };
+
+    for (const budget of budgets) {
+      const inflationMap = await this.prisma.categoryInflationMap.findUnique({
+        where: { categoryId: budget.categoryId },
+      });
+      if (!inflationMap) continue;
+
+      const inflationRate = await this.prisma.inflationRate.findUnique({
+        where: {
+          categoryKey_year_month: {
+            categoryKey: inflationMap.inflationKey,
+            year,
+            month,
+          },
+        },
+      });
+
+      const [lastAgg, currentAgg] = await Promise.all([
+        this.prisma.transaction.aggregate({
+          where: {
+            userId,
+            categoryId: budget.categoryId,
+            type: TransactionType.EXPENSE,
+            transactionDate: {
+              gte: new Date(lastYear, lastMonth - 1, 1),
+              lt: new Date(year, month - 1, 1),
+            },
+          },
+          _sum: { amount: true },
+        }),
+        this.prisma.transaction.aggregate({
+          where: {
+            userId,
+            categoryId: budget.categoryId,
+            type: TransactionType.EXPENSE,
+            transactionDate: {
+              gte: new Date(year, month - 1, 1),
+              lt: new Date(year, month, 1),
+            },
+          },
+          _sum: { amount: true },
+        }),
+      ]);
+
+      const lastPeriodSpent = Number(lastAgg._sum.amount ?? 0);
+      const currentPeriodSpent = Number(currentAgg._sum.amount ?? 0);
+
+      const userChangeRate =
+        lastPeriodSpent > 0
+          ? Math.round(
+              ((currentPeriodSpent - lastPeriodSpent) / lastPeriodSpent) *
+                100 *
+                100,
+            ) / 100
+          : null;
+
+      const inflRateValue = Number(inflationRate?.monthlyRate ?? 0);
+
+      let status: 'BELOW' | 'EQUAL' | 'ABOVE' = 'EQUAL';
+      if (userChangeRate !== null) {
+        if (userChangeRate > inflRateValue + 1) status = 'ABOVE';
+        else if (userChangeRate < inflRateValue - 1) status = 'BELOW';
+      }
+
+      rows.push({
+        categoryId: budget.category.id,
+        categoryName: budget.category.name,
+        lastPeriodSpent,
+        currentPeriodSpent,
+        userChangeRate,
+        inflationRate: inflRateValue,
+        status,
+      });
+
+      if (status === 'ABOVE') summary.categoriesAbove++;
+      else if (status === 'BELOW') summary.categoriesBelow++;
+      else summary.categoriesEqual++;
+    }
+
+    return {
+      period: `${year}-${String(month).padStart(2, '0')}`,
+      rows,
+      summary,
+    };
+  }
+
   // =============================================
   // Helpers
   // =============================================
+
+  private resolvePeriodStr(periodStr?: string): {
+    year: number;
+    month: number;
+  } {
+    if (!periodStr) {
+      const now = new Date();
+      return { year: now.getFullYear(), month: now.getMonth() + 1 };
+    }
+    const match = /^(\d{4})-(\d{2})$/.exec(periodStr);
+    if (!match) {
+      throw new BadRequestException(
+        'Geçersiz period formatı. Beklenen format: YYYY-MM',
+      );
+    }
+    const year = parseInt(match[1], 10);
+    const month = parseInt(match[2], 10);
+    if (month < 1 || month > 12) {
+      throw new BadRequestException('Geçersiz ay değeri');
+    }
+    return { year, month };
+  }
 
   private resolvePeriod(query: QueryReportDto): {
     startDate: Date;

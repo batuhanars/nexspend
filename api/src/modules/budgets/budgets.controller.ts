@@ -6,13 +6,16 @@ import {
   Delete,
   Body,
   Param,
+  Res,
   UseGuards,
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
+import { Response } from 'express';
 import { BudgetsService } from './budgets.service';
 import { CreateBudgetDto } from './dto/create-budget.dto';
 import { UpdateBudgetDto } from './dto/update-budget.dto';
+import { ApplyInflationDto } from './dto/apply-inflation.dto';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 
@@ -48,6 +51,35 @@ export class BudgetsController {
     @Body() dto: UpdateBudgetDto,
   ) {
     return this.budgetsService.update(user.id, id, dto);
+  }
+
+  @Get(':id/inflation-suggestion')
+  async getInflationSuggestion(
+    @CurrentUser() user: { id: string },
+    @Param('id') id: string,
+    @Res() res: Response,
+  ) {
+    const suggestion = await this.budgetsService.getInflationSuggestion(
+      user.id,
+      id,
+    );
+    if (!suggestion) {
+      return res.status(HttpStatus.NO_CONTENT).send();
+    }
+    return res.status(HttpStatus.OK).json({
+      success: true,
+      statusCode: HttpStatus.OK,
+      data: suggestion,
+    });
+  }
+
+  @Post(':id/apply-inflation')
+  applyInflation(
+    @CurrentUser() user: { id: string },
+    @Param('id') id: string,
+    @Body() dto: ApplyInflationDto,
+  ) {
+    return this.budgetsService.applyInflation(user.id, id, dto);
   }
 
   @Delete(':id')

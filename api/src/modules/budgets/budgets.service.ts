@@ -2,6 +2,8 @@ import {
   Injectable,
   NotFoundException,
   ConflictException,
+  UnprocessableEntityException,
+  BadRequestException,
   Logger,
 } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
@@ -14,6 +16,7 @@ import {
 } from '../../common/events/transaction.events';
 import { CreateBudgetDto } from './dto/create-budget.dto';
 import { UpdateBudgetDto } from './dto/update-budget.dto';
+import { ApplyInflationDto } from './dto/apply-inflation.dto';
 import { NotificationsService } from '../notifications/notifications.service';
 
 @Injectable()
@@ -252,6 +255,100 @@ export class BudgetsService {
         `${categoryName} bütçenizin %${Math.round(pct)}'ini harcadınız.`,
       );
     }
+  }
+
+  // =============================================
+  // Enflasyon — Öneri & Uygulama
+  // =============================================
+
+  async getInflationSuggestion(userId: string, id: string) {
+    const budget = await this.findOwned(userId, id);
+
+    const inflationMap = await this.prisma.categoryInflationMap.findUnique({
+      where: { categoryId: budget.categoryId },
+    });
+
+    if (!inflationMap) {
+      throw new UnprocessableEntityException(
+        'Bu kategori için enflasyon eşleştirmesi tanımlı değil',
+      );
+    }
+
+    const now = new Date();
+    const updatedAt = budget.updatedAt;
+    const monthsSinceUpdate = Math.max(
+      1,
+      (now.getFullYear() - updatedAt.getFullYear()) * 12 +
+        (now.getMonth() - updatedAt.getMonth()),
+    );
+
+    const monthPairs = this.buildMonthPairsSince(updatedAt, now);
+    const rates = await this.prisma.inflationRate.findMany({
+      where: {
+        categoryKey: inflationMap.inflationKey,
+        OR: monthPairs.map(({ year, month }) => ({ year, month })),
+      },
+      orderBy: [{ year: 'asc' }, { month: 'asc' }],
+    });
+
+    let cumulativeMultiplier = 1;
+    for (const rate of rates) {
+      cumulativeMultiplier *= 1 + Number(rate.monthlyRate) / 100;
+    }
+    const cumulativeRate =
+      Math.round((cumulativeMultiplier - 1) * 100 * 100) / 100;
+
+    const currentAmount = Number(budget.amount);
+    const suggestedAmount =
+      Math.round(currentAmount * cumulativeMultiplier * 100) / 100;
+
+    if (cumulativeRate < 5 && suggestedAmount - currentAmount < 100) {
+      return null;
+    }
+
+    return {
+      budgetId: budget.id,
+      currentAmount,
+      suggestedAmount,
+      cumulativeRate,
+      monthsSinceUpdate,
+      categoryKey: inflationMap.inflationKey,
+    };
+  }
+
+  async applyInflation(userId: string, id: string, dto: ApplyInflationDto) {
+    const suggestion = await this.getInflationSuggestion(userId, id);
+
+    if (!suggestion) {
+      throw new BadRequestException(
+        'Enflasyon düzeltmesi anlamlı eşiğin altında',
+      );
+    }
+
+    const lower = Math.round(suggestion.suggestedAmount * 0.9 * 100) / 100;
+    const upper = Math.round(suggestion.suggestedAmount * 1.1 * 100) / 100;
+    if (dto.newAmount < lower || dto.newAmount > upper) {
+      throw new BadRequestException(
+        `Yeni tutar önerilen değerin (${suggestion.suggestedAmount} TL) ±%10 dışında olamaz`,
+      );
+    }
+
+    return this.update(userId, id, { amount: dto.newAmount });
+  }
+
+  private buildMonthPairsSince(
+    from: Date,
+    to: Date,
+  ): { year: number; month: number }[] {
+    const pairs: { year: number; month: number }[] = [];
+    // updatedAt'ten SONRAKİ aydan başla, to'nun ayına kadar
+    let d = new Date(from.getFullYear(), from.getMonth() + 1, 1);
+    const limit = new Date(to.getFullYear(), to.getMonth() + 1, 1);
+    while (d < limit) {
+      pairs.push({ year: d.getFullYear(), month: d.getMonth() + 1 });
+      d = new Date(d.getFullYear(), d.getMonth() + 1, 1);
+    }
+    return pairs;
   }
 
   private async findOwned(userId: string, id: string) {

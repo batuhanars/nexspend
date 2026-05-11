@@ -498,12 +498,14 @@
 
 > **Not (EVDS3 göçü, 2026-05-11):** TCMB EVDS API'sini `evds2.tcmb.gov.tr/service/evds/` → `evds3.tcmb.gov.tr/igmevdsms-dis/` adresine taşıdı. Üç breaking change: API anahtarı artık HTTP header (`key: ...`), çoklu seri ayırıcısı `-` (virgül değil), yanıttaki `Tarih` formatı `"YYYY-M"`. Lokal smoke test ile doğrulandı (`scripts/trigger-inflation-fetch.ts` aracı ile 261 kayıt çekildi).
 
-### Frontend
-- [ ] InflationSuggestionCard widget (bütçe sayfasında öneri kartı)
-- [ ] InflationComparisonTable widget (raporlarda kategori bazlı karşılaştırma)
-- [ ] InflationTrendChart widget (harcama vs enflasyon çizgi grafiği — fl_chart)
-- [ ] BudgetsPage'e enflasyon öneri kartı entegrasyonu
-- [ ] ReportsPage'e "Enflasyon Karşılaştırması" bölümü
+### Frontend ✅ Tamamlandı (PR #5, merged 2026-05-11)
+- [x] InflationSuggestionCard widget (bütçe sayfasında öneri kartı; 204'te render edilmez)
+- [x] InflationComparisonTable widget (raporlarda kategori bazlı karşılaştırma; BELOW/EQUAL/ABOVE renk eşleşmesi contract Bölüm 6'ya uygun)
+- [x] InflationTrendChart widget (harcama vs enflasyon çizgi grafiği — fl_chart)
+- [x] BudgetsPage'e enflasyon öneri kartı entegrasyonu (apply sonrası optimistic refresh)
+- [x] ReportsPage'e "Enflasyon" tab eklendi
+
+> InflationBloc + Repository + Model, DI kaydı, ApiEndpoints sabitleri eklendi. `inflation_bloc_test.dart` 8 senaryo (`flutter test`: 41/41 ✅, `flutter analyze`: temiz).
 
 ---
 
@@ -653,13 +655,13 @@
 | Sprint 6 | Raporlar + Fiş Tarama | ✅ %100 | ✅ %100 | ✅ Tamamlandı |
 | Sprint 7 | Ayarlar + Profil | ✅ %100 | 🔧 %88 | 🔧 Para birimi/dil seçici, l10n eksik |
 | Sprint 8 | Test + Optimizasyon | ✅ %90 | 🔧 %88 | 🔧 Backend: 76 unit + 25 e2e ✅, ESLint 0 hata ✅, Railway ✅; Frontend: shimmer ✅, BLoC testleri 32/32 ✅, empty states ✅, infinite scroll ✅, splash screen ✅; widget/integration testleri + app icon eksik |
-| **Sprint 9** | **Enflasyon Bütçeleme** | ✅ %100 | ❌ %0 | 🔧 Backend tamam (PR #6 + #7), EVDS3 göçü uyarlandı; frontend bekliyor |
+| **Sprint 9** | **Enflasyon Bütçeleme** | ✅ %100 | ✅ %100 | ✅ Backend (PR #6 + #7) + Frontend (PR #5) tamamlandı, EVDS3 göçü uyarlandı |
 | **Sprint 10** | **Altın/Döviz Portföy** | ❌ %0 | ❌ %0 | ❌ Başlanmadı |
 | **Sprint 11** | **Akıllı Harcama Analizi** | ❌ %0 | ❌ %0 | ❌ Başlanmadı |
 | **Sprint 12** | **Aile/Ortak Bütçe (v2)** | ❌ %0 | ❌ %0 | ❌ Başlanmadı |
 | Çapraz | Merkezi Entegrasyon | ✅ %100 | — | ✅ Event akışı ✅, Report/Dashboard source filtresi ✅, FCM bildirimleri ✅ |
 
-**Tahmini genel ilerleme: ~%90** — V1 backend ✅ + Sprint 9 backend ✅, frontend Sprint 0-8 ~%95  
+**Tahmini genel ilerleme: ~%92** — V1 + Sprint 9 backend/frontend ✅, frontend Sprint 0-8 ~%95  
 **Toplam sprint: 13** (Sprint 0-8 temel + Sprint 9-12 fark yaratan özellikler)  
 **Sıradaki (Backend):** Sprint 10 (Altın/Döviz Portföy)  
-**Sıradaki (Frontend):** Sprint 9 enflasyon UI bileşenleri (InflationSuggestionCard, InflationComparisonTable, InflationTrendChart + Budgets/Reports entegrasyonu)
+**Sıradaki (Frontend):** Sprint 10 portföy UI (Sprint 10 backend tamamlandıktan sonra)

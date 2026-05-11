@@ -88,11 +88,11 @@ class InflationCategoryKey {
 ### 2.2 EVDS API yapılandırması
 
 ```env
-EVDS_API_KEY=<TCMB EVDS API key — kullanıcı sağlayacak>
-EVDS_BASE_URL=https://evds2.tcmb.gov.tr/service/evds/
+EVDS_API_KEY=<TCMB EVDS API key — kullanıcı sağladı, .env'de mevcut>
+EVDS_BASE_URL=https://evds3.tcmb.gov.tr/igmevdsms-dis/
 ```
 
-`.env.example`'a eklenmeli (zaten Sprint 9 için yer ayrılmış).
+> **Not (2026-05-11 PR #7):** TCMB EVDS API'sini `evds2.tcmb.gov.tr/service/evds/` adresinden `evds3.tcmb.gov.tr/igmevdsms-dis/` adresine taşıdı. Üç breaking change uyarlandı (backend tarafında saydam — frontend bilmek zorunda değil ama referans olarak): API anahtarı artık HTTP header (`key: ...`) olarak gönderiliyor, çoklu seri ayırıcısı virgül yerine dash (`TP.FG.J0-TP.FG.J01-...`), ve yanıt `Tarih` formatı `"YYYY-M"` (örn. `"2026-1"`). Railway'de `EVDS_BASE_URL` env var güncellendi.
 
 ---
 
@@ -102,7 +102,7 @@ EVDS_BASE_URL=https://evds2.tcmb.gov.tr/service/evds/
 |---|---|---|
 | `InflationRateDto` | `InflationRateModel` | `categoryKey: string, year: number, month: number, monthlyRate: number, yearlyRate: number \| null, fetchedAt: string (ISO 8601)` |
 | `InflationSuggestionDto` | `InflationSuggestionModel` | `budgetId: string, currentAmount: number, suggestedAmount: number, cumulativeRate: number, monthsSinceUpdate: number, categoryKey: string` |
-| `InflationComparisonRowDto` | `InflationComparisonRowModel` | `categoryId: string, categoryName: string, lastPeriodSpent: number, currentPeriodSpent: number, userChangeRate: number, inflationRate: number, status: 'BELOW' \| 'EQUAL' \| 'ABOVE'` |
+| `InflationComparisonRowDto` | `InflationComparisonRowModel` | `categoryId: string, categoryName: string, lastPeriodSpent: number, currentPeriodSpent: number, userChangeRate: number \| null, inflationRate: number, status: 'BELOW' \| 'EQUAL' \| 'ABOVE'` |
 | `ApplyInflationDto` (request body) | — | `newAmount: number` (validation: positive, min 1, max 9999999.99) |
 
 **JSON serialization kuralı:** Tüm `Decimal` alanlar wire'da `number` olarak gider (backend `class-transformer` `@Type(() => Number)`, Dart `num.toDouble()`).
@@ -243,8 +243,10 @@ Belirtilen bütçe için ayarlama önerisi hesapla.
 
 | Cron expr | Job | Etki |
 |---|---|---|
-| `0 10 5 * *` | `InflationFetchJob` | EVDS API'den son 13 ayın endeksini çeker, aylık + yıllık % hesaplar, `InflationRate` tablosuna upsert. **Frontend'e direkt etki yok**, ama `/api/inflation/current` sonucu güncellenmiş olur. |
-| `0 10 10 * *` | (Aynı job, fallback) | TÜİK 5'inde yayınlamadıysa 10'unda tekrar dene. Aynı upsert idempotent çalışır. |
+| `0 10 5 * *` | `InflationFetchJob.runPrimary()` | EVDS API'den son 25 ayın endeksini çeker (12 ay öncesini içermesi için), aylık + yıllık % hesaplar, `InflationRate` tablosuna upsert. **Frontend'e direkt etki yok**, ama `/api/inflation/current` sonucu güncellenmiş olur. |
+| `0 10 10 * *` | `InflationFetchJob.runFallback()` | TÜİK 5'inde yayınlamadıysa 10'unda tekrar dene. Aynı upsert idempotent çalışır. |
+
+**Manuel tetikleme (geliştirme için):** `cd api && npx ts-node -O '{"module":"CommonJS"}' scripts/trigger-inflation-fetch.ts` — Cron'u beklemeden DB'yi doldurur ve son dönemin oranlarını konsola basar. Frontend mock veriyle test ederken yararlı.
 
 **EVDS API hata yönetimi (backend):**
 - 3 retry, 5sn arayla
@@ -301,12 +303,12 @@ Standart `GlobalExceptionFilter` formatına uyar:
 
 ## 9. Tamamlanma Kriterleri (Definition of Done)
 
-### Backend
-- [ ] `npx prisma migrate dev --name add_inflation_models` koşmuş, migration commit'lenmiş
-- [ ] 5 endpoint canlı, hepsi `@UseGuards(JwtAuthGuard)`
-- [ ] Cron job test ortamında (`@Cron`) tetiklenebilir, mock EVDS yanıtıyla doğrulanmış
-- [ ] Birim testler: `inflation.service.spec.ts` (kümülatif rate hesaplaması), `budgets.service.spec.ts` ek (suggestion mantığı)
-- [ ] `npm run lint && npm test && npm run build` lokal'de yeşil **(push öncesi şart)**
+### Backend ✅ (PR #6 + PR #7, merged 2026-05-11)
+- [x] `npx prisma migrate dev --name add_inflation_models` koşmuş, migration commit'lenmiş (mükerrer migration b95be31'de temizlendi)
+- [x] 5 endpoint canlı, hepsi `@UseGuards(JwtAuthGuard)`
+- [x] Cron job (`@Cron('0 10 5 * *')` + fallback `'0 10 10 * *'`), lokal smoke test ile EVDS3 canlı yanıtı doğrulandı — 261 kayıt çekildi
+- [x] Birim testler: `inflation.service.spec.ts` (9 test, kümülatif rate hesaplaması), `budgets.service.spec.ts` ek (suggestion + apply mantığı)
+- [x] `npm run lint && npm test && npm run build` yeşil, CI 4/4 yeşil (Mobile Analyze + Test path-filter ile skipped)
 
 ### Frontend
 - [ ] 3 widget render olur, BLoC entegre

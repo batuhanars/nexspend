@@ -107,4 +107,8 @@ Future<void> configureDependencies() async {
   getIt.registerLazySingleton<StatementRepository>(
     () => StatementRepository(apiClient: getIt<ApiClient>()),
   );
+
+  getIt.registerLazySingleton<InflationRepository>(
+    () => InflationRepository(apiClient: getIt<ApiClient>()),
+  );
 }

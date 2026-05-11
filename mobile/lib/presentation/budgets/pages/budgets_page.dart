@@ -137,7 +137,8 @@ class _BudgetsView extends StatelessWidget {
     );
   }
 
-  Widget _buildBody(BuildContext context, BudgetsState state, AppStrings s) {
+  Widget _buildBody(
+      BuildContext context, BudgetsState state, AppStrings s) {
     return switch (state) {
       BudgetsInitial() || BudgetsLoading() => const SliverFillRemaining(
           child: BudgetsShimmer(),
@@ -208,7 +209,8 @@ class _BudgetsView extends StatelessWidget {
                                   AppColors.surfaceContainerHigh,
                               shape: const RoundedRectangleBorder(
                                 borderRadius: BorderRadius.vertical(
-                                  top: Radius.circular(AppSpacing.radiusLg),
+                                  top: Radius.circular(
+                                      AppSpacing.radiusLg),
                                 ),
                               ),
                               builder: (_) => BlocProvider.value(
@@ -289,8 +291,10 @@ class _SuggestionCardWrapper extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<InflationBloc, InflationState>(
       buildWhen: (_, curr) =>
-          curr is InflationApplying || curr is InflationApplied ||
-          curr is InflationApplyError || curr is InflationSuggestionsLoaded,
+          curr is InflationApplying ||
+          curr is InflationApplied ||
+          curr is InflationApplyError ||
+          curr is InflationSuggestionsLoaded,
       builder: (context, state) {
         final isApplying = state is InflationApplying &&
             state.budgetId == suggestion.budgetId;

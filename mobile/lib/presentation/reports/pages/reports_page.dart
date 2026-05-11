@@ -1,6 +1,6 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:wallet_app/core/l10n/app_strings.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:wallet_app/presentation/reports/widgets/cash_flow_chart.dart';
 import 'package:wallet_app/presentation/reports/widgets/expense_distribution_section.dart';
 import 'package:wallet_app/presentation/reports/widgets/period_filter.dart';
@@ -67,8 +67,8 @@ class _ReportsView extends StatelessWidget {
             indicatorColor: AppColors.primary,
             labelColor: AppColors.primary,
             unselectedLabelColor: AppColors.onSurfaceVariant,
-            labelStyle: AppTypography.bodySm
-                .copyWith(fontWeight: FontWeight.w600),
+            labelStyle:
+                AppTypography.bodySm.copyWith(fontWeight: FontWeight.w600),
             unselectedLabelStyle: AppTypography.bodySm,
             dividerColor: AppColors.surfaceContainerHighest,
             tabs: const [
@@ -117,9 +117,9 @@ class _GeneralReportTab extends StatelessWidget {
                 ),
                 const SizedBox(height: AppSpacing.lg),
                 FilledButton.tonal(
-                  onPressed: () => context.read<ReportsBloc>().add(
-                        const ReportsLoadRequested(),
-                      ),
+                  onPressed: () => context
+                      .read<ReportsBloc>()
+                      .add(const ReportsLoadRequested()),
                   child: Text(AppStrings.of(context).retry),
                 ),
               ],
@@ -143,15 +143,13 @@ class _GeneralReportTab extends StatelessWidget {
             ],
             if (loaded.distribution.isNotEmpty) ...[
               SectionTitle(
-                  title:
-                      AppStrings.of(context).expenseDistributionTitle),
+                  title: AppStrings.of(context).expenseDistributionTitle),
               const SizedBox(height: AppSpacing.md),
               ExpenseDistributionSection(items: loaded.distribution),
               const SizedBox(height: AppSpacing.xl),
             ],
             if (loaded.trends.isNotEmpty) ...[
-              SectionTitle(
-                  title: AppStrings.of(context).categoryTrendsTitle),
+              SectionTitle(title: AppStrings.of(context).categoryTrendsTitle),
               const SizedBox(height: AppSpacing.md),
               TrendList(trends: loaded.trends),
             ],
@@ -213,9 +211,9 @@ class _InflationReportTabState extends State<_InflationReportTab>
                 ),
                 const SizedBox(height: AppSpacing.lg),
                 FilledButton.tonal(
-                  onPressed: () => context.read<InflationBloc>().add(
-                        const InflationReportFetchRequested(),
-                      ),
+                  onPressed: () => context
+                      .read<InflationBloc>()
+                      .add(const InflationReportFetchRequested()),
                   child: Text(AppStrings.of(context).retry),
                 ),
               ],
@@ -241,10 +239,9 @@ class _InflationReportTabState extends State<_InflationReportTab>
             if (comparison.rows.isEmpty)
               Center(
                 child: Padding(
-                  padding:
-                      const EdgeInsets.symmetric(vertical: AppSpacing.xxxl),
+                  padding: const EdgeInsets.symmetric(vertical: AppSpacing.xxxl),
                   child: Text(
-                    'Enflasyon verisi henüz hazır değil',
+                    'Enflasyon verisi henüz hazir degil',
                     style: AppTypography.bodyMd.copyWith(
                       color: AppColors.onSurfaceVariant,
                     ),

@@ -80,12 +80,8 @@ class ApiEndpoints {
       '/api/reports/expense-distribution';
   static const String reportsCashFlow = '/api/reports/cash-flow';
   static const String reportsTrends = '/api/reports/trends';
-
-  // Credit Card Statements
-  static String accountStatementsList(String accountId) =>
-      '/api/accounts/$accountId/statements';
-  static String statementById(String id) => '/api/statements/$id';
-  static String statementPay(String id) => '/api/statements/$id/pay';
+  static const String reportsInflationComparison =
+      '/api/reports/inflation-comparison';
 
   // Inflation
   static const String inflationCurrent = '/api/inflation/current';
@@ -94,8 +90,12 @@ class ApiEndpoints {
       '/api/budgets/$id/inflation-suggestion';
   static String budgetApplyInflation(String id) =>
       '/api/budgets/$id/apply-inflation';
-  static const String reportsInflationComparison =
-      '/api/reports/inflation-comparison';
+
+  // Credit Card Statements
+  static String accountStatementsList(String accountId) =>
+      '/api/accounts/$accountId/statements';
+  static String statementById(String id) => '/api/statements/$id';
+  static String statementPay(String id) => '/api/statements/$id/pay';
 
   // Receipts
   static const String receiptsScan = '/api/receipts/scan';

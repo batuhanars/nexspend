@@ -80,6 +80,16 @@ class ApiEndpoints {
       '/api/reports/expense-distribution';
   static const String reportsCashFlow = '/api/reports/cash-flow';
   static const String reportsTrends = '/api/reports/trends';
+  static const String reportsInflationComparison =
+      '/api/reports/inflation-comparison';
+
+  // Inflation
+  static const String inflationCurrent = '/api/inflation/current';
+  static const String inflationHistory = '/api/inflation/history';
+  static String budgetInflationSuggestion(String id) =>
+      '/api/budgets/$id/inflation-suggestion';
+  static String budgetApplyInflation(String id) =>
+      '/api/budgets/$id/apply-inflation';
 
   // Credit Card Statements
   static String accountStatementsList(String accountId) =>

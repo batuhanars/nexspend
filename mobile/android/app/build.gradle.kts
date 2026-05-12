@@ -36,14 +36,10 @@ android {
     buildTypes {
         release {
             signingConfig = signingConfigs.getByName("debug")
-            isMinifyEnabled = true
-            isShrinkResources = true
-            // proguard-android-optimize.txt yerine proguard-android.txt — optimize sürümü
-            // metot inlining/dead-code-removal ile platform channel çağrılarını bozuyordu
-            proguardFiles(
-                getDefaultProguardFile("proguard-android.txt"),
-                "proguard-rules.pro",
-            )
+            // Minification kapalı — ProGuard platform channel çağrılarını (flutter_local_notifications,
+            // firebase_messaging) bozuyor. Play Store öncesi tekrar incelenecek.
+            isMinifyEnabled = false
+            isShrinkResources = false
         }
     }
 }

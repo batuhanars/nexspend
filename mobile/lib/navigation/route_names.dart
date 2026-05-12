@@ -45,4 +45,8 @@ class RouteNames {
   static String receiptImage(String id) => '/receipts/$id/image';
   static const String settings = '/settings';
   static const String editProfile = '/settings/profile';
+
+  // Yasal
+  static const String privacyPolicy = '/legal/privacy-policy';
+  static const String termsOfService = '/legal/terms-of-service';
 }

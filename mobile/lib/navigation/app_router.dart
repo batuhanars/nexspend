@@ -65,6 +65,8 @@ import '../presentation/accounts/pages/archived_accounts_page.dart';
 import '../presentation/accounts/pages/edit_account_page.dart';
 import '../presentation/transactions/bloc/add_transaction_bloc.dart';
 import '../presentation/transactions/bloc/transactions_bloc.dart';
+import '../presentation/legal/pages/privacy_policy_page.dart';
+import '../presentation/legal/pages/terms_of_service_page.dart';
 import '../presentation/settings/pages/settings_page.dart';
 import '../presentation/settings/pages/edit_profile_page.dart';
 import '../presentation/shared/bottom_nav_bar.dart';
@@ -454,6 +456,18 @@ GoRouter createRouter() {
             ),
           );
         },
+      ),
+      GoRoute(
+        path: RouteNames.privacyPolicy,
+        name: 'privacy-policy',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, _) => const PrivacyPolicyPage(),
+      ),
+      GoRoute(
+        path: RouteNames.termsOfService,
+        name: 'terms-of-service',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, _) => const TermsOfServicePage(),
       ),
       GoRoute(
         path: RouteNames.receiptHistory,

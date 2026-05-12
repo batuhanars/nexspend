@@ -197,6 +197,18 @@ class _SettingsView extends StatelessWidget {
                     onTap: () => _showChangePasswordSheet(context),
                   ),
                 const SizedBox(height: AppSpacing.lg),
+                SectionHeader('Yasal'),
+                SettingsTile(
+                  icon: Icons.privacy_tip_outlined,
+                  label: 'Gizlilik Politikası',
+                  onTap: () => context.push(RouteNames.privacyPolicy),
+                ),
+                SettingsTile(
+                  icon: Icons.description_outlined,
+                  label: 'Kullanım Şartları',
+                  onTap: () => context.push(RouteNames.termsOfService),
+                ),
+                const SizedBox(height: AppSpacing.lg),
                 SectionHeader(s.sectionSession),
                 SettingsTile(
                   icon: Icons.logout_rounded,

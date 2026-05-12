@@ -67,6 +67,7 @@ import '../presentation/transactions/bloc/add_transaction_bloc.dart';
 import '../presentation/transactions/bloc/transactions_bloc.dart';
 import '../presentation/legal/pages/privacy_policy_page.dart';
 import '../presentation/legal/pages/terms_of_service_page.dart';
+import '../presentation/onboarding/pages/onboarding_page.dart';
 import '../presentation/settings/pages/settings_page.dart';
 import '../presentation/settings/pages/edit_profile_page.dart';
 import '../presentation/shared/bottom_nav_bar.dart';
@@ -81,6 +82,12 @@ GoRouter createRouter() {
     initialLocation: RouteNames.login,
     redirect: _redirect,
     routes: [
+      GoRoute(
+        path: RouteNames.onboarding,
+        name: 'onboarding',
+        builder: (context, _) => const OnboardingPage(),
+      ),
+
       // Auth Routes — share one AuthBloc instance across the auth flow
       GoRoute(
         path: RouteNames.login,
@@ -489,6 +496,17 @@ GoRouter createRouter() {
 
 Future<String?> _redirect(BuildContext context, GoRouterState state) async {
   final storage = getIt<SecureStorage>();
+
+  final isPublicPage = state.matchedLocation == RouteNames.privacyPolicy ||
+      state.matchedLocation == RouteNames.termsOfService;
+  final isOnboarding = state.matchedLocation == RouteNames.onboarding;
+
+  // Onboarding henüz tamamlanmadıysa — auth/public sayfalar dahil her yerden yönlendir
+  final onboardingDone = await storage.isOnboardingComplete();
+  if (!onboardingDone && !isOnboarding && !isPublicPage) {
+    return RouteNames.onboarding;
+  }
+
   final isLoggedIn = await storage.hasTokens();
   final isOnAuthPage = state.matchedLocation == RouteNames.login ||
       state.matchedLocation == RouteNames.register ||
@@ -496,10 +514,9 @@ Future<String?> _redirect(BuildContext context, GoRouterState state) async {
       state.matchedLocation == RouteNames.forgotPassword ||
       state.matchedLocation == RouteNames.resetPassword;
 
-  final isPublicPage = state.matchedLocation == RouteNames.privacyPolicy ||
-      state.matchedLocation == RouteNames.termsOfService;
-
-  if (!isLoggedIn && !isOnAuthPage && !isPublicPage) return RouteNames.login;
+  if (!isLoggedIn && !isOnAuthPage && !isPublicPage && !isOnboarding) {
+    return RouteNames.login;
+  }
 
   if (isLoggedIn && isOnAuthPage) {
     // Biometric açıksa login sayfasında kal — LoginPage tetikleyecek

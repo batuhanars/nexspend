@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:tutorial_coach_mark/tutorial_coach_mark.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_spacing.dart';
 import '../../core/constants/app_typography.dart';
 import '../../core/di/injection.dart';
 import '../../core/l10n/app_strings.dart';
 import '../../core/services/notification_service.dart';
+import '../../core/storage/secure_storage.dart';
+import '../../core/utils/coach_mark_keys.dart';
 import '../../navigation/route_names.dart';
 
 class AppShell extends StatefulWidget {
@@ -23,6 +26,92 @@ class _AppShellState extends State<AppShell> {
     super.initState();
     debugPrint('[AppShell] initState — NotificationService başlatılıyor');
     getIt<NotificationService>().initialize();
+    _checkCoachMark();
+  }
+
+  Future<void> _checkCoachMark() async {
+    final seen = await getIt<SecureStorage>().isCoachMarkSeen();
+    if (!seen && mounted) {
+      await Future.delayed(const Duration(milliseconds: 900));
+      if (mounted) _showCoachMark();
+    }
+  }
+
+  void _showCoachMark() {
+    final size = MediaQuery.of(context).size;
+
+    TutorialCoachMark(
+      targets: [
+        TargetFocus(
+          identify: 'fab',
+          keyTarget: CoachMarkKeys.fab,
+          shape: ShapeLightFocus.Circle,
+          paddingFocus: 8,
+          contents: [
+            TargetContent(
+              align: ContentAlign.top,
+              padding: const EdgeInsets.only(bottom: AppSpacing.xl),
+              child: _CoachContent(
+                title: 'Hızlı Ekle',
+                body: 'Bu butona basarak gelir, gider, transfer ve hesap ekleyebilirsin.',
+              ),
+            ),
+          ],
+        ),
+        TargetFocus(
+          identify: 'settings',
+          keyTarget: CoachMarkKeys.settings,
+          shape: ShapeLightFocus.Circle,
+          paddingFocus: 6,
+          contents: [
+            TargetContent(
+              align: ContentAlign.bottom,
+              padding: const EdgeInsets.only(top: AppSpacing.xl),
+              child: _CoachContent(
+                title: 'Ayarlar',
+                body: 'Profilini düzenleyebilir, Aile Bütçesi oluşturabilir ve bildirim tercihlerini ayarlayabilirsin.',
+              ),
+            ),
+          ],
+        ),
+        TargetFocus(
+          identify: 'swipe',
+          targetPosition: TargetPosition(
+            const Size(80, 80),
+            Offset(size.width / 2 - 40, size.height / 2 - 40),
+          ),
+          shape: ShapeLightFocus.Circle,
+          contents: [
+            TargetContent(
+              align: ContentAlign.bottom,
+              padding: const EdgeInsets.only(top: AppSpacing.xl),
+              child: _CoachContent(
+                title: 'Kaydırarak Sil',
+                body: 'İşlem, bütçe veya herhangi bir listede kartı sola kaydırarak silebilirsin.',
+                icon: Icons.swipe_left_rounded,
+              ),
+            ),
+          ],
+        ),
+      ],
+      colorShadow: Colors.black,
+      opacityShadow: 0.88,
+      textSkip: 'Atla',
+      skipWidget: Padding(
+        padding: const EdgeInsets.all(AppSpacing.lg),
+        child: Text(
+          'Atla',
+          style: AppTypography.bodyMd.copyWith(
+            color: Colors.white.withValues(alpha: 0.7),
+          ),
+        ),
+      ),
+      onFinish: () => getIt<SecureStorage>().saveCoachMarkSeen(),
+      onSkip: () {
+        getIt<SecureStorage>().saveCoachMarkSeen();
+        return true;
+      },
+    ).show(context: context);
   }
 
   void _showAddSheet() {
@@ -271,6 +360,7 @@ class _BottomNavBar extends StatelessWidget {
                   behavior: HitTestBehavior.opaque,
                   child: Center(
                     child: Container(
+                      key: CoachMarkKeys.fab,
                       width: 48,
                       height: 48,
                       decoration: BoxDecoration(
@@ -350,4 +440,50 @@ class _TabItem {
   final IconData activeIcon;
   final String label;
   final String route;
+}
+
+class _CoachContent extends StatelessWidget {
+  const _CoachContent({
+    required this.title,
+    required this.body,
+    this.icon,
+  });
+
+  final String title;
+  final String body;
+  final IconData? icon;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (icon != null) ...[
+          Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              color: AppColors.primary.withValues(alpha: 0.2),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(icon, color: AppColors.primary, size: 22),
+          ),
+          const SizedBox(height: AppSpacing.md),
+        ],
+        Text(
+          title,
+          style: AppTypography.titleSm.copyWith(color: Colors.white),
+        ),
+        const SizedBox(height: AppSpacing.xs),
+        Text(
+          body,
+          style: AppTypography.bodyMd.copyWith(
+            color: Colors.white.withValues(alpha: 0.75),
+            height: 1.5,
+          ),
+        ),
+      ],
+    );
+  }
 }

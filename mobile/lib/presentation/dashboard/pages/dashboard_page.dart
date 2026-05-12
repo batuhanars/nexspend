@@ -7,6 +7,7 @@ import '../../../core/constants/app_typography.dart';
 import '../../../core/l10n/app_strings.dart';
 import '../../../core/di/injection.dart';
 import '../../../core/services/app_events.dart';
+import '../../../core/utils/coach_mark_keys.dart';
 import '../../../data/repositories/dashboard_repository.dart';
 import '../../../navigation/route_names.dart';
 import '../bloc/dashboard_bloc.dart';
@@ -109,6 +110,7 @@ class _DashboardViewState extends State<_DashboardView> {
       title: Text(greeting, style: AppTypography.headlineSm),
       actions: [
         IconButton(
+          key: CoachMarkKeys.settings,
           icon: const Icon(Icons.settings_outlined, color: AppColors.onSurface),
           onPressed: () => context.push(RouteNames.settings),
         ),

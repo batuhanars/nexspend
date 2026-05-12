@@ -1,6 +1,9 @@
 class RouteNames {
   RouteNames._();
 
+  // Onboarding
+  static const String onboarding = '/onboarding';
+
   // Auth
   static const String login = '/login';
   static const String register = '/register';

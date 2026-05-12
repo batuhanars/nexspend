@@ -63,4 +63,24 @@ class SecureStorage {
     final val = await _storage.read(key: _currencyKey);
     return val ?? 'TRY';
   }
+
+  static const _onboardingCompleteKey = 'onboarding_complete';
+
+  Future<void> saveOnboardingComplete() =>
+      _storage.write(key: _onboardingCompleteKey, value: 'true');
+
+  Future<bool> isOnboardingComplete() async {
+    final val = await _storage.read(key: _onboardingCompleteKey);
+    return val == 'true';
+  }
+
+  static const _coachMarkSeenKey = 'coach_mark_seen';
+
+  Future<void> saveCoachMarkSeen() =>
+      _storage.write(key: _coachMarkSeenKey, value: 'true');
+
+  Future<bool> isCoachMarkSeen() async {
+    final val = await _storage.read(key: _coachMarkSeenKey);
+    return val == 'true';
+  }
 }

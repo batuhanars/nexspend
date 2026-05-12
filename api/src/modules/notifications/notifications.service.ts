@@ -72,7 +72,10 @@ export class NotificationsService {
     body: string,
     data?: Record<string, string>,
   ): Promise<void> {
-    if (!this.messaging) return;
+    if (!this.messaging) {
+      this.logger.warn(`FCM devre dışı (messaging=null) — bildirim atlandı: ${title}`);
+      return;
+    }
 
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
@@ -96,17 +99,20 @@ export class NotificationsService {
       this.logger.log(`FCM gönderildi [${userId}]: ${title}`);
     } catch (err: unknown) {
       const fbErr = err as FirebaseMessagingError;
-      const code = fbErr.errorInfo?.code;
-      if (
+      const code = fbErr.errorInfo?.code ?? (err as { code?: string }).code;
+      const message = err instanceof Error ? err.message : String(err);
+      const isInvalidToken =
         code === 'messaging/registration-token-not-registered' ||
-        code === 'messaging/invalid-registration-token'
-      ) {
+        code === 'messaging/invalid-registration-token' ||
+        message.includes('not a valid FCM registration token') ||
+        message.includes('Requested entity was not found');
+      if (isInvalidToken) {
         await this.prisma.user.update({
           where: { id: userId },
           data: { fcmToken: null },
         });
+        this.logger.warn(`FCM token temizlendi [${userId}]: geçersiz token`);
       }
-      const message = err instanceof Error ? err.message : String(err);
       this.logger.error(`FCM gönderilemedi [${userId}]: ${message}`);
     }
   }

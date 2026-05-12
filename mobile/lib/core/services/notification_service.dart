@@ -5,7 +5,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import '../constants/api_endpoints.dart';
 import '../network/api_client.dart';
 
-const _channelId = 'high_importance_channel';
+const _channelId = 'high_importance_channel_v2';
 const _channelName = 'Bildirimler';
 const _invitePrefix = 'INVITE:';
 
@@ -13,7 +13,7 @@ final _localNotifications = FlutterLocalNotificationsPlugin();
 final _inviteController = StreamController<String>.broadcast();
 
 @pragma('vm:entry-point')
-Future<void> _firebaseBackgroundHandler(RemoteMessage message) async {}
+Future<void> firebaseBackgroundHandler(RemoteMessage message) async {}
 
 @pragma('vm:entry-point')
 void _onNotificationTap(NotificationResponse details) {
@@ -41,8 +41,6 @@ class NotificationService {
   Future<void> initialize() async {
     if (_initialized) return;
     _initialized = true;
-
-    FirebaseMessaging.onBackgroundMessage(_firebaseBackgroundHandler);
 
     const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
     await _localNotifications.initialize(
@@ -99,7 +97,7 @@ class NotificationService {
 
       try {
         await _localNotifications.show(
-          notification.hashCode.abs(),
+          DateTime.now().millisecondsSinceEpoch & 0x7FFFFFFF,
           notification.title,
           notification.body,
           const NotificationDetails(

@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
+import '../../../data/models/category_model.dart';
 import '../../../data/models/family_model.dart';
+import '../../../data/repositories/category_repository.dart';
 import '../../../navigation/route_names.dart';
 import '../bloc/family_bloc.dart';
 import '../bloc/family_event.dart';
@@ -51,6 +54,16 @@ class _FamilyGroupDetailPageState extends State<FamilyGroupDetailPage> {
           );
         }
         if (state is FamilySharedBudgetCreated) {
+          context
+              .read<FamilyBloc>()
+              .add(FamilyGroupDetailLoadRequested(groupId: widget.groupId));
+        }
+        if (state is FamilySharedBudgetCreateError) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+                content: Text(state.message),
+                backgroundColor: AppColors.error),
+          );
           context
               .read<FamilyBloc>()
               .add(FamilyGroupDetailLoadRequested(groupId: widget.groupId));
@@ -254,81 +267,19 @@ class _DetailBody extends StatelessWidget {
   }
 
   void _showAddBudgetDialog(BuildContext context, String groupId) {
-    final nameCtrl = TextEditingController();
-    final amountCtrl = TextEditingController();
     showDialog<void>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: AppColors.surfaceContainerHigh,
-        title: Text('Ortak Bütçe Ekle', style: AppTypography.titleSm),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: nameCtrl,
-              style: AppTypography.bodyMd,
-              decoration: InputDecoration(
-                hintText: 'Bütçe adı',
-                hintStyle: AppTypography.bodyMd
-                    .copyWith(color: AppColors.onSurfaceVariant),
-                filled: true,
-                fillColor: AppColors.surfaceContainerHighest,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-                  borderSide: BorderSide.none,
-                ),
-              ),
-            ),
-            const SizedBox(height: AppSpacing.sm),
-            TextField(
-              controller: amountCtrl,
-              keyboardType: TextInputType.number,
-              style: AppTypography.bodyMd,
-              decoration: InputDecoration(
-                hintText: 'Tutar (₺)',
-                hintStyle: AppTypography.bodyMd
-                    .copyWith(color: AppColors.onSurfaceVariant),
-                filled: true,
-                fillColor: AppColors.surfaceContainerHighest,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-                  borderSide: BorderSide.none,
-                ),
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(),
-            child: Text('İptal',
-                style: AppTypography.bodyMd
-                    .copyWith(color: AppColors.onSurfaceVariant)),
-          ),
-          FilledButton(
-            onPressed: () {
-              final name = nameCtrl.text.trim();
-              final amount = double.tryParse(amountCtrl.text.trim());
-              if (name.isEmpty || amount == null) return;
-              Navigator.of(ctx).pop();
-              final now = DateTime.now();
-              final startDate =
-                  '${now.year}-${now.month.toString().padLeft(2, '0')}-01';
-              context.read<FamilyBloc>().add(FamilySharedBudgetCreateRequested(
-                    groupId: groupId,
-                    categoryId: 'default',
-                    name: name,
-                    amount: amount,
-                    startDate: startDate,
-                  ));
-            },
-            style: FilledButton.styleFrom(
-              backgroundColor: AppColors.primary,
-              foregroundColor: AppColors.onPrimary,
-            ),
-            child: const Text('Ekle'),
-          ),
-        ],
+      builder: (ctx) => _AddBudgetDialog(
+        groupId: groupId,
+        onSubmit: (name, amount, categoryId, startDate) {
+          context.read<FamilyBloc>().add(FamilySharedBudgetCreateRequested(
+                groupId: groupId,
+                categoryId: categoryId,
+                name: name,
+                amount: amount,
+                startDate: startDate,
+              ));
+        },
       ),
     );
   }
@@ -427,6 +378,148 @@ class _EmptyBudgets extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _AddBudgetDialog extends StatefulWidget {
+  const _AddBudgetDialog({required this.groupId, required this.onSubmit});
+
+  final String groupId;
+  final void Function(String name, double amount, String categoryId, String startDate) onSubmit;
+
+  @override
+  State<_AddBudgetDialog> createState() => _AddBudgetDialogState();
+}
+
+class _AddBudgetDialogState extends State<_AddBudgetDialog> {
+  final _nameCtrl = TextEditingController();
+  final _amountCtrl = TextEditingController();
+  CategoryModel? _selectedCategory;
+  late Future<List<CategoryModel>> _categoriesFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _categoriesFuture = GetIt.I<CategoryRepository>().getCategories();
+  }
+
+  @override
+  void dispose() {
+    _nameCtrl.dispose();
+    _amountCtrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      backgroundColor: AppColors.surfaceContainerHigh,
+      title: Text('Ortak Bütçe Ekle', style: AppTypography.titleSm),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            TextField(
+              controller: _nameCtrl,
+              style: AppTypography.bodyMd,
+              decoration: InputDecoration(
+                hintText: 'Bütçe adı',
+                hintStyle: AppTypography.bodyMd
+                    .copyWith(color: AppColors.onSurfaceVariant),
+                filled: true,
+                fillColor: AppColors.surfaceContainerHighest,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                  borderSide: BorderSide.none,
+                ),
+              ),
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            TextField(
+              controller: _amountCtrl,
+              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              style: AppTypography.bodyMd,
+              decoration: InputDecoration(
+                hintText: 'Tutar (₺)',
+                hintStyle: AppTypography.bodyMd
+                    .copyWith(color: AppColors.onSurfaceVariant),
+                filled: true,
+                fillColor: AppColors.surfaceContainerHighest,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                  borderSide: BorderSide.none,
+                ),
+              ),
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            FutureBuilder<List<CategoryModel>>(
+              future: _categoriesFuture,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(AppSpacing.md),
+                      child: CircularProgressIndicator(
+                          color: AppColors.primary, strokeWidth: 2),
+                    ),
+                  );
+                }
+                final categories = snapshot.data ?? [];
+                return DropdownButtonFormField<CategoryModel>(
+                  initialValue: _selectedCategory,
+                  dropdownColor: AppColors.surfaceContainerHigh,
+                  style: AppTypography.bodyMd,
+                  decoration: InputDecoration(
+                    hintText: 'Kategori seç',
+                    hintStyle: AppTypography.bodyMd
+                        .copyWith(color: AppColors.onSurfaceVariant),
+                    filled: true,
+                    fillColor: AppColors.surfaceContainerHighest,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                      borderSide: BorderSide.none,
+                    ),
+                  ),
+                  items: categories
+                      .map((c) => DropdownMenuItem(
+                            value: c,
+                            child: Text(c.name, style: AppTypography.bodyMd),
+                          ))
+                      .toList(),
+                  onChanged: (val) => setState(() => _selectedCategory = val),
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: Text('İptal',
+              style: AppTypography.bodyMd
+                  .copyWith(color: AppColors.onSurfaceVariant)),
+        ),
+        FilledButton(
+          onPressed: () {
+            final name = _nameCtrl.text.trim();
+            final amount = double.tryParse(_amountCtrl.text.trim());
+            if (name.isEmpty || amount == null || _selectedCategory == null) return;
+            Navigator.of(context).pop();
+            final now = DateTime.now();
+            final startDate =
+                '${now.year}-${now.month.toString().padLeft(2, '0')}-01';
+            widget.onSubmit(name, amount, _selectedCategory!.id, startDate);
+          },
+          style: FilledButton.styleFrom(
+            backgroundColor: AppColors.primary,
+            foregroundColor: AppColors.onPrimary,
+          ),
+          child: const Text('Ekle'),
+        ),
+      ],
     );
   }
 }

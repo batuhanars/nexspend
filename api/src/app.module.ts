@@ -19,6 +19,7 @@ import { UsersModule } from './modules/users/users.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { InflationModule } from './modules/inflation/inflation.module';
 import { InsightsModule } from './modules/insights/insights.module';
+import { FamilyModule } from './modules/family/family.module';
 import appConfig from './config/app.config';
 
 @Module({
@@ -47,6 +48,7 @@ import appConfig from './config/app.config';
     NotificationsModule,
     InflationModule,
     InsightsModule,
+    FamilyModule,
   ],
 })
 export class AppModule {}

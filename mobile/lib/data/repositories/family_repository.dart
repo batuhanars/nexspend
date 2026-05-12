@@ -104,4 +104,15 @@ class FamilyRepository {
   }) async {
     await _dio.delete(ApiEndpoints.familyGroupMember(groupId, userId));
   }
+
+  Future<void> deleteGroup(String groupId) async {
+    await _dio.delete(ApiEndpoints.familyGroupById(groupId));
+  }
+
+  Future<void> deleteSharedBudget({
+    required String groupId,
+    required String budgetId,
+  }) async {
+    await _dio.delete(ApiEndpoints.familyGroupBudgetById(groupId, budgetId));
+  }
 }

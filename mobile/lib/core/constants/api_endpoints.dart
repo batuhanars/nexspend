@@ -111,6 +111,8 @@ class ApiEndpoints {
       '/api/family/groups/$id/contributions';
   static String familyGroupMember(String groupId, String userId) =>
       '/api/family/groups/$groupId/members/$userId';
+  static String familyGroupBudgetById(String groupId, String budgetId) =>
+      '/api/family/groups/$groupId/budgets/$budgetId';
   static String familyInviteAccept(String token) =>
       '/api/family/invites/$token/accept';
   static String familyInviteReject(String token) =>

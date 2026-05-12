@@ -392,6 +392,26 @@ export class FamilyService {
     return null;
   }
 
+  async deleteGroup(userId: string, groupId: string): Promise<null> {
+    await this.requireOwner(userId, groupId);
+    await this.prisma.familyGroup.delete({ where: { id: groupId } });
+    return null;
+  }
+
+  async deleteSharedBudget(
+    userId: string,
+    groupId: string,
+    budgetId: string,
+  ): Promise<null> {
+    await this.requireMember(userId, groupId);
+    const budget = await this.prisma.sharedBudget.findFirst({
+      where: { id: budgetId, groupId },
+    });
+    if (!budget) throw new NotFoundException('Bütçe bulunamadı');
+    await this.prisma.sharedBudget.delete({ where: { id: budgetId } });
+    return null;
+  }
+
   // ─── Private Helpers ─────────────────────────────────────────────────────────
 
   private async requireMember(userId: string, groupId: string) {

@@ -128,6 +128,36 @@ class FamilyContributionsError extends FamilyState {
   final String message;
 }
 
+// --- Grup silme ---
+
+class FamilyGroupDeleting extends FamilyState {
+  const FamilyGroupDeleting();
+}
+
+class FamilyGroupDeleted extends FamilyState {
+  const FamilyGroupDeleted();
+}
+
+class FamilyGroupDeleteError extends FamilyState {
+  const FamilyGroupDeleteError(this.message);
+  final String message;
+}
+
+// --- Bütçe silme ---
+
+class FamilySharedBudgetDeleting extends FamilyState {
+  const FamilySharedBudgetDeleting();
+}
+
+class FamilySharedBudgetDeleted extends FamilyState {
+  const FamilySharedBudgetDeleted();
+}
+
+class FamilySharedBudgetDeleteError extends FamilyState {
+  const FamilySharedBudgetDeleteError(this.message);
+  final String message;
+}
+
 // --- Üye çıkarma ---
 
 class FamilyMemberRemoving extends FamilyState {

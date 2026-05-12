@@ -73,3 +73,17 @@ class FamilyMemberRemoveRequested extends FamilyEvent {
   final String groupId;
   final String userId;
 }
+
+class FamilyGroupDeleteRequested extends FamilyEvent {
+  const FamilyGroupDeleteRequested({required this.groupId});
+  final String groupId;
+}
+
+class FamilySharedBudgetDeleteRequested extends FamilyEvent {
+  const FamilySharedBudgetDeleteRequested({
+    required this.groupId,
+    required this.budgetId,
+  });
+  final String groupId;
+  final String budgetId;
+}

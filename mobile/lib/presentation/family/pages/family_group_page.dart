@@ -17,16 +17,17 @@ class FamilyGroupPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocListener<FamilyBloc, FamilyState>(
       listener: (context, state) {
-        if (state is FamilyGroupCreated) {
+        if (state is FamilyGroupCreated || state is FamilyGroupDeleted) {
           context.read<FamilyBloc>().add(const FamilyGroupsLoadRequested());
         }
-        if (state is FamilyGroupCreateError) {
+        if (state is FamilyGroupCreateError || state is FamilyGroupDeleteError) {
+          final msg = state is FamilyGroupCreateError
+              ? state.message
+              : (state as FamilyGroupDeleteError).message;
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(state.message),
-              backgroundColor: AppColors.error,
-            ),
+            SnackBar(content: Text(msg), backgroundColor: AppColors.error),
           );
+          context.read<FamilyBloc>().add(const FamilyGroupsLoadRequested());
         }
       },
       child: Scaffold(
@@ -207,10 +208,41 @@ class _GroupCard extends StatelessWidget {
 
   final FamilyGroupModel group;
 
+  void _confirmDelete(BuildContext context) {
+    showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppColors.surfaceContainerHigh,
+        title: Text('Grubu Sil', style: AppTypography.titleSm),
+        content: Text(
+          '"${group.name}" grubu ve tüm ortak bütçeleri silinecek. Bu işlem geri alınamaz.',
+          style: AppTypography.bodyMd.copyWith(color: AppColors.onSurfaceVariant),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: Text('İptal',
+                style: AppTypography.bodyMd.copyWith(color: AppColors.onSurfaceVariant)),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: Text('Sil', style: TextStyle(color: AppColors.error)),
+          ),
+        ],
+      ),
+    ).then((confirmed) {
+      if (confirmed == true && context.mounted) {
+        context.read<FamilyBloc>().add(FamilyGroupDeleteRequested(groupId: group.id));
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
+    final isOwner = group.role == FamilyRole.OWNER;
     return GestureDetector(
       onTap: () => context.push(RouteNames.familyGroupDetail(group.id)),
+      onLongPress: isOwner ? () => _confirmDelete(context) : null,
       child: Container(
         padding: const EdgeInsets.all(AppSpacing.lg),
         decoration: BoxDecoration(

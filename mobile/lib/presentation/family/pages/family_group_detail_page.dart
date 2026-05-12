@@ -53,10 +53,31 @@ class _FamilyGroupDetailPageState extends State<FamilyGroupDetailPage> {
                 backgroundColor: AppColors.error),
           );
         }
-        if (state is FamilySharedBudgetCreated) {
+        if (state is FamilySharedBudgetCreated ||
+            state is FamilySharedBudgetDeleted) {
           context
               .read<FamilyBloc>()
               .add(FamilyGroupDetailLoadRequested(groupId: widget.groupId));
+        }
+        if (state is FamilySharedBudgetDeleteError) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+                content: Text(state.message),
+                backgroundColor: AppColors.error),
+          );
+          context
+              .read<FamilyBloc>()
+              .add(FamilyGroupDetailLoadRequested(groupId: widget.groupId));
+        }
+        if (state is FamilyGroupDeleted) {
+          context.pop();
+        }
+        if (state is FamilyGroupDeleteError) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+                content: Text(state.message),
+                backgroundColor: AppColors.error),
+          );
         }
         if (state is FamilySharedBudgetCreateError) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -128,6 +149,12 @@ class _DetailBody extends StatelessWidget {
                   context.push(RouteNames.familyContributions(groupId)),
               tooltip: 'Katkı Raporu',
             ),
+            if (isOwner)
+              IconButton(
+                icon: Icon(Icons.delete_outline_rounded, color: AppColors.error),
+                onPressed: () => _confirmDeleteGroup(context, groupId, group.name),
+                tooltip: 'Grubu Sil',
+              ),
           ],
         ),
         SliverToBoxAdapter(
@@ -187,11 +214,31 @@ class _DetailBody extends StatelessWidget {
                     onAdd: () => _showAddBudgetDialog(context, groupId),
                   )
                 else
-                  ...group.sharedBudgets
-                      .map((b) => Padding(
-                            padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-                            child: SharedBudgetCard(budget: b),
-                          )),
+                  ...group.sharedBudgets.map((b) => Padding(
+                        padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+                        child: Stack(
+                          children: [
+                            SharedBudgetCard(budget: b),
+                            Positioned(
+                              top: 4,
+                              right: 4,
+                              child: GestureDetector(
+                                onTap: () => _confirmDeleteBudget(
+                                    context, groupId, b.id, b.name),
+                                child: Container(
+                                  padding: const EdgeInsets.all(4),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.surface.withValues(alpha: 0.8),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: Icon(Icons.close_rounded,
+                                      size: 16, color: AppColors.error),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      )),
 
                 // Bekleyen davetler (sadece owner)
                 if (isOwner && group.pendingInvites.isNotEmpty) ...[
@@ -213,6 +260,66 @@ class _DetailBody extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  void _confirmDeleteGroup(BuildContext context, String groupId, String groupName) {
+    showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppColors.surfaceContainerHigh,
+        title: Text('Grubu Sil', style: AppTypography.titleSm),
+        content: Text(
+          '"$groupName" grubu ve tüm ortak bütçeleri silinecek. Bu işlem geri alınamaz.',
+          style: AppTypography.bodyMd.copyWith(color: AppColors.onSurfaceVariant),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: Text('İptal',
+                style: AppTypography.bodyMd.copyWith(color: AppColors.onSurfaceVariant)),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: Text('Sil', style: TextStyle(color: AppColors.error)),
+          ),
+        ],
+      ),
+    ).then((confirmed) {
+      if (confirmed == true && context.mounted) {
+        context.read<FamilyBloc>().add(FamilyGroupDeleteRequested(groupId: groupId));
+      }
+    });
+  }
+
+  void _confirmDeleteBudget(
+      BuildContext context, String groupId, String budgetId, String budgetName) {
+    showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppColors.surfaceContainerHigh,
+        title: Text('Bütçeyi Sil', style: AppTypography.titleSm),
+        content: Text(
+          '"$budgetName" bütçesi silinecek.',
+          style: AppTypography.bodyMd.copyWith(color: AppColors.onSurfaceVariant),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: Text('İptal',
+                style: AppTypography.bodyMd.copyWith(color: AppColors.onSurfaceVariant)),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: Text('Sil', style: TextStyle(color: AppColors.error)),
+          ),
+        ],
+      ),
+    ).then((confirmed) {
+      if (confirmed == true && context.mounted) {
+        context.read<FamilyBloc>().add(FamilySharedBudgetDeleteRequested(
+            groupId: groupId, budgetId: budgetId));
+      }
+    });
   }
 
   void _showInviteDialog(BuildContext context, String groupId) {

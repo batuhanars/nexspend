@@ -113,4 +113,23 @@ export class FamilyController {
   ) {
     return this.familyService.removeMember(user.id, groupId, targetUserId);
   }
+
+  @Delete('groups/:id')
+  @HttpCode(HttpStatus.OK)
+  deleteGroup(
+    @CurrentUser() user: { id: string },
+    @Param('id') groupId: string,
+  ) {
+    return this.familyService.deleteGroup(user.id, groupId);
+  }
+
+  @Delete('groups/:id/budgets/:budgetId')
+  @HttpCode(HttpStatus.OK)
+  deleteSharedBudget(
+    @CurrentUser() user: { id: string },
+    @Param('id') groupId: string,
+    @Param('budgetId') budgetId: string,
+  ) {
+    return this.familyService.deleteSharedBudget(user.id, groupId, budgetId);
+  }
 }

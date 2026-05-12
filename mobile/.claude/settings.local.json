@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(flutter analyze *)",
+      "Bash(git -C \"C:\\\\Users\\\\batuh\\\\dev\\\\projects\\\\wallet-app\" status)",
+      "Bash(git -C \"C:\\\\Users\\\\batuh\\\\dev\\\\projects\\\\wallet-app\" diff)",
+      "Bash(git -C \"C:\\\\Users\\\\batuh\\\\dev\\\\projects\\\\wallet-app\" add mobile/lib/core/network/api_interceptors.dart)",
+      "Bash(git -C 'C:\\\\Users\\\\batuh\\\\dev\\\\projects\\\\wallet-app' commit -m ' *)",
+      "Bash(git *)",
+      "Bash(Get-ChildItem *)",
+      "Bash(npm run *)",
+      "Bash(xargs grep -l \"PrismaClient\")",
+      "Bash(flutter test *)",
+      "Bash(gh pr create --title 'feat\\(mobile\\): Sprint 9 enflasyon-duyarlı bütçeleme frontend' --body ' *)",
+      "Bash(flutter build *)",
+      "Bash(python3 -c ' *)",
+      "Bash(gh pr *)",
+      "PowerShell(New-Item *)"
+    ]
+  }
+}

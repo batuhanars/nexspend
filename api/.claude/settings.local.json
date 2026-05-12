@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git checkout *)",
+      "Bash(npx prisma *)",
+      "Bash(docker compose *)",
+      "Bash(npm run *)",
+      "Bash(npm test *)",
+      "Bash(powershell *)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git push *)",
+      "Bash(gh pr create --title 'feat\\(api\\): Sprint 9 enflasyon-duyarlı bütçeleme backend' --body ' *)",
+      "Bash(npx jest *)",
+      "Bash(npm install *)",
+      "Bash(git commit *)",
+      "Bash(gh pr *)"
+    ]
+  }
+}

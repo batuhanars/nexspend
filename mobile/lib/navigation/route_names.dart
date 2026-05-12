@@ -32,6 +32,12 @@ class RouteNames {
   // Insights (Home carousel'dan push)
   static const String insights = '/insights';
 
+  // Aile Bütçesi
+  static const String family = '/family';
+  static String familyGroupDetail(String id) => '/family/$id';
+  static String familyContributions(String id) => '/family/$id/contributions';
+  static String familyInvite(String token) => '/invite/$token';
+
   // AppBar erişimli
   static const String reports = '/reports';
   static const String receiptScanner = '/receipt-scanner';

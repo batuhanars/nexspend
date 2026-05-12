@@ -174,6 +174,13 @@ class _SettingsView extends StatelessWidget {
                   onTap: () => _showLanguagePicker(context, s, user),
                 ),
                 const SizedBox(height: AppSpacing.lg),
+                SectionHeader('Aile'),
+                SettingsTile(
+                  icon: Icons.group_outlined,
+                  label: 'Aile Bütçesi',
+                  onTap: () => context.push(RouteNames.family),
+                ),
+                const SizedBox(height: AppSpacing.lg),
                 SectionHeader(s.sectionTools),
                 SettingsTile(
                   icon: Icons.receipt_long_outlined,

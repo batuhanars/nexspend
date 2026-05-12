@@ -1,3 +1,5 @@
+import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../data/repositories/family_repository.dart';
 import 'family_event.dart';
@@ -172,17 +174,30 @@ class FamilyBloc extends Bloc<FamilyEvent, FamilyState> {
   }
 
   String _parseError(Object e) {
+    if (e is DioException) {
+      final data = e.response?.data;
+      if (data is Map) {
+        final backendMsg = data['message'];
+        if (backendMsg != null) {
+          debugPrint('Family API hatası: $backendMsg');
+          if (backendMsg is List) return backendMsg.join(', ');
+          return backendMsg.toString();
+        }
+      }
+      final status = e.response?.statusCode;
+      if (status == 401) return 'Oturum süreniz dolmuş.';
+      if (status == 403) return 'Bu işlem için yetkiniz yok.';
+      if (status == 404) return 'Kayıt bulunamadı.';
+      if (status == 410) return 'Davet süresi dolmuş.';
+      if (status == 400) {
+        if (e.toString().contains('sınır') || e.toString().contains('limit')) {
+          return 'Grup üye sınırına ulaşıldı (max 5).';
+        }
+        return 'Geçersiz istek (400).';
+      }
+    }
     final msg = e.toString();
     if (msg.contains('SocketException')) return 'İnternet bağlantınızı kontrol edin.';
-    if (msg.contains('401')) return 'Oturum süreniz dolmuş.';
-    if (msg.contains('403')) return 'Bu işlem için yetkiniz yok.';
-    if (msg.contains('404')) return 'Kayıt bulunamadı.';
-    if (msg.contains('400')) {
-      if (msg.contains('sınır') || msg.contains('limit')) {
-        return 'Grup üye sınırına ulaşıldı (max 5).';
-      }
-      return 'Geçersiz istek.';
-    }
     return 'Bir hata oluştu. Lütfen tekrar deneyin.';
   }
 }

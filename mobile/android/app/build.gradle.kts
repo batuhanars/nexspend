@@ -35,13 +35,13 @@ android {
 
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
             signingConfig = signingConfigs.getByName("debug")
-
-            // R8/ProGuard kurallarını bağladığımız satır (BU SATIR ÖNEMLİ)
+            isMinifyEnabled = true
+            isShrinkResources = true
+            // proguard-android-optimize.txt yerine proguard-android.txt — optimize sürümü
+            // metot inlining/dead-code-removal ile platform channel çağrılarını bozuyordu
             proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
+                getDefaultProguardFile("proguard-android.txt"),
                 "proguard-rules.pro",
             )
         }

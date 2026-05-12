@@ -29,6 +29,9 @@ class RouteNames {
   // Arşiv
   static const String archivedAccounts = '/settings/archived-accounts';
 
+  // Insights (Home carousel'dan push)
+  static const String insights = '/insights';
+
   // AppBar erişimli
   static const String reports = '/reports';
   static const String receiptScanner = '/receipt-scanner';

@@ -30,6 +30,7 @@ import '../presentation/debts/bloc/debt_detail_bloc.dart';
 import '../presentation/debts/bloc/debts_bloc.dart';
 import '../presentation/debts/pages/debt_detail_page.dart';
 import '../presentation/debts/pages/debts_page.dart';
+import '../presentation/insights/pages/insights_page.dart';
 import '../presentation/receipt_scanner/pages/receipt_history_page.dart';
 import '../presentation/receipt_scanner/pages/receipt_image_viewer_page.dart';
 import '../presentation/subscriptions/bloc/subscriptions_bloc.dart' show SubscriptionsBloc, SubscriptionsLoadRequested;
@@ -383,6 +384,12 @@ GoRouter createRouter() {
             child: SubscriptionDetailPage(subscription: subscription),
           );
         },
+      ),
+      GoRoute(
+        path: RouteNames.insights,
+        name: 'insights',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, _) => const InsightsPage(),
       ),
       GoRoute(
         path: RouteNames.receiptHistory,

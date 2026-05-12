@@ -18,6 +18,7 @@ import { StatementsModule } from './modules/statements/statements.module';
 import { UsersModule } from './modules/users/users.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { InflationModule } from './modules/inflation/inflation.module';
+import { InsightsModule } from './modules/insights/insights.module';
 import appConfig from './config/app.config';
 
 @Module({
@@ -45,6 +46,7 @@ import appConfig from './config/app.config';
     UsersModule,
     NotificationsModule,
     InflationModule,
+    InsightsModule,
   ],
 })
 export class AppModule {}

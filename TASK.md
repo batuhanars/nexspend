@@ -1,6 +1,6 @@
 # Stitch Wallet App — Görev Takip Dosyası
 
-> Son güncelleme: 6 Mayıs 2026 (Sprint 0 CI/CD pipeline tamamlandı — GitHub Actions workflow'ları `api-ci.yml` + `mobile-ci.yml`; PR #1 sırasında ortaya çıkan teknik borç da temizlendi)  
+> Son güncelleme: 12 Mayıs 2026 (Sprint sıralaması güncellendi: Insights → Sprint 10, Aile Bütçesi → Sprint 11, Portföy → V3/ertelendi. Bkz. karar notu §V2.)  
 > ✅ = Tamamlandı | 🔧 = Kısmen yapıldı | ❌ = Henüz başlanmadı  
 > ☑ = Kodda mevcut ancak migration henüz çalıştırılmadı
 
@@ -477,6 +477,8 @@
 > **Şema referans:** `SCHEMA.md` (V2 modelleri: InflationRate, PortfolioAsset, Insight, FamilyGroup vb.)  
 > **Ön koşul:** V1 (Sprint 0-8) tamamlanmış olmalı
 
+> **Sprint Sıralama Kararı (12 Mayıs 2026):** Portföy Takibi (eski Sprint 10) V3'e ertelendi. Gerekçe: Insights ve Aile Bütçesi mevcut kullanıcıyı tutar ve engagement/büyüme açısından daha yüksek değer taşır. Portföy ise doğası gereği büyüyen bir kapsama sahip (altın → döviz → hisse → banka entegrasyonu); talep doğrulandıktan sonra bağımsız bir modül olarak tasarlanacak. Yeni sıra: Sprint 10 = Insights, Sprint 11 = Aile/Ortak Bütçe, V3 = Portföy.
+
 ---
 
 ## Sprint 9 — Enflasyon-Duyarlı Bütçeleme
@@ -509,76 +511,43 @@
 
 ---
 
-## Sprint 10 — Altın / Döviz Portföy Takibi
-> 📖 Detay: `DEVELOPMENT_PLAN_V2.md` → Section 8.7
-
-### Backend
-
-> ☑ Modeller hazır: `AssetType` enum, `PortfolioAsset`, `PortfolioTx`, `ExchangeRate` — `schema.prisma`'da tanımlı.
-
-- [ ] Migration çalıştır: `npx prisma migrate dev --name add_portfolio_models`
-- [ ] `ExchangeRateService` — TCMB + altın API entegrasyonu
-- [ ] Cron Job (saatlik, 08:00-22:00): `ExchangeRateFetchJob` — kur güncelleme
-- [ ] `GET /api/exchange-rates` — güncel tüm kurlar
-- [ ] `GET /api/portfolio` — kullanıcının varlıkları (canlı değer dahil)
-- [ ] `GET /api/portfolio/summary` — toplam değer, kâr/zarar, TL + USD bazlı
-- [ ] `POST /api/portfolio/buy` — varlık alım kaydı
-- [ ] `POST /api/portfolio/sell` — varlık satım kaydı
-- [ ] `GET /api/portfolio/history` — alım/satım geçmişi
-- [ ] `GET /api/portfolio/performance` — varlık bazlı performans
-- [ ] Dashboard endpoint'ini güncelle: portföy canlı değer + çoklu para birimi net varlık
-
-### Frontend
-- [ ] PortfolioPage — ana portföy ekranı (varlık listesi + toplam değer)
-- [ ] AddPortfolioTxPage — alım/satım ekleme (varlık seçimi, miktar, fiyat)
-- [ ] AssetCard widget (varlık kartı: miktar, güncel değer, kâr/zarar %)
-- [ ] ExchangeRateTicker widget (canlı kur bandı — dashboard üstü)
-- [ ] PortfolioPieChart widget (varlık dağılımı — fl_chart)
-- [ ] ProfitLossIndicator widget (+%2,5 yeşil / -%1,3 kırmızı)
-- [ ] PortfolioBloc + ExchangeRateBloc
-- [ ] PortfolioModel + PortfolioRepository
-- [ ] Dashboard BalanceCard güncelle: TL + USD bazlı net varlık gösterimi
-- [ ] BottomNavBar veya Dashboard'a portföy erişim noktası ekle
-
----
-
-## Sprint 11 — Akıllı Harcama Analizi (Insights)
-> 📖 Detay: `DEVELOPMENT_PLAN_V2.md` → Section 8.8
+## Sprint 10 — Akıllı Harcama Analizi (Insights)
+> 📖 Contract: `SPRINT_10_CONTRACT.md` | Detay: `DEVELOPMENT_PLAN_V2.md` → Section 8.8
 
 ### Backend
 
 > ☑ Model hazır: `Insight` — `schema.prisma`'da tanımlı.
 
-- [ ] Migration çalıştır: `npx prisma migrate dev --name add_insight_model`
+- [ ] Migration çalıştır: `npx prisma migrate dev --name add_insights`
 - [ ] `InsightRulesService` — 7 kural tabanlı analiz motoru:
-  - [ ] spending_spike: kategori harcama artışı (%30+ artış tespiti)
-  - [ ] unused_subscription: 60 gündür kullanılmayan abonelik
-  - [ ] recurring_small_expense: küçük ama birikimli harcamalar (Starbucks x14)
-  - [ ] weekend_spending: hafta sonu vs hafta içi harcama paterni
-  - [ ] budget_forecast: ay ortası bütçe projeksiyonu
-  - [ ] saving_opportunity: tasarruf başarısı tespiti + teşvik
-  - [ ] income_expense_ratio: gelir-gider dengesi uyarısı (%90+ harcama)
+  - [ ] spending_spike: geçen aya göre kategori harcaması ≥%30 artış
+  - [ ] unused_subscription: aktif abonelik var, son 60 günde o kategoride 0 harcama
+  - [ ] category_overrun: bütçenin ≥%70'i ayın ilk 15 gününde tükendi
+  - [ ] recurring_drift: tekrarlanan işlem miktarı son 3 ayda ≥%20 değişti
+  - [ ] debt_aging: verilen alacak 30+ gün tahsil edilmedi
+  - [ ] inflation_gap: kategori harcaması ilgili TÜFE'nin >%5 üstünde (Sprint 9 verisi)
+  - [ ] saving_streak: net akış 3+ ay üst üste pozitif
 - [ ] Cron Job (her ayın 1'i, 08:00): `MonthlyInsightJob` — tüm kullanıcılar için insight üret
-- [ ] Eski insight'ları temizleme (6 aydan eski + dismissed)
-- [ ] `GET /api/insights` — kullanıcının insight'ları (?period=2026-04&unread=true)
+- [ ] Cleanup Job (her ayın 1'i, 02:00): 6 aydan eski + isDismissed kayıtları sil
+- [ ] `GET /api/insights` — (?period=YYYY-MM&unread=true, sayfalama)
 - [ ] `GET /api/insights/summary` — okunmamış sayısı + son insight
 - [ ] `PATCH /api/insights/:id/read` — okundu işaretle
 - [ ] `PATCH /api/insights/:id/dismiss` — kapat
 - [ ] `POST /api/insights/generate` — manuel tetikleme
 
 ### Frontend
-- [ ] InsightsPage — tüm insight'lar listesi (filtreli: bilgi/uyarı/başarı)
-- [ ] InsightCard widget (ikon, başlık, mesaj, aksiyon butonları)
-- [ ] InsightBadge widget (okunmamış sayısı — dashboard'da)
-- [ ] InsightsCarousel widget (dashboard'da kaydırılabilir öneri kartları)
+- [ ] InsightsPage — tüm insight'lar listesi + Bu Ay/Geçen Ay tab filtresi
+- [ ] InsightCard widget (severity renk: warning=turuncu, info=lavender, success=mint)
+- [ ] InsightsCarousel widget (dashboard'da kaydırılabilir — son 3 insight)
+- [ ] InsightBadge widget (okunmamış sayı badge — `AppColors.tertiary` bg)
 - [ ] InsightsBloc + InsightsRepository
 - [ ] DashboardPage'e "Akıllı Öneriler" bölümü ekle
-- [ ] Push notification entegrasyonu (aylık insight hazır bildirimi)
+- [ ] Push notification: aylık "Finansal raporun hazır!" bildirimi
 
 ---
 
-## Sprint 12 — Aile / Ortak Bütçe (v2)
-> 📖 Detay: `DEVELOPMENT_PLAN_V2.md` → Section 8.9
+## Sprint 11 — Aile / Ortak Bütçe
+> 📖 Contract: `SPRINT_11_CONTRACT.md` | Detay: `DEVELOPMENT_PLAN_V2.md` → Section 8.9
 
 ### Backend
 
@@ -586,34 +555,57 @@
 
 - [ ] Migration çalıştır: `npx prisma migrate dev --name add_family_models`
 - [ ] `FamilyService` — grup oluşturma, davet, üye yönetimi
-- [ ] E-posta davet sistemi (token üretimi + doğrulama)
+- [ ] `FamilyEmailService` — Resend ile davet e-postası (`RESEND_API_KEY` env ekle)
 - [ ] `@OnEvent('transaction.created')` → SharedBudgetListener:
   - [ ] Kullanıcının grubu var mı kontrol et
-  - [ ] İlgili kategoride ortak bütçe var mı kontrol et
-  - [ ] Varsa → SharedExpense oluştur + spent güncelle
-  - [ ] Tüm grup üyelerine bildirim gönder
-- [ ] `POST /api/family/groups` — grup oluştur
+  - [ ] İlgili kategoride aktif ortak bütçe var mı kontrol et
+  - [ ] Varsa → SharedExpense oluştur + SharedBudget.spent güncelle
+  - [ ] Tüm grup üyelerine FCM bildirimi gönder
+- [ ] `POST /api/family/groups` — grup oluştur (max 3 grup/kullanıcı)
 - [ ] `GET /api/family/groups` — kullanıcının grupları
-- [ ] `GET /api/family/groups/:id` — grup detayı
-- [ ] `POST /api/family/groups/:id/invite` — üye davet et
-- [ ] `POST /api/family/invites/:token/accept` — daveti kabul et
+- [ ] `GET /api/family/groups/:id` — grup detayı (üyeler + bütçeler + bekleyen davetler)
+- [ ] `POST /api/family/groups/:id/invite` — üye davet et (max 5 üye, 7 gün geçerli token)
+- [ ] `POST /api/family/invites/:token/accept` — daveti kabul (e-posta eşleşmesi zorunlu)
 - [ ] `POST /api/family/invites/:token/reject` — daveti reddet
 - [ ] `POST /api/family/groups/:id/budgets` — ortak bütçe oluştur
 - [ ] `GET /api/family/groups/:id/budgets` — ortak bütçe listesi
-- [ ] `GET /api/family/groups/:id/contributions` — katkı dağılımı raporu
-- [ ] `DELETE /api/family/groups/:id/members/:userId` — üyeyi çıkar
+- [ ] `GET /api/family/groups/:id/contributions` — katkı dağılımı raporu (?period=YYYY-MM)
+- [ ] `DELETE /api/family/groups/:id/members/:userId` — üyeyi çıkar (OWNER only)
 
 ### Frontend
-- [ ] FamilyGroupPage — grup yönetimi (üyeler, ayarlar)
-- [ ] SharedBudgetsPage — ortak bütçeler listesi + ilerleme
-- [ ] InvitePage — üye davet ekranı (e-posta girişi)
-- [ ] ContributionReportPage — katkı dağılımı raporu (çubuk grafik)
-- [ ] MemberAvatarRow widget (üye avatarları)
-- [ ] ContributionBar widget (Batuhan %64 / Ayşe %36)
-- [ ] SharedBudgetCard widget (ortak bütçe kartı + progress bar)
-- [ ] InviteStatusBadge widget (Beklemede/Kabul Edildi/Reddedildi)
+- [ ] FamilyGroupPage — grup listesi + oluşturma
+- [ ] FamilyGroupDetailPage — üye listesi + ortak bütçe kartları + bekleyen davetler
+- [ ] InvitePage — deep link `wallet://invite/<token>` handler, kabul/reddet
+- [ ] ContributionReportPage — katkı çubuğu (Batuhan %64 / Ayşe %36)
+- [ ] SharedBudgetCard widget (ortak bütçe + progress bar)
+- [ ] MemberAvatarRow widget, ContributionBar widget, InviteStatusBadge widget
 - [ ] FamilyBloc + SharedBudgetBloc
 - [ ] Ayarlar sayfasına "Aile Bütçesi" menü öğesi ekle
+- [ ] GoRouter'a `wallet://invite/:token` deep link route ekle
+
+---
+
+## V3 — Altın / Döviz Portföy Takibi (Ertelendi)
+> 📖 Contract: `V3_PORTFOLIO_CONTRACT.md` | Detay: `DEVELOPMENT_PLAN_V2.md` → Section 8.7
+>
+> **Neden ertelendi (12 Mayıs 2026):** Portföy doğası gereği büyüyen bir kapsamdır — altın, döviz, hisse, banka entegrasyonu. Talep doğrulandıktan sonra kendi tab sistemi, kendi navigasyonu ve olası banka API entegrasyonuyla bağımsız bir modül olarak tasarlanacak. Sprint 10 ve 11 önce tamamlanacak.
+
+### Backend (V3'te yapılacak)
+
+> ☑ Modeller hazır: `AssetType` enum, `PortfolioAsset`, `PortfolioTx`, `ExchangeRate` — `schema.prisma`'da tanımlı.
+
+- [ ] Migration çalıştır: `npx prisma migrate dev --name add_portfolio_models`
+- [ ] `ExchangeRateService` — TCMB today.xml (döviz) + EVDS3 (altın) entegrasyonu
+- [ ] Cron Job (mesai günleri 10:00 + 16:00): `ExchangeRateFetchJob`
+- [ ] `GET /api/exchange-rates`, `GET /api/portfolio`, `GET /api/portfolio/summary`
+- [ ] `POST /api/portfolio/buy`, `POST /api/portfolio/sell`
+- [ ] `GET /api/portfolio/history`, `GET /api/portfolio/performance`
+
+### Frontend (V3'te yapılacak)
+- [ ] Portfolio navigation (kendi tab sistemi — V3 UX tasarımı gerektirir)
+- [ ] PortfolioPage, AddPortfolioTxPage, AssetCard, ExchangeRateTicker, PortfolioPieChart
+- [ ] Dashboard'a portföy özet kartı (Home'dan erişim noktası)
+- [ ] PortfolioBloc + ExchangeRateBloc + PortfolioRepository
 
 ---
 
@@ -656,12 +648,12 @@
 | Sprint 7 | Ayarlar + Profil | ✅ %100 | 🔧 %88 | 🔧 Para birimi/dil seçici, l10n eksik |
 | Sprint 8 | Test + Optimizasyon | ✅ %90 | 🔧 %88 | 🔧 Backend: 76 unit + 25 e2e ✅, ESLint 0 hata ✅, Railway ✅; Frontend: shimmer ✅, BLoC testleri 32/32 ✅, empty states ✅, infinite scroll ✅, splash screen ✅; widget/integration testleri + app icon eksik |
 | **Sprint 9** | **Enflasyon Bütçeleme** | ✅ %100 | ✅ %100 | ✅ Backend (PR #6 + #7) + Frontend (PR #5) tamamlandı, EVDS3 göçü uyarlandı |
-| **Sprint 10** | **Altın/Döviz Portföy** | ❌ %0 | ❌ %0 | ❌ Başlanmadı |
-| **Sprint 11** | **Akıllı Harcama Analizi** | ❌ %0 | ❌ %0 | ❌ Başlanmadı |
-| **Sprint 12** | **Aile/Ortak Bütçe (v2)** | ❌ %0 | ❌ %0 | ❌ Başlanmadı |
+| **Sprint 10** | **Akıllı Harcama Analizi** | ❌ %0 | ❌ %0 | ❌ Başlanmadı |
+| **Sprint 11** | **Aile/Ortak Bütçe** | ❌ %0 | ❌ %0 | ❌ Başlanmadı |
+| **V3** | **Altın/Döviz Portföy** | — | — | ⏸ Ertelendi (talep doğrulandıkça) |
 | Çapraz | Merkezi Entegrasyon | ✅ %100 | — | ✅ Event akışı ✅, Report/Dashboard source filtresi ✅, FCM bildirimleri ✅ |
 
 **Tahmini genel ilerleme: ~%92** — V1 + Sprint 9 backend/frontend ✅, frontend Sprint 0-8 ~%95  
 **Toplam sprint: 13** (Sprint 0-8 temel + Sprint 9-12 fark yaratan özellikler)  
-**Sıradaki (Backend):** Sprint 10 (Altın/Döviz Portföy)  
-**Sıradaki (Frontend):** Sprint 10 portföy UI (Sprint 10 backend tamamlandıktan sonra)
+**Sıradaki (Backend):** Sprint 10 (Akıllı Harcama Analizi — `SPRINT_10_CONTRACT.md`)  
+**Sıradaki (Frontend):** Sprint 10 Insights UI (Sprint 10 backend tamamlandıktan sonra)

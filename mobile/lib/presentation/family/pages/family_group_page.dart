@@ -208,8 +208,8 @@ class _GroupCard extends StatelessWidget {
 
   final FamilyGroupModel group;
 
-  void _confirmDelete(BuildContext context) {
-    showDialog<bool>(
+  Future<bool?> _confirmDelete(BuildContext context) {
+    return showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: AppColors.surfaceContainerHigh,
@@ -230,19 +230,14 @@ class _GroupCard extends StatelessWidget {
           ),
         ],
       ),
-    ).then((confirmed) {
-      if (confirmed == true && context.mounted) {
-        context.read<FamilyBloc>().add(FamilyGroupDeleteRequested(groupId: group.id));
-      }
-    });
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     final isOwner = group.role == FamilyRole.OWNER;
-    return GestureDetector(
+    final card = GestureDetector(
       onTap: () => context.push(RouteNames.familyGroupDetail(group.id)),
-      onLongPress: isOwner ? () => _confirmDelete(context) : null,
       child: Container(
         padding: const EdgeInsets.all(AppSpacing.lg),
         decoration: BoxDecoration(
@@ -285,6 +280,27 @@ class _GroupCard extends StatelessWidget {
           ],
         ),
       ),
+    );
+    if (!isOwner) return card;
+    return Dismissible(
+      key: ValueKey(group.id),
+      direction: DismissDirection.endToStart,
+      background: Container(
+        alignment: Alignment.centerRight,
+        padding: const EdgeInsets.only(right: AppSpacing.xl),
+        decoration: BoxDecoration(
+          color: AppColors.errorContainer,
+          borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+        ),
+        child: const Icon(Icons.delete_outline_rounded, color: AppColors.error),
+      ),
+      confirmDismiss: (_) => _confirmDelete(context),
+      onDismissed: (_) {
+        context
+            .read<FamilyBloc>()
+            .add(FamilyGroupDeleteRequested(groupId: group.id));
+      },
+      child: card,
     );
   }
 }

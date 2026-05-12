@@ -1,6 +1,6 @@
 # Stitch Wallet App — Görev Takip Dosyası
 
-> Son güncelleme: 12 Mayıs 2026 (Sprint 11 backend tamamlandı — PR #11 merge edildi. Sprint 11 frontend sıradaki.)  
+> Son güncelleme: 12 Mayıs 2026 (Sprint 11 Aile/Ortak Bütçe tamamlandı — PR #11 + #12 merge edildi. V1+V2 feature complete.)  
 > ✅ = Tamamlandı | 🔧 = Kısmen yapıldı | ❌ = Henüz başlanmadı  
 > ☑ = Kodda mevcut ancak migration henüz çalıştırılmadı
 
@@ -568,16 +568,16 @@
 - [x] `GET /api/family/groups/:id/contributions`
 - [x] `DELETE /api/family/groups/:id/members/:userId`
 
-### Frontend
-- [ ] FamilyGroupPage — grup listesi + oluşturma
-- [ ] FamilyGroupDetailPage — üye listesi + ortak bütçe kartları + bekleyen davetler
-- [ ] InvitePage — deep link `wallet://invite/<token>` handler, kabul/reddet
-- [ ] ContributionReportPage — katkı çubuğu (Batuhan %64 / Ayşe %36)
-- [ ] SharedBudgetCard widget (ortak bütçe + progress bar)
-- [ ] MemberAvatarRow widget, ContributionBar widget, InviteStatusBadge widget
-- [ ] FamilyBloc + SharedBudgetBloc
-- [ ] Ayarlar sayfasına "Aile Bütçesi" menü öğesi ekle
-- [ ] GoRouter'a `wallet://invite/:token` deep link route ekle
+### Frontend ✅
+- [x] FamilyGroupPage — grup listesi + oluşturma
+- [x] FamilyGroupDetailPage — üye listesi + ortak bütçe kartları + bekleyen davetler
+- [x] InvitePage — deep link `wallet://invite/<token>` handler, kabul/reddet
+- [x] ContributionReportPage — katkı çubuğu
+- [x] SharedBudgetCard widget (ortak bütçe + progress bar)
+- [x] MemberAvatarRow widget, ContributionBar widget, InviteStatusBadge widget
+- [x] FamilyBloc + FamilyRepository
+- [x] Ayarlar sayfasına "Aile Bütçesi" menü öğesi eklendi
+- [x] GoRouter'a `wallet://invite/:token` deep link route eklendi (AndroidManifest.xml güncellendi)
 
 ---
 
@@ -645,11 +645,10 @@
 | Sprint 8 | Test + Optimizasyon | ✅ %90 | 🔧 %88 | 🔧 Backend: 76 unit + 25 e2e ✅, ESLint 0 hata ✅, Railway ✅; Frontend: shimmer ✅, BLoC testleri 32/32 ✅, empty states ✅, infinite scroll ✅, splash screen ✅; widget/integration testleri + app icon eksik |
 | **Sprint 9** | **Enflasyon Bütçeleme** | ✅ %100 | ✅ %100 | ✅ Backend (PR #6 + #7) + Frontend (PR #5) tamamlandı, EVDS3 göçü uyarlandı |
 | **Sprint 10** | **Akıllı Harcama Analizi** | ✅ %100 | ✅ %100 | ✅ Backend + Frontend tamamlandı (PR #10) |
-| **Sprint 11** | **Aile/Ortak Bütçe** | ✅ %100 | ❌ %0 | 🔧 Backend tamamlandı (PR #11), frontend sıradaki |
+| **Sprint 11** | **Aile/Ortak Bütçe** | ✅ %100 | ✅ %100 | ✅ Backend (PR #11) + Frontend (PR #12) tamamlandı |
 | **V3** | **Altın/Döviz Portföy** | — | — | ⏸ Ertelendi (talep doğrulandıkça) |
 | Çapraz | Merkezi Entegrasyon | ✅ %100 | — | ✅ Event akışı ✅, Report/Dashboard source filtresi ✅, FCM bildirimleri ✅ |
 
-**Tahmini genel ilerleme: ~%96** — V1 + Sprint 9 + Sprint 10 ✅  
+**Tahmini genel ilerleme: ~%99** — V1 + Sprint 9 + Sprint 10 + Sprint 11 ✅ (V2 feature complete)  
 **Toplam sprint: 13** (Sprint 0-8 temel + Sprint 9-12 fark yaratan özellikler)  
-**Sıradaki (Backend):** — (Sprint 11 backend ✅)  
-**Sıradaki (Frontend):** Sprint 11 Aile Bütçesi UI (`SPRINT_11_CONTRACT.md` §6)
+**Sıradaki:** V2 tamamlandı. Kalan: app icon, store listing, V3 Portföy (talep doğrulandıkça). Bkz. `V3_PORTFOLIO_CONTRACT.md`.

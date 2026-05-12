@@ -76,15 +76,17 @@ class _AppShellState extends State<AppShell> {
         ),
         TargetFocus(
           identify: 'swipe',
-          targetPosition: TargetPosition(
-            const Size(80, 80),
-            Offset(size.width / 2 - 40, size.height / 2 - 40),
-          ),
-          shape: ShapeLightFocus.Circle,
+          // Ekranın dışına konumlandırılmış 1×1 hedef — spotlight yok
+          targetPosition: TargetPosition(const Size(1, 1), Offset(-10, -10)),
+          color: Colors.transparent,
           contents: [
             TargetContent(
-              align: ContentAlign.bottom,
-              padding: const EdgeInsets.only(top: AppSpacing.xl),
+              align: ContentAlign.custom,
+              customPosition: CustomTargetContentPosition(
+                top: size.height * 0.28,
+                left: AppSpacing.pagePadding,
+                right: AppSpacing.pagePadding,
+              ),
               child: _CoachContent(
                 title: 'Kaydırarak Sil',
                 body: 'İşlem, bütçe veya herhangi bir listede kartı sola kaydırarak silebilirsin.',

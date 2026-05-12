@@ -35,6 +35,7 @@ class _AppShellState extends State<AppShell> {
   Future<void> _initNotifications() async {
     final ns = getIt<NotificationService>();
     await ns.initialize();
+    await ns.tryRegisterToken();
     if (!mounted) return;
 
     // Arka plan / cold start bildiriminden gelen davet

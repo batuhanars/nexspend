@@ -68,24 +68,6 @@ class NotificationService {
     );
     if (kDebugMode) print('[FCM] İzin durumu: ${settings.authorizationStatus}');
 
-    // İzin reddedilse bile token kaydet (data-only mesajlar için)
-    try {
-      String? token;
-      for (int i = 0; i < 3; i++) {
-        token = await FirebaseMessaging.instance.getToken();
-        if (token != null) break;
-        await Future.delayed(const Duration(seconds: 2));
-      }
-      if (kDebugMode) print('[FCM] getToken() sonucu: $token');
-      if (token != null) {
-        await _registerToken(token);
-      } else {
-        if (kDebugMode) print('[FCM] Token null — 3 denemede alınamadı.');
-      }
-    } catch (e) {
-      if (kDebugMode) print('[FCM] getToken() hatası: $e');
-    }
-
     FirebaseMessaging.instance.onTokenRefresh.listen(_registerToken);
 
     // Uygulama kapalıyken bildirime tıklandı (cold start)
@@ -134,6 +116,25 @@ class NotificationService {
       _pendingInviteToken = token;
     } else {
       _inviteController.add(token);
+    }
+  }
+
+  Future<void> tryRegisterToken() async {
+    try {
+      String? token;
+      for (int i = 0; i < 3; i++) {
+        token = await FirebaseMessaging.instance.getToken();
+        if (token != null) break;
+        await Future.delayed(const Duration(seconds: 2));
+      }
+      if (kDebugMode) print('[FCM] getToken() sonucu: $token');
+      if (token != null) {
+        await _registerToken(token);
+      } else {
+        if (kDebugMode) print('[FCM] Token null — 3 denemede alınamadı.');
+      }
+    } catch (e) {
+      if (kDebugMode) print('[FCM] getToken() hatası: $e');
     }
   }
 

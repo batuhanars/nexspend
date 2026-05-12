@@ -1,5 +1,6 @@
 import {
   Controller,
+  Delete,
   Post,
   Body,
   Get,
@@ -17,6 +18,7 @@ import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { VerifyResetCodeDto } from './dto/verify-reset-code.dto';
 import { GoogleMobileAuthDto } from './dto/google-mobile-auth.dto';
+import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RefreshTokenGuard } from '../../common/guards/refresh-token.guard';
 import { GoogleAuthGuard } from '../../common/guards/google-auth.guard';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
@@ -45,6 +47,13 @@ export class AuthController {
   @UseGuards(RefreshTokenGuard)
   refresh(@CurrentUser() user: { id: string; email: string }) {
     return this.authService.refresh(user.id, user.email);
+  }
+
+  @Delete('account')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(JwtAuthGuard)
+  deleteAccount(@CurrentUser() user: { id: string }) {
+    return this.authService.deleteAccount(user.id);
   }
 
   @Post('logout')

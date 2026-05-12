@@ -205,6 +205,14 @@ class _SettingsView extends StatelessWidget {
                   showChevron: false,
                   onTap: () => _confirmLogout(context, s),
                 ),
+                SettingsTile(
+                  icon: Icons.delete_forever_rounded,
+                  label: 'Hesabı Sil',
+                  labelColor: AppColors.error,
+                  iconColor: AppColors.error,
+                  showChevron: false,
+                  onTap: () => _confirmDeleteAccount(context),
+                ),
                 const SizedBox(height: AppSpacing.xxxl),
               ],
             );
@@ -295,6 +303,47 @@ class _SettingsView extends StatelessWidget {
         child: const ChangePasswordSheet(),
       ),
     );
+  }
+
+  void _confirmDeleteAccount(BuildContext context) {
+    showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppColors.surfaceContainerHigh,
+        title: Text('Hesabı Sil', style: AppTypography.titleSm),
+        content: Text(
+          'Hesabınız ve tüm verileriniz (işlemler, bütçeler, borçlar, abonelikler) kalıcı olarak silinecek. Bu işlem geri alınamaz.',
+          style: AppTypography.bodyMd.copyWith(color: AppColors.onSurfaceVariant),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: const Text('İptal'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: Text('Hesabı Sil',
+                style: TextStyle(color: AppColors.error)),
+          ),
+        ],
+      ),
+    ).then((confirmed) async {
+      if (confirmed == true && context.mounted) {
+        try {
+          await getIt<AuthRepository>().deleteAccount();
+          if (context.mounted) context.go(RouteNames.login);
+        } catch (_) {
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Hesap silinemedi. Lütfen tekrar deneyin.'),
+                backgroundColor: AppColors.error,
+              ),
+            );
+          }
+        }
+      }
+    });
   }
 
   void _confirmLogout(BuildContext context, AppStrings s) {

@@ -19,6 +19,7 @@ class ApiEndpoints {
   static const String resetPassword = '/api/auth/reset-password';
   static const String refresh = '/api/auth/refresh';
   static const String logout = '/api/auth/logout';
+  static const String deleteAccount = '/api/auth/account';
 
   // Users
   static const String me = '/api/users/me';

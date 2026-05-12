@@ -230,6 +230,11 @@ export class AuthService {
     ]);
   }
 
+  async deleteAccount(userId: string): Promise<null> {
+    await this.prisma.user.delete({ where: { id: userId } });
+    return null;
+  }
+
   private generateTokens(userId: string, email: string): AuthTokens {
     const payload = { sub: userId, email };
     const accessExp =

@@ -60,7 +60,13 @@ class NotificationService {
             AndroidFlutterLocalNotificationsPlugin>()
         ?.createNotificationChannel(channel);
 
-    // Önce izin al (Android 13+ token üretimi için gerekli)
+    // Android 13+ local notification izni
+    await _localNotifications
+        .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin>()
+        ?.requestNotificationsPermission();
+
+    // FCM izni (iOS + Android 13+)
     final settings = await FirebaseMessaging.instance.requestPermission(
       alert: true,
       badge: true,
@@ -80,7 +86,7 @@ class NotificationService {
     );
 
     // Uygulama açıkken gelen bildirim → yerel bildirim göster
-    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) async {
       final notification = message.notification;
       if (notification == null) return;
       if (kDebugMode) {
@@ -91,20 +97,24 @@ class NotificationService {
           ? '$_invitePrefix${message.data['inviteToken']}'
           : null;
 
-      _localNotifications.show(
-        notification.hashCode,
-        notification.title,
-        notification.body,
-        const NotificationDetails(
-          android: AndroidNotificationDetails(
-            _channelId,
-            _channelName,
-            importance: Importance.high,
-            priority: Priority.high,
+      try {
+        await _localNotifications.show(
+          notification.hashCode.abs(),
+          notification.title,
+          notification.body,
+          const NotificationDetails(
+            android: AndroidNotificationDetails(
+              _channelId,
+              _channelName,
+              importance: Importance.high,
+              priority: Priority.high,
+            ),
           ),
-        ),
-        payload: payload,
-      );
+          payload: payload,
+        );
+      } catch (e) {
+        if (kDebugMode) print('[FCM] Local bildirim gösterilemedi: $e');
+      }
     });
   }
 

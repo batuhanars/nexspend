@@ -177,10 +177,14 @@ class FamilyBloc extends Bloc<FamilyEvent, FamilyState> {
     if (e is DioException) {
       final data = e.response?.data;
       if (data is Map) {
+        final errors = data['errors'];
+        if (errors is List && errors.isNotEmpty) {
+          debugPrint('Family API validation errors: $errors');
+          return errors.join(', ');
+        }
         final backendMsg = data['message'];
         if (backendMsg != null) {
           debugPrint('Family API hatası: $backendMsg');
-          if (backendMsg is List) return backendMsg.join(', ');
           return backendMsg.toString();
         }
       }

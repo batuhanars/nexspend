@@ -22,7 +22,7 @@ class PrivacyPolicyPage extends StatelessWidget {
           _Section(
             title: 'Veri Sorumlusu',
             body:
-                'The Digital Private Vault uygulaması ("Uygulama"), Batuhan Arslan tarafından işletilmektedir. '
+                'NexSpend uygulaması ("Uygulama"), Batuhan Arslan tarafından işletilmektedir. '
                 'Bu politika, kişisel verilerinizin nasıl toplandığını, kullanıldığını ve korunduğunu açıklar.',
           ),
           _Section(

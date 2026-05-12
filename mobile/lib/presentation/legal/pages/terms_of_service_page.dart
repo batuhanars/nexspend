@@ -22,7 +22,7 @@ class TermsOfServicePage extends StatelessWidget {
           _Section(
             title: 'Kabul',
             body:
-                'The Digital Private Vault uygulamasını ("Uygulama") kullanarak bu Kullanım Şartlarını '
+                'NexSpend uygulamasını ("Uygulama") kullanarak bu Kullanım Şartlarını '
                 'kabul etmiş sayılırsınız. Şartları kabul etmiyorsanız uygulamayı kullanmayınız.',
           ),
           _Section(

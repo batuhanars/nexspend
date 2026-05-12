@@ -49,7 +49,7 @@ class FamilyGroupPage extends StatelessWidget {
                       .add(const FamilyGroupsLoadRequested()),
                 ),
               FamilyGroupsLoaded(:final groups) when groups.isEmpty =>
-                const _EmptyView(),
+                _EmptyView(onCreateTap: () => _showCreateGroupDialog(context)),
               FamilyGroupsLoaded(:final groups) =>
                 _GroupListView(groups: groups),
               FamilyGroupCreating() => const _LoadingView(),
@@ -59,11 +59,17 @@ class FamilyGroupPage extends StatelessWidget {
             };
           },
         ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: () => _showCreateGroupDialog(context),
-          backgroundColor: AppColors.primary,
-          foregroundColor: AppColors.onPrimary,
-          child: const Icon(Icons.add_rounded),
+        floatingActionButton: BlocBuilder<FamilyBloc, FamilyState>(
+          builder: (context, state) {
+            final isEmpty = state is FamilyGroupsLoaded && state.groups.isEmpty;
+            if (isEmpty) return const SizedBox.shrink();
+            return FloatingActionButton(
+              onPressed: () => _showCreateGroupDialog(context),
+              backgroundColor: AppColors.primary,
+              foregroundColor: AppColors.onPrimary,
+              child: const Icon(Icons.add_rounded),
+            );
+          },
         ),
       ),
     );
@@ -99,8 +105,8 @@ class FamilyGroupPage extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: AppSpacing.md),
-              Wrap(
-                spacing: AppSpacing.sm,
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: icons.map((icon) {
                   final isSelected = selectedIcon == icon;
                   return GestureDetector(
@@ -252,7 +258,9 @@ class _GroupCard extends StatelessWidget {
 }
 
 class _EmptyView extends StatelessWidget {
-  const _EmptyView();
+  const _EmptyView({required this.onCreateTap});
+
+  final VoidCallback onCreateTap;
 
   @override
   Widget build(BuildContext context) {
@@ -286,7 +294,7 @@ class _EmptyView extends StatelessWidget {
             ),
             const SizedBox(height: AppSpacing.xl),
             FilledButton.icon(
-              onPressed: () {},
+              onPressed: onCreateTap,
               icon: const Icon(Icons.add_rounded),
               label: const Text('Grup Oluştur'),
               style: FilledButton.styleFrom(

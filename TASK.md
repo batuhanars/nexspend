@@ -1,6 +1,6 @@
 # Stitch Wallet App — Görev Takip Dosyası
 
-> Son güncelleme: 12 Mayıs 2026 (Sprint sıralaması güncellendi: Insights → Sprint 10, Aile Bütçesi → Sprint 11, Portföy → V3/ertelendi. Bkz. karar notu §V2.)  
+> Son güncelleme: 12 Mayıs 2026 (Sprint 10 Insights tamamlandı — PR #10 merge edildi. Sprint 11 Aile Bütçesi sıradaki.)  
 > ✅ = Tamamlandı | 🔧 = Kısmen yapıldı | ❌ = Henüz başlanmadı  
 > ☑ = Kodda mevcut ancak migration henüz çalıştırılmadı
 
@@ -514,35 +514,33 @@
 ## Sprint 10 — Akıllı Harcama Analizi (Insights)
 > 📖 Contract: `SPRINT_10_CONTRACT.md` | Detay: `DEVELOPMENT_PLAN_V2.md` → Section 8.8
 
-### Backend
+### Backend ✅
 
-> ☑ Model hazır: `Insight` — `schema.prisma`'da tanımlı.
+- [x] Migration çalıştırıldı: `npx prisma migrate dev --name add_insights`
+- [x] `InsightRulesService` — 7 kural tabanlı analiz motoru:
+  - [x] spending_spike: geçen aya göre kategori harcaması ≥%30 artış
+  - [x] unused_subscription: aktif abonelik var, son 60 günde o kategoride 0 harcama
+  - [x] category_overrun: bütçenin ≥%70'i ayın ilk 15 gününde tükendi
+  - [x] recurring_drift: tekrarlanan işlem miktarı son 3 ayda ≥%20 değişti
+  - [x] debt_aging: verilen alacak 30+ gün tahsil edilmedi
+  - [x] inflation_gap: kategori harcaması ilgili TÜFE'nin >%5 üstünde (Sprint 9 verisi)
+  - [x] saving_streak: net akış 3+ ay üst üste pozitif
+- [x] Cron Job (her ayın 1'i, 08:00): `MonthlyInsightJob` — tüm kullanıcılar için insight üret
+- [x] Cleanup Job (her ayın 1'i, 02:00): 6 aydan eski + isDismissed kayıtları sil
+- [x] `GET /api/insights` — (?period=YYYY-MM&unread=true, sayfalama)
+- [x] `GET /api/insights/summary` — okunmamış sayısı + son insight
+- [x] `PATCH /api/insights/:id/read` — okundu işaretle
+- [x] `PATCH /api/insights/:id/dismiss` — kapat
+- [x] `POST /api/insights/generate` — manuel tetikleme
 
-- [ ] Migration çalıştır: `npx prisma migrate dev --name add_insights`
-- [ ] `InsightRulesService` — 7 kural tabanlı analiz motoru:
-  - [ ] spending_spike: geçen aya göre kategori harcaması ≥%30 artış
-  - [ ] unused_subscription: aktif abonelik var, son 60 günde o kategoride 0 harcama
-  - [ ] category_overrun: bütçenin ≥%70'i ayın ilk 15 gününde tükendi
-  - [ ] recurring_drift: tekrarlanan işlem miktarı son 3 ayda ≥%20 değişti
-  - [ ] debt_aging: verilen alacak 30+ gün tahsil edilmedi
-  - [ ] inflation_gap: kategori harcaması ilgili TÜFE'nin >%5 üstünde (Sprint 9 verisi)
-  - [ ] saving_streak: net akış 3+ ay üst üste pozitif
-- [ ] Cron Job (her ayın 1'i, 08:00): `MonthlyInsightJob` — tüm kullanıcılar için insight üret
-- [ ] Cleanup Job (her ayın 1'i, 02:00): 6 aydan eski + isDismissed kayıtları sil
-- [ ] `GET /api/insights` — (?period=YYYY-MM&unread=true, sayfalama)
-- [ ] `GET /api/insights/summary` — okunmamış sayısı + son insight
-- [ ] `PATCH /api/insights/:id/read` — okundu işaretle
-- [ ] `PATCH /api/insights/:id/dismiss` — kapat
-- [ ] `POST /api/insights/generate` — manuel tetikleme
-
-### Frontend
-- [ ] InsightsPage — tüm insight'lar listesi + Bu Ay/Geçen Ay tab filtresi
-- [ ] InsightCard widget (severity renk: warning=turuncu, info=lavender, success=mint)
-- [ ] InsightsCarousel widget (dashboard'da kaydırılabilir — son 3 insight)
-- [ ] InsightBadge widget (okunmamış sayı badge — `AppColors.tertiary` bg)
-- [ ] InsightsBloc + InsightsRepository
-- [ ] DashboardPage'e "Akıllı Öneriler" bölümü ekle
-- [ ] Push notification: aylık "Finansal raporun hazır!" bildirimi
+### Frontend ✅
+- [x] InsightsPage — tüm insight'lar listesi + Bu Ay/Geçen Ay tab filtresi
+- [x] InsightCard widget (severity renk: warning=turuncu, info=lavender, success=mint)
+- [x] InsightsCarousel widget (dashboard'da kaydırılabilir — son 3 insight)
+- [x] InsightBadge widget (okunmamış sayı badge — `AppColors.tertiary` bg)
+- [x] InsightsBloc + InsightsRepository
+- [x] DashboardPage'e "Akıllı Öneriler" bölümü eklendi
+- [ ] Push notification: aylık "Finansal raporun hazır!" bildirimi (Sprint 11 FCM altyapısıyla birleştirilebilir)
 
 ---
 
@@ -648,12 +646,12 @@
 | Sprint 7 | Ayarlar + Profil | ✅ %100 | 🔧 %88 | 🔧 Para birimi/dil seçici, l10n eksik |
 | Sprint 8 | Test + Optimizasyon | ✅ %90 | 🔧 %88 | 🔧 Backend: 76 unit + 25 e2e ✅, ESLint 0 hata ✅, Railway ✅; Frontend: shimmer ✅, BLoC testleri 32/32 ✅, empty states ✅, infinite scroll ✅, splash screen ✅; widget/integration testleri + app icon eksik |
 | **Sprint 9** | **Enflasyon Bütçeleme** | ✅ %100 | ✅ %100 | ✅ Backend (PR #6 + #7) + Frontend (PR #5) tamamlandı, EVDS3 göçü uyarlandı |
-| **Sprint 10** | **Akıllı Harcama Analizi** | ❌ %0 | ❌ %0 | ❌ Başlanmadı |
+| **Sprint 10** | **Akıllı Harcama Analizi** | ✅ %100 | ✅ %100 | ✅ Backend + Frontend tamamlandı (PR #10) |
 | **Sprint 11** | **Aile/Ortak Bütçe** | ❌ %0 | ❌ %0 | ❌ Başlanmadı |
 | **V3** | **Altın/Döviz Portföy** | — | — | ⏸ Ertelendi (talep doğrulandıkça) |
 | Çapraz | Merkezi Entegrasyon | ✅ %100 | — | ✅ Event akışı ✅, Report/Dashboard source filtresi ✅, FCM bildirimleri ✅ |
 
-**Tahmini genel ilerleme: ~%92** — V1 + Sprint 9 backend/frontend ✅, frontend Sprint 0-8 ~%95  
+**Tahmini genel ilerleme: ~%96** — V1 + Sprint 9 + Sprint 10 ✅  
 **Toplam sprint: 13** (Sprint 0-8 temel + Sprint 9-12 fark yaratan özellikler)  
-**Sıradaki (Backend):** Sprint 10 (Akıllı Harcama Analizi — `SPRINT_10_CONTRACT.md`)  
-**Sıradaki (Frontend):** Sprint 10 Insights UI (Sprint 10 backend tamamlandıktan sonra)
+**Sıradaki (Backend):** Sprint 11 (Aile/Ortak Bütçe — `SPRINT_11_CONTRACT.md`)  
+**Sıradaki (Frontend):** Sprint 11 Aile Bütçesi UI (Sprint 11 backend tamamlandıktan sonra)

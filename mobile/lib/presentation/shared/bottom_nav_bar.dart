@@ -53,7 +53,7 @@ class _AppShellState extends State<AppShell> {
               padding: const EdgeInsets.only(bottom: AppSpacing.xl),
               child: _CoachContent(
                 title: 'Hızlı Ekle',
-                body: 'Bu butona basarak gelir, gider, transfer ve hesap ekleyebilirsin.',
+                body: 'Bu butona basarak gelir, gider, transfer ekleyebilir ve fiş tarayabilirsin.',
               ),
             ),
           ],

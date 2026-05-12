@@ -3,13 +3,12 @@ import {
   IsDateString,
   IsNumber,
   IsString,
-  IsUUID,
   MaxLength,
   Min,
 } from 'class-validator';
 
 export class CreateSharedBudgetDto {
-  @IsUUID()
+  @IsString()
   categoryId: string;
 
   @IsString()

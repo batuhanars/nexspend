@@ -1,5 +1,6 @@
 import {
   Injectable,
+  Logger,
   NotFoundException,
   BadRequestException,
   UnauthorizedException,
@@ -22,6 +23,8 @@ const AVATAR_CONTENT_TYPES: Record<string, string> = {
 
 @Injectable()
 export class UsersService {
+  private readonly logger = new Logger(UsersService.name);
+
   constructor(private readonly prisma: PrismaService) {}
 
   async getProfile(userId: string) {
@@ -188,10 +191,12 @@ export class UsersService {
   }
 
   async updateFcmToken(userId: string, fcmToken: string) {
+    this.logger.log(`FCM token kaydediliyor [${userId}]: ${fcmToken.slice(0, 20)}...`);
     await this.prisma.user.update({
       where: { id: userId },
       data: { fcmToken },
     });
+    this.logger.log(`FCM token kaydedildi [${userId}]`);
     return { message: 'FCM token güncellendi' };
   }
 

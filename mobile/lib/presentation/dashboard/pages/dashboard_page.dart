@@ -16,6 +16,7 @@ import '../widgets/dashboard_shimmer.dart';
 import '../widgets/debt_shortcut_card.dart';
 import '../widgets/empty_accounts_card.dart';
 import '../widgets/recent_transactions_section.dart';
+import '../../home/widgets/insights_carousel.dart';
 import '../../shared/widgets/error_view.dart';
 
 class DashboardPage extends StatelessWidget {
@@ -194,6 +195,8 @@ class _DashboardViewState extends State<_DashboardView> {
             DebtShortcutCard(
               onTap: () => context.push(RouteNames.debts),
             ),
+            const SizedBox(height: AppSpacing.xl),
+            const InsightsCarousel(),
             const SizedBox(height: AppSpacing.xl),
             RecentTransactionsSection(
               transactions: dashboard.recentTransactions,

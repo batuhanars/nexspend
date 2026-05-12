@@ -231,7 +231,31 @@ export class AuthService {
   }
 
   async deleteAccount(userId: string): Promise<null> {
-    await this.prisma.user.delete({ where: { id: userId } });
+    await this.prisma.$transaction(async (tx) => {
+      // Account'a bağlı child kayıtları sil (FK RESTRICT nedeniyle sıra önemli)
+      await tx.transactionTag.deleteMany({
+        where: { transaction: { userId } },
+      });
+      await tx.receiptItem.deleteMany({
+        where: { receipt: { userId } },
+      });
+      await tx.receipt.deleteMany({ where: { userId } });
+      await tx.debtPayment.deleteMany({
+        where: { account: { userId } },
+      });
+      await tx.transaction.deleteMany({ where: { userId } });
+      await tx.recurringTransaction.deleteMany({ where: { userId } });
+      await tx.subscription.deleteMany({ where: { userId } });
+      await tx.creditCardStatement.deleteMany({
+        where: { account: { userId } },
+      });
+      // Kullanıcı sahibi olduğu aile gruplarını sil
+      await tx.familyGroup.deleteMany({
+        where: { members: { some: { userId, role: 'OWNER' } } },
+      });
+      // User silme (kalan cascade'leri DB halleder)
+      await tx.user.delete({ where: { id: userId } });
+    });
     return null;
   }
 

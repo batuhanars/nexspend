@@ -75,10 +75,15 @@ export class UsersService {
         language: true,
         biometricEnabled: true,
         notificationsEnabled: true,
+        googleId: true,
       },
     });
 
-    return updated;
+    return {
+      ...updated,
+      hasPassword: await this.hasPassword(userId),
+      isGoogleLinked: !!updated.googleId,
+    };
   }
 
   async changePassword(userId: string, dto: ChangePasswordDto) {

@@ -102,6 +102,13 @@ class ApiEndpoints {
   static String statementById(String id) => '/api/statements/$id';
   static String statementPay(String id) => '/api/statements/$id/pay';
 
+  // Insights
+  static const String insights = '/api/insights';
+  static const String insightsSummary = '/api/insights/summary';
+  static const String insightsGenerate = '/api/insights/generate';
+  static String insightRead(String id) => '/api/insights/$id/read';
+  static String insightDismiss(String id) => '/api/insights/$id/dismiss';
+
   // Receipts
   static const String receiptsScan = '/api/receipts/scan';
   static const String receipts = '/api/receipts';

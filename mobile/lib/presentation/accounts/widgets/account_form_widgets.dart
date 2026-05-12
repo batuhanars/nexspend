@@ -27,7 +27,7 @@ class AccountTypeSelector extends StatelessWidget {
       crossAxisSpacing: AppSpacing.md,
       mainAxisSpacing: AppSpacing.md,
       childAspectRatio: 2.6,
-      children: AccountType.values.map((type) {
+      children: AccountType.values.where((t) => t != AccountType.INVESTMENT).map((type) {
         final isSelected = type == selected;
         final accent = type.defaultColor;
         return GestureDetector(

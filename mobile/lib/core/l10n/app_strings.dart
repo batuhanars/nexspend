@@ -625,7 +625,7 @@ class _Tr extends AppStrings {
   @override String get noAccountsFound => 'Hesap bulunamadı';
   @override String get refreshTooltip => 'Yenile';
 
-  @override String get welcomeBack => 'Wallet\'a Tekrar\nHoş Geldiniz';
+  @override String get welcomeBack => 'NexSpend\'e Tekrar\nHoş Geldiniz';
   @override String get signInSubtitle => 'Hesabınıza giriş yapın';
   @override String get emailLabel => 'E-posta';
   @override String get passwordLabel => 'Şifre';

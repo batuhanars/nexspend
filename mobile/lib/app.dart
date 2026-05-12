@@ -41,7 +41,7 @@ class _WalletAppState extends State<WalletApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp.router(
-      title: 'Wallet App',
+      title: 'NexSpend',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.dark,
       routerConfig: _router,

@@ -26,6 +26,7 @@ void _onNotificationTap(NotificationResponse details) {
 class NotificationService {
   final ApiClient _apiClient;
   String? _pendingInviteToken;
+  bool _initialized = false;
 
   NotificationService(this._apiClient);
 
@@ -38,6 +39,9 @@ class NotificationService {
   }
 
   Future<void> initialize() async {
+    if (_initialized) return;
+    _initialized = true;
+
     FirebaseMessaging.onBackgroundMessage(_firebaseBackgroundHandler);
 
     const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
@@ -56,7 +60,15 @@ class NotificationService {
             AndroidFlutterLocalNotificationsPlugin>()
         ?.createNotificationChannel(channel);
 
-    // Token kaydı izin durumundan bağımsız — önce kaydet
+    // Önce izin al (Android 13+ token üretimi için gerekli)
+    final settings = await FirebaseMessaging.instance.requestPermission(
+      alert: true,
+      badge: true,
+      sound: true,
+    );
+    if (kDebugMode) print('[FCM] İzin durumu: ${settings.authorizationStatus}');
+
+    // İzin reddedilse bile token kaydet (data-only mesajlar için)
     try {
       String? token;
       for (int i = 0; i < 3; i++) {
@@ -73,14 +85,6 @@ class NotificationService {
     } catch (e) {
       if (kDebugMode) print('[FCM] getToken() hatası: $e');
     }
-
-    // İzin al (bildirim gösterimi için)
-    final settings = await FirebaseMessaging.instance.requestPermission(
-      alert: true,
-      badge: true,
-      sound: true,
-    );
-    if (kDebugMode) print('[FCM] İzin durumu: ${settings.authorizationStatus}');
 
     FirebaseMessaging.instance.onTokenRefresh.listen(_registerToken);
 

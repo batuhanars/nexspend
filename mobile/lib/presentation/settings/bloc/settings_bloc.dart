@@ -43,7 +43,13 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
     emit(SettingsSaving(user: current.user));
     try {
       final updated = await _repo.updateMe(event.data);
-      emit(SettingsLoaded(user: updated, successMessage: 'Profil güncellendi'));
+      emit(SettingsLoaded(
+        user: updated.copyWith(
+          hasPassword: current.user.hasPassword,
+          isGoogleLinked: current.user.isGoogleLinked,
+        ),
+        successMessage: 'Profil güncellendi',
+      ));
     } catch (e) {
       emit(SettingsLoaded(
           user: current.user, errorMessage: _parseError(e)));
@@ -75,7 +81,12 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
     emit(SettingsSaving(user: current.user));
     try {
       final updated = await _repo.uploadAvatar(event.filePath);
-      emit(SettingsLoaded(user: updated));
+      emit(SettingsLoaded(
+        user: updated.copyWith(
+          hasPassword: current.user.hasPassword,
+          isGoogleLinked: current.user.isGoogleLinked,
+        ),
+      ));
     } catch (e) {
       emit(SettingsLoaded(user: current.user, errorMessage: _parseError(e)));
     }
@@ -106,12 +117,18 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
     );
     emit(SettingsLoaded(user: optimistic));
     try {
-      final updated =
-          await _repo.updateMe({event.field == 'biometric' ? 'biometricEnabled' : 'notificationsEnabled': event.value});
+      final updated = await _repo.updateMe(
+        {event.field == 'biometric' ? 'biometricEnabled' : 'notificationsEnabled': event.value},
+      );
       if (event.field == 'biometric') {
         await _storage.saveBiometricEnabled(event.value);
       }
-      emit(SettingsLoaded(user: updated));
+      emit(SettingsLoaded(
+        user: updated.copyWith(
+          hasPassword: current.user.hasPassword,
+          isGoogleLinked: current.user.isGoogleLinked,
+        ),
+      ));
     } catch (_) {
       emit(SettingsLoaded(user: current.user));
     }

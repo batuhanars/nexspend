@@ -61,6 +61,8 @@ class UserModel {
     bool? notificationsEnabled,
     String? avatarUrl,
     bool clearAvatar = false,
+    bool? hasPassword,
+    bool? isGoogleLinked,
   }) =>
       UserModel(
         id: id,
@@ -71,7 +73,7 @@ class UserModel {
         biometricEnabled: biometricEnabled ?? this.biometricEnabled,
         notificationsEnabled: notificationsEnabled ?? this.notificationsEnabled,
         avatarUrl: clearAvatar ? null : (avatarUrl ?? this.avatarUrl),
-        hasPassword: hasPassword,
-        isGoogleLinked: isGoogleLinked,
+        hasPassword: hasPassword ?? this.hasPassword,
+        isGoogleLinked: isGoogleLinked ?? this.isGoogleLinked,
       );
 }

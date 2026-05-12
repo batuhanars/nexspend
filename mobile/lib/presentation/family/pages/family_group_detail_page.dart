@@ -149,12 +149,6 @@ class _DetailBody extends StatelessWidget {
                   context.push(RouteNames.familyContributions(groupId)),
               tooltip: 'Katkı Raporu',
             ),
-            if (isOwner)
-              IconButton(
-                icon: Icon(Icons.delete_outline_rounded, color: AppColors.error),
-                onPressed: () => _confirmDeleteGroup(context, groupId, group.name),
-                tooltip: 'Grubu Sil',
-              ),
           ],
         ),
         SliverToBoxAdapter(
@@ -216,27 +210,29 @@ class _DetailBody extends StatelessWidget {
                 else
                   ...group.sharedBudgets.map((b) => Padding(
                         padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-                        child: Stack(
-                          children: [
-                            SharedBudgetCard(budget: b),
-                            Positioned(
-                              top: 4,
-                              right: 4,
-                              child: GestureDetector(
-                                onTap: () => _confirmDeleteBudget(
-                                    context, groupId, b.id, b.name),
-                                child: Container(
-                                  padding: const EdgeInsets.all(4),
-                                  decoration: BoxDecoration(
-                                    color: AppColors.surface.withValues(alpha: 0.8),
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: Icon(Icons.close_rounded,
-                                      size: 16, color: AppColors.error),
-                                ),
-                              ),
+                        child: Dismissible(
+                          key: ValueKey(b.id),
+                          direction: DismissDirection.endToStart,
+                          background: Container(
+                            alignment: Alignment.centerRight,
+                            padding: const EdgeInsets.only(right: AppSpacing.xl),
+                            decoration: BoxDecoration(
+                              color: AppColors.errorContainer,
+                              borderRadius:
+                                  BorderRadius.circular(AppSpacing.radiusLg),
                             ),
-                          ],
+                            child: const Icon(Icons.delete_outline_rounded,
+                                color: AppColors.error),
+                          ),
+                          confirmDismiss: (_) =>
+                              _confirmDeleteBudget(context, b.name),
+                          onDismissed: (_) {
+                            context.read<FamilyBloc>().add(
+                                  FamilySharedBudgetDeleteRequested(
+                                      groupId: groupId, budgetId: b.id),
+                                );
+                          },
+                          child: SharedBudgetCard(budget: b),
                         ),
                       )),
 
@@ -262,38 +258,8 @@ class _DetailBody extends StatelessWidget {
     );
   }
 
-  void _confirmDeleteGroup(BuildContext context, String groupId, String groupName) {
-    showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: AppColors.surfaceContainerHigh,
-        title: Text('Grubu Sil', style: AppTypography.titleSm),
-        content: Text(
-          '"$groupName" grubu ve tüm ortak bütçeleri silinecek. Bu işlem geri alınamaz.',
-          style: AppTypography.bodyMd.copyWith(color: AppColors.onSurfaceVariant),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(false),
-            child: Text('İptal',
-                style: AppTypography.bodyMd.copyWith(color: AppColors.onSurfaceVariant)),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(true),
-            child: Text('Sil', style: TextStyle(color: AppColors.error)),
-          ),
-        ],
-      ),
-    ).then((confirmed) {
-      if (confirmed == true && context.mounted) {
-        context.read<FamilyBloc>().add(FamilyGroupDeleteRequested(groupId: groupId));
-      }
-    });
-  }
-
-  void _confirmDeleteBudget(
-      BuildContext context, String groupId, String budgetId, String budgetName) {
-    showDialog<bool>(
+  Future<bool?> _confirmDeleteBudget(BuildContext context, String budgetName) {
+    return showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: AppColors.surfaceContainerHigh,
@@ -314,12 +280,7 @@ class _DetailBody extends StatelessWidget {
           ),
         ],
       ),
-    ).then((confirmed) {
-      if (confirmed == true && context.mounted) {
-        context.read<FamilyBloc>().add(FamilySharedBudgetDeleteRequested(
-            groupId: groupId, budgetId: budgetId));
-      }
-    });
+    );
   }
 
   void _showInviteDialog(BuildContext context, String groupId) {

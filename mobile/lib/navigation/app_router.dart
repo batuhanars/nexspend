@@ -30,6 +30,13 @@ import '../presentation/debts/bloc/debt_detail_bloc.dart';
 import '../presentation/debts/bloc/debts_bloc.dart';
 import '../presentation/debts/pages/debt_detail_page.dart';
 import '../presentation/debts/pages/debts_page.dart';
+import '../data/repositories/family_repository.dart';
+import '../presentation/family/bloc/family_bloc.dart';
+import '../presentation/family/bloc/family_event.dart';
+import '../presentation/family/pages/contribution_report_page.dart';
+import '../presentation/family/pages/family_group_detail_page.dart';
+import '../presentation/family/pages/family_group_page.dart';
+import '../presentation/family/pages/invite_page.dart';
 import '../presentation/insights/pages/insights_page.dart';
 import '../presentation/receipt_scanner/pages/receipt_history_page.dart';
 import '../presentation/receipt_scanner/pages/receipt_image_viewer_page.dart';
@@ -390,6 +397,63 @@ GoRouter createRouter() {
         name: 'insights',
         parentNavigatorKey: _rootNavigatorKey,
         builder: (context, _) => const InsightsPage(),
+      ),
+
+      // Aile Bütçesi routes
+      GoRoute(
+        path: RouteNames.family,
+        name: 'family',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, _) => BlocProvider(
+          create: (_) => FamilyBloc(
+            familyRepository: getIt<FamilyRepository>(),
+          )..add(const FamilyGroupsLoadRequested()),
+          child: const FamilyGroupPage(),
+        ),
+      ),
+      // Deep link: wallet://invite/<token> → GoRouter routes /invite/:token
+      GoRoute(
+        path: '/invite/:token',
+        name: 'family-invite',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) {
+          final token = state.pathParameters['token']!;
+          return BlocProvider(
+            create: (_) =>
+                FamilyBloc(familyRepository: getIt<FamilyRepository>()),
+            child: InvitePage(token: token),
+          );
+        },
+      ),
+      GoRoute(
+        path: '/family/:id',
+        name: 'family-detail',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) {
+          final id = state.pathParameters['id']!;
+          return BlocProvider(
+            create: (_) =>
+                FamilyBloc(familyRepository: getIt<FamilyRepository>()),
+            child: FamilyGroupDetailPage(groupId: id),
+          );
+        },
+      ),
+      GoRoute(
+        path: '/family/:id/contributions',
+        name: 'family-contributions',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) {
+          final id = state.pathParameters['id']!;
+          final period = state.uri.queryParameters['period'];
+          return BlocProvider(
+            create: (_) =>
+                FamilyBloc(familyRepository: getIt<FamilyRepository>()),
+            child: ContributionReportPage(
+              groupId: id,
+              initialPeriod: period,
+            ),
+          );
+        },
       ),
       GoRoute(
         path: RouteNames.receiptHistory,

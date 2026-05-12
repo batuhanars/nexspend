@@ -96,6 +96,7 @@ class FamilyInviteModel {
     required this.status,
     required this.expiresAt,
     required this.createdAt,
+    this.inviteLink,
   });
 
   final String id;
@@ -104,6 +105,7 @@ class FamilyInviteModel {
   final InviteStatus status;
   final DateTime expiresAt;
   final DateTime createdAt;
+  final String? inviteLink;
 
   factory FamilyInviteModel.fromJson(Map<String, dynamic> json) =>
       FamilyInviteModel(
@@ -116,6 +118,7 @@ class FamilyInviteModel {
         ),
         expiresAt: DateTime.parse(json['expiresAt'] as String),
         createdAt: DateTime.parse(json['createdAt'] as String),
+        inviteLink: json['inviteLink'] as String?,
       );
 }
 

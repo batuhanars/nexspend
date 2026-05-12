@@ -18,42 +18,6 @@ export class MailService {
     });
   }
 
-  async sendFamilyInvite(params: {
-    to: string;
-    groupName: string;
-    token: string;
-    inviterName: string;
-    baseUrl: string;
-  }): Promise<void> {
-    const from = this.configService.get<string>('mail.from');
-    const deepLink = `wallet://invite/${params.token}`;
-    const webLink = `${params.baseUrl}/invite/${params.token}`;
-
-    try {
-      await this.transporter.sendMail({
-        from,
-        to: params.to,
-        subject: `${params.inviterName} sizi "${params.groupName}" grubuna davet etti`,
-        html: `
-          <div style="font-family: Inter, sans-serif; max-width: 480px; margin: 0 auto; background: #131313; color: #E5E2E1; padding: 32px; border-radius: 16px;">
-            <h2 style="color: #BAC3FF; margin-bottom: 8px;">Aile Bütçesi Daveti</h2>
-            <p>Merhaba,</p>
-            <p><strong>${params.inviterName}</strong> sizi <strong>"${params.groupName}"</strong> ortak bütçe grubuna davet etti.</p>
-            <div style="margin: 28px 0; text-align: center;">
-              <a href="${deepLink}" style="display:inline-block;padding:14px 28px;background:#BAC3FF;color:#131313;border-radius:12px;text-decoration:none;font-weight:700;">
-                Daveti Kabul Et
-              </a>
-            </div>
-            <p style="color: #9E9E9E; font-size: 13px;">Uygulama açılmazsa: <a href="${webLink}" style="color:#BAC3FF;">${webLink}</a></p>
-            <p style="color: #9E9E9E; font-size: 13px;">Bu davet 7 gün içinde geçerliliğini yitirir.</p>
-          </div>
-        `,
-      });
-    } catch (error) {
-      this.logger.error(`Aile daveti e-postası gönderilemedi: ${params.to}`, error);
-    }
-  }
-
   async sendPasswordReset(
     to: string,
     fullName: string,

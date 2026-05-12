@@ -18,7 +18,6 @@ import {
 } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import { FAMILY_CONSTANTS } from './family.constants';
-import { FamilyEmailService } from './email.service';
 import { CreateGroupDto } from './dto/create-group.dto';
 import { SendInviteDto } from './dto/send-invite.dto';
 import { CreateSharedBudgetDto } from './dto/create-shared-budget.dto';
@@ -27,10 +26,7 @@ import { CreateSharedBudgetDto } from './dto/create-shared-budget.dto';
 export class FamilyService {
   private readonly logger = new Logger(FamilyService.name);
 
-  constructor(
-    private readonly prisma: PrismaService,
-    private readonly emailService: FamilyEmailService,
-  ) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   // ─── Grup CRUD ────────────────────────────────────────────────────────────────
 
@@ -168,22 +164,6 @@ export class FamilyService {
         status: InviteStatus.PENDING,
         expiresAt,
       },
-    });
-
-    const group = await this.prisma.familyGroup.findUnique({
-      where: { id: groupId },
-      select: { name: true },
-    });
-    const inviter = await this.prisma.user.findUnique({
-      where: { id: userId },
-      select: { fullName: true },
-    });
-
-    await this.emailService.sendInvite({
-      to: dto.email,
-      groupName: group!.name,
-      token: invite.token,
-      inviterName: inviter!.fullName,
     });
 
     return this.formatInvite(invite);
@@ -486,6 +466,7 @@ export class FamilyService {
       status: invite.status as string,
       expiresAt: invite.expiresAt.toISOString(),
       createdAt: invite.createdAt.toISOString(),
+      inviteLink: `nexspend://invite/${invite.token}`,
     };
   }
 

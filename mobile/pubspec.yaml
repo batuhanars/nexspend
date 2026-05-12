@@ -76,14 +76,14 @@ dev_dependencies:
 
 flutter_native_splash:
   color: "#131313"
-  image: assets/images/nexspend-icon.png
+  image: assets/images/nexspend-icon-splash.png
   color_dark: "#131313"
-  image_dark: assets/images/nexspend-icon.png
+  image_dark: assets/images/nexspend-icon-splash.png
   android_12:
     color: "#131313"
-    image: assets/images/nexspend-icon.png
+    image: assets/images/nexspend-icon-splash.png
     color_dark: "#131313"
-    image_dark: assets/images/nexspend-icon.png
+    image_dark: assets/images/nexspend-icon-splash.png
 
 flutter_launcher_icons:
   android: "launcher_icon"

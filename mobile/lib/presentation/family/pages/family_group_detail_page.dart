@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
@@ -43,8 +42,9 @@ class _FamilyGroupDetailPageState extends State<FamilyGroupDetailPage> {
           context
               .read<FamilyBloc>()
               .add(FamilyGroupDetailLoadRequested(groupId: widget.groupId));
-          final link = state.invite.inviteLink;
-          if (link != null) _showInviteLinkSheet(context, link);
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Davet bildirimi gönderildi.')),
+          );
         }
         if (state is FamilyInviteSendError) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -117,78 +117,6 @@ class _FamilyGroupDetailPageState extends State<FamilyGroupDetailPage> {
     );
   }
 
-  void _showInviteLinkSheet(BuildContext context, String link) {
-    showModalBottomSheet<void>(
-      context: context,
-      backgroundColor: AppColors.surfaceContainerHigh,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(AppSpacing.radiusXl)),
-      ),
-      builder: (_) => Padding(
-        padding: const EdgeInsets.fromLTRB(
-          AppSpacing.pagePadding, AppSpacing.xl,
-          AppSpacing.pagePadding, AppSpacing.xxl,
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Center(
-              child: Container(
-                width: 36, height: 4,
-                decoration: BoxDecoration(
-                  color: AppColors.onSurfaceVariant.withValues(alpha: 0.3),
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-            ),
-            const SizedBox(height: AppSpacing.xl),
-            Text('Davet Linki', style: AppTypography.titleSm),
-            const SizedBox(height: AppSpacing.sm),
-            Text(
-              'Bu linki WhatsApp veya herhangi bir mesajlaşma uygulamasından paylaş. Link 7 gün geçerlidir.',
-              style: AppTypography.bodyMd.copyWith(color: AppColors.onSurfaceVariant),
-            ),
-            const SizedBox(height: AppSpacing.lg),
-            Container(
-              padding: const EdgeInsets.all(AppSpacing.md),
-              decoration: BoxDecoration(
-                color: AppColors.surfaceContainerHighest,
-                borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-              ),
-              child: Text(
-                link,
-                style: AppTypography.bodySm.copyWith(color: AppColors.primary),
-              ),
-            ),
-            const SizedBox(height: AppSpacing.lg),
-            SizedBox(
-              width: double.infinity,
-              height: 52,
-              child: FilledButton.icon(
-                onPressed: () {
-                  Clipboard.setData(ClipboardData(text: link));
-                  Navigator.of(context).pop();
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Link kopyalandı!')),
-                  );
-                },
-                icon: const Icon(Icons.copy_rounded, size: 18),
-                label: const Text('Linki Kopyala'),
-                style: FilledButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  foregroundColor: AppColors.onPrimary,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 }
 
 class _DetailBody extends StatelessWidget {

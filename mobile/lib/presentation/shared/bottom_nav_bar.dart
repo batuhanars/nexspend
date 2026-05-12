@@ -87,10 +87,38 @@ class _AppShellState extends State<AppShell> {
                 left: AppSpacing.pagePadding,
                 right: AppSpacing.pagePadding,
               ),
-              child: _CoachContent(
-                title: 'Kaydırarak Sil',
-                body: 'İşlem, bütçe veya herhangi bir listede kartı sola kaydırarak silebilirsin.',
-                icon: Icons.swipe_left_rounded,
+              builder: (_, controller) => Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _CoachContent(
+                    title: 'Kaydırarak Sil',
+                    body: 'İşlem, bütçe veya herhangi bir listede kartı sola kaydırarak silebilirsin.',
+                    icon: Icons.swipe_left_rounded,
+                  ),
+                  const SizedBox(height: AppSpacing.xl),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 48,
+                    child: FilledButton(
+                      onPressed: controller.next,
+                      style: FilledButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        shape: RoundedRectangleBorder(
+                          borderRadius:
+                              BorderRadius.circular(AppSpacing.radiusXl),
+                        ),
+                      ),
+                      child: Text(
+                        'Tamam',
+                        style: AppTypography.bodyMd.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.surface,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
           ],

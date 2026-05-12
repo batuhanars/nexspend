@@ -1,0 +1,5 @@
+export const FAMILY_CONSTANTS = {
+  MAX_MEMBERS: 5,
+  INVITE_EXPIRY_DAYS: 7,
+  MAX_GROUPS_PER_USER: 3,
+} as const;

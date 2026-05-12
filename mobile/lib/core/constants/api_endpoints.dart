@@ -102,6 +102,20 @@ class ApiEndpoints {
   static String statementById(String id) => '/api/statements/$id';
   static String statementPay(String id) => '/api/statements/$id/pay';
 
+  // Family / Aile Bütçesi
+  static const String familyGroups = '/api/family/groups';
+  static String familyGroupById(String id) => '/api/family/groups/$id';
+  static String familyGroupInvite(String id) => '/api/family/groups/$id/invite';
+  static String familyGroupBudgets(String id) => '/api/family/groups/$id/budgets';
+  static String familyGroupContributions(String id) =>
+      '/api/family/groups/$id/contributions';
+  static String familyGroupMember(String groupId, String userId) =>
+      '/api/family/groups/$groupId/members/$userId';
+  static String familyInviteAccept(String token) =>
+      '/api/family/invites/$token/accept';
+  static String familyInviteReject(String token) =>
+      '/api/family/invites/$token/reject';
+
   // Insights
   static const String insights = '/api/insights';
   static const String insightsSummary = '/api/insights/summary';

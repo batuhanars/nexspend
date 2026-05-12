@@ -15,6 +15,7 @@ import '../../data/repositories/tag_repository.dart';
 import '../../data/repositories/inflation_repository.dart';
 import '../../data/repositories/receipt_repository.dart';
 import '../../data/repositories/dashboard_repository.dart';
+import '../../data/repositories/family_repository.dart';
 import '../../data/repositories/insights_repository.dart';
 import '../../data/repositories/transaction_repository.dart';
 import '../network/api_client.dart';
@@ -111,5 +112,9 @@ Future<void> configureDependencies() async {
 
   getIt.registerLazySingleton<InsightsRepository>(
     () => InsightsRepository(apiClient: getIt<ApiClient>()),
+  );
+
+  getIt.registerLazySingleton<FamilyRepository>(
+    () => FamilyRepository(apiClient: getIt<ApiClient>()),
   );
 }

@@ -1,6 +1,6 @@
 # Stitch Wallet App — Görev Takip Dosyası
 
-> Son güncelleme: 12 Mayıs 2026 (Sprint 10 Insights tamamlandı — PR #10 merge edildi. Sprint 11 Aile Bütçesi sıradaki.)  
+> Son güncelleme: 12 Mayıs 2026 (Sprint 11 backend tamamlandı — PR #11 merge edildi. Sprint 11 frontend sıradaki.)  
 > ✅ = Tamamlandı | 🔧 = Kısmen yapıldı | ❌ = Henüz başlanmadı  
 > ☑ = Kodda mevcut ancak migration henüz çalıştırılmadı
 
@@ -547,28 +547,26 @@
 ## Sprint 11 — Aile / Ortak Bütçe
 > 📖 Contract: `SPRINT_11_CONTRACT.md` | Detay: `DEVELOPMENT_PLAN_V2.md` → Section 8.9
 
-### Backend
+### Backend ✅
 
-> ☑ Modeller hazır: `FamilyGroup`, `FamilyMember`, `FamilyInvite`, `SharedBudget`, `SharedExpense` — `schema.prisma`'da tanımlı.
-
-- [ ] Migration çalıştır: `npx prisma migrate dev --name add_family_models`
-- [ ] `FamilyService` — grup oluşturma, davet, üye yönetimi
-- [ ] `FamilyEmailService` — Resend ile davet e-postası (`RESEND_API_KEY` env ekle)
-- [ ] `@OnEvent('transaction.created')` → SharedBudgetListener:
-  - [ ] Kullanıcının grubu var mı kontrol et
-  - [ ] İlgili kategoride aktif ortak bütçe var mı kontrol et
-  - [ ] Varsa → SharedExpense oluştur + SharedBudget.spent güncelle
-  - [ ] Tüm grup üyelerine FCM bildirimi gönder
-- [ ] `POST /api/family/groups` — grup oluştur (max 3 grup/kullanıcı)
-- [ ] `GET /api/family/groups` — kullanıcının grupları
-- [ ] `GET /api/family/groups/:id` — grup detayı (üyeler + bütçeler + bekleyen davetler)
-- [ ] `POST /api/family/groups/:id/invite` — üye davet et (max 5 üye, 7 gün geçerli token)
-- [ ] `POST /api/family/invites/:token/accept` — daveti kabul (e-posta eşleşmesi zorunlu)
-- [ ] `POST /api/family/invites/:token/reject` — daveti reddet
-- [ ] `POST /api/family/groups/:id/budgets` — ortak bütçe oluştur
-- [ ] `GET /api/family/groups/:id/budgets` — ortak bütçe listesi
-- [ ] `GET /api/family/groups/:id/contributions` — katkı dağılımı raporu (?period=YYYY-MM)
-- [ ] `DELETE /api/family/groups/:id/members/:userId` — üyeyi çıkar (OWNER only)
+- [x] Migration çalıştırıldı: `npx prisma migrate dev --name add_family_models`
+- [x] `FamilyService` — grup oluşturma, davet, üye yönetimi
+- [x] `FamilyEmailService` — Resend ile davet e-postası (`RESEND_API_KEY` env)
+- [x] `@OnEvent('transaction.created')` → `SharedBudgetListener`:
+  - [x] Kullanıcının grubu var mı kontrol et
+  - [x] İlgili kategoride aktif ortak bütçe var mı kontrol et
+  - [x] Varsa → SharedExpense oluştur + SharedBudget.spent güncelle
+  - [x] Tüm grup üyelerine FCM bildirimi gönder
+- [x] `POST /api/family/groups`
+- [x] `GET /api/family/groups`
+- [x] `GET /api/family/groups/:id`
+- [x] `POST /api/family/groups/:id/invite`
+- [x] `POST /api/family/invites/:token/accept`
+- [x] `POST /api/family/invites/:token/reject`
+- [x] `POST /api/family/groups/:id/budgets`
+- [x] `GET /api/family/groups/:id/budgets`
+- [x] `GET /api/family/groups/:id/contributions`
+- [x] `DELETE /api/family/groups/:id/members/:userId`
 
 ### Frontend
 - [ ] FamilyGroupPage — grup listesi + oluşturma
@@ -647,11 +645,11 @@
 | Sprint 8 | Test + Optimizasyon | ✅ %90 | 🔧 %88 | 🔧 Backend: 76 unit + 25 e2e ✅, ESLint 0 hata ✅, Railway ✅; Frontend: shimmer ✅, BLoC testleri 32/32 ✅, empty states ✅, infinite scroll ✅, splash screen ✅; widget/integration testleri + app icon eksik |
 | **Sprint 9** | **Enflasyon Bütçeleme** | ✅ %100 | ✅ %100 | ✅ Backend (PR #6 + #7) + Frontend (PR #5) tamamlandı, EVDS3 göçü uyarlandı |
 | **Sprint 10** | **Akıllı Harcama Analizi** | ✅ %100 | ✅ %100 | ✅ Backend + Frontend tamamlandı (PR #10) |
-| **Sprint 11** | **Aile/Ortak Bütçe** | ❌ %0 | ❌ %0 | ❌ Başlanmadı |
+| **Sprint 11** | **Aile/Ortak Bütçe** | ✅ %100 | ❌ %0 | 🔧 Backend tamamlandı (PR #11), frontend sıradaki |
 | **V3** | **Altın/Döviz Portföy** | — | — | ⏸ Ertelendi (talep doğrulandıkça) |
 | Çapraz | Merkezi Entegrasyon | ✅ %100 | — | ✅ Event akışı ✅, Report/Dashboard source filtresi ✅, FCM bildirimleri ✅ |
 
 **Tahmini genel ilerleme: ~%96** — V1 + Sprint 9 + Sprint 10 ✅  
 **Toplam sprint: 13** (Sprint 0-8 temel + Sprint 9-12 fark yaratan özellikler)  
-**Sıradaki (Backend):** Sprint 11 (Aile/Ortak Bütçe — `SPRINT_11_CONTRACT.md`)  
-**Sıradaki (Frontend):** Sprint 11 Aile Bütçesi UI (Sprint 11 backend tamamlandıktan sonra)
+**Sıradaki (Backend):** — (Sprint 11 backend ✅)  
+**Sıradaki (Frontend):** Sprint 11 Aile Bütçesi UI (`SPRINT_11_CONTRACT.md` §6)

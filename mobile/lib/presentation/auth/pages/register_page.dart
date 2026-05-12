@@ -1,3 +1,4 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -78,6 +79,18 @@ class _RegisterPageState extends State<RegisterPage> {
   final _emailFocus = FocusNode();
   final _passwordFocus = FocusNode();
   final _confirmPasswordFocus = FocusNode();
+  bool _termsAccepted = false;
+  late final TapGestureRecognizer _privacyRecognizer;
+  late final TapGestureRecognizer _termsRecognizer;
+
+  @override
+  void initState() {
+    super.initState();
+    _privacyRecognizer = TapGestureRecognizer()
+      ..onTap = () => context.push(RouteNames.privacyPolicy);
+    _termsRecognizer = TapGestureRecognizer()
+      ..onTap = () => context.push(RouteNames.termsOfService);
+  }
 
   @override
   void dispose() {
@@ -89,10 +102,20 @@ class _RegisterPageState extends State<RegisterPage> {
     _emailFocus.dispose();
     _passwordFocus.dispose();
     _confirmPasswordFocus.dispose();
+    _privacyRecognizer.dispose();
+    _termsRecognizer.dispose();
     super.dispose();
   }
 
   void _submit() {
+    if (!_termsAccepted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Devam etmek için kullanım şartlarını kabul edin.'),
+        ),
+      );
+      return;
+    }
     if (_formKey.currentState?.validate() ?? false) {
       context.read<AuthBloc>().add(
             RegisterRequested(
@@ -204,7 +227,54 @@ class _RegisterPageState extends State<RegisterPage> {
                     ),
                     onFieldSubmitted: (_) => _submit(),
                   ),
-                  const SizedBox(height: AppSpacing.xxl),
+                  const SizedBox(height: AppSpacing.xl),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Checkbox(
+                        value: _termsAccepted,
+                        onChanged: (val) =>
+                            setState(() => _termsAccepted = val ?? false),
+                        activeColor: AppColors.primary,
+                        side: BorderSide(
+                          color: _termsAccepted
+                              ? AppColors.primary
+                              : AppColors.onSurfaceVariant,
+                        ),
+                      ),
+                      Expanded(
+                        child: Text.rich(
+                          TextSpan(
+                            style: AppTypography.bodySm
+                                .copyWith(color: AppColors.onSurfaceVariant),
+                            children: [
+                              const TextSpan(text: 'Okudum ve kabul ediyorum: '),
+                              TextSpan(
+                                text: 'Gizlilik Politikası',
+                                recognizer: _privacyRecognizer,
+                                style: AppTypography.bodySm.copyWith(
+                                  color: AppColors.primary,
+                                  decoration: TextDecoration.underline,
+                                  decorationColor: AppColors.primary,
+                                ),
+                              ),
+                              const TextSpan(text: ' ve '),
+                              TextSpan(
+                                text: 'Kullanım Şartları',
+                                recognizer: _termsRecognizer,
+                                style: AppTypography.bodySm.copyWith(
+                                  color: AppColors.primary,
+                                  decoration: TextDecoration.underline,
+                                  decorationColor: AppColors.primary,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: AppSpacing.lg),
                   BlocBuilder<AuthBloc, AuthState>(
                     builder: (context, state) {
                       final isLoading = state is AuthLoading;

@@ -23,6 +23,7 @@ class AppShell extends StatefulWidget {
 
 class _AppShellState extends State<AppShell> {
   StreamSubscription<String>? _inviteSub;
+  StreamSubscription<String>? _debugSub;
 
   @override
   void initState() {
@@ -43,6 +44,15 @@ class _AppShellState extends State<AppShell> {
       if (mounted) context.push(RouteNames.familyInvite(token));
     });
 
+    // DEBUG: onMessage ve show() sonuçlarını ekranda göster
+    _debugSub = NotificationService.onDebug.listen((msg) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('[FCM Debug] $msg'), duration: const Duration(seconds: 6)),
+        );
+      }
+    });
+
     // Cold start: uygulama kapalıyken bildirime tıklandı
     final pending = ns.consumePendingInvite();
     if (pending != null && mounted) {
@@ -55,6 +65,7 @@ class _AppShellState extends State<AppShell> {
   @override
   void dispose() {
     _inviteSub?.cancel();
+    _debugSub?.cancel();
     super.dispose();
   }
 

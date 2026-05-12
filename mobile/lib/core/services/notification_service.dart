@@ -11,6 +11,7 @@ const _invitePrefix = 'INVITE:';
 
 final _localNotifications = FlutterLocalNotificationsPlugin();
 final _inviteController = StreamController<String>.broadcast();
+final _debugController = StreamController<String>.broadcast();
 
 @pragma('vm:entry-point')
 Future<void> firebaseBackgroundHandler(RemoteMessage message) async {}
@@ -31,6 +32,7 @@ class NotificationService {
   NotificationService(this._apiClient);
 
   static Stream<String> get onInvite => _inviteController.stream;
+  static Stream<String> get onDebug => _debugController.stream;
 
   String? consumePendingInvite() {
     final token = _pendingInviteToken;
@@ -86,10 +88,14 @@ class NotificationService {
     // Uygulama açıkken gelen bildirim → yerel bildirim göster
     FirebaseMessaging.onMessage.listen((RemoteMessage message) async {
       final notification = message.notification;
-      if (notification == null) return;
-      if (kDebugMode) {
-        print('[FCM] Foreground mesaj: ${notification.title} — ${notification.body}');
+      if (notification == null) {
+        _debugController.add('onMessage tetiklendi ama notification=null');
+        return;
       }
+
+      // DEBUG: onMessage tetiklendiğini onayla
+      _debugController.add('onMessage: ${notification.title}');
+
       final isInvite = message.data['type'] == 'FAMILY_INVITE';
       final payload = isInvite
           ? '$_invitePrefix${message.data['inviteToken']}'
@@ -110,8 +116,9 @@ class NotificationService {
           ),
           payload: payload,
         );
+        _debugController.add('show() başarılı');
       } catch (e) {
-        if (kDebugMode) print('[FCM] Local bildirim gösterilemedi: $e');
+        _debugController.add('show() HATA: $e');
       }
     });
   }

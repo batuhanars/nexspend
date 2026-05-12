@@ -496,7 +496,10 @@ Future<String?> _redirect(BuildContext context, GoRouterState state) async {
       state.matchedLocation == RouteNames.forgotPassword ||
       state.matchedLocation == RouteNames.resetPassword;
 
-  if (!isLoggedIn && !isOnAuthPage) return RouteNames.login;
+  final isPublicPage = state.matchedLocation == RouteNames.privacyPolicy ||
+      state.matchedLocation == RouteNames.termsOfService;
+
+  if (!isLoggedIn && !isOnAuthPage && !isPublicPage) return RouteNames.login;
 
   if (isLoggedIn && isOnAuthPage) {
     // Biometric açıksa login sayfasında kal — LoginPage tetikleyecek

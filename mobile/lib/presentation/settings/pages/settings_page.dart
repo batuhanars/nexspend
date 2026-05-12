@@ -188,14 +188,16 @@ class _SettingsView extends StatelessWidget {
                   label: s.receiptHistory,
                   onTap: () => context.push(RouteNames.receiptHistory),
                 ),
-                const SizedBox(height: AppSpacing.lg),
-                SectionHeader(s.sectionSecurity),
-                if (user.hasPassword)
-                  SettingsTile(
-                    icon: Icons.lock_outline_rounded,
-                    label: s.changePassword,
-                    onTap: () => _showChangePasswordSheet(context),
-                  ),
+                if (!user.isGoogleLinked) ...[
+                  const SizedBox(height: AppSpacing.lg),
+                  SectionHeader(s.sectionSecurity),
+                  if (user.hasPassword)
+                    SettingsTile(
+                      icon: Icons.lock_outline_rounded,
+                      label: s.changePassword,
+                      onTap: () => _showChangePasswordSheet(context),
+                    ),
+                ],
                 const SizedBox(height: AppSpacing.lg),
                 SectionHeader('Yasal'),
                 SettingsTile(

@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -332,13 +333,19 @@ class _SettingsView extends StatelessWidget {
         try {
           await getIt<AuthRepository>().deleteAccount();
           if (context.mounted) context.go(RouteNames.login);
-        } catch (_) {
+        } catch (e) {
           if (context.mounted) {
+            String msg = 'Hesap silinemedi. Lütfen tekrar deneyin.';
+            if (e is DioException) {
+              final data = e.response?.data;
+              if (data is Map && data['message'] != null) {
+                msg = data['message'].toString();
+              } else if (e.response?.statusCode != null) {
+                msg = 'HTTP ${e.response!.statusCode}: $msg';
+              }
+            }
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Hesap silinemedi. Lütfen tekrar deneyin.'),
-                backgroundColor: AppColors.error,
-              ),
+              SnackBar(content: Text(msg), backgroundColor: AppColors.error),
             );
           }
         }

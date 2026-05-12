@@ -56,30 +56,31 @@ class NotificationService {
             AndroidFlutterLocalNotificationsPlugin>()
         ?.createNotificationChannel(channel);
 
+    // Token kaydı izin durumundan bağımsız — önce kaydet
+    try {
+      String? token;
+      for (int i = 0; i < 3; i++) {
+        token = await FirebaseMessaging.instance.getToken();
+        if (token != null) break;
+        await Future.delayed(const Duration(seconds: 2));
+      }
+      if (kDebugMode) print('[FCM] getToken() sonucu: $token');
+      if (token != null) {
+        await _registerToken(token);
+      } else {
+        if (kDebugMode) print('[FCM] Token null — 3 denemede alınamadı.');
+      }
+    } catch (e) {
+      if (kDebugMode) print('[FCM] getToken() hatası: $e');
+    }
+
+    // İzin al (bildirim gösterimi için)
     final settings = await FirebaseMessaging.instance.requestPermission(
       alert: true,
       badge: true,
       sound: true,
     );
-
     if (kDebugMode) print('[FCM] İzin durumu: ${settings.authorizationStatus}');
-
-    if (settings.authorizationStatus == AuthorizationStatus.denied) {
-      if (kDebugMode) print('[FCM] Bildirim izni reddedildi, token alınmıyor.');
-      return;
-    }
-
-    try {
-      final token = await FirebaseMessaging.instance.getToken();
-      if (kDebugMode) print('[FCM] getToken() sonucu: $token');
-      if (token != null) {
-        await _registerToken(token);
-      } else {
-        if (kDebugMode) print('[FCM] Token null — emülatörde Google Play Services olmayabilir.');
-      }
-    } catch (e) {
-      if (kDebugMode) print('[FCM] getToken() hatası: $e');
-    }
 
     FirebaseMessaging.instance.onTokenRefresh.listen(_registerToken);
 

@@ -18,6 +18,7 @@ import {
 } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import { FAMILY_CONSTANTS } from './family.constants';
+import { NotificationsService } from '../notifications/notifications.service';
 import { CreateGroupDto } from './dto/create-group.dto';
 import { SendInviteDto } from './dto/send-invite.dto';
 import { CreateSharedBudgetDto } from './dto/create-shared-budget.dto';
@@ -26,7 +27,10 @@ import { CreateSharedBudgetDto } from './dto/create-shared-budget.dto';
 export class FamilyService {
   private readonly logger = new Logger(FamilyService.name);
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly notifications: NotificationsService,
+  ) {}
 
   // ─── Grup CRUD ────────────────────────────────────────────────────────────────
 
@@ -165,6 +169,28 @@ export class FamilyService {
         expiresAt,
       },
     });
+
+    const invitedUser = await this.prisma.user.findUnique({
+      where: { email: dto.email },
+      select: { id: true },
+    });
+
+    if (invitedUser) {
+      const group = await this.prisma.familyGroup.findUnique({
+        where: { id: groupId },
+        select: { name: true },
+      });
+      const inviter = await this.prisma.user.findUnique({
+        where: { id: userId },
+        select: { fullName: true },
+      });
+      await this.notifications.sendToUser(
+        invitedUser.id,
+        'Aile Bütçesi Daveti',
+        `${inviter!.fullName} sizi "${group!.name}" grubuna davet etti`,
+        { type: 'FAMILY_INVITE', inviteToken: invite.token },
+      );
+    }
 
     return this.formatInvite(invite);
   }

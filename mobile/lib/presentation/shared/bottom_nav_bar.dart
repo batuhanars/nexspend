@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:tutorial_coach_mark/tutorial_coach_mark.dart';
@@ -21,12 +22,39 @@ class AppShell extends StatefulWidget {
 }
 
 class _AppShellState extends State<AppShell> {
+  StreamSubscription<String>? _inviteSub;
+
   @override
   void initState() {
     super.initState();
     debugPrint('[AppShell] initState — NotificationService başlatılıyor');
-    getIt<NotificationService>().initialize();
+    _initNotifications();
     _checkCoachMark();
+  }
+
+  Future<void> _initNotifications() async {
+    final ns = getIt<NotificationService>();
+    await ns.initialize();
+    if (!mounted) return;
+
+    // Arka plan / cold start bildiriminden gelen davet
+    _inviteSub = NotificationService.onInvite.listen((token) {
+      if (mounted) context.push(RouteNames.familyInvite(token));
+    });
+
+    // Cold start: uygulama kapalıyken bildirime tıklandı
+    final pending = ns.consumePendingInvite();
+    if (pending != null && mounted) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) context.push(RouteNames.familyInvite(pending));
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _inviteSub?.cancel();
+    super.dispose();
   }
 
   Future<void> _checkCoachMark() async {

@@ -10,6 +10,7 @@ import '../../core/l10n/app_strings.dart';
 import '../../core/services/notification_service.dart';
 import '../../core/storage/secure_storage.dart';
 import '../../core/utils/coach_mark_keys.dart';
+import '../../data/repositories/family_repository.dart';
 import '../../navigation/route_names.dart';
 
 class AppShell extends StatefulWidget {
@@ -21,15 +22,54 @@ class AppShell extends StatefulWidget {
   State<AppShell> createState() => _AppShellState();
 }
 
-class _AppShellState extends State<AppShell> {
+class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
   StreamSubscription<String>? _inviteSub;
+  StreamSubscription<({String token, String action})>? _actionSub;
+  StreamSubscription<String>? _groupNavSub;
 
   @override
   void initState() {
     super.initState();
-    debugPrint('[AppShell] initState — NotificationService başlatılıyor');
+    WidgetsBinding.instance.addObserver(this);
     _initNotifications();
     _checkCoachMark();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _inviteSub?.cancel();
+    _actionSub?.cancel();
+    _groupNavSub?.cancel();
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      // onMessageOpenedApp'ın tetiklenmesine kısa süre tanı
+      Future.delayed(const Duration(milliseconds: 400), _consumePending);
+    }
+  }
+
+  void _consumePending() {
+    if (!mounted) return;
+    final ns = getIt<NotificationService>();
+
+    final inviteToken = ns.consumePendingInvite();
+    if (inviteToken != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) context.push(RouteNames.familyInvite(inviteToken));
+      });
+      return;
+    }
+
+    final groupId = ns.consumePendingGroupId();
+    if (groupId != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) context.push(RouteNames.familyGroupDetail(groupId));
+      });
+    }
   }
 
   Future<void> _initNotifications() async {
@@ -38,25 +78,52 @@ class _AppShellState extends State<AppShell> {
     await ns.tryRegisterToken();
     if (!mounted) return;
 
-    // Arka plan / cold start bildiriminden gelen davet
+    // Foreground local bildirim tap → InvitePage
     _inviteSub = NotificationService.onInvite.listen((token) {
-      if (mounted) context.push(RouteNames.familyInvite(token));
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) context.push(RouteNames.familyInvite(token));
+      });
     });
 
+    // Foreground bildirim aksiyon butonları (Kabul Et / Reddet)
+    _actionSub = NotificationService.onInviteAction.listen(_handleInviteAction);
 
-    // Cold start: uygulama kapalıyken bildirime tıklandı
-    final pending = ns.consumePendingInvite();
-    if (pending != null && mounted) {
+    // Foreground INVITE_RESPONSE bildirimi tap → Grup detay sayfası
+    _groupNavSub = NotificationService.onGroupNav.listen((groupId) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) context.push(RouteNames.familyInvite(pending));
+        if (mounted) context.push(RouteNames.familyGroupDetail(groupId));
       });
-    }
+    });
+
+    // Cold start ve başlangıç pending token'larını tüket
+    _consumePending();
   }
 
-  @override
-  void dispose() {
-    _inviteSub?.cancel();
-    super.dispose();
+  Future<void> _handleInviteAction(
+      ({String token, String action}) event) async {
+    if (!mounted) return;
+    try {
+      if (event.action == 'accept') {
+        final group =
+            await getIt<FamilyRepository>().acceptInvite(event.token);
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Gruba katıldınız!')),
+        );
+        context.push(RouteNames.familyGroupDetail(group.id));
+      } else {
+        await getIt<FamilyRepository>().rejectInvite(event.token);
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Davet reddedildi.')),
+        );
+      }
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('İşlem sırasında hata oluştu.')),
+      );
+    }
   }
 
   Future<void> _checkCoachMark() async {

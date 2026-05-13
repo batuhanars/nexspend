@@ -8,9 +8,15 @@ import '../network/api_client.dart';
 const _channelId = 'high_importance_channel_v2';
 const _channelName = 'Bildirimler';
 const _invitePrefix = 'INVITE:';
+const _groupPrefix = 'GROUP:';
+const _acceptActionId = 'accept_invite';
+const _rejectActionId = 'reject_invite';
 
 final _localNotifications = FlutterLocalNotificationsPlugin();
 final _inviteController = StreamController<String>.broadcast();
+final _actionController =
+    StreamController<({String token, String action})>.broadcast();
+final _groupNavController = StreamController<String>.broadcast();
 
 @pragma('vm:entry-point')
 Future<void> firebaseBackgroundHandler(RemoteMessage message) async {}
@@ -18,19 +24,36 @@ Future<void> firebaseBackgroundHandler(RemoteMessage message) async {}
 @pragma('vm:entry-point')
 void _onNotificationTap(NotificationResponse details) {
   final payload = details.payload;
-  if (payload != null && payload.startsWith(_invitePrefix)) {
-    _inviteController.add(payload.substring(_invitePrefix.length));
+  if (payload == null) return;
+
+  if (payload.startsWith(_invitePrefix)) {
+    final token = payload.substring(_invitePrefix.length);
+    final actionId = details.actionId;
+    if (actionId == _acceptActionId) {
+      _actionController.add((token: token, action: 'accept'));
+    } else if (actionId == _rejectActionId) {
+      _actionController.add((token: token, action: 'reject'));
+    } else {
+      _inviteController.add(token);
+    }
+  } else if (payload.startsWith(_groupPrefix)) {
+    final groupId = payload.substring(_groupPrefix.length);
+    _groupNavController.add(groupId);
   }
 }
 
 class NotificationService {
   final ApiClient _apiClient;
   String? _pendingInviteToken;
+  String? _pendingGroupId;
   bool _initialized = false;
 
   NotificationService(this._apiClient);
 
   static Stream<String> get onInvite => _inviteController.stream;
+  static Stream<({String token, String action})> get onInviteAction =>
+      _actionController.stream;
+  static Stream<String> get onGroupNav => _groupNavController.stream;
 
   String? consumePendingInvite() {
     final token = _pendingInviteToken;
@@ -38,11 +61,18 @@ class NotificationService {
     return token;
   }
 
+  String? consumePendingGroupId() {
+    final id = _pendingGroupId;
+    _pendingGroupId = null;
+    return id;
+  }
+
   Future<void> initialize() async {
     if (_initialized) return;
     _initialized = true;
 
-    const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
+    const androidSettings =
+        AndroidInitializationSettings('@mipmap/ic_launcher');
     await _localNotifications.initialize(
       const InitializationSettings(android: androidSettings),
       onDidReceiveNotificationResponse: _onNotificationTap,
@@ -58,70 +88,102 @@ class NotificationService {
             AndroidFlutterLocalNotificationsPlugin>()
         ?.createNotificationChannel(channel);
 
-    // Android 13+ local notification izni
     await _localNotifications
         .resolvePlatformSpecificImplementation<
             AndroidFlutterLocalNotificationsPlugin>()
         ?.requestNotificationsPermission();
 
-    // FCM izni (iOS + Android 13+)
     final settings = await FirebaseMessaging.instance.requestPermission(
       alert: true,
       badge: true,
       sound: true,
     );
-    if (kDebugMode) print('[FCM] İzin durumu: ${settings.authorizationStatus}');
+    if (kDebugMode) {
+      print('[FCM] İzin durumu: ${settings.authorizationStatus}');
+    }
 
     FirebaseMessaging.instance.onTokenRefresh.listen(_registerToken);
 
-    // Uygulama kapalıyken bildirime tıklandı (cold start)
+    // Cold start: uygulama kapalıyken bildirime tıklandı
     final initial = await FirebaseMessaging.instance.getInitialMessage();
-    if (initial != null) _processMessage(initial, pending: true);
+    if (initial != null) _processMessage(initial);
 
-    // Uygulama arka plandayken bildirime tıklandı
-    FirebaseMessaging.onMessageOpenedApp.listen(
-      (msg) => _processMessage(msg, pending: false),
-    );
+    // Arka plan → ön plan: her zaman pending token mekanizması kullan
+    FirebaseMessaging.onMessageOpenedApp.listen(_processMessage);
 
     // Uygulama açıkken gelen bildirim → yerel bildirim göster
-    FirebaseMessaging.onMessage.listen((RemoteMessage message) async {
-      final notification = message.notification;
-      if (notification == null) return;
-
-      final isInvite = message.data['type'] == 'FAMILY_INVITE';
-      final payload = isInvite
-          ? '$_invitePrefix${message.data['inviteToken']}'
-          : null;
-
-      try {
-        await _localNotifications.show(
-          DateTime.now().millisecondsSinceEpoch & 0x7FFFFFFF,
-          notification.title,
-          notification.body,
-          const NotificationDetails(
-            android: AndroidNotificationDetails(
-              _channelId,
-              _channelName,
-              importance: Importance.high,
-              priority: Priority.high,
-            ),
-          ),
-          payload: payload,
-        );
-      } catch (e) {
-        if (kDebugMode) print('[FCM] Local bildirim gösterilemedi: $e');
-      }
-    });
+    FirebaseMessaging.onMessage.listen(_handleForegroundMessage);
   }
 
-  void _processMessage(RemoteMessage message, {required bool pending}) {
-    if (message.data['type'] != 'FAMILY_INVITE') return;
-    final token = message.data['inviteToken'] as String?;
-    if (token == null) return;
-    if (pending) {
-      _pendingInviteToken = token;
+  void _processMessage(RemoteMessage message) {
+    final type = message.data['type'] as String?;
+
+    if (type == 'FAMILY_INVITE') {
+      final token = message.data['inviteToken'] as String?;
+      if (token != null) _pendingInviteToken = token;
+    } else if (type == 'INVITE_RESPONSE') {
+      final groupId = message.data['groupId'] as String?;
+      if (groupId != null) _pendingGroupId = groupId;
+    }
+  }
+
+  Future<void> _handleForegroundMessage(RemoteMessage message) async {
+    final notification = message.notification;
+    if (notification == null) return;
+
+    final type = message.data['type'] as String?;
+    String? payload;
+    AndroidNotificationDetails androidDetails;
+
+    if (type == 'FAMILY_INVITE') {
+      payload = '$_invitePrefix${message.data['inviteToken'] ?? ''}';
+      androidDetails = const AndroidNotificationDetails(
+        _channelId,
+        _channelName,
+        importance: Importance.high,
+        priority: Priority.high,
+        actions: [
+          AndroidNotificationAction(
+            _acceptActionId,
+            'Kabul Et',
+            cancelNotification: true,
+            showsUserInterface: true,
+          ),
+          AndroidNotificationAction(
+            _rejectActionId,
+            'Reddet',
+            cancelNotification: true,
+          ),
+        ],
+      );
+    } else if (type == 'INVITE_RESPONSE') {
+      final groupId = message.data['groupId'] as String?;
+      payload = groupId != null ? '$_groupPrefix$groupId' : null;
+      androidDetails = const AndroidNotificationDetails(
+        _channelId,
+        _channelName,
+        importance: Importance.high,
+        priority: Priority.high,
+      );
     } else {
-      _inviteController.add(token);
+      androidDetails = const AndroidNotificationDetails(
+        _channelId,
+        _channelName,
+        importance: Importance.high,
+        priority: Priority.high,
+      );
+    }
+
+    try {
+      await _localNotifications.show(
+        DateTime.now().millisecondsSinceEpoch & 0x7FFFFFFF,
+        notification.title,
+        notification.body,
+        NotificationDetails(android: androidDetails),
+        payload: payload,
+      );
+    } catch (e) {
+      if (kDebugMode) print('[FCM] Local bildirim gösterilemedi: $e');
     }
   }
 

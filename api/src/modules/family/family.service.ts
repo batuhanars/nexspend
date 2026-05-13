@@ -203,7 +203,7 @@ export class FamilyService {
 
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
-      select: { email: true },
+      select: { email: true, fullName: true },
     });
 
     if (user?.email !== invite.email) {
@@ -240,7 +240,25 @@ export class FamilyService {
       where: { groupId: invite.groupId, userId },
     });
 
-    return this.formatGroup(group!, member!);
+    const result = this.formatGroup(group!, member!);
+
+    // Fire-and-forget: inviter'a kabul bildirimi gönder
+    this.notifications
+      .sendToUser(
+        invite.invitedBy,
+        'Davet Kabul Edildi',
+        `${user?.fullName ?? invite.email} grubunuza katıldı`,
+        {
+          type: 'INVITE_RESPONSE',
+          status: 'ACCEPTED',
+          groupId: invite.groupId,
+        },
+      )
+      .catch((err: unknown) =>
+        this.logger.warn(`Davet kabul bildirimi gönderilemedi: ${String(err)}`),
+      );
+
+    return result;
   }
 
   async rejectInvite(userId: string, token: string) {
@@ -257,6 +275,27 @@ export class FamilyService {
       where: { id: invite.id },
       data: { status: InviteStatus.REJECTED },
     });
+
+    const group = await this.prisma.familyGroup.findUnique({
+      where: { id: invite.groupId },
+      select: { name: true },
+    });
+
+    // Fire-and-forget: inviter'a red bildirimi gönder
+    this.notifications
+      .sendToUser(
+        invite.invitedBy,
+        'Davet Reddedildi',
+        `"${group?.name ?? ''}" grubuna gönderilen davet reddedildi`,
+        {
+          type: 'INVITE_RESPONSE',
+          status: 'REJECTED',
+          groupId: invite.groupId,
+        },
+      )
+      .catch((err: unknown) =>
+        this.logger.warn(`Davet red bildirimi gönderilemedi: ${String(err)}`),
+      );
 
     return null;
   }

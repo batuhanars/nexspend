@@ -42,7 +42,7 @@ const mockPrisma = {
   $transaction: jest.fn(),
 };
 
-const mockEmailService = { sendInvite: jest.fn() };
+const mockNotificationsService = { sendToUser: jest.fn().mockResolvedValue(undefined) };
 
 const OWNER_ID = 'owner-1';
 const MEMBER_ID = 'member-1';
@@ -89,7 +89,7 @@ describe('FamilyService', () => {
   let service: FamilyService;
 
   beforeEach(() => {
-    service = new FamilyService(mockPrisma as any, mockEmailService as any);
+    service = new FamilyService(mockPrisma as any, mockNotificationsService as any);
     jest.clearAllMocks();
     mockPrisma.$transaction.mockImplementation(async (cb: any) => cb(mockPrisma));
   });
@@ -145,7 +145,7 @@ describe('FamilyService', () => {
 
       expect(result.email).toBe(dto.email);
       expect(result.status).toBe('PENDING');
-      expect(mockEmailService.sendInvite).toHaveBeenCalledTimes(1);
+      expect(mockNotificationsService.sendToUser).toHaveBeenCalledTimes(1);
     });
 
     it('OWNER değilse ForbiddenException', async () => {
@@ -178,7 +178,7 @@ describe('FamilyService', () => {
   describe('acceptInvite()', () => {
     beforeEach(() => {
       mockPrisma.familyInvite.findUnique.mockResolvedValue(basePendingInvite);
-      mockPrisma.user.findUnique.mockResolvedValue({ email: 'ayse@example.com' });
+      mockPrisma.user.findUnique.mockResolvedValue({ email: 'ayse@example.com', fullName: 'Ayşe' });
       mockPrisma.familyGroup.findUnique.mockResolvedValue({
         ...baseGroup,
         members: [{ id: 'm1' }, { id: 'm2' }],

@@ -26,6 +26,7 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
   StreamSubscription<String>? _inviteSub;
   StreamSubscription<({String token, String action})>? _actionSub;
   StreamSubscription<String>? _groupNavSub;
+  StreamSubscription<void>? _insightsNavSub;
 
   @override
   void initState() {
@@ -41,6 +42,7 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
     _inviteSub?.cancel();
     _actionSub?.cancel();
     _groupNavSub?.cancel();
+    _insightsNavSub?.cancel();
     super.dispose();
   }
 
@@ -69,6 +71,13 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) context.push(RouteNames.familyGroupDetail(groupId));
       });
+      return;
+    }
+
+    if (ns.consumePendingInsights()) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) context.push(RouteNames.insights);
+      });
     }
   }
 
@@ -92,6 +101,13 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
     _groupNavSub = NotificationService.onGroupNav.listen((groupId) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) context.push(RouteNames.familyGroupDetail(groupId));
+      });
+    });
+
+    // Foreground MONTHLY_REPORT bildirimi tap → Insights sayfası
+    _insightsNavSub = NotificationService.onInsightsNav.listen((_) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) context.push(RouteNames.insights);
       });
     });
 

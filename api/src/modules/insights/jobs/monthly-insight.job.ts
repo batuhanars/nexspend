@@ -34,6 +34,7 @@ export class MonthlyInsightJob {
           user.id,
           'Aylık Finansal Rapor',
           'Aylık finansal raporun hazır! 📊',
+          { type: 'MONTHLY_REPORT' },
         );
       } catch (err) {
         this.logger.warn(

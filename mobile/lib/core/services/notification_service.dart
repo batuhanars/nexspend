@@ -9,6 +9,7 @@ const _channelId = 'high_importance_channel_v2';
 const _channelName = 'Bildirimler';
 const _invitePrefix = 'INVITE:';
 const _groupPrefix = 'GROUP:';
+const _insightsPayload = 'INSIGHTS';
 const _acceptActionId = 'accept_invite';
 const _rejectActionId = 'reject_invite';
 
@@ -17,6 +18,7 @@ final _inviteController = StreamController<String>.broadcast();
 final _actionController =
     StreamController<({String token, String action})>.broadcast();
 final _groupNavController = StreamController<String>.broadcast();
+final _insightsNavController = StreamController<void>.broadcast();
 
 @pragma('vm:entry-point')
 Future<void> firebaseBackgroundHandler(RemoteMessage message) async {}
@@ -39,6 +41,8 @@ void _onNotificationTap(NotificationResponse details) {
   } else if (payload.startsWith(_groupPrefix)) {
     final groupId = payload.substring(_groupPrefix.length);
     _groupNavController.add(groupId);
+  } else if (payload == _insightsPayload) {
+    _insightsNavController.add(null);
   }
 }
 
@@ -46,6 +50,7 @@ class NotificationService {
   final ApiClient _apiClient;
   String? _pendingInviteToken;
   String? _pendingGroupId;
+  bool _pendingInsights = false;
   bool _initialized = false;
 
   NotificationService(this._apiClient);
@@ -54,6 +59,7 @@ class NotificationService {
   static Stream<({String token, String action})> get onInviteAction =>
       _actionController.stream;
   static Stream<String> get onGroupNav => _groupNavController.stream;
+  static Stream<void> get onInsightsNav => _insightsNavController.stream;
 
   String? consumePendingInvite() {
     final token = _pendingInviteToken;
@@ -65,6 +71,12 @@ class NotificationService {
     final id = _pendingGroupId;
     _pendingGroupId = null;
     return id;
+  }
+
+  bool consumePendingInsights() {
+    final pending = _pendingInsights;
+    _pendingInsights = false;
+    return pending;
   }
 
   Future<void> initialize() async {
@@ -124,6 +136,8 @@ class NotificationService {
     } else if (type == 'INVITE_RESPONSE') {
       final groupId = message.data['groupId'] as String?;
       if (groupId != null) _pendingGroupId = groupId;
+    } else if (type == 'MONTHLY_REPORT') {
+      _pendingInsights = true;
     }
   }
 
@@ -159,6 +173,14 @@ class NotificationService {
     } else if (type == 'INVITE_RESPONSE') {
       final groupId = message.data['groupId'] as String?;
       payload = groupId != null ? '$_groupPrefix$groupId' : null;
+      androidDetails = const AndroidNotificationDetails(
+        _channelId,
+        _channelName,
+        importance: Importance.high,
+        priority: Priority.high,
+      );
+    } else if (type == 'MONTHLY_REPORT') {
+      payload = _insightsPayload;
       androidDetails = const AndroidNotificationDetails(
         _channelId,
         _channelName,

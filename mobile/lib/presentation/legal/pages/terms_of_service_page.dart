@@ -81,7 +81,7 @@ class TermsOfServicePage extends StatelessWidget {
           _Section(
             title: 'İletişim',
             body:
-                'Sorularınız için: batuhan.ars@yahoo.com\n\n'
+                'Sorularınız için: bystackmates@gmail.com\n\n'
                 'Son güncelleme: 12 Mayıs 2026',
           ),
           SizedBox(height: AppSpacing.xxxl),

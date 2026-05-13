@@ -22,7 +22,7 @@ class PrivacyPolicyPage extends StatelessWidget {
           _Section(
             title: 'Veri Sorumlusu',
             body:
-                'NexSpend uygulaması ("Uygulama"), Batuhan Arslan tarafından işletilmektedir. '
+                'NexSpend uygulaması ("Uygulama"), Stackmates tarafından işletilmektedir. '
                 'Bu politika, kişisel verilerinizin nasıl toplandığını, kullanıldığını ve korunduğunu açıklar.',
           ),
           _Section(
@@ -78,7 +78,7 @@ class PrivacyPolicyPage extends StatelessWidget {
             title: 'İletişim',
             body:
                 'Gizlilik politikasıyla ilgili sorularınız için:\n\n'
-                'E-posta: batuhan.ars@yahoo.com\n\n'
+                'E-posta: bystackmates@gmail.com\n\n'
                 'Bu politika en son 12 Mayıs 2026 tarihinde güncellenmiştir.',
           ),
           SizedBox(height: AppSpacing.xxxl),

@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
 import '../../../core/l10n/app_strings.dart';
+import '../../../core/utils/icon_mapper.dart';
 import '../../../data/models/budget_model.dart';
+import '../../../data/models/family_model.dart';
 import '../../../data/models/inflation_model.dart';
+import '../../../data/repositories/family_repository.dart';
 import '../../../navigation/route_names.dart';
 import '../../inflation/bloc/inflation_bloc.dart';
 import '../../inflation/bloc/inflation_event.dart';
@@ -168,6 +172,7 @@ class _BudgetsView extends StatelessWidget {
               OverviewCard(overview: overview),
               const SizedBox(height: AppSpacing.xl),
             ],
+            const _FamilyGroupsSection(),
             _InflationSuggestionsSection(budgets: budgets),
             if (budgets.isEmpty)
               EmptyStateView(
@@ -286,6 +291,116 @@ class _InflationSuggestionsSection extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+}
+
+// ── Aile Grupları Bölümü ───────────────────────────────────────────────────
+
+class _FamilyGroupsSection extends StatefulWidget {
+  const _FamilyGroupsSection();
+
+  @override
+  State<_FamilyGroupsSection> createState() => _FamilyGroupsSectionState();
+}
+
+class _FamilyGroupsSectionState extends State<_FamilyGroupsSection> {
+  late final Future<List<FamilyGroupModel>> _future;
+
+  @override
+  void initState() {
+    super.initState();
+    _future = GetIt.I<FamilyRepository>().getGroups();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<List<FamilyGroupModel>>(
+      future: _future,
+      builder: (context, snapshot) {
+        final groups = snapshot.data ?? [];
+        if (groups.isEmpty) return const SizedBox.shrink();
+
+        return Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.pagePadding,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('AİLE GRUPLARI', style: AppTypography.labelSm),
+              const SizedBox(height: AppSpacing.md),
+              ...groups.map(
+                (g) => Padding(
+                  padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+                  child: _FamilyGroupEntryCard(group: g),
+                ),
+              ),
+              const SizedBox(height: AppSpacing.md),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _FamilyGroupEntryCard extends StatelessWidget {
+  const _FamilyGroupEntryCard({required this.group});
+
+  final FamilyGroupModel group;
+
+  @override
+  Widget build(BuildContext context) {
+    final icon = IconMapper.fromString(group.icon ?? 'people');
+    return GestureDetector(
+      onTap: () => context.push(RouteNames.familyGroupDetail(group.id)),
+      child: Container(
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.lg,
+          vertical: AppSpacing.md,
+        ),
+        decoration: BoxDecoration(
+          color: AppColors.surfaceContainerHigh,
+          borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 36,
+              height: 36,
+              decoration: BoxDecoration(
+                color: AppColors.primary.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+              ),
+              child: Icon(icon, size: 18, color: AppColors.primary),
+            ),
+            const SizedBox(width: AppSpacing.md),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    group.name,
+                    style: AppTypography.bodyMd
+                        .copyWith(fontWeight: FontWeight.w500),
+                  ),
+                  Text(
+                    '${group.memberCount} üye',
+                    style: AppTypography.bodySm
+                        .copyWith(color: AppColors.onSurfaceVariant),
+                  ),
+                ],
+              ),
+            ),
+            const Icon(
+              Icons.chevron_right_rounded,
+              color: AppColors.onSurfaceVariant,
+              size: 20,
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

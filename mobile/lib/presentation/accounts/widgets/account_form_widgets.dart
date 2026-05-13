@@ -145,63 +145,6 @@ class AccountFormField extends StatelessWidget {
   }
 }
 
-// ── Currency selector ──────────────────────────────────────────────────────
-
-class AccountCurrencySelector extends StatelessWidget {
-  const AccountCurrencySelector({
-    super.key,
-    required this.selected,
-    required this.onChanged,
-  });
-
-  final String selected;
-  final ValueChanged<String> onChanged;
-
-  static const _currencies = ['TRY', 'USD', 'EUR'];
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: _currencies.map((c) {
-        final isSelected = c == selected;
-        return Padding(
-          padding: const EdgeInsets.only(right: AppSpacing.sm),
-          child: GestureDetector(
-            onTap: () => onChanged(c),
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 150),
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.lg,
-                vertical: AppSpacing.sm,
-              ),
-              decoration: BoxDecoration(
-                color: isSelected
-                    ? AppColors.primary.withValues(alpha: 0.15)
-                    : AppColors.surfaceContainerHigh,
-                borderRadius:
-                    BorderRadius.circular(AppSpacing.radiusFull),
-                border: isSelected
-                    ? Border.all(color: AppColors.primary, width: 1.5)
-                    : null,
-              ),
-              child: Text(
-                c,
-                style: AppTypography.labelSm.copyWith(
-                  color: isSelected
-                      ? AppColors.primary
-                      : AppColors.onSurfaceVariant,
-                  fontWeight:
-                      isSelected ? FontWeight.w600 : FontWeight.w500,
-                ),
-              ),
-            ),
-          ),
-        );
-      }).toList(),
-    );
-  }
-}
-
 // ── Day dropdown (1–28) ────────────────────────────────────────────────────
 
 class AccountDayDropdown extends StatelessWidget {

@@ -191,7 +191,9 @@ export class UsersService {
   }
 
   async updateFcmToken(userId: string, fcmToken: string) {
-    this.logger.log(`FCM token kaydediliyor [${userId}]: ${fcmToken.slice(0, 20)}...`);
+    this.logger.log(
+      `FCM token kaydediliyor [${userId}]: ${fcmToken.slice(0, 20)}...`,
+    );
     await this.prisma.user.update({
       where: { id: userId },
       data: { fcmToken },

@@ -73,7 +73,9 @@ export class NotificationsService {
     data?: Record<string, string>,
   ): Promise<void> {
     if (!this.messaging) {
-      this.logger.warn(`FCM devre dışı (messaging=null) — bildirim atlandı: ${title}`);
+      this.logger.warn(
+        `FCM devre dışı (messaging=null) — bildirim atlandı: ${title}`,
+      );
       return;
     }
 

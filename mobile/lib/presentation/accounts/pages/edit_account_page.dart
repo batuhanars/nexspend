@@ -29,7 +29,6 @@ class _EditAccountPageState extends State<EditAccountPage> {
   );
 
   late AccountType _type = widget.account.type;
-  late String _currency = widget.account.currency;
   late int _statementDay = widget.account.statementDay ?? 1;
   late int _paymentDueDay = widget.account.paymentDueDay ?? 10;
   late bool _isDefault = widget.account.isDefault;
@@ -52,7 +51,7 @@ class _EditAccountPageState extends State<EditAccountPage> {
     final data = <String, dynamic>{
       'name': _nameController.text.trim(),
       'type': _type.name,
-      'currency': _currency,
+      'currency': 'TRY',
       'isDefault': _isDefault,
       if (_type == AccountType.CREDIT_CARD) ...{
         'creditLimit': double.tryParse(
@@ -132,11 +131,6 @@ class _EditAccountPageState extends State<EditAccountPage> {
                 },
                 validator: (v) =>
                     (v == null || v.trim().isEmpty) ? AppStrings.of(context).accountNameRequired : null,
-              ),
-              const SizedBox(height: AppSpacing.sm),
-              AccountCurrencySelector(
-                selected: _currency,
-                onChanged: (c) => setState(() => _currency = c),
               ),
               if (_type == AccountType.CREDIT_CARD) ...[
                 const SizedBox(height: AppSpacing.xl),

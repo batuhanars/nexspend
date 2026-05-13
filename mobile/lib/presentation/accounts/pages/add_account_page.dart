@@ -40,7 +40,6 @@ class _AddAccountPageState extends State<AddAccountPage> {
   double? _splitBalance;
 
   late AccountType _type;
-  String _currency = 'TRY';
   int _statementDay = 1;
   int _paymentDueDay = 10;
   bool _isDefault = false;
@@ -151,7 +150,7 @@ class _AddAccountPageState extends State<AddAccountPage> {
       'name': _nameController.text.trim(),
       'type': _type.name,
       'balance': balance,
-      'currency': _currency,
+      'currency': 'TRY',
       'isDefault': _isDefault,
       if (isCreditCard) ...{
         'creditLimit': creditLimit,
@@ -266,11 +265,6 @@ class _AddAccountPageState extends State<AddAccountPage> {
                   initialValue: _splitBalance,
                   onChanged: (v) => _splitBalance = v,
                 ),
-              const SizedBox(height: AppSpacing.lg),
-              AccountCurrencySelector(
-                selected: _currency,
-                onChanged: (c) => setState(() => _currency = c),
-              ),
               if (_type == AccountType.CREDIT_CARD) ...[
                 const SizedBox(height: AppSpacing.xl),
                 _label(AppStrings.of(context).creditCardDetailsLabel),

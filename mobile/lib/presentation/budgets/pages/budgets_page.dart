@@ -305,7 +305,8 @@ class _FamilyGroupsSection extends StatefulWidget {
 }
 
 class _FamilyGroupsSectionState extends State<_FamilyGroupsSection> {
-  late final Future<List<FamilyGroupModel>> _future;
+  late Future<List<FamilyGroupModel>> _future;
+  bool _isCreating = false;
 
   @override
   void initState() {
@@ -313,13 +314,141 @@ class _FamilyGroupsSectionState extends State<_FamilyGroupsSection> {
     _future = GetIt.I<FamilyRepository>().getGroups();
   }
 
+  void _reload() => setState(
+        () => _future = GetIt.I<FamilyRepository>().getGroups(),
+      );
+
+  Future<void> _createGroup(String name, String? icon) async {
+    setState(() => _isCreating = true);
+    try {
+      await GetIt.I<FamilyRepository>().createGroup(name: name, icon: icon);
+      _reload();
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Grup oluşturulamadı'),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isCreating = false);
+    }
+  }
+
+  void _showCreateDialog() {
+    final nameCtrl = TextEditingController();
+    String? selectedIcon;
+    const icons = ['home', 'favorite', 'star', 'group', 'apartment'];
+
+    showDialog<void>(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setDialogState) => AlertDialog(
+          backgroundColor: AppColors.surfaceContainerHigh,
+          title: Text('Yeni Grup Oluştur', style: AppTypography.titleSm),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: nameCtrl,
+                style: AppTypography.bodyMd,
+                decoration: InputDecoration(
+                  hintText: 'Grup adı (örn. Ev Bütçesi)',
+                  hintStyle: AppTypography.bodyMd
+                      .copyWith(color: AppColors.onSurfaceVariant),
+                  filled: true,
+                  fillColor: AppColors.surfaceContainerHighest,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                    borderSide: BorderSide.none,
+                  ),
+                ),
+              ),
+              const SizedBox(height: AppSpacing.md),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: icons.map((icon) {
+                  final isSelected = selectedIcon == icon;
+                  return GestureDetector(
+                    onTap: () =>
+                        setDialogState(() => selectedIcon = icon),
+                    child: Container(
+                      width: 44,
+                      height: 44,
+                      decoration: BoxDecoration(
+                        color: isSelected
+                            ? AppColors.primary.withValues(alpha: 0.2)
+                            : AppColors.surfaceContainerHighest,
+                        borderRadius:
+                            BorderRadius.circular(AppSpacing.radiusMd),
+                        border: isSelected
+                            ? Border.all(
+                                color: AppColors.primary, width: 1.5)
+                            : null,
+                      ),
+                      child: Icon(
+                        _iconData(icon),
+                        color: isSelected
+                            ? AppColors.primary
+                            : AppColors.onSurfaceVariant,
+                        size: 22,
+                      ),
+                    ),
+                  );
+                }).toList(),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(),
+              child: Text(
+                'İptal',
+                style: AppTypography.bodyMd
+                    .copyWith(color: AppColors.onSurfaceVariant),
+              ),
+            ),
+            FilledButton(
+              onPressed: () {
+                final name = nameCtrl.text.trim();
+                if (name.isEmpty) return;
+                Navigator.of(ctx).pop();
+                _createGroup(name, selectedIcon);
+              },
+              style: FilledButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: AppColors.onPrimary,
+              ),
+              child: const Text('Oluştur'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  IconData _iconData(String icon) => switch (icon) {
+        'home' => Icons.home_outlined,
+        'favorite' => Icons.favorite_outline_rounded,
+        'star' => Icons.star_outline_rounded,
+        'group' => Icons.group_outlined,
+        'apartment' => Icons.apartment_outlined,
+        _ => Icons.group_outlined,
+      };
+
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<List<FamilyGroupModel>>(
       future: _future,
       builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting &&
+            !_isCreating) {
+          return const SizedBox.shrink();
+        }
+
         final groups = snapshot.data ?? [];
-        if (groups.isEmpty) return const SizedBox.shrink();
 
         return Padding(
           padding: const EdgeInsets.symmetric(
@@ -328,19 +457,87 @@ class _FamilyGroupsSectionState extends State<_FamilyGroupsSection> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('AİLE GRUPLARI', style: AppTypography.labelSm),
-              const SizedBox(height: AppSpacing.md),
-              ...groups.map(
-                (g) => Padding(
-                  padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-                  child: _FamilyGroupEntryCard(group: g),
-                ),
+              Row(
+                children: [
+                  Expanded(
+                    child:
+                        Text('AİLE GRUPLARI', style: AppTypography.labelSm),
+                  ),
+                  if (_isCreating)
+                    const SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: AppColors.primary,
+                      ),
+                    )
+                  else
+                    GestureDetector(
+                      onTap: _showCreateDialog,
+                      child: const Icon(
+                        Icons.add_rounded,
+                        size: 20,
+                        color: AppColors.primary,
+                      ),
+                    ),
+                ],
               ),
+              const SizedBox(height: AppSpacing.md),
+              if (groups.isEmpty)
+                _CreateGroupPromptCard(onTap: _showCreateDialog)
+              else
+                ...groups.map(
+                  (g) => Padding(
+                    padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+                    child: _FamilyGroupEntryCard(group: g),
+                  ),
+                ),
               const SizedBox(height: AppSpacing.md),
             ],
           ),
         );
       },
+    );
+  }
+}
+
+class _CreateGroupPromptCard extends StatelessWidget {
+  const _CreateGroupPromptCard({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(
+          vertical: AppSpacing.lg,
+          horizontal: AppSpacing.lg,
+        ),
+        decoration: BoxDecoration(
+          color: AppColors.surfaceContainerHigh,
+          borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+          border: Border.all(
+            color: AppColors.primary.withValues(alpha: 0.3),
+            width: 1,
+          ),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.add_rounded, color: AppColors.primary, size: 20),
+            const SizedBox(width: AppSpacing.sm),
+            Text(
+              'Aile grubu oluştur',
+              style: AppTypography.bodyMd
+                  .copyWith(color: AppColors.primary),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

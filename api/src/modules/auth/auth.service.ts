@@ -7,6 +7,7 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../../prisma/prisma.service';
+import { Prisma } from '@prisma/client';
 import { MailService } from '../mail/mail.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
@@ -231,7 +232,7 @@ export class AuthService {
   }
 
   async deleteAccount(userId: string): Promise<null> {
-    await this.prisma.$transaction(async (tx) => {
+    await this.prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       // TransactionTag → Transaction bağımlı (userId FK yok)
       await tx.transactionTag.deleteMany({
         where: { transaction: { userId } },

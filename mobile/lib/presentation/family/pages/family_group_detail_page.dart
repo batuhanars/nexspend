@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
@@ -9,6 +10,7 @@ import '../../../data/models/category_model.dart';
 import '../../../data/models/family_model.dart';
 import '../../../data/repositories/category_repository.dart';
 import '../../../navigation/route_names.dart';
+import '../../shared/widgets/split_amount_field.dart';
 import '../bloc/family_bloc.dart';
 import '../bloc/family_event.dart';
 import '../bloc/family_state.dart';
@@ -129,7 +131,17 @@ class _DetailBody extends StatelessWidget {
   Widget build(BuildContext context) {
     final isOwner = group.role == FamilyRole.OWNER;
 
-    return CustomScrollView(
+    return RefreshIndicator(
+      color: AppColors.primary,
+      backgroundColor: AppColors.surfaceContainerHigh,
+      onRefresh: () async {
+        context
+            .read<FamilyBloc>()
+            .add(FamilyGroupDetailLoadRequested(groupId: groupId));
+        await Future.delayed(const Duration(milliseconds: 600));
+      },
+      child: CustomScrollView(
+      physics: const AlwaysScrollableScrollPhysics(),
       slivers: [
         SliverAppBar(
           floating: true,
@@ -256,6 +268,7 @@ class _DetailBody extends StatelessWidget {
           ),
         ),
       ],
+      ),
     );
   }
 
@@ -480,6 +493,12 @@ class _AddBudgetDialogState extends State<_AddBudgetDialog> {
     super.dispose();
   }
 
+  double? _parseAmount(String text) {
+    final cleaned = text.replaceAll('.', '').trim();
+    if (cleaned.isEmpty) return null;
+    return double.tryParse(cleaned);
+  }
+
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
@@ -508,7 +527,11 @@ class _AddBudgetDialogState extends State<_AddBudgetDialog> {
             const SizedBox(height: AppSpacing.sm),
             TextField(
               controller: _amountCtrl,
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              keyboardType: TextInputType.number,
+              inputFormatters: [
+                FilteringTextInputFormatter.digitsOnly,
+                ThousandsFormatter(),
+              ],
               style: AppTypography.bodyMd,
               decoration: InputDecoration(
                 hintText: 'Tutar (₺)',
@@ -574,7 +597,7 @@ class _AddBudgetDialogState extends State<_AddBudgetDialog> {
         FilledButton(
           onPressed: () {
             final name = _nameCtrl.text.trim();
-            final amount = double.tryParse(_amountCtrl.text.trim());
+            final amount = _parseAmount(_amountCtrl.text);
             if (name.isEmpty || amount == null || _selectedCategory == null) return;
             Navigator.of(context).pop();
             final now = DateTime.now();

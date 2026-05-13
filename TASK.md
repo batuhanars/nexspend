@@ -1,6 +1,6 @@
 # Stitch Wallet App — Görev Takip Dosyası
 
-> Son güncelleme: 12 Mayıs 2026 (Sprint 11 Aile/Ortak Bütçe tamamlandı — PR #11 + #12 merge edildi. V1+V2 feature complete.)  
+> Son güncelleme: 13 Mayıs 2026 (Sprint 11 sonrası polish: bildirim aksiyon butonları, bütçeler ekranı aile entegrasyonu, hesap formu temizliği)  
 > ✅ = Tamamlandı | 🔧 = Kısmen yapıldı | ❌ = Henüz başlanmadı  
 > ☑ = Kodda mevcut ancak migration henüz çalıştırılmadı
 
@@ -431,7 +431,7 @@
 - [x] "Çıkış Yap" butonu (onay dialog, kırmızı)
 - [x] EditProfilePage (avatar değiştirme, ad düzenleme)
 - [x] SettingsBloc
-- [x] Para Birimi: TRY-only (seçici kaldırıldı — çoklu para birimi Sprint 10'a ertelendi, TCMB kur altyapısı orada kurulacak)
+- [x] Para Birimi: TRY-only — ayarlar sayfasında seçici kaldırıldı; hesap ekleme/düzenleme formlarından da USD/EUR seçeneği ve `AccountCurrencySelector` widget'ı kaldırıldı, `currency: 'TRY'` sabit gönderiliyor
 - [x] Dil seçici (Türkçe/English)
 - [x] l10n yapılandırması (app_tr.arb, app_en.arb)
 
@@ -464,7 +464,7 @@
 - [x] Error handling ekranları — ErrorView'lar bloc-bağımsız onRetry callback'e dönüştürüldü (transactions, debts, subscriptions)
 - [x] Lazy loading + infinite scroll — TransactionsBloc pagination (sayfa başına 20), ScrollController ile scroll listener, `isLoadingMore` spinner
 - [x] Image caching (profil fotoğrafları — CachedNetworkImage ile değiştirildi)
-- [ ] App icon tasarımı
+- [x] App icon tasarımı (adaptive icon — `flutter_launcher_icons` ile Android foreground/background katmanları, splash screen rengiyle uyumlu)
 - [x] Splash screen — `flutter_native_splash` ile #131313 renk, Android + iOS oluşturuldu
 - [ ] Android store hazırlığı (signing, listing)
 - [ ] iOS store hazırlığı (provisioning, listing)
@@ -579,6 +579,16 @@
 - [x] Ayarlar sayfasına "Aile Bütçesi" menü öğesi eklendi
 - [x] GoRouter'a `wallet://invite/:token` deep link route eklendi (AndroidManifest.xml güncellendi)
 
+### Post-Sprint 11 Polish ✅
+- [x] **Bildirim aksiyon butonları:** foreground FAMILY_INVITE bildirimlerine "Kabul Et" / "Reddet" butonları eklendi; reddet → bildirim kapanır, kabul et → uygulama açılır + API çağrısı tetiklenir
+- [x] **Davet yanıt bildirimi:** `acceptInvite` / `rejectInvite` sonrası davet atan kullanıcıya fire-and-forget FCM bildirimi gider ("Kabul Edildi" / "Reddedildi")
+- [x] **Navigasyon düzeltmesi:** cold start + background→foreground bildirim tıklaması artık ana ekrana değil doğru sayfaya (InvitePage / grup detay) yönlendiriyor; pending token mekanizması + `AppLifecycleState.resumed` ile sağlandı
+- [x] **Ortak bütçe tutar alanı:** `ThousandsFormatter` ile binlik ayraç eklendi ("1500" → "1.500")
+- [x] **Grup detay pull-to-refresh:** başka kullanıcı değişiklik yaptığında aşağı çekerek güncel veri alınabiliyor
+- [x] **Bütçeler ekranı — AİLE GRUPLARI bölümü:** istatistik kartının altına grup kartları eklendi; her kart grup ikonu + adı + üye sayısı gösteriyor, dokununca grup detayına geçiş yapıyor
+- [x] **Bütçeler ekranı — grup oluşturma:** bölüm başlığındaki "+" butonu ve grup yokken prompt kartı ile yeni grup oluşturulabiliyor (`FamilyRepository` üzerinden, BLoC bağımlılığı yok)
+- [x] **ProGuard / R8:** release APK'da `isMinifyEnabled=false` ile bildirim ve plugin sorunları giderildi
+
 ---
 
 ## V3 — Altın / Döviz Portföy Takibi (Ertelendi)
@@ -641,14 +651,14 @@
 | Sprint 4 | Bütçeler | ✅ %100 | ✅ %100 | ✅ Tamamlandı |
 | Sprint 5 | Borçlar + Abonelikler | ✅ %100 | ✅ %100 | ✅ Borç detay + Abonelik detay tamamlandı |
 | Sprint 6 | Raporlar + Fiş Tarama | ✅ %100 | ✅ %100 | ✅ Tamamlandı |
-| Sprint 7 | Ayarlar + Profil | ✅ %100 | 🔧 %88 | 🔧 Para birimi/dil seçici, l10n eksik |
-| Sprint 8 | Test + Optimizasyon | ✅ %90 | 🔧 %88 | 🔧 Backend: 76 unit + 25 e2e ✅, ESLint 0 hata ✅, Railway ✅; Frontend: shimmer ✅, BLoC testleri 32/32 ✅, empty states ✅, infinite scroll ✅, splash screen ✅; widget/integration testleri + app icon eksik |
+| Sprint 7 | Ayarlar + Profil | ✅ %100 | ✅ %95 | 🔧 l10n tam lokalizasyon eksik |
+| Sprint 8 | Test + Optimizasyon | ✅ %90 | ✅ %95 | 🔧 Backend: 76 unit + 25 e2e ✅; Frontend: app icon ✅, shimmer ✅, BLoC testleri 32/32 ✅; widget/integration testleri eksik |
 | **Sprint 9** | **Enflasyon Bütçeleme** | ✅ %100 | ✅ %100 | ✅ Backend (PR #6 + #7) + Frontend (PR #5) tamamlandı, EVDS3 göçü uyarlandı |
 | **Sprint 10** | **Akıllı Harcama Analizi** | ✅ %100 | ✅ %100 | ✅ Backend + Frontend tamamlandı (PR #10) |
-| **Sprint 11** | **Aile/Ortak Bütçe** | ✅ %100 | ✅ %100 | ✅ Backend (PR #11) + Frontend (PR #12) tamamlandı |
+| **Sprint 11** | **Aile/Ortak Bütçe** | ✅ %100 | ✅ %100 | ✅ Backend (PR #11) + Frontend (PR #12) + post-sprint polish tamamlandı |
 | **V3** | **Altın/Döviz Portföy** | — | — | ⏸ Ertelendi (talep doğrulandıkça) |
 | Çapraz | Merkezi Entegrasyon | ✅ %100 | — | ✅ Event akışı ✅, Report/Dashboard source filtresi ✅, FCM bildirimleri ✅ |
 
 **Tahmini genel ilerleme: ~%99** — V1 + Sprint 9 + Sprint 10 + Sprint 11 ✅ (V2 feature complete)  
-**Toplam sprint: 13** (Sprint 0-8 temel + Sprint 9-12 fark yaratan özellikler)  
-**Sıradaki:** V2 tamamlandı. Kalan: app icon, store listing, V3 Portföy (talep doğrulandıkça). Bkz. `V3_PORTFOLIO_CONTRACT.md`.
+**Toplam sprint: 12** (Sprint 0-8 temel + Sprint 9-11 fark yaratan özellikler)  
+**Sıradaki:** V2 tamamlandı. Kalan: l10n tam lokalizasyon, widget/integration testleri, store listing, V3 Portföy (talep doğrulandıkça). Bkz. `V3_PORTFOLIO_CONTRACT.md`.

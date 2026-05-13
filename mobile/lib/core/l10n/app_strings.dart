@@ -444,6 +444,40 @@ abstract class AppStrings {
   String get payFullButton;
   String get payMinimumButton;
   String get statementPeriodFmt;
+
+  // Family module
+  String get familyBudgetTitle;
+  String get createNewGroupTitle;
+  String get groupNameHint;
+  String get createGroupBtn;
+  String get deleteGroupTitle;
+  String deleteGroupContent(String name);
+  String get inviteMemberTitle;
+  String get emailAddressHint;
+  String get sendInviteBtn;
+  String get inviteSentSuccess;
+  String get membersSection;
+  String get sharedBudgetsSection;
+  String get pendingInvitesSection;
+  String get addSharedBudgetBtn;
+  String get deleteSharedBudgetTitle;
+  String get addSharedBudgetTitle;
+  String get addSharedBudgetPrompt;
+  String get sharedBudgetNameHint;
+  String get amountTRYHint;
+  String get addBtn;
+  String get removeMemberTitle;
+  String removeMemberContent(String name);
+  String get removeMemberBtn;
+  String removeMemberAction(String name);
+  String memberCountRole(int count, bool isOwner);
+  String familyMemberCount(int count);
+  String get noGroupsTitle;
+  String get noGroupsSubtitle;
+  String get createGroupLargeBtn;
+  String get createGroupError;
+  String get familyGroupsSection;
+  String get createFamilyGroupPrompt;
 }
 
 // ─── Turkish ────────────────────────────────────────────────────────────────
@@ -856,6 +890,44 @@ class _Tr extends AppStrings {
   @override String get payFullButton => 'Tamamını Öde';
   @override String get payMinimumButton => 'Asgariyi Öde';
   @override String get statementPeriodFmt => 'Dönem';
+
+  // Family module
+  @override String get familyBudgetTitle => 'Aile Bütçesi';
+  @override String get createNewGroupTitle => 'Yeni Grup Oluştur';
+  @override String get groupNameHint => 'Grup adı (örn. Ev Bütçesi)';
+  @override String get createGroupBtn => 'Oluştur';
+  @override String get deleteGroupTitle => 'Grubu Sil';
+  @override String deleteGroupContent(String name) =>
+      '"$name" grubu ve tüm ortak bütçeleri silinecek. Bu işlem geri alınamaz.';
+  @override String get inviteMemberTitle => 'Üye Davet Et';
+  @override String get emailAddressHint => 'E-posta adresi';
+  @override String get sendInviteBtn => 'Davet Et';
+  @override String get inviteSentSuccess => 'Davet bildirimi gönderildi.';
+  @override String get membersSection => 'ÜYELER';
+  @override String get sharedBudgetsSection => 'ORTAK BÜTÇELER';
+  @override String get pendingInvitesSection => 'BEKLEYEN DAVETLER';
+  @override String get addSharedBudgetBtn => 'Bütçe Ekle';
+  @override String get deleteSharedBudgetTitle => 'Bütçeyi Sil';
+  @override String get addSharedBudgetTitle => 'Ortak Bütçe Ekle';
+  @override String get addSharedBudgetPrompt => 'Ortak bütçe ekle';
+  @override String get sharedBudgetNameHint => 'Bütçe adı';
+  @override String get amountTRYHint => 'Tutar (₺)';
+  @override String get addBtn => 'Ekle';
+  @override String get removeMemberTitle => 'Üyeyi Çıkar';
+  @override String removeMemberContent(String name) =>
+      '$name grubu üyelikten çıkarılsın mı?';
+  @override String get removeMemberBtn => 'Çıkar';
+  @override String removeMemberAction(String name) => '$name\'ı çıkar';
+  @override String memberCountRole(int count, bool isOwner) =>
+      '$count üye · ${isOwner ? 'Sahip' : 'Üye'}';
+  @override String familyMemberCount(int count) => '$count üye';
+  @override String get noGroupsTitle => 'Aile bütçesi oluştur';
+  @override String get noGroupsSubtitle =>
+      'Partner\'ınla veya aile üyeleriyle ortak bütçe takibi yap. Her üyenin katkısı otomatik hesaplanır.';
+  @override String get createGroupLargeBtn => 'Grup Oluştur';
+  @override String get createGroupError => 'Grup oluşturulamadı';
+  @override String get familyGroupsSection => 'AİLE GRUPLARI';
+  @override String get createFamilyGroupPrompt => 'Aile grubu oluştur';
 }
 
 // ─── English ─────────────────────────────────────────────────────────────────
@@ -1361,4 +1433,43 @@ class _En extends AppStrings {
     'Alacak Tahsilatı': 'Debt Collection',
     'Abonelik': 'Subscription',
   };
+
+  // Family module
+  @override String get familyBudgetTitle => 'Family Budget';
+  @override String get createNewGroupTitle => 'Create New Group';
+  @override String get groupNameHint => 'Group name (e.g. Home Budget)';
+  @override String get createGroupBtn => 'Create';
+  @override String get deleteGroupTitle => 'Delete Group';
+  @override String deleteGroupContent(String name) =>
+      '"$name" group and all shared budgets will be deleted. This cannot be undone.';
+  @override String get inviteMemberTitle => 'Invite Member';
+  @override String get emailAddressHint => 'Email address';
+  @override String get sendInviteBtn => 'Invite';
+  @override String get inviteSentSuccess => 'Invite notification sent.';
+  @override String get membersSection => 'MEMBERS';
+  @override String get sharedBudgetsSection => 'SHARED BUDGETS';
+  @override String get pendingInvitesSection => 'PENDING INVITES';
+  @override String get addSharedBudgetBtn => 'Add Budget';
+  @override String get deleteSharedBudgetTitle => 'Delete Budget';
+  @override String get addSharedBudgetTitle => 'Add Shared Budget';
+  @override String get addSharedBudgetPrompt => 'Add shared budget';
+  @override String get sharedBudgetNameHint => 'Budget name';
+  @override String get amountTRYHint => 'Amount (₺)';
+  @override String get addBtn => 'Add';
+  @override String get removeMemberTitle => 'Remove Member';
+  @override String removeMemberContent(String name) =>
+      'Remove $name from the group?';
+  @override String get removeMemberBtn => 'Remove';
+  @override String removeMemberAction(String name) => 'Remove $name';
+  @override String memberCountRole(int count, bool isOwner) =>
+      '$count member${count == 1 ? '' : 's'} · ${isOwner ? 'Owner' : 'Member'}';
+  @override String familyMemberCount(int count) =>
+      '$count member${count == 1 ? '' : 's'}';
+  @override String get noGroupsTitle => 'Create Family Budget';
+  @override String get noGroupsSubtitle =>
+      'Track shared budgets with your partner or family. Each member\'s contribution is calculated automatically.';
+  @override String get createGroupLargeBtn => 'Create Group';
+  @override String get createGroupError => 'Could not create group';
+  @override String get familyGroupsSection => 'FAMILY GROUPS';
+  @override String get createFamilyGroupPrompt => 'Create family group';
 }

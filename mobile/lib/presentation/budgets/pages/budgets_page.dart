@@ -326,8 +326,8 @@ class _FamilyGroupsSectionState extends State<_FamilyGroupsSection> {
     } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Grup oluşturulamadı'),
+          SnackBar(
+            content: Text(AppStrings.of(context).createGroupError),
             backgroundColor: AppColors.error,
           ),
         );
@@ -347,7 +347,7 @@ class _FamilyGroupsSectionState extends State<_FamilyGroupsSection> {
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setDialogState) => AlertDialog(
           backgroundColor: AppColors.surfaceContainerHigh,
-          title: Text('Yeni Grup Oluştur', style: AppTypography.titleSm),
+          title: Text(AppStrings.of(context).createNewGroupTitle, style: AppTypography.titleSm),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -355,7 +355,7 @@ class _FamilyGroupsSectionState extends State<_FamilyGroupsSection> {
                 controller: nameCtrl,
                 style: AppTypography.bodyMd,
                 decoration: InputDecoration(
-                  hintText: 'Grup adı (örn. Ev Bütçesi)',
+                  hintText: AppStrings.of(context).groupNameHint,
                   hintStyle: AppTypography.bodyMd
                       .copyWith(color: AppColors.onSurfaceVariant),
                   filled: true,
@@ -405,7 +405,7 @@ class _FamilyGroupsSectionState extends State<_FamilyGroupsSection> {
             TextButton(
               onPressed: () => Navigator.of(ctx).pop(),
               child: Text(
-                'İptal',
+                AppStrings.of(context).cancel,
                 style: AppTypography.bodyMd
                     .copyWith(color: AppColors.onSurfaceVariant),
               ),
@@ -421,7 +421,7 @@ class _FamilyGroupsSectionState extends State<_FamilyGroupsSection> {
                 backgroundColor: AppColors.primary,
                 foregroundColor: AppColors.onPrimary,
               ),
-              child: const Text('Oluştur'),
+              child: Text(AppStrings.of(context).createGroupBtn),
             ),
           ],
         ),
@@ -461,7 +461,7 @@ class _FamilyGroupsSectionState extends State<_FamilyGroupsSection> {
                 children: [
                   Expanded(
                     child:
-                        Text('AİLE GRUPLARI', style: AppTypography.labelSm),
+                        Text(AppStrings.of(context).familyGroupsSection, style: AppTypography.labelSm),
                   ),
                   if (_isCreating)
                     const SizedBox(
@@ -531,7 +531,7 @@ class _CreateGroupPromptCard extends StatelessWidget {
             const Icon(Icons.add_rounded, color: AppColors.primary, size: 20),
             const SizedBox(width: AppSpacing.sm),
             Text(
-              'Aile grubu oluştur',
+              AppStrings.of(context).createFamilyGroupPrompt,
               style: AppTypography.bodyMd
                   .copyWith(color: AppColors.primary),
             ),
@@ -583,7 +583,7 @@ class _FamilyGroupEntryCard extends StatelessWidget {
                         .copyWith(fontWeight: FontWeight.w500),
                   ),
                   Text(
-                    '${group.memberCount} üye',
+                    AppStrings.of(context).familyMemberCount(group.memberCount),
                     style: AppTypography.bodySm
                         .copyWith(color: AppColors.onSurfaceVariant),
                   ),

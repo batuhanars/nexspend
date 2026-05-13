@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
+import '../../../core/l10n/app_strings.dart';
 import '../../../data/models/category_model.dart';
 import '../../../data/models/family_model.dart';
 import '../../../data/repositories/category_repository.dart';
@@ -45,7 +46,7 @@ class _FamilyGroupDetailPageState extends State<FamilyGroupDetailPage> {
               .read<FamilyBloc>()
               .add(FamilyGroupDetailLoadRequested(groupId: widget.groupId));
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Davet bildirimi gönderildi.')),
+            SnackBar(content: Text(AppStrings.of(context).inviteSentSuccess)),
           );
         }
         if (state is FamilyInviteSendError) {
@@ -154,7 +155,7 @@ class _DetailBody extends StatelessWidget {
               IconButton(
                 icon: const Icon(Icons.person_add_outlined),
                 onPressed: () => _showInviteDialog(context, groupId),
-                tooltip: 'Üye Davet Et',
+                tooltip: AppStrings.of(context).inviteMemberTitle,
               ),
             IconButton(
               icon: const Icon(Icons.bar_chart_rounded),
@@ -171,7 +172,7 @@ class _DetailBody extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Üyeler
-                Text('ÜYELER', style: AppTypography.labelSm),
+                Text(AppStrings.of(context).membersSection, style: AppTypography.labelSm),
                 const SizedBox(height: AppSpacing.md),
                 MemberAvatarRow(members: group.members, showRoles: true),
 
@@ -187,7 +188,7 @@ class _DetailBody extends StatelessWidget {
                             onPressed: () =>
                                 _confirmRemoveMember(context, groupId, m),
                             child: Text(
-                              '${m.name}\'ı çıkar',
+                              AppStrings.of(context).removeMemberAction(m.name),
                               style: AppTypography.bodySm
                                   .copyWith(color: AppColors.error),
                             ),
@@ -202,13 +203,13 @@ class _DetailBody extends StatelessWidget {
                 Row(
                   children: [
                     Expanded(
-                      child: Text('ORTAK BÜTÇELER',
+                      child: Text(AppStrings.of(context).sharedBudgetsSection,
                           style: AppTypography.labelSm),
                     ),
                     TextButton(
                       onPressed: () => _showAddBudgetDialog(context, groupId),
                       child: Text(
-                        'Bütçe Ekle',
+                        AppStrings.of(context).addSharedBudgetBtn,
                         style: AppTypography.bodySm
                             .copyWith(color: AppColors.primary),
                       ),
@@ -252,7 +253,7 @@ class _DetailBody extends StatelessWidget {
                 // Bekleyen davetler (sadece owner)
                 if (isOwner && group.pendingInvites.isNotEmpty) ...[
                   const SizedBox(height: AppSpacing.xl),
-                  Text('BEKLEYEN DAVETLER', style: AppTypography.labelSm),
+                  Text(AppStrings.of(context).pendingInvitesSection, style: AppTypography.labelSm),
                   const SizedBox(height: AppSpacing.md),
                   ...group.pendingInvites.map(
                     (inv) => Padding(
@@ -277,20 +278,20 @@ class _DetailBody extends StatelessWidget {
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: AppColors.surfaceContainerHigh,
-        title: Text('Bütçeyi Sil', style: AppTypography.titleSm),
+        title: Text(AppStrings.of(context).deleteSharedBudgetTitle, style: AppTypography.titleSm),
         content: Text(
-          '"$budgetName" bütçesi silinecek.',
+          AppStrings.of(context).deleteBudgetContent(budgetName),
           style: AppTypography.bodyMd.copyWith(color: AppColors.onSurfaceVariant),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
-            child: Text('İptal',
+            child: Text(AppStrings.of(context).cancel,
                 style: AppTypography.bodyMd.copyWith(color: AppColors.onSurfaceVariant)),
           ),
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(true),
-            child: Text('Sil', style: TextStyle(color: AppColors.error)),
+            child: Text(AppStrings.of(context).delete, style: const TextStyle(color: AppColors.error)),
           ),
         ],
       ),
@@ -303,13 +304,13 @@ class _DetailBody extends StatelessWidget {
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: AppColors.surfaceContainerHigh,
-        title: Text('Üye Davet Et', style: AppTypography.titleSm),
+        title: Text(AppStrings.of(context).inviteMemberTitle, style: AppTypography.titleSm),
         content: TextField(
           controller: emailCtrl,
           keyboardType: TextInputType.emailAddress,
           style: AppTypography.bodyMd,
           decoration: InputDecoration(
-            hintText: 'E-posta adresi',
+            hintText: AppStrings.of(context).emailAddressHint,
             hintStyle:
                 AppTypography.bodyMd.copyWith(color: AppColors.onSurfaceVariant),
             filled: true,
@@ -323,7 +324,7 @@ class _DetailBody extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
-            child: Text('İptal',
+            child: Text(AppStrings.of(context).cancel,
                 style: AppTypography.bodyMd
                     .copyWith(color: AppColors.onSurfaceVariant)),
           ),
@@ -341,7 +342,7 @@ class _DetailBody extends StatelessWidget {
               backgroundColor: AppColors.primary,
               foregroundColor: AppColors.onPrimary,
             ),
-            child: const Text('Davet Et'),
+            child: Text(AppStrings.of(context).sendInviteBtn),
           ),
         ],
       ),
@@ -372,21 +373,21 @@ class _DetailBody extends StatelessWidget {
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: AppColors.surfaceContainerHigh,
-        title: Text('Üyeyi Çıkar', style: AppTypography.titleSm),
+        title: Text(AppStrings.of(context).removeMemberTitle, style: AppTypography.titleSm),
         content: Text(
-          '${member.name} grubu üyelikten çıkarılsın mı?',
+          AppStrings.of(context).removeMemberContent(member.name),
           style:
               AppTypography.bodyMd.copyWith(color: AppColors.onSurfaceVariant),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('İptal'),
+            child: Text(AppStrings.of(context).cancel),
           ),
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(true),
-            child: Text('Çıkar',
-                style: TextStyle(color: AppColors.error)),
+            child: Text(AppStrings.of(context).removeMemberBtn,
+                style: const TextStyle(color: AppColors.error)),
           ),
         ],
       ),
@@ -454,7 +455,7 @@ class _EmptyBudgets extends StatelessWidget {
                 color: AppColors.primary, size: 32),
             const SizedBox(height: AppSpacing.sm),
             Text(
-              'Ortak bütçe ekle',
+              AppStrings.of(context).addSharedBudgetPrompt,
               style: AppTypography.bodyMd.copyWith(color: AppColors.primary),
             ),
           ],
@@ -503,7 +504,7 @@ class _AddBudgetDialogState extends State<_AddBudgetDialog> {
   Widget build(BuildContext context) {
     return AlertDialog(
       backgroundColor: AppColors.surfaceContainerHigh,
-      title: Text('Ortak Bütçe Ekle', style: AppTypography.titleSm),
+      title: Text(AppStrings.of(context).addSharedBudgetTitle, style: AppTypography.titleSm),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -513,7 +514,7 @@ class _AddBudgetDialogState extends State<_AddBudgetDialog> {
               controller: _nameCtrl,
               style: AppTypography.bodyMd,
               decoration: InputDecoration(
-                hintText: 'Bütçe adı',
+                hintText: AppStrings.of(context).sharedBudgetNameHint,
                 hintStyle: AppTypography.bodyMd
                     .copyWith(color: AppColors.onSurfaceVariant),
                 filled: true,
@@ -534,7 +535,7 @@ class _AddBudgetDialogState extends State<_AddBudgetDialog> {
               ],
               style: AppTypography.bodyMd,
               decoration: InputDecoration(
-                hintText: 'Tutar (₺)',
+                hintText: AppStrings.of(context).amountTRYHint,
                 hintStyle: AppTypography.bodyMd
                     .copyWith(color: AppColors.onSurfaceVariant),
                 filled: true,
@@ -564,7 +565,7 @@ class _AddBudgetDialogState extends State<_AddBudgetDialog> {
                   dropdownColor: AppColors.surfaceContainerHigh,
                   style: AppTypography.bodyMd,
                   decoration: InputDecoration(
-                    hintText: 'Kategori seç',
+                    hintText: AppStrings.of(context).selectCategory,
                     hintStyle: AppTypography.bodyMd
                         .copyWith(color: AppColors.onSurfaceVariant),
                     filled: true,
@@ -590,7 +591,7 @@ class _AddBudgetDialogState extends State<_AddBudgetDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: Text('İptal',
+          child: Text(AppStrings.of(context).cancel,
               style: AppTypography.bodyMd
                   .copyWith(color: AppColors.onSurfaceVariant)),
         ),
@@ -609,7 +610,7 @@ class _AddBudgetDialogState extends State<_AddBudgetDialog> {
             backgroundColor: AppColors.primary,
             foregroundColor: AppColors.onPrimary,
           ),
-          child: const Text('Ekle'),
+          child: Text(AppStrings.of(context).addBtn),
         ),
       ],
     );
@@ -646,7 +647,7 @@ class _ErrorBody extends StatelessWidget {
           const SizedBox(height: AppSpacing.lg),
           TextButton(
             onPressed: onRetry,
-            child: Text('Tekrar Dene',
+            child: Text(AppStrings.of(context).retry,
                 style: AppTypography.bodyMd.copyWith(color: AppColors.primary)),
           ),
         ],

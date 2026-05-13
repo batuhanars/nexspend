@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
+import '../../../core/l10n/app_strings.dart';
 import '../../../data/models/family_model.dart';
 import '../../../navigation/route_names.dart';
 import '../bloc/family_bloc.dart';
@@ -35,7 +36,7 @@ class FamilyGroupPage extends StatelessWidget {
         appBar: AppBar(
           backgroundColor: AppColors.surface,
           surfaceTintColor: Colors.transparent,
-          title: const Text('Aile Bütçesi'),
+          title: Text(AppStrings.of(context).familyBudgetTitle),
           titleTextStyle: AppTypography.headlineSm,
           iconTheme: const IconThemeData(color: AppColors.onSurface),
         ),
@@ -86,7 +87,7 @@ class FamilyGroupPage extends StatelessWidget {
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setState) => AlertDialog(
           backgroundColor: AppColors.surfaceContainerHigh,
-          title: Text('Yeni Grup Oluştur', style: AppTypography.titleSm),
+          title: Text(AppStrings.of(context).createNewGroupTitle, style: AppTypography.titleSm),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -94,7 +95,7 @@ class FamilyGroupPage extends StatelessWidget {
                 controller: nameCtrl,
                 style: AppTypography.bodyMd,
                 decoration: InputDecoration(
-                  hintText: 'Grup adı (örn. Ev Bütçesi)',
+                  hintText: AppStrings.of(context).groupNameHint,
                   hintStyle:
                       AppTypography.bodyMd.copyWith(color: AppColors.onSurfaceVariant),
                   filled: true,
@@ -141,8 +142,8 @@ class FamilyGroupPage extends StatelessWidget {
           actions: [
             TextButton(
               onPressed: () => Navigator.of(ctx).pop(),
-              child:
-                  Text('İptal', style: AppTypography.bodyMd.copyWith(color: AppColors.onSurfaceVariant)),
+              child: Text(AppStrings.of(context).cancel,
+                  style: AppTypography.bodyMd.copyWith(color: AppColors.onSurfaceVariant)),
             ),
             FilledButton(
               onPressed: () {
@@ -158,7 +159,7 @@ class FamilyGroupPage extends StatelessWidget {
                 backgroundColor: AppColors.primary,
                 foregroundColor: AppColors.onPrimary,
               ),
-              child: const Text('Oluştur'),
+              child: Text(AppStrings.of(context).createGroupBtn),
             ),
           ],
         ),
@@ -213,20 +214,20 @@ class _GroupCard extends StatelessWidget {
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: AppColors.surfaceContainerHigh,
-        title: Text('Grubu Sil', style: AppTypography.titleSm),
+        title: Text(AppStrings.of(context).deleteGroupTitle, style: AppTypography.titleSm),
         content: Text(
-          '"${group.name}" grubu ve tüm ortak bütçeleri silinecek. Bu işlem geri alınamaz.',
+          AppStrings.of(context).deleteGroupContent(group.name),
           style: AppTypography.bodyMd.copyWith(color: AppColors.onSurfaceVariant),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
-            child: Text('İptal',
+            child: Text(AppStrings.of(context).cancel,
                 style: AppTypography.bodyMd.copyWith(color: AppColors.onSurfaceVariant)),
           ),
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(true),
-            child: Text('Sil', style: TextStyle(color: AppColors.error)),
+            child: Text(AppStrings.of(context).delete, style: const TextStyle(color: AppColors.error)),
           ),
         ],
       ),
@@ -266,7 +267,8 @@ class _GroupCard extends StatelessWidget {
                 children: [
                   Text(group.name, style: AppTypography.titleSm),
                   Text(
-                    '${group.memberCount} üye · ${group.role == FamilyRole.OWNER ? 'Sahip' : 'Üye'}',
+                    AppStrings.of(context).memberCountRole(
+                        group.memberCount, group.role == FamilyRole.OWNER),
                     style: AppTypography.bodySm,
                   ),
                 ],
@@ -332,10 +334,10 @@ class _EmptyView extends StatelessWidget {
               ),
             ),
             const SizedBox(height: AppSpacing.xl),
-            Text('Aile bütçesi oluştur', style: AppTypography.titleSm),
+            Text(AppStrings.of(context).noGroupsTitle, style: AppTypography.titleSm),
             const SizedBox(height: AppSpacing.sm),
             Text(
-              'Partner\'ınla veya aile üyeleriyle ortak bütçe takibi yap. Her üyenin katkısı otomatik hesaplanır.',
+              AppStrings.of(context).noGroupsSubtitle,
               style: AppTypography.bodyMd
                   .copyWith(color: AppColors.onSurfaceVariant),
               textAlign: TextAlign.center,
@@ -344,7 +346,7 @@ class _EmptyView extends StatelessWidget {
             FilledButton.icon(
               onPressed: onCreateTap,
               icon: const Icon(Icons.add_rounded),
-              label: const Text('Grup Oluştur'),
+              label: Text(AppStrings.of(context).createGroupLargeBtn),
               style: FilledButton.styleFrom(
                 backgroundColor: AppColors.primary,
                 foregroundColor: AppColors.onPrimary,
@@ -399,7 +401,7 @@ class _ErrorView extends StatelessWidget {
           const SizedBox(height: AppSpacing.lg),
           TextButton(
             onPressed: onRetry,
-            child: Text('Tekrar Dene',
+            child: Text(AppStrings.of(context).retry,
                 style: AppTypography.bodyMd
                     .copyWith(color: AppColors.primary)),
           ),

@@ -1,6 +1,6 @@
 # Stitch Wallet App — Görev Takip Dosyası
 
-> Son güncelleme: 13 Mayıs 2026 (Sprint 11 sonrası polish: bildirim aksiyon butonları, bütçeler ekranı aile entegrasyonu, hesap formu temizliği)  
+> Son güncelleme: 13 Mayıs 2026 (Sprint 10 push notification, l10n tamamlandı, family bloc testleri düzeltildi)  
 > ✅ = Tamamlandı | 🔧 = Kısmen yapıldı | ❌ = Henüz başlanmadı  
 > ☑ = Kodda mevcut ancak migration henüz çalıştırılmadı
 
@@ -454,8 +454,7 @@
 - [ ] Auth widget testleri
 - [ ] Dashboard widget testleri
 - [ ] Transactions widget testleri
-- [x] BLoC testleri — AuthBloc (9 test: login/register/forgot/reset/logout) + TransactionsBloc (7 test: load/filter/delete/rollback) = **16 test, tümü geçti**
-- [x] DebtsBloc + BudgetsBloc testleri — DebtsBloc (9 test: load/filter/delete-rollback/payment/refresh) + BudgetsBloc (7 test: load/delete/update/refresh) = **16 test, tümü geçti**
+- [x] BLoC testleri — AuthBloc (9 test) + TransactionsBloc (7 test) + DebtsBloc (9 test) + BudgetsBloc (7 test) + InflationBloc (8 test) + InsightsBloc (11 test) + FamilyBloc (15 test) = **66 test, tümü geçti ✅**
 - [ ] Integration testleri (kritik akışlar)
 
 ### Optimizasyon & Son Dokunuşlar
@@ -540,7 +539,7 @@
 - [x] InsightBadge widget (okunmamış sayı badge — `AppColors.tertiary` bg)
 - [x] InsightsBloc + InsightsRepository
 - [x] DashboardPage'e "Akıllı Öneriler" bölümü eklendi
-- [ ] Push notification: aylık "Finansal raporun hazır!" bildirimi (Sprint 11 FCM altyapısıyla birleştirilebilir)
+- [x] Push notification: aylık "Finansal raporun hazır!" bildirimi — `MonthlyInsightJob` `data:{type:'MONTHLY_REPORT'}` eklendi; `NotificationService` MONTHLY_REPORT foreground/background/cold-start handling + `AppShell` Insights navigasyonu tamamlandı
 
 ---
 
@@ -588,6 +587,9 @@
 - [x] **Bütçeler ekranı — AİLE GRUPLARI bölümü:** istatistik kartının altına grup kartları eklendi; her kart grup ikonu + adı + üye sayısı gösteriyor, dokununca grup detayına geçiş yapıyor
 - [x] **Bütçeler ekranı — grup oluşturma:** bölüm başlığındaki "+" butonu ve grup yokken prompt kartı ile yeni grup oluşturulabiliyor (`FamilyRepository` üzerinden, BLoC bağımlılığı yok)
 - [x] **ProGuard / R8:** release APK'da `isMinifyEnabled=false` ile bildirim ve plugin sorunları giderildi
+- [x] **l10n tamamlandı (aile modülü):** `FamilyGroupPage`, `FamilyGroupDetailPage`, `BudgetsPage` aile bölümü için 32 yeni AppStrings anahtarı eklendi (TR + EN); `budgetNameHint` çakışması `sharedBudgetNameHint` ile giderildi; import eksiklikleri düzeltildi
+- [x] **FamilyBloc test düzeltmesi:** `_parseError` metodu plain `Exception` mesajlarından HTTP kodu parse edecek şekilde genişletildi; 3 başarısız test giderildi (toplam Flutter testleri: 66/66 ✅)
+- [x] **Insights push notification navigasyonu:** `MonthlyInsightJob` `data:{type:'MONTHLY_REPORT'}` ile gönderir; `NotificationService` üç senaryoyu (foreground/background/cold-start) handle eder; `AppShell` `onInsightsNav` stream'i ile `/insights` sayfasına yönlendiriyor
 
 ---
 
@@ -652,13 +654,13 @@
 | Sprint 5 | Borçlar + Abonelikler | ✅ %100 | ✅ %100 | ✅ Borç detay + Abonelik detay tamamlandı |
 | Sprint 6 | Raporlar + Fiş Tarama | ✅ %100 | ✅ %100 | ✅ Tamamlandı |
 | Sprint 7 | Ayarlar + Profil | ✅ %100 | ✅ %95 | 🔧 l10n tam lokalizasyon eksik |
-| Sprint 8 | Test + Optimizasyon | ✅ %90 | ✅ %95 | 🔧 Backend: 76 unit + 25 e2e ✅; Frontend: app icon ✅, shimmer ✅, BLoC testleri 32/32 ✅; widget/integration testleri eksik |
+| Sprint 8 | Test + Optimizasyon | ✅ %90 | ✅ %97 | 🔧 Backend: 76 unit + 25 e2e ✅; Frontend: app icon ✅, shimmer ✅, BLoC testleri 66/66 ✅; widget/integration testleri eksik |
 | **Sprint 9** | **Enflasyon Bütçeleme** | ✅ %100 | ✅ %100 | ✅ Backend (PR #6 + #7) + Frontend (PR #5) tamamlandı, EVDS3 göçü uyarlandı |
-| **Sprint 10** | **Akıllı Harcama Analizi** | ✅ %100 | ✅ %100 | ✅ Backend + Frontend tamamlandı (PR #10) |
+| **Sprint 10** | **Akıllı Harcama Analizi** | ✅ %100 | ✅ %100 | ✅ Backend + Frontend + push notification navigasyonu tamamlandı |
 | **Sprint 11** | **Aile/Ortak Bütçe** | ✅ %100 | ✅ %100 | ✅ Backend (PR #11) + Frontend (PR #12) + post-sprint polish tamamlandı |
 | **V3** | **Altın/Döviz Portföy** | — | — | ⏸ Ertelendi (talep doğrulandıkça) |
 | Çapraz | Merkezi Entegrasyon | ✅ %100 | — | ✅ Event akışı ✅, Report/Dashboard source filtresi ✅, FCM bildirimleri ✅ |
 
 **Tahmini genel ilerleme: ~%99** — V1 + Sprint 9 + Sprint 10 + Sprint 11 ✅ (V2 feature complete)  
 **Toplam sprint: 12** (Sprint 0-8 temel + Sprint 9-11 fark yaratan özellikler)  
-**Sıradaki:** V2 tamamlandı. Kalan: l10n tam lokalizasyon, widget/integration testleri, store listing, V3 Portföy (talep doğrulandıkça). Bkz. `V3_PORTFOLIO_CONTRACT.md`.
+**Sıradaki:** V2 tamamlandı. Kalan: widget/integration testleri, l10n genel (Sprint 7 kodları), store listing, V3 Portföy (talep doğrulandıkça). Bkz. `V3_PORTFOLIO_CONTRACT.md`.

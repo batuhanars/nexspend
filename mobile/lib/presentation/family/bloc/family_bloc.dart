@@ -233,6 +233,15 @@ class FamilyBloc extends Bloc<FamilyEvent, FamilyState> {
     }
     final msg = e.toString();
     if (msg.contains('SocketException')) return 'İnternet bağlantınızı kontrol edin.';
+    if (msg.contains('403')) return 'Bu işlem için yetkiniz yok.';
+    if (msg.contains('404')) return 'Kayıt bulunamadı.';
+    if (msg.contains('410')) return 'Davet süresi dolmuş.';
+    if (msg.contains('400')) {
+      if (msg.contains('sınır') || msg.contains('limit')) {
+        return 'Grup üye sınırına ulaşıldı (max 5).';
+      }
+      return 'Geçersiz istek (400).';
+    }
     return 'Bir hata oluştu. Lütfen tekrar deneyin.';
   }
 }

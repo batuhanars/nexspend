@@ -314,16 +314,20 @@ class _FamilyGroupsSectionState extends State<_FamilyGroupsSection> {
     _future = GetIt.I<FamilyRepository>().getGroups();
   }
 
-  void _reload() => setState(
-        () => _future = GetIt.I<FamilyRepository>().getGroups(),
-      );
+  void _reload() {
+    setState(() {
+      _future = GetIt.I<FamilyRepository>().getGroups();
+    });
+  }
 
   Future<void> _createGroup(String name, String? icon) async {
     setState(() => _isCreating = true);
     try {
       await GetIt.I<FamilyRepository>().createGroup(name: name, icon: icon);
       _reload();
-    } catch (_) {
+    } catch (e, stack) {
+      debugPrint('[FamilyGroupsSection] createGroup failed: $e');
+      debugPrint('$stack');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -490,7 +494,10 @@ class _FamilyGroupsSectionState extends State<_FamilyGroupsSection> {
                 ...groups.map(
                   (g) => Padding(
                     padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-                    child: _FamilyGroupEntryCard(group: g),
+                    child: _FamilyGroupEntryCard(
+                      group: g,
+                      onReturn: _reload,
+                    ),
                   ),
                 ),
               const SizedBox(height: AppSpacing.md),
@@ -543,15 +550,22 @@ class _CreateGroupPromptCard extends StatelessWidget {
 }
 
 class _FamilyGroupEntryCard extends StatelessWidget {
-  const _FamilyGroupEntryCard({required this.group});
+  const _FamilyGroupEntryCard({
+    required this.group,
+    required this.onReturn,
+  });
 
   final FamilyGroupModel group;
+  final VoidCallback onReturn;
 
   @override
   Widget build(BuildContext context) {
     final icon = IconMapper.fromString(group.icon ?? 'people');
     return GestureDetector(
-      onTap: () => context.push(RouteNames.familyGroupDetail(group.id)),
+      onTap: () async {
+        await context.push(RouteNames.familyGroupDetail(group.id));
+        onReturn();
+      },
       child: Container(
         padding: const EdgeInsets.symmetric(
           horizontal: AppSpacing.lg,

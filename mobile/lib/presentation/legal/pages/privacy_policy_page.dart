@@ -32,7 +32,10 @@ class PrivacyPolicyPage extends StatelessWidget {
                 '• Kimlik bilgileri: ad-soyad, e-posta adresi\n'
                 '• Finansal veriler: hesap bakiyeleri, işlemler, bütçeler, borçlar ve abonelikler\n'
                 '• Makbuz görüntüleri: OCR işlemi için yüklediğiniz fişler\n'
-                '• Cihaz bilgileri: bildirim izni, biyometrik kimlik doğrulama tercihi\n\n'
+                '• Cihaz bilgileri: bildirim izni, biyometrik kimlik doğrulama tercihi\n'
+                '• Reklam kimliği: Google AdMob SDK\'sı cihazınızın reklam kimliği (Android Advertising ID / iOS IDFA), '
+                'IP adresi ve genel cihaz bilgilerini reklam yayını için işler. Uygulama bu verilere doğrudan erişmez '
+                've kendi sunucularında saklamaz.\n\n'
                 'Google ile giriş yaptığınızda yalnızca ad, soyad ve e-posta adresi alınır. '
                 'Şifreniz hiçbir zaman düz metin olarak saklanmaz; bcrypt ile şifrelenerek tutulur.',
           ),
@@ -60,8 +63,24 @@ class PrivacyPolicyPage extends StatelessWidget {
                 'Uygulama aşağıdaki üçüncü taraf hizmetleri kullanır:\n\n'
                 '• Google Sign-In: kimlik doğrulama\n'
                 '• Firebase Cloud Messaging: anlık bildirimler\n'
-                '• TCMB API: döviz kurları (Sprint 12)\n\n'
+                '• Google AdMob: banner reklam yayını\n'
+                '• TCMB API: enflasyon ve döviz verileri\n\n'
                 'Bu hizmetlerin kendi gizlilik politikaları geçerlidir.',
+          ),
+          _Section(
+            title: 'Reklamlar',
+            body:
+                'NexSpend, ücretsiz olarak sunulması için Google AdMob tarafından yayınlanan banner reklamlar içerir. '
+                'Reklamlar yalnızca uygulamanın ana sekmelerinde (Ana Sayfa, İşlemler, Bütçeler, Abonelikler) alt '
+                'navigasyonun üzerinde gösterilir; finansal verilerinizi gördüğünüz form ve detay sayfalarında reklam çıkmaz.\n\n'
+                'Google AdMob, ilgili reklamı seçmek için cihazınızın reklam kimliği, IP adresi, cihaz türü, dil tercihi '
+                've IP\'nizden çıkarılan yaklaşık konum gibi bilgileri işleyebilir. Reklam içerikleri ilgi alanlarınıza '
+                'göre kişiselleştirilebilir. NexSpend; ad, e-posta, finansal kayıt ya da makbuz görüntüsü gibi hesap '
+                'verilerinizi reklam ağıyla paylaşmaz.\n\n'
+                'Reklam kişiselleştirmesini cihaz seviyesinden kontrol edebilirsiniz:\n\n'
+                '• Android: Ayarlar → Google → Reklamlar → "Reklam kimliğini sıfırla" / "Kişiselleştirilmiş reklamları kapat"\n'
+                '• iOS: Ayarlar → Gizlilik ve Güvenlik → Apple Reklamcılık ve İzleme\n\n'
+                'Detay: policies.google.com/technologies/ads',
           ),
           _Section(
             title: 'KVKK Kapsamında Haklarınız',
@@ -79,7 +98,7 @@ class PrivacyPolicyPage extends StatelessWidget {
             body:
                 'Gizlilik politikasıyla ilgili sorularınız için:\n\n'
                 'E-posta: bystackmates@gmail.com\n\n'
-                'Bu politika en son 12 Mayıs 2026 tarihinde güncellenmiştir.',
+                'Bu politika en son 14 Mayıs 2026 tarihinde güncellenmiştir.',
           ),
           SizedBox(height: AppSpacing.xxxl),
         ],

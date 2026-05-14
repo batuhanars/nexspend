@@ -59,6 +59,17 @@ class TermsOfServicePage extends StatelessWidget {
                 'İzin almadan kopyalanamaz, dağıtılamaz veya türev eserler oluşturulamaz.',
           ),
           _Section(
+            title: 'Reklamlar',
+            body:
+                'Uygulama, ücretsiz olarak sunulması için Google AdMob tarafından yayınlanan banner reklamlar içerir. '
+                'Reklam içerikleri Google AdMob tarafından seçilir; içeriklerin doğruluğu, güncelliği ve niteliği '
+                'konusunda Stackmates sorumluluk kabul etmez.\n\n'
+                'Reklama tıklamak isteğe bağlıdır. Reklam üzerinden ulaşılan üçüncü taraf web sitelerinin gizlilik '
+                'politikaları ve kullanım şartları o sitelere aittir; bu sitelerden kaynaklanan zararlardan sorumlu '
+                'tutulamayız. Reklam kişiselleştirmesini nasıl kontrol edeceğinize dair detay Gizlilik Politikası — '
+                'Reklamlar başlığı altındadır.',
+          ),
+          _Section(
             title: 'Sorumluluk Sınırlaması',
             body:
                 'Uygulama "olduğu gibi" sunulmaktadır. Teknik arızalar, veri kaybı veya '
@@ -82,7 +93,7 @@ class TermsOfServicePage extends StatelessWidget {
             title: 'İletişim',
             body:
                 'Sorularınız için: bystackmates@gmail.com\n\n'
-                'Son güncelleme: 12 Mayıs 2026',
+                'Son güncelleme: 14 Mayıs 2026',
           ),
           SizedBox(height: AppSpacing.xxxl),
         ],

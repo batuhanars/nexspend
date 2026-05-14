@@ -133,6 +133,23 @@ Font: Inter (`google_fonts` paketi).
 
 ---
 
+## AdMob — Banner Reklam
+
+`google_mobile_ads` paketi. Banner, `AppShell.bottomNavigationBar` slot'unda nav bar'ın hemen üstünde — **ShellRoute child'larında** (Home/Transactions/Budgets/Subscriptions) görünür. Auth, modal'lar, kamera, settings root navigator'da olduğu için banner görmezler.
+
+**ID yönetimi (`core/services/ads_service.dart`):**
+- **Android release** → gerçek banner unit (`ca-app-pub-9972490944328521/1861785732`)
+- **Android debug (`kDebugMode`)** → Google test ID
+- **iOS** → her zaman test ID (iOS prod henüz yok)
+
+Kendi reklamına tıklamak AdMob hesap banı sebebidir; `flutter run` her zaman debug → test reklam gösterir.
+
+`AndroidManifest.xml` içinde `com.google.android.gms.ads.APPLICATION_ID` meta-data ve `AD_ID` permission zorunlu (eksikse SDK init crash).
+
+Banner yüklenmediği veya hata aldığı durumda widget `SizedBox.shrink()` döner — kullanıcı boş şerit görmez.
+
+---
+
 ## Test Yazma Kuralları
 
 - BLoC test: `test/blocs/<feature>_bloc_test.dart` — `bloc_test` paketi ile

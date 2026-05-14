@@ -12,6 +12,7 @@ import '../../core/storage/secure_storage.dart';
 import '../../core/utils/coach_mark_keys.dart';
 import '../../data/repositories/family_repository.dart';
 import '../../navigation/route_names.dart';
+import 'banner_ad_widget.dart';
 
 class AppShell extends StatefulWidget {
   const AppShell({super.key, required this.child});
@@ -291,7 +292,13 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
   Widget build(BuildContext context) {
     return Scaffold(
       body: widget.child,
-      bottomNavigationBar: _BottomNavBar(onAddTap: _showAddSheet),
+      bottomNavigationBar: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const BannerAdWidget(),
+          _BottomNavBar(onAddTap: _showAddSheet),
+        ],
+      ),
     );
   }
 }

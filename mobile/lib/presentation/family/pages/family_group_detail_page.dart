@@ -62,6 +62,14 @@ class _FamilyGroupDetailPageState extends State<FamilyGroupDetailPage> {
               .read<FamilyBloc>()
               .add(FamilyGroupDetailLoadRequested(groupId: widget.groupId));
         }
+        if (state is FamilySharedBudgetDeleted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(AppStrings.of(context).sharedBudgetDeletedSuccess),
+              backgroundColor: AppColors.secondary,
+            ),
+          );
+        }
         if (state is FamilySharedBudgetDeleteError) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -73,6 +81,12 @@ class _FamilyGroupDetailPageState extends State<FamilyGroupDetailPage> {
               .add(FamilyGroupDetailLoadRequested(groupId: widget.groupId));
         }
         if (state is FamilyGroupDeleted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(AppStrings.of(context).groupDeletedSuccess),
+              backgroundColor: AppColors.secondary,
+            ),
+          );
           context.pop();
         }
         if (state is FamilyGroupDeleteError) {

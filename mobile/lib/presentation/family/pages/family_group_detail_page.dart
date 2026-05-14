@@ -81,6 +81,12 @@ class _FamilyGroupDetailPageState extends State<FamilyGroupDetailPage> {
                 content: Text(state.message),
                 backgroundColor: AppColors.error),
           );
+          // Delete hatasından sonra detay sayfasını tekrar yükle — aksi halde
+          // bloc FamilyGroupDeleteError state'inde takılı kalır ve switch'in
+          // catch-all branch'i sonsuz _LoadingBody gösterir.
+          context
+              .read<FamilyBloc>()
+              .add(FamilyGroupDetailLoadRequested(groupId: widget.groupId));
         }
         if (state is FamilySharedBudgetCreateError) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -163,6 +169,15 @@ class _DetailBody extends StatelessWidget {
                   context.push(RouteNames.familyContributions(groupId)),
               tooltip: 'Katkı Raporu',
             ),
+            if (isOwner)
+              IconButton(
+                icon: const Icon(
+                  Icons.delete_outline_rounded,
+                  color: AppColors.error,
+                ),
+                onPressed: () => _confirmDeleteGroup(context, group),
+                tooltip: AppStrings.of(context).deleteGroupTitle,
+              ),
           ],
         ),
         SliverToBoxAdapter(
@@ -397,6 +412,41 @@ class _DetailBody extends StatelessWidget {
               groupId: groupId,
               userId: member.userId,
             ));
+      }
+    });
+  }
+
+  void _confirmDeleteGroup(BuildContext context, FamilyGroupModel group) {
+    showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppColors.surfaceContainerHigh,
+        title: Text(AppStrings.of(context).deleteGroupTitle,
+            style: AppTypography.titleSm),
+        content: Text(
+          AppStrings.of(context).deleteGroupContent(group.name),
+          style:
+              AppTypography.bodyMd.copyWith(color: AppColors.onSurfaceVariant),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: Text(AppStrings.of(context).cancel,
+                style: AppTypography.bodyMd
+                    .copyWith(color: AppColors.onSurfaceVariant)),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: Text(AppStrings.of(context).delete,
+                style: const TextStyle(color: AppColors.error)),
+          ),
+        ],
+      ),
+    ).then((confirmed) {
+      if (confirmed == true && context.mounted) {
+        context
+            .read<FamilyBloc>()
+            .add(FamilyGroupDeleteRequested(groupId: group.id));
       }
     });
   }

@@ -209,35 +209,9 @@ class _GroupCard extends StatelessWidget {
 
   final FamilyGroupModel group;
 
-  Future<bool?> _confirmDelete(BuildContext context) {
-    return showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: AppColors.surfaceContainerHigh,
-        title: Text(AppStrings.of(context).deleteGroupTitle, style: AppTypography.titleSm),
-        content: Text(
-          AppStrings.of(context).deleteGroupContent(group.name),
-          style: AppTypography.bodyMd.copyWith(color: AppColors.onSurfaceVariant),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(false),
-            child: Text(AppStrings.of(context).cancel,
-                style: AppTypography.bodyMd.copyWith(color: AppColors.onSurfaceVariant)),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(true),
-            child: Text(AppStrings.of(context).delete, style: const TextStyle(color: AppColors.error)),
-          ),
-        ],
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
-    final isOwner = group.role == FamilyRole.OWNER;
-    final card = GestureDetector(
+    return GestureDetector(
       onTap: () => context.push(RouteNames.familyGroupDetail(group.id)),
       child: Container(
         padding: const EdgeInsets.all(AppSpacing.lg),
@@ -282,27 +256,6 @@ class _GroupCard extends StatelessWidget {
           ],
         ),
       ),
-    );
-    if (!isOwner) return card;
-    return Dismissible(
-      key: ValueKey(group.id),
-      direction: DismissDirection.endToStart,
-      background: Container(
-        alignment: Alignment.centerRight,
-        padding: const EdgeInsets.only(right: AppSpacing.xl),
-        decoration: BoxDecoration(
-          color: AppColors.errorContainer,
-          borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-        ),
-        child: const Icon(Icons.delete_outline_rounded, color: AppColors.error),
-      ),
-      confirmDismiss: (_) => _confirmDelete(context),
-      onDismissed: (_) {
-        context
-            .read<FamilyBloc>()
-            .add(FamilyGroupDeleteRequested(groupId: group.id));
-      },
-      child: card,
     );
   }
 }

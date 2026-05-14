@@ -1,4 +1,4 @@
-package com.example.mobile
+package com.nexspend.app
 
 import io.flutter.embedding.android.FlutterFragmentActivity
 

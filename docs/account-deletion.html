@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+  <html lang="tr">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NexSpend — Hesap Silme</title>
+    <style>
+      * { box-sizing: border-box; }
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        max-width: 760px;
+        margin: 0 auto;
+        padding: 32px 20px;
+        line-height: 1.7;
+        color: #1a1a1a;
+        background: #fafafa;
+      }
+      h1 { color: #131313; border-bottom: 2px solid #BAC3FF; padding-bottom: 12px; }
+      h2 { color: #131313; margin-top: 32px; }
+      h3 { color: #353534; margin-top: 24px; }
+      .updated { color: #666; font-size: 14px; margin-bottom: 24px; }
+      .highlight {
+        background: #f0f2ff;
+        border-left: 4px solid #BAC3FF;
+        padding: 12px 16px;
+        margin: 16px 0;
+        border-radius: 4px;
+      }
+      .email {
+        display: inline-block;
+        background: #131313;
+        color: #fff;
+        padding: 8px 16px;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 600;
+        margin: 8px 0;
+      }
+      .email:hover { background: #2a2a2a; }
+      ul, ol { padding-left: 24px; }
+      li { margin: 6px 0; }
+      code {
+        background: #eee;
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-size: 0.9em;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Hesap Silme Talebi</h1>
+    <p class="updated">Son güncelleme: 15 Mayıs 2026</p>
+
+    <p>NexSpend hesabınızı silmek için iki yöntem sunuyoruz. İşlem geri alınamaz; hesabınız ve tüm verileriniz kalıcı olarak
+   silinir.</p>
+
+    <h2>Yöntem 1 — Uygulama İçinden (Önerilen)</h2>
+    <ol>
+      <li>NexSpend uygulamasını açın</li>
+      <li>Profil sekmesine girin</li>
+      <li><strong>Ayarlar &rarr; Hesabımı Sil</strong> seçeneğine dokunun</li>
+      <li>İşlemi onaylayın</li>
+    </ol>
+    <div class="highlight">
+      Bu işlem hesabınızı ve tüm kişisel verilerinizi <strong>anında</strong> sistemden siler.
+    </div>
+
+    <h2>Yöntem 2 — E-posta ile Talep</h2>
+    <p>Uygulamaya erişiminiz yoksa, hesabınızın kayıtlı e-posta adresinden bizimle iletişime geçebilirsiniz:</p>
+    <p>
+      <a href="mailto:bystackmates@gmail.com?subject=Hesap%20Silme%20Talebi" class="email">
+        bystackmates@gmail.com
+      </a>
+    </p>
+    <p>E-posta konusu: <code>Hesap silme talebi</code></p>
+    <p>Talebinizi en geç <strong>7 iş günü</strong> içinde işleme alır, hesabınızı siler ve sizi e-posta ile
+  bilgilendiririz.</p>
+
+    <h2>Silinecek Veriler</h2>
+    <ul>
+      <li>Hesap bilgileri: ad, e-posta adresi, şifre özeti (hash), profil resmi</li>
+      <li>Tüm finansal kayıtlar: hesaplar, gelir-gider işlemleri, bütçeler, borçlar, abonelikler</li>
+      <li>Fiş resimleri ve OCR sonuçları</li>
+      <li>Aile grupları ve ortak bütçe katılımlarınız</li>
+      <li>Bildirim ayarları ve cihaz tokenleri</li>
+    </ul>
+
+    <h2>Saklanacak Veriler</h2>
+    <p>Aşağıdaki veriler, ilgili süreler boyunca anonimize edilmiş veya sınırlı şekilde saklanabilir:</p>
+    <ul>
+      <li><strong>Yasal yükümlülükler:</strong> Türkiye Cumhuriyeti mevzuatı kapsamında saklanması zorunlu kayıtlar (varsa)
+  ilgili süreyle anonim olarak saklanır.</li>
+      <li><strong>Sistem yedekleri:</strong> Yedeklerden tam silinme 30 gün içinde tamamlanır.</li>
+      <li><strong>Üçüncü taraf hizmetler:</strong> Google Firebase, AdMob gibi entegre hizmetlerden veri silinmesi ilgili
+  hizmet sağlayıcının politikalarına tabidir.</li>
+    </ul>
+
+    <h2>Sorularınız İçin</h2>
+    <p>Hesap silme süreciyle ilgili tüm sorularınız için bize <a 
+  href="mailto:bystackmates@gmail.com">bystackmates@gmail.com</a> adresinden ulaşabilirsiniz.</p>
+  </body>
+  </html>

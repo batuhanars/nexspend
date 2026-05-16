@@ -6,6 +6,10 @@ import '../../../core/constants/app_typography.dart';
 import '../../../core/di/injection.dart';
 import '../../../core/l10n/app_strings.dart';
 import '../../../core/services/app_events.dart';
+import '../../../data/models/budget_model.dart';
+import '../../../data/models/family_model.dart';
+import '../../../data/repositories/budget_repository.dart';
+import '../../../data/repositories/family_repository.dart';
 import '../../../navigation/route_names.dart';
 import '../bloc/transactions_bloc.dart';
 import '../widgets/summary_row.dart';
@@ -34,12 +38,15 @@ class _TransactionsView extends StatefulWidget {
 
 class _TransactionsViewState extends State<_TransactionsView> {
   final _scrollController = ScrollController();
+  List<BudgetModel> _personalBudgets = const [];
+  List<MySharedBudgetModel> _sharedBudgets = const [];
 
   @override
   void initState() {
     super.initState();
     _scrollController.addListener(_onScroll);
     getIt<AppEvents>().addListener(_onTransactionAdded);
+    _loadBudgets();
   }
 
   @override
@@ -49,9 +56,26 @@ class _TransactionsViewState extends State<_TransactionsView> {
     super.dispose();
   }
 
+  Future<void> _loadBudgets() async {
+    try {
+      final results = await Future.wait([
+        getIt<BudgetRepository>().getAll(),
+        getIt<FamilyRepository>().getMySharedBudgets(),
+      ]);
+      if (!mounted) return;
+      setState(() {
+        _personalBudgets = results[0] as List<BudgetModel>;
+        _sharedBudgets = results[1] as List<MySharedBudgetModel>;
+      });
+    } catch (_) {
+      // Bütçe etiketleri gösterilmesin diye sessizce yutalım — liste yine çalışır.
+    }
+  }
+
   void _onTransactionAdded() {
     if (mounted) {
       context.read<TransactionsBloc>().add(TransactionsRefreshRequested());
+      _loadBudgets();
     }
   }
 
@@ -150,7 +174,11 @@ class _TransactionsViewState extends State<_TransactionsView> {
                       ),
                     )
                   else ...[
-                    TransactionList(transactions: state.transactions),
+                    TransactionList(
+                      transactions: state.transactions,
+                      personalBudgets: _personalBudgets,
+                      sharedBudgets: _sharedBudgets,
+                    ),
                     if (state.isLoadingMore)
                       const SliverToBoxAdapter(
                         child: Padding(

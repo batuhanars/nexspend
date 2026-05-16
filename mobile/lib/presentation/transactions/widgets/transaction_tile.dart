@@ -14,8 +14,13 @@ import '../../../navigation/route_names.dart';
 import '../bloc/transactions_bloc.dart';
 
 class TransactionTile extends StatelessWidget {
-  const TransactionTile({super.key, required this.transaction});
+  const TransactionTile({
+    super.key,
+    required this.transaction,
+    this.budgetLabel,
+  });
   final TransactionModel transaction;
+  final String? budgetLabel;
 
   @override
   Widget build(BuildContext context) {
@@ -119,6 +124,10 @@ class TransactionTile extends StatelessWidget {
                       ],
                     ],
                   ),
+                  if (budgetLabel != null) ...[
+                    const SizedBox(height: 4),
+                    _BudgetBadge(label: budgetLabel!),
+                  ],
                 ],
               ),
             ),
@@ -177,5 +186,44 @@ class TransactionTile extends StatelessWidget {
     } catch (_) {
       return AppColors.onSurfaceVariant;
     }
+  }
+}
+
+class _BudgetBadge extends StatelessWidget {
+  const _BudgetBadge({required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      decoration: BoxDecoration(
+        color: AppColors.primary.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(
+            Icons.account_balance_wallet_outlined,
+            size: 10,
+            color: AppColors.primary,
+          ),
+          const SizedBox(width: 4),
+          Flexible(
+            child: Text(
+              label,
+              style: AppTypography.labelSm.copyWith(
+                color: AppColors.primary,
+                fontSize: 10,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

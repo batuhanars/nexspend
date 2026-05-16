@@ -87,7 +87,9 @@ export class FamilyService {
         },
         sharedBudgets: {
           where: { isActive: true },
-          include: { category: { select: { name: true } } },
+          include: {
+            category: { select: { name: true, icon: true, color: true } },
+          },
           orderBy: { createdAt: 'desc' },
         },
         invites: {
@@ -316,7 +318,9 @@ export class FamilyService {
         amount: dto.amount,
         startDate: new Date(dto.startDate),
       },
-      include: { category: { select: { name: true } } },
+      include: {
+        category: { select: { name: true, icon: true, color: true } },
+      },
     });
 
     return this.formatBudget(budget);
@@ -334,7 +338,9 @@ export class FamilyService {
         groupId,
         ...(includeInactive ? {} : { isActive: true }),
       },
-      include: { category: { select: { name: true } } },
+      include: {
+        category: { select: { name: true, icon: true, color: true } },
+      },
       orderBy: { createdAt: 'desc' },
     });
 
@@ -362,7 +368,9 @@ export class FamilyService {
       },
       include: {
         sharedBudget: {
-          include: { category: { select: { name: true } } },
+          include: {
+            category: { select: { name: true, icon: true, color: true } },
+          },
         },
       },
     });
@@ -488,7 +496,9 @@ export class FamilyService {
 
     const budget = await this.prisma.sharedBudget.findFirst({
       where: { id: budgetId, groupId },
-      include: { category: { select: { name: true, icon: true } } },
+      include: {
+        category: { select: { name: true, icon: true, color: true } },
+      },
     });
     if (!budget) throw new NotFoundException('Bütçe bulunamadı');
 
@@ -595,7 +605,7 @@ export class FamilyService {
     period: string;
     startDate: Date;
     isActive: boolean;
-    category: { name: string };
+    category: { name: string; icon?: string; color?: string };
   }) {
     const amount = Number(budget.amount);
     const spent = Number(budget.spent);
@@ -607,6 +617,8 @@ export class FamilyService {
       groupId: budget.groupId,
       categoryId: budget.categoryId,
       categoryName: budget.category.name,
+      categoryIcon: budget.category.icon ?? null,
+      categoryColor: budget.category.color ?? null,
       name: budget.name,
       amount,
       spent,

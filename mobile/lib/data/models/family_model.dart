@@ -131,6 +131,8 @@ class SharedBudgetModel {
     required this.groupId,
     required this.categoryId,
     required this.categoryName,
+    this.categoryIcon,
+    this.categoryColor,
     required this.name,
     required this.amount,
     required this.spent,
@@ -144,6 +146,8 @@ class SharedBudgetModel {
   final String groupId;
   final String categoryId;
   final String categoryName;
+  final String? categoryIcon;
+  final String? categoryColor;
   final String name;
   final double amount;
   final double spent;
@@ -160,6 +164,8 @@ class SharedBudgetModel {
         groupId: json['groupId'] as String,
         categoryId: json['categoryId'] as String,
         categoryName: json['categoryName'] as String,
+        categoryIcon: json['categoryIcon'] as String?,
+        categoryColor: json['categoryColor'] as String?,
         name: json['name'] as String,
         amount: (json['amount'] as num).toDouble(),
         spent: (json['spent'] as num).toDouble(),

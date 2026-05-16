@@ -9,6 +9,7 @@ import '../../../core/di/injection.dart';
 import '../../../core/l10n/app_strings.dart';
 import '../../../core/utils/currency_formatter.dart';
 import '../../../core/utils/date_formatter.dart';
+import '../../../core/utils/icon_mapper.dart';
 import '../../../data/models/family_model.dart';
 import '../../../data/repositories/family_repository.dart';
 import '../bloc/family_bloc.dart';
@@ -168,7 +169,7 @@ class _SharedBudgetDetailPageState extends State<SharedBudgetDetailPage> {
                     ),
                   )
                 else
-                  ..._buildGrouped(expenses),
+                  ..._buildGrouped(expenses, budget),
                 const SizedBox(height: AppSpacing.xxl),
               ],
             );
@@ -178,7 +179,8 @@ class _SharedBudgetDetailPageState extends State<SharedBudgetDetailPage> {
     );
   }
 
-  List<Widget> _buildGrouped(List<SharedBudgetExpenseModel> expenses) {
+  List<Widget> _buildGrouped(
+      List<SharedBudgetExpenseModel> expenses, SharedBudgetModel budget) {
     final sorted = [...expenses]
       ..sort((a, b) => b.transactionDate.compareTo(a.transactionDate));
     final groups = <String, List<SharedBudgetExpenseModel>>{};
@@ -198,7 +200,7 @@ class _SharedBudgetDetailPageState extends State<SharedBudgetDetailPage> {
         ),
       ));
       for (final e in items) {
-        widgets.add(_ExpenseTile(expense: e));
+        widgets.add(_ExpenseTile(expense: e, budget: budget));
       }
     });
     return widgets;
@@ -521,31 +523,37 @@ class _MemberBreakdown extends StatelessWidget {
 }
 
 class _ExpenseTile extends StatelessWidget {
-  const _ExpenseTile({required this.expense});
+  const _ExpenseTile({required this.expense, required this.budget});
 
   final SharedBudgetExpenseModel expense;
+  final SharedBudgetModel budget;
+
+  Color _hexColor(String? hex) {
+    if (hex == null || hex.isEmpty) return AppColors.tertiary;
+    try {
+      return Color(int.parse('FF${hex.replaceAll('#', '')}', radix: 16));
+    } catch (_) {
+      return AppColors.tertiary;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    final color = _hexColor(budget.categoryColor);
+    final icon = IconMapper.fromString(budget.categoryIcon ?? 'shopping_cart');
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
       child: Row(
         children: [
           Container(
-            width: 36,
-            height: 36,
+            width: 40,
+            height: 40,
             decoration: BoxDecoration(
-              color: AppColors.primary.withValues(alpha: 0.12),
+              color: color.withValues(alpha: 0.12),
               shape: BoxShape.circle,
             ),
-            alignment: Alignment.center,
-            child: Text(
-              expense.userName.isNotEmpty
-                  ? expense.userName[0].toUpperCase()
-                  : '?',
-              style: AppTypography.labelSm
-                  .copyWith(color: AppColors.primary),
-            ),
+            child: Icon(icon, color: color, size: 18),
           ),
           const SizedBox(width: AppSpacing.md),
           Expanded(

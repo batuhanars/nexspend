@@ -428,6 +428,7 @@ abstract class AppStrings {
   String get typeLabel;
   String get sourceLabel;
   String get descriptionLabel;
+  String get noteLabel;
   String get transactionIdLabel;
   String get timeLabel;
   String get sourceManual;
@@ -889,6 +890,7 @@ class _Tr extends AppStrings {
   @override String get typeLabel => 'Tür';
   @override String get sourceLabel => 'Kaynak';
   @override String get descriptionLabel => 'Açıklama';
+  @override String get noteLabel => 'Not';
   @override String get transactionIdLabel => 'İşlem No';
   @override String get timeLabel => 'Saat';
   @override String get sourceManual => 'Manuel';
@@ -1354,6 +1356,7 @@ class _En extends AppStrings {
   @override String get typeLabel => 'Type';
   @override String get sourceLabel => 'Source';
   @override String get descriptionLabel => 'Description';
+  @override String get noteLabel => 'Note';
   @override String get transactionIdLabel => 'Tx ID';
   @override String get timeLabel => 'Time';
   @override String get sourceManual => 'Manual';

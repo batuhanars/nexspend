@@ -241,6 +241,11 @@ class _ReceiptCard extends StatelessWidget {
                     label: s.descriptionLabel,
                     value: transaction.description!,
                   ),
+                if (transaction.note != null && transaction.note!.isNotEmpty)
+                  _DetailRow(
+                    label: s.noteLabel,
+                    value: transaction.note!,
+                  ),
                 const SizedBox(height: AppSpacing.md),
                 const Divider(
                   color: AppColors.surfaceContainerHighest,

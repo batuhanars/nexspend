@@ -52,6 +52,7 @@ class TransactionModel {
     this.category,
     this.account,
     this.description,
+    this.note,
   });
 
   final String id;
@@ -62,6 +63,7 @@ class TransactionModel {
   final CategoryInfo? category;
   final AccountInfo? account;
   final String? description;
+  final String? note;
 
   factory TransactionModel.fromJson(Map<String, dynamic> json) =>
       TransactionModel(
@@ -84,5 +86,6 @@ class TransactionModel {
             ? AccountInfo.fromJson(json['account'] as Map<String, dynamic>)
             : null,
         description: json['description'] as String?,
+        note: json['note'] as String?,
       );
 }

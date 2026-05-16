@@ -14,10 +14,12 @@ class BudgetCard extends StatelessWidget {
     required this.budget,
     required this.onDelete,
     required this.onEdit,
+    this.onTap,
   });
   final BudgetModel budget;
   final VoidCallback onDelete;
   final VoidCallback onEdit;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -69,7 +71,10 @@ class BudgetCard extends StatelessWidget {
         );
       },
       onDismissed: (_) => onDelete(),
-      child: Container(
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+        child: Container(
         padding: const EdgeInsets.all(AppSpacing.lg),
         decoration: BoxDecoration(
           color: AppColors.surfaceContainerHigh,
@@ -190,6 +195,7 @@ class BudgetCard extends StatelessWidget {
             ),
           ],
         ),
+      ),
       ),
     );
   }

@@ -6,9 +6,10 @@ import '../../../core/utils/currency_formatter.dart';
 import '../../../data/models/family_model.dart';
 
 class SharedBudgetCard extends StatelessWidget {
-  const SharedBudgetCard({super.key, required this.budget});
+  const SharedBudgetCard({super.key, required this.budget, this.onTap});
 
   final SharedBudgetModel budget;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -19,7 +20,10 @@ class SharedBudgetCard extends StatelessWidget {
             ? AppColors.tertiary.withValues(alpha: 0.7)
             : AppColors.primary;
 
-    return Container(
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+      child: Container(
       padding: const EdgeInsets.all(AppSpacing.lg),
       decoration: BoxDecoration(
         color: AppColors.surfaceContainerHigh,
@@ -75,6 +79,7 @@ class SharedBudgetCard extends StatelessWidget {
             ],
           ),
         ],
+      ),
       ),
     );
   }

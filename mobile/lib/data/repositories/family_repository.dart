@@ -115,4 +115,14 @@ class FamilyRepository {
   }) async {
     await _dio.delete(ApiEndpoints.familyGroupBudgetById(groupId, budgetId));
   }
+
+  Future<SharedBudgetDetailModel> getSharedBudgetExpenses({
+    required String groupId,
+    required String budgetId,
+  }) async {
+    final response = await _dio
+        .get(ApiEndpoints.familyGroupBudgetExpenses(groupId, budgetId));
+    return SharedBudgetDetailModel.fromJson(
+        response.data['data'] as Map<String, dynamic>);
+  }
 }

@@ -275,7 +275,16 @@ class _DetailBody extends StatelessWidget {
                                       groupId: groupId, budgetId: b.id),
                                 );
                           },
-                          child: SharedBudgetCard(budget: b),
+                          child: SharedBudgetCard(
+                            budget: b,
+                            onTap: () => context.push(
+                              RouteNames.sharedBudgetDetail(groupId, b.id),
+                              extra: {
+                                'budget': b,
+                                'bloc': context.read<FamilyBloc>(),
+                              },
+                            ),
+                          ),
                         ),
                       )),
 

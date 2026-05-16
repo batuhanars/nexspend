@@ -457,6 +457,66 @@ export class FamilyService {
     return null;
   }
 
+  // ─── Ortak Bütçe — İşlem Listesi ─────────────────────────────────────────────
+
+  async findSharedBudgetExpenses(
+    userId: string,
+    groupId: string,
+    budgetId: string,
+  ) {
+    await this.requireMember(userId, groupId);
+
+    const budget = await this.prisma.sharedBudget.findFirst({
+      where: { id: budgetId, groupId },
+      include: { category: { select: { name: true, icon: true } } },
+    });
+    if (!budget) throw new NotFoundException('Bütçe bulunamadı');
+
+    const expenses = await this.prisma.sharedExpense.findMany({
+      where: { sharedBudgetId: budgetId },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    if (expenses.length === 0) {
+      return { budget: this.formatBudget(budget), expenses: [] };
+    }
+
+    const userIds = Array.from(new Set(expenses.map((e) => e.userId)));
+    const transactionIds = Array.from(
+      new Set(expenses.map((e) => e.transactionId)),
+    );
+
+    const [users, transactions] = await Promise.all([
+      this.prisma.user.findMany({
+        where: { id: { in: userIds } },
+        select: { id: true, fullName: true },
+      }),
+      this.prisma.transaction.findMany({
+        where: { id: { in: transactionIds } },
+        select: { id: true, note: true, transactionDate: true },
+      }),
+    ]);
+
+    const userMap = new Map(users.map((u) => [u.id, u.fullName]));
+    const txMap = new Map(transactions.map((t) => [t.id, t]));
+
+    const formatted = expenses.map((e) => {
+      const tx = txMap.get(e.transactionId);
+      return {
+        id: e.id,
+        transactionId: e.transactionId,
+        userId: e.userId,
+        userName: userMap.get(e.userId) ?? 'Bilinmeyen üye',
+        amount: Number(e.amount),
+        note: tx?.note ?? null,
+        transactionDate: (tx?.transactionDate ?? e.createdAt).toISOString(),
+        createdAt: e.createdAt.toISOString(),
+      };
+    });
+
+    return { budget: this.formatBudget(budget), expenses: formatted };
+  }
+
   // ─── Private Helpers ─────────────────────────────────────────────────────────
 
   private async requireMember(userId: string, groupId: string) {

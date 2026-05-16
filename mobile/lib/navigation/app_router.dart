@@ -24,12 +24,16 @@ import '../presentation/inflation/bloc/inflation_bloc.dart';
 import '../presentation/budgets/bloc/add_budget_event.dart';
 import '../presentation/budgets/pages/budgets_page.dart';
 import '../presentation/budgets/pages/add_budget_page.dart';
+import '../presentation/budgets/pages/budget_detail_page.dart';
+import '../data/models/budget_model.dart' show BudgetModel;
+import '../presentation/family/pages/shared_budget_detail_page.dart';
 import '../data/models/debt_model.dart' show DebtModel;
 import '../data/models/subscription_model.dart' show SubscriptionModel;
 import '../presentation/debts/bloc/debt_detail_bloc.dart';
 import '../presentation/debts/bloc/debts_bloc.dart';
 import '../presentation/debts/pages/debt_detail_page.dart';
 import '../presentation/debts/pages/debts_page.dart';
+import '../data/models/family_model.dart' show SharedBudgetModel;
 import '../data/repositories/family_repository.dart';
 import '../presentation/family/bloc/family_bloc.dart';
 import '../presentation/family/bloc/family_event.dart';
@@ -259,6 +263,38 @@ GoRouter createRouter() {
           )..add(const AddBudgetInitialized()),
           child: const AddBudgetPage(),
         ),
+      ),
+      GoRoute(
+        path: '/budgets/:id',
+        name: 'budget-detail',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) {
+          final extra = state.extra as Map<String, dynamic>;
+          final budget = extra['budget'] as BudgetModel;
+          final bloc = extra['bloc'] as BudgetsBloc;
+          return BlocProvider.value(
+            value: bloc,
+            child: BudgetDetailPage(budget: budget),
+          );
+        },
+      ),
+      GoRoute(
+        path: '/family/:groupId/budgets/:budgetId',
+        name: 'shared-budget-detail',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) {
+          final groupId = state.pathParameters['groupId']!;
+          final extra = state.extra as Map<String, dynamic>;
+          final budget = extra['budget'] as SharedBudgetModel;
+          final bloc = extra['bloc'] as FamilyBloc;
+          return BlocProvider.value(
+            value: bloc,
+            child: SharedBudgetDetailPage(
+              groupId: groupId,
+              budget: budget,
+            ),
+          );
+        },
       ),
       GoRoute(
         path: RouteNames.reports,

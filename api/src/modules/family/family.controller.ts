@@ -123,6 +123,19 @@ export class FamilyController {
     return this.familyService.deleteGroup(user.id, groupId);
   }
 
+  @Get('groups/:id/budgets/:budgetId/expenses')
+  findSharedBudgetExpenses(
+    @CurrentUser() user: { id: string },
+    @Param('id') groupId: string,
+    @Param('budgetId') budgetId: string,
+  ) {
+    return this.familyService.findSharedBudgetExpenses(
+      user.id,
+      groupId,
+      budgetId,
+    );
+  }
+
   @Delete('groups/:id/budgets/:budgetId')
   @HttpCode(HttpStatus.OK)
   deleteSharedBudget(

@@ -206,6 +206,15 @@ class _BudgetsView extends StatelessWidget {
                             const EdgeInsets.only(bottom: AppSpacing.md),
                         child: BudgetCard(
                           budget: b,
+                          onTap: () {
+                            context.push(
+                              RouteNames.budgetDetail(b.id),
+                              extra: {
+                                'budget': b,
+                                'bloc': context.read<BudgetsBloc>(),
+                              },
+                            );
+                          },
                           onDelete: () {
                             context
                                 .read<BudgetsBloc>()

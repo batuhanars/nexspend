@@ -18,6 +18,7 @@ class RouteNames {
   static String transactionDetail(String id) => '/transactions/$id';
   static const String budgets = '/budgets';
   static const String addBudget = '/budgets/add';
+  static String budgetDetail(String id) => '/budgets/$id';
   static const String debts = '/debts';
   static String debtDetail(String id) => '/debts/$id';
   static const String subscriptions = '/subscriptions';
@@ -38,6 +39,8 @@ class RouteNames {
   // Aile Bütçesi
   static const String family = '/family';
   static String familyGroupDetail(String id) => '/family/$id';
+  static String sharedBudgetDetail(String groupId, String budgetId) =>
+      '/family/$groupId/budgets/$budgetId';
   static String familyContributions(String id) => '/family/$id/contributions';
   static String familyInvite(String token) => '/invite/$token';
 

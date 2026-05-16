@@ -167,6 +167,60 @@ class SharedBudgetModel {
       );
 }
 
+class SharedBudgetExpenseModel {
+  const SharedBudgetExpenseModel({
+    required this.id,
+    required this.transactionId,
+    required this.userId,
+    required this.userName,
+    required this.amount,
+    this.note,
+    required this.transactionDate,
+    required this.createdAt,
+  });
+
+  final String id;
+  final String transactionId;
+  final String userId;
+  final String userName;
+  final double amount;
+  final String? note;
+  final DateTime transactionDate;
+  final DateTime createdAt;
+
+  factory SharedBudgetExpenseModel.fromJson(Map<String, dynamic> json) =>
+      SharedBudgetExpenseModel(
+        id: json['id'] as String,
+        transactionId: json['transactionId'] as String,
+        userId: json['userId'] as String,
+        userName: json['userName'] as String,
+        amount: (json['amount'] as num).toDouble(),
+        note: json['note'] as String?,
+        transactionDate: DateTime.parse(json['transactionDate'] as String),
+        createdAt: DateTime.parse(json['createdAt'] as String),
+      );
+}
+
+class SharedBudgetDetailModel {
+  const SharedBudgetDetailModel({
+    required this.budget,
+    required this.expenses,
+  });
+
+  final SharedBudgetModel budget;
+  final List<SharedBudgetExpenseModel> expenses;
+
+  factory SharedBudgetDetailModel.fromJson(Map<String, dynamic> json) =>
+      SharedBudgetDetailModel(
+        budget: SharedBudgetModel.fromJson(
+            json['budget'] as Map<String, dynamic>),
+        expenses: (json['expenses'] as List)
+            .map((e) =>
+                SharedBudgetExpenseModel.fromJson(e as Map<String, dynamic>))
+            .toList(),
+      );
+}
+
 class ContributionMemberModel {
   const ContributionMemberModel({
     required this.userId,

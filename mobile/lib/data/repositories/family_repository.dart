@@ -57,6 +57,10 @@ class FamilyRepository {
     await _dio.post(ApiEndpoints.familyInviteReject(token));
   }
 
+  Future<void> cancelInvite(String token) async {
+    await _dio.delete(ApiEndpoints.familyInviteCancel(token));
+  }
+
   Future<SharedBudgetModel> createSharedBudget({
     required String groupId,
     required String categoryId,

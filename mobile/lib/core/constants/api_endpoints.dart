@@ -120,6 +120,8 @@ class ApiEndpoints {
       '/api/family/invites/$token/accept';
   static String familyInviteReject(String token) =>
       '/api/family/invites/$token/reject';
+  static String familyInviteCancel(String token) =>
+      '/api/family/invites/$token';
 
   // Insights
   static const String insights = '/api/insights';

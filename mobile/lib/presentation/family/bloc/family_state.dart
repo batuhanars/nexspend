@@ -96,6 +96,20 @@ class FamilyInviteError extends FamilyState {
   final String message;
 }
 
+class FamilyInviteCancelling extends FamilyState {
+  const FamilyInviteCancelling();
+}
+
+class FamilyInviteCancelled extends FamilyState {
+  const FamilyInviteCancelled({required this.groupId});
+  final String groupId;
+}
+
+class FamilyInviteCancelError extends FamilyState {
+  const FamilyInviteCancelError(this.message);
+  final String message;
+}
+
 // --- Ortak bütçe oluşturma ---
 
 class FamilySharedBudgetCreating extends FamilyState {

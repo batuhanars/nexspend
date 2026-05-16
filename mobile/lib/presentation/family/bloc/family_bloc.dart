@@ -15,6 +15,7 @@ class FamilyBloc extends Bloc<FamilyEvent, FamilyState> {
     on<FamilyInviteSendRequested>(_onSendInvite);
     on<FamilyInviteAcceptRequested>(_onAcceptInvite);
     on<FamilyInviteRejectRequested>(_onRejectInvite);
+    on<FamilyInviteCancelRequested>(_onCancelInvite);
     on<FamilySharedBudgetCreateRequested>(_onCreateSharedBudget);
     on<FamilySharedBudgetsLoadRequested>(_onLoadSharedBudgets);
     on<FamilyContributionsLoadRequested>(_onLoadContributions);
@@ -108,6 +109,19 @@ class FamilyBloc extends Bloc<FamilyEvent, FamilyState> {
       emit(const FamilyInviteRejected());
     } catch (e) {
       emit(FamilyInviteError(_parseError(e)));
+    }
+  }
+
+  Future<void> _onCancelInvite(
+    FamilyInviteCancelRequested event,
+    Emitter<FamilyState> emit,
+  ) async {
+    emit(const FamilyInviteCancelling());
+    try {
+      await _repo.cancelInvite(event.token);
+      emit(FamilyInviteCancelled(groupId: event.groupId));
+    } catch (e) {
+      emit(FamilyInviteCancelError(_parseError(e)));
     }
   }
 

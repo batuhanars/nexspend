@@ -117,6 +117,27 @@ class _FamilyGroupDetailPageState extends State<FamilyGroupDetailPage> {
               .read<FamilyBloc>()
               .add(FamilyGroupDetailLoadRequested(groupId: widget.groupId));
         }
+        if (state is FamilyInviteCancelled) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(AppStrings.of(context).inviteCancelledSuccess),
+              backgroundColor: AppColors.secondary,
+            ),
+          );
+          context
+              .read<FamilyBloc>()
+              .add(FamilyGroupDetailLoadRequested(groupId: widget.groupId));
+        }
+        if (state is FamilyInviteCancelError) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+                content: Text(state.message),
+                backgroundColor: AppColors.error),
+          );
+          context
+              .read<FamilyBloc>()
+              .add(FamilyGroupDetailLoadRequested(groupId: widget.groupId));
+        }
       },
       child: Scaffold(
         backgroundColor: AppColors.surface,
@@ -296,7 +317,7 @@ class _DetailBody extends StatelessWidget {
                   ...group.pendingInvites.map(
                     (inv) => Padding(
                       padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-                      child: _InviteRow(invite: inv),
+                      child: _InviteRow(invite: inv, groupId: groupId),
                     ),
                   ),
                 ],
@@ -476,9 +497,51 @@ class _DetailBody extends StatelessWidget {
 }
 
 class _InviteRow extends StatelessWidget {
-  const _InviteRow({required this.invite});
+  const _InviteRow({required this.invite, required this.groupId});
 
   final FamilyInviteModel invite;
+  final String groupId;
+
+  Future<void> _confirmCancel(BuildContext context) async {
+    final s = AppStrings.of(context);
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppColors.surfaceContainerHigh,
+        title: Text(s.cancelInviteTitle, style: AppTypography.titleSm),
+        content: Text(
+          s.cancelInviteConfirm(invite.email),
+          style: AppTypography.bodyMd
+              .copyWith(color: AppColors.onSurfaceVariant),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(
+              s.cancel,
+              style: AppTypography.bodyMd
+                  .copyWith(color: AppColors.onSurfaceVariant),
+            ),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(
+              s.delete,
+              style: const TextStyle(color: AppColors.error),
+            ),
+          ),
+        ],
+      ),
+    );
+    if (ok == true && context.mounted) {
+      context.read<FamilyBloc>().add(
+            FamilyInviteCancelRequested(
+              groupId: groupId,
+              token: invite.token ?? '',
+            ),
+          );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -497,6 +560,15 @@ class _InviteRow extends StatelessWidget {
             child: Text(invite.email, style: AppTypography.bodyMd),
           ),
           InviteStatusBadge(status: invite.status),
+          const SizedBox(width: AppSpacing.sm),
+          GestureDetector(
+            onTap: () => _confirmCancel(context),
+            child: const Icon(
+              Icons.close_rounded,
+              size: 18,
+              color: AppColors.error,
+            ),
+          ),
         ],
       ),
     );

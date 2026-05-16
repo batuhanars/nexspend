@@ -36,6 +36,15 @@ class FamilyInviteRejectRequested extends FamilyEvent {
   final String token;
 }
 
+class FamilyInviteCancelRequested extends FamilyEvent {
+  const FamilyInviteCancelRequested({
+    required this.groupId,
+    required this.token,
+  });
+  final String groupId;
+  final String token;
+}
+
 class FamilySharedBudgetCreateRequested extends FamilyEvent {
   const FamilySharedBudgetCreateRequested({
     required this.groupId,

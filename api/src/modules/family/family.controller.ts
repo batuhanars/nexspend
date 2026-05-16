@@ -71,6 +71,15 @@ export class FamilyController {
     return this.familyService.rejectInvite(user.id, token);
   }
 
+  @Delete('invites/:token')
+  @HttpCode(HttpStatus.OK)
+  cancelInvite(
+    @CurrentUser() user: { id: string },
+    @Param('token') token: string,
+  ) {
+    return this.familyService.cancelInvite(user.id, token);
+  }
+
   @Post('groups/:id/budgets')
   @HttpCode(HttpStatus.CREATED)
   createSharedBudget(

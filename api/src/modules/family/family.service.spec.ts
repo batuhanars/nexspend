@@ -27,6 +27,8 @@ const mockPrisma = {
     findUnique: jest.fn(),
     create: jest.fn(),
     update: jest.fn(),
+    updateMany: jest.fn(),
+    delete: jest.fn(),
   },
   sharedBudget: {
     create: jest.fn(),
@@ -164,10 +166,66 @@ describe('FamilyService', () => {
       );
     });
 
-    it('aynı e-postaya pending davet varsa BadRequestException', async () => {
-      mockPrisma.familyInvite.findFirst.mockResolvedValue(basePendingInvite);
+    it('aynı e-postaya pending davet varsa eski davet EXPIRED yapılır ve yeni davet gönderilir', async () => {
+      mockPrisma.familyMember.findFirst
+        .mockResolvedValueOnce(ownerMember)
+        .mockResolvedValueOnce(null);
+      mockPrisma.familyInvite.updateMany.mockResolvedValue({ count: 1 });
 
-      await expect(service.sendInvite(OWNER_ID, GROUP_ID, dto)).rejects.toThrow(
+      const result = await service.sendInvite(OWNER_ID, GROUP_ID, dto);
+
+      expect(mockPrisma.familyInvite.updateMany).toHaveBeenCalledWith({
+        where: {
+          groupId: GROUP_ID,
+          email: dto.email,
+          status: InviteStatus.PENDING,
+        },
+        data: { status: InviteStatus.EXPIRED },
+      });
+      expect(result.status).toBe('PENDING');
+    });
+  });
+
+  // ─── cancelInvite ──────────────────────────────────────────────────────────
+
+  describe('cancelInvite()', () => {
+    it('owner pending daveti iptal edebilir', async () => {
+      mockPrisma.familyInvite.findUnique.mockResolvedValue(basePendingInvite);
+      mockPrisma.familyMember.findFirst.mockResolvedValue(ownerMember);
+
+      const result = await service.cancelInvite(OWNER_ID, TOKEN);
+
+      expect(result).toBeNull();
+      expect(mockPrisma.familyInvite.delete).toHaveBeenCalledWith({
+        where: { id: basePendingInvite.id },
+      });
+    });
+
+    it('davet bulunamazsa NotFoundException', async () => {
+      mockPrisma.familyInvite.findUnique.mockResolvedValue(null);
+
+      await expect(service.cancelInvite(OWNER_ID, TOKEN)).rejects.toThrow(
+        NotFoundException,
+      );
+    });
+
+    it('owner değilse ForbiddenException', async () => {
+      mockPrisma.familyInvite.findUnique.mockResolvedValue(basePendingInvite);
+      mockPrisma.familyMember.findFirst.mockResolvedValue(memberMember);
+
+      await expect(service.cancelInvite(MEMBER_ID, TOKEN)).rejects.toThrow(
+        ForbiddenException,
+      );
+    });
+
+    it('pending olmayan daveti iptal etmeye çalışmak BadRequestException', async () => {
+      mockPrisma.familyInvite.findUnique.mockResolvedValue({
+        ...basePendingInvite,
+        status: InviteStatus.ACCEPTED,
+      });
+      mockPrisma.familyMember.findFirst.mockResolvedValue(ownerMember);
+
+      await expect(service.cancelInvite(OWNER_ID, TOKEN)).rejects.toThrow(
         BadRequestException,
       );
     });

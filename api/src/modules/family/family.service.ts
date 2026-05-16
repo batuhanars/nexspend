@@ -138,14 +138,12 @@ export class FamilyService {
       );
     }
 
-    const pendingDuplicate = await this.prisma.familyInvite.findFirst({
+    // Aynı email için bekleyen davet varsa otomatik EXPIRED yap — yeni davet
+    // gönderme akışını engellemesin (owner manuel iptal etmek zorunda kalmasın).
+    await this.prisma.familyInvite.updateMany({
       where: { groupId, email: dto.email, status: InviteStatus.PENDING },
+      data: { status: InviteStatus.EXPIRED },
     });
-    if (pendingDuplicate) {
-      throw new BadRequestException(
-        'Bu e-postaya zaten bekleyen bir davet var',
-      );
-    }
 
     const alreadyMember = await this.prisma.familyMember.findFirst({
       where: { groupId, user: { email: dto.email } },
@@ -457,6 +455,27 @@ export class FamilyService {
     return null;
   }
 
+  // ─── Davet İptali ─────────────────────────────────────────────────────────
+
+  async cancelInvite(userId: string, token: string): Promise<null> {
+    const invite = await this.prisma.familyInvite.findUnique({
+      where: { token },
+    });
+    if (!invite) throw new NotFoundException('Davet bulunamadı');
+
+    // Sadece grup sahibi pending daveti iptal edebilir
+    await this.requireOwner(userId, invite.groupId);
+
+    if (invite.status !== InviteStatus.PENDING) {
+      throw new BadRequestException(
+        'Yalnızca bekleyen davetler iptal edilebilir',
+      );
+    }
+
+    await this.prisma.familyInvite.delete({ where: { id: invite.id } });
+    return null;
+  }
+
   // ─── Ortak Bütçe — İşlem Listesi ─────────────────────────────────────────────
 
   async findSharedBudgetExpenses(
@@ -591,6 +610,7 @@ export class FamilyService {
       status: invite.status as string,
       expiresAt: invite.expiresAt.toISOString(),
       createdAt: invite.createdAt.toISOString(),
+      token: invite.token,
       inviteLink: `nexspend://invite/${invite.token}`,
     };
   }

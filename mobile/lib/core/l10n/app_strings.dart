@@ -190,6 +190,9 @@ abstract class AppStrings {
   String get sharedBudgetExpensesTitle;
   String get sharedBudgetNoExpenses;
   String get sharedBudgetMembersTotal;
+  String get cancelInviteTitle;
+  String cancelInviteConfirm(String email);
+  String get inviteCancelledSuccess;
   String get debtDeletedSuccess;
   String get subscriptionDeletedSuccess;
   String get groupDeletedSuccess;
@@ -662,6 +665,9 @@ class _Tr extends AppStrings {
   @override String get sharedBudgetExpensesTitle => 'HARCAMALAR';
   @override String get sharedBudgetNoExpenses => 'Bu ortak bütçeye ait harcama bulunamadı.';
   @override String get sharedBudgetMembersTotal => 'Toplam';
+  @override String get cancelInviteTitle => 'Daveti İptal Et';
+  @override String cancelInviteConfirm(String email) => '$email adresine gönderilen davet iptal edilecek.';
+  @override String get inviteCancelledSuccess => 'Davet iptal edildi';
   @override String get debtDeletedSuccess => 'Borç kaydı başarıyla silindi';
   @override String get subscriptionDeletedSuccess => 'Abonelik başarıyla silindi';
   @override String get groupDeletedSuccess => 'Grup başarıyla silindi';
@@ -1123,6 +1129,9 @@ class _En extends AppStrings {
   @override String get sharedBudgetExpensesTitle => 'EXPENSES';
   @override String get sharedBudgetNoExpenses => 'No expenses found for this shared budget.';
   @override String get sharedBudgetMembersTotal => 'Total';
+  @override String get cancelInviteTitle => 'Cancel Invite';
+  @override String cancelInviteConfirm(String email) => 'The invite sent to $email will be cancelled.';
+  @override String get inviteCancelledSuccess => 'Invite cancelled';
   @override String get debtDeletedSuccess => 'Debt record deleted successfully';
   @override String get subscriptionDeletedSuccess => 'Subscription deleted successfully';
   @override String get groupDeletedSuccess => 'Group deleted successfully';

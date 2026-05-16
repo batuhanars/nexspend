@@ -35,7 +35,7 @@ const mockPrisma = {
     findMany: jest.fn(),
     findFirst: jest.fn(),
   },
-  sharedExpense: {
+  transaction: {
     findMany: jest.fn(),
   },
   user: {
@@ -287,7 +287,7 @@ describe('FamilyService', () => {
         { userId: OWNER_ID, user: { id: OWNER_ID, fullName: 'Batuhan' }, joinedAt: new Date() },
         { userId: MEMBER_ID, user: { id: MEMBER_ID, fullName: 'Ayşe' }, joinedAt: new Date() },
       ]);
-      mockPrisma.sharedExpense.findMany.mockResolvedValue([
+      mockPrisma.transaction.findMany.mockResolvedValue([
         {
           userId: OWNER_ID,
           amount: 3200,

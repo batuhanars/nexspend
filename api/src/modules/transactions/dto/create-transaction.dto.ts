@@ -40,6 +40,11 @@ export class CreateTransactionDto {
   @IsOptional()
   transferToAccountId?: string;
 
+  // Kişisel mi ortak mı? null/omit → kişisel; doluysa belirtilen ortak bütçeye sayilir.
+  @IsString()
+  @IsOptional()
+  sharedBudgetId?: string;
+
   @IsArray()
   @IsString({ each: true })
   @IsOptional()

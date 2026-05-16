@@ -213,6 +213,8 @@ export class BudgetsService {
         userId,
         categoryId,
         type: TransactionType.EXPENSE,
+        // Ortak bütçeye atanan işlemler kişisel toplama dahil değil — çift sayım engellenir.
+        sharedBudgetId: null,
         transactionDate: {
           gte: startDate,
           ...(endDate ? { lte: endDate } : {}),

@@ -176,6 +176,34 @@ class SharedBudgetModel {
       );
 }
 
+class MySharedBudgetModel {
+  const MySharedBudgetModel({
+    required this.id,
+    required this.groupId,
+    required this.groupName,
+    required this.categoryId,
+    required this.categoryName,
+    required this.name,
+  });
+
+  final String id;
+  final String groupId;
+  final String groupName;
+  final String categoryId;
+  final String categoryName;
+  final String name;
+
+  factory MySharedBudgetModel.fromJson(Map<String, dynamic> json) =>
+      MySharedBudgetModel(
+        id: json['id'] as String,
+        groupId: json['groupId'] as String,
+        groupName: (json['groupName'] as String?) ?? '',
+        categoryId: json['categoryId'] as String,
+        categoryName: json['categoryName'] as String,
+        name: json['name'] as String,
+      );
+}
+
 class SharedBudgetExpenseModel {
   const SharedBudgetExpenseModel({
     required this.id,

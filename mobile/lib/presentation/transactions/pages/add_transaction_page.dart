@@ -9,6 +9,8 @@ import '../../../core/l10n/app_strings.dart';
 import '../../../core/services/app_events.dart';
 import '../../../data/models/account_model.dart';
 import '../../../data/models/category_model.dart';
+import '../../../data/models/family_model.dart';
+import '../../../data/repositories/family_repository.dart';
 import '../bloc/add_transaction_bloc.dart';
 import '../widgets/account_chips.dart';
 import '../widgets/recurring_section.dart';
@@ -47,6 +49,10 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
   bool _accountsInitialized = false;
   bool _categoryInitialized = false;
 
+  List<MySharedBudgetModel> _mySharedBudgets = const [];
+  // null = "Kişisel"; doluysa seçilen ortak bütçenin id'si.
+  String? _selectedSharedBudgetId;
+
   bool _isRecurring = false;
   String _recurringFrequency = 'MONTHLY';
   DateTime? _recurringEndDate;
@@ -56,6 +62,24 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
     super.initState();
     _type = widget.initialType ?? 'EXPENSE';
     context.read<AddTransactionBloc>().add(AddTransactionInitialized());
+    _loadMySharedBudgets();
+  }
+
+  Future<void> _loadMySharedBudgets() async {
+    try {
+      final list = await getIt<FamilyRepository>().getMySharedBudgets();
+      if (mounted) setState(() => _mySharedBudgets = list);
+    } catch (_) {
+      // Sessizce yutalım — chip group olmasa da form çalışmaya devam etsin.
+    }
+  }
+
+  List<MySharedBudgetModel> _sharedBudgetsForCategory() {
+    final c = _selectedCategory;
+    if (c == null) return const [];
+    return _mySharedBudgets
+        .where((b) => b.categoryId == c.id || b.categoryId == c.parentId)
+        .toList();
   }
 
   @override
@@ -103,6 +127,8 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
       'accountId': _selectedAccount!.id,
       'transactionDate': submitDate.toUtc().toIso8601String(),
       if (_selectedCategory != null) 'categoryId': _selectedCategory!.id,
+      if (_selectedSharedBudgetId != null)
+        'sharedBudgetId': _selectedSharedBudgetId,
       if (_noteController.text.trim().isNotEmpty)
         'note': _noteController.text.trim(),
       if (_type == 'TRANSFER' && _transferToAccount != null)
@@ -214,6 +240,7 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                   onChanged: (t) => setState(() {
                     _type = t;
                     _selectedCategory = null;
+                    _selectedSharedBudgetId = null;
                   }),
                 ),
                 const SizedBox(height: AppSpacing.xl),
@@ -227,8 +254,23 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                   TransactionCategoryGrid(
                     categories: filtered,
                     selected: _selectedCategory,
-                    onSelected: (c) =>
-                        setState(() => _selectedCategory = c),
+                    onSelected: (c) => setState(() {
+                      _selectedCategory = c;
+                      _selectedSharedBudgetId = null;
+                    }),
+                  ),
+                ],
+                if (_type == 'EXPENSE' &&
+                    _sharedBudgetsForCategory().isNotEmpty) ...[
+                  const SizedBox(height: AppSpacing.lg),
+                  _sectionLabel(AppStrings.of(context).budgetScopeLabel),
+                  const SizedBox(height: AppSpacing.sm),
+                  _BudgetScopeChips(
+                    budgets: _sharedBudgetsForCategory(),
+                    selectedId: _selectedSharedBudgetId,
+                    personalLabel: AppStrings.of(context).budgetScopePersonal,
+                    onSelected: (id) =>
+                        setState(() => _selectedSharedBudgetId = id),
                   ),
                 ],
                 const SizedBox(height: AppSpacing.xl),
@@ -328,5 +370,82 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
     if (s is AddTransactionSubmitting) return s.accounts;
     if (s is AddTransactionFailure) return s.accounts;
     return const [];
+  }
+}
+
+/// İşlem ekleme formunda kategori seçildikten sonra çıkar:
+/// "Kişisel" + kullanıcının üye olduğu o kategori için ortak bütçeler.
+/// null = Kişisel, doluysa ortak bütçeye atanır.
+class _BudgetScopeChips extends StatelessWidget {
+  const _BudgetScopeChips({
+    required this.budgets,
+    required this.selectedId,
+    required this.personalLabel,
+    required this.onSelected,
+  });
+
+  final List<MySharedBudgetModel> budgets;
+  final String? selectedId;
+  final String personalLabel;
+  final ValueChanged<String?> onSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    return Wrap(
+      spacing: AppSpacing.sm,
+      runSpacing: AppSpacing.sm,
+      children: [
+        _Chip(
+          label: personalLabel,
+          selected: selectedId == null,
+          onTap: () => onSelected(null),
+        ),
+        for (final b in budgets)
+          _Chip(
+            label: '${b.groupName} · ${b.name}',
+            selected: selectedId == b.id,
+            onTap: () => onSelected(b.id),
+          ),
+      ],
+    );
+  }
+}
+
+class _Chip extends StatelessWidget {
+  const _Chip({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
+      child: Container(
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.md,
+          vertical: AppSpacing.sm,
+        ),
+        decoration: BoxDecoration(
+          color: selected
+              ? AppColors.primary
+              : AppColors.surfaceContainerHighest,
+          borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
+        ),
+        child: Text(
+          label,
+          style: AppTypography.bodySm.copyWith(
+            color: selected ? AppColors.onPrimary : AppColors.onSurface,
+            fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
+          ),
+        ),
+      ),
+    );
   }
 }

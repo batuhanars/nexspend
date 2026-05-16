@@ -361,16 +361,20 @@ export class FamilyService {
       orderBy: { joinedAt: 'asc' },
     });
 
-    const expenses = await this.prisma.sharedExpense.findMany({
+    // Eski SharedExpense tablosu yerine doğrudan sharedBudgetId üzerinden
+    // bağlanmış EXPENSE transaction'larını topla.
+    const transactions = await this.prisma.transaction.findMany({
       where: {
+        sharedBudgetId: { not: null },
         sharedBudget: { groupId },
-        createdAt: { gte: start, lte: end },
+        type: TransactionType.EXPENSE,
+        transactionDate: { gte: start, lte: end },
       },
-      include: {
+      select: {
+        userId: true,
+        amount: true,
         sharedBudget: {
-          include: {
-            category: { select: { name: true, icon: true, color: true } },
-          },
+          select: { category: { select: { name: true } } },
         },
       },
     });
@@ -380,10 +384,10 @@ export class FamilyService {
       { total: number; categories: Map<string, number> }
     >();
 
-    for (const exp of expenses) {
-      const uid = exp.userId;
-      const catName = exp.sharedBudget.category.name;
-      const amount = Number(exp.amount);
+    for (const tx of transactions) {
+      const uid = tx.userId;
+      const catName = tx.sharedBudget?.category.name ?? '—';
+      const amount = Number(tx.amount);
 
       if (!byUser.has(uid))
         byUser.set(uid, { total: 0, categories: new Map() });
@@ -464,6 +468,37 @@ export class FamilyService {
     return null;
   }
 
+  // ─── Kullanıcının Üye Olduğu Tüm Ortak Bütçeler ───────────────────────────
+
+  async findMySharedBudgets(userId: string) {
+    // Kullanıcının üye olduğu grupların aktif ortak bütçeleri — işlem ekleme
+    // formundaki Kişisel/Ortak chip seçici için.
+    const memberships = await this.prisma.familyMember.findMany({
+      where: { userId },
+      select: { groupId: true, group: { select: { name: true } } },
+    });
+
+    if (memberships.length === 0) return [];
+
+    const groupNameById = new Map(
+      memberships.map((m) => [m.groupId, m.group.name]),
+    );
+    const groupIds = memberships.map((m) => m.groupId);
+
+    const budgets = await this.prisma.sharedBudget.findMany({
+      where: { groupId: { in: groupIds }, isActive: true },
+      include: {
+        category: { select: { name: true, icon: true, color: true } },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    return budgets.map((b) => ({
+      ...this.formatBudget(b),
+      groupName: groupNameById.get(b.groupId) ?? '',
+    }));
+  }
+
   // ─── Davet İptali ─────────────────────────────────────────────────────────
 
   async cancelInvite(userId: string, token: string): Promise<null> {
@@ -502,25 +537,12 @@ export class FamilyService {
     });
     if (!budget) throw new NotFoundException('Bütçe bulunamadı');
 
-    // Kişisel bütçeyle aynı mantık: bütçenin kategorisi + tarih aralığına uyan
-    // tüm grup üyelerinin EXPENSE işlemlerini doğrudan Transaction tablosundan
-    // çek — SharedExpense join'ine bağlı kalmıyoruz ki listener race
-    // condition'ı veya eski veriler liste dışı kalmasın.
-    const members = await this.prisma.familyMember.findMany({
-      where: { groupId },
-      select: { userId: true },
-    });
-    const memberIds = members.map((m) => m.userId);
-
+    // Kullanıcının "Ortak" seçimiyle bu bütçeye atadığı tüm Transaction'lar
+    // (artık kategori auto-match değil; sharedBudgetId opt-in).
     const transactions = await this.prisma.transaction.findMany({
       where: {
-        userId: { in: memberIds },
-        categoryId: budget.categoryId,
+        sharedBudgetId: budgetId,
         type: TransactionType.EXPENSE,
-        transactionDate: {
-          gte: budget.startDate,
-          ...(budget.endDate ? { lte: budget.endDate } : {}),
-        },
       },
       select: {
         id: true,

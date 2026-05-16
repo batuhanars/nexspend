@@ -292,6 +292,7 @@ model Transaction {
   transferToAccountId String?           @map("transfer_to_account_id") @db.VarChar(36)
   relatedDebtId       String?           @map("related_debt_id") @db.VarChar(36)
   relatedSubId        String?           @map("related_subscription_id") @db.VarChar(36)
+  sharedBudgetId      String?           @map("shared_budget_id") @db.VarChar(36)
   createdAt           DateTime          @default(now()) @map("created_at") @db.DateTime(0)
   updatedAt           DateTime          @updatedAt @map("updated_at") @db.DateTime(0)
 
@@ -301,6 +302,7 @@ model Transaction {
   transferToAccount   Account?      @relation("TransferToAccount", fields: [transferToAccountId], references: [id])
   relatedDebt         Debt?         @relation(fields: [relatedDebtId], references: [id])
   relatedSubscription Subscription? @relation(fields: [relatedSubId], references: [id])
+  sharedBudget        SharedBudget? @relation(fields: [sharedBudgetId], references: [id], onDelete: SetNull)
   receipts            Receipt[]
   tags                TransactionTag[]
 
@@ -309,6 +311,7 @@ model Transaction {
   @@index([categoryId], map: "idx_transactions_category")
   @@index([relatedDebtId], map: "idx_transactions_debt")
   @@index([relatedSubId], map: "idx_transactions_sub")
+  @@index([sharedBudgetId], map: "idx_transactions_shared_budget")
   @@map("transactions")
 }
 
@@ -679,22 +682,9 @@ model SharedBudget {
   createdAt  DateTime     @default(now()) @map("created_at") @db.DateTime(0)
   updatedAt  DateTime     @updatedAt @map("updated_at") @db.DateTime(0)
 
-  group    FamilyGroup     @relation(fields: [groupId], references: [id], onDelete: Cascade)
-  category Category        @relation(fields: [categoryId], references: [id])
-  expenses SharedExpense[]
+  group        FamilyGroup   @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  category     Category      @relation(fields: [categoryId], references: [id])
+  transactions Transaction[]
 
   @@map("shared_budgets")
-}
-
-model SharedExpense {
-  id             String   @id @default(uuid()) @db.VarChar(36)
-  sharedBudgetId String   @map("shared_budget_id") @db.VarChar(36)
-  transactionId  String   @map("transaction_id") @db.VarChar(36)
-  userId         String   @map("user_id") @db.VarChar(36)
-  amount         Decimal  @db.Decimal(15, 2)
-  createdAt      DateTime @default(now()) @map("created_at") @db.DateTime(0)
-
-  sharedBudget SharedBudget @relation(fields: [sharedBudgetId], references: [id], onDelete: Cascade)
-
-  @@map("shared_expenses")
 }

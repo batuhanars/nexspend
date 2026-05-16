@@ -38,6 +38,11 @@ export class FamilyController {
     return this.familyService.findGroups(user.id);
   }
 
+  @Get('shared-budgets/mine')
+  findMySharedBudgets(@CurrentUser() user: { id: string }) {
+    return this.familyService.findMySharedBudgets(user.id);
+  }
+
   @Get('groups/:id')
   findGroup(@CurrentUser() user: { id: string }, @Param('id') groupId: string) {
     return this.familyService.findGroup(user.id, groupId);

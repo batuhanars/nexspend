@@ -53,6 +53,7 @@ class TransactionModel {
     this.account,
     this.description,
     this.note,
+    this.sharedBudgetId,
   });
 
   final String id;
@@ -64,6 +65,7 @@ class TransactionModel {
   final AccountInfo? account;
   final String? description;
   final String? note;
+  final String? sharedBudgetId;
 
   factory TransactionModel.fromJson(Map<String, dynamic> json) =>
       TransactionModel(
@@ -87,5 +89,6 @@ class TransactionModel {
             : null,
         description: json['description'] as String?,
         note: json['note'] as String?,
+        sharedBudgetId: json['sharedBudgetId'] as String?,
       );
 }

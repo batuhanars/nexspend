@@ -39,4 +39,9 @@ export class UpdateTransactionDto {
   @IsString({ each: true })
   @IsOptional()
   tagIds?: string[];
+
+  // Kişisel mi ortak mı? null gönderildiğinde ortak baglanti kaldirilir.
+  @IsString()
+  @IsOptional()
+  sharedBudgetId?: string | null;
 }

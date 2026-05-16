@@ -156,6 +156,7 @@ export class TransactionsService {
           note: dto.note ?? null,
           transactionDate,
           transferToAccountId: dto.transferToAccountId ?? null,
+          sharedBudgetId: dto.sharedBudgetId ?? null,
           ...(dto.tagIds?.length && {
             tags: {
               create: dto.tagIds.map((tagId) => ({ tagId })),
@@ -209,6 +210,7 @@ export class TransactionsService {
         'MANUAL',
         dto.amount,
         transactionDate,
+        dto.sharedBudgetId ?? null,
       ),
     );
 
@@ -265,6 +267,9 @@ export class TransactionsService {
           ...(dto.transactionDate !== undefined && {
             transactionDate: new Date(dto.transactionDate),
           }),
+          ...(dto.sharedBudgetId !== undefined && {
+            sharedBudgetId: dto.sharedBudgetId,
+          }),
         },
         include: {
           category: true,
@@ -294,6 +299,10 @@ export class TransactionsService {
         oldAmount,
         newAmount,
         transaction.transactionDate,
+        existing.sharedBudgetId,
+        dto.sharedBudgetId !== undefined
+          ? dto.sharedBudgetId
+          : existing.sharedBudgetId,
       ),
     );
 
@@ -329,6 +338,7 @@ export class TransactionsService {
         existing.type,
         amount,
         existing.transactionDate,
+        existing.sharedBudgetId,
       ),
     );
 

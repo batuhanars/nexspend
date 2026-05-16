@@ -10,6 +10,7 @@ export class TransactionCreatedEvent {
     public readonly source: TransactionSource,
     public readonly amount: number,
     public readonly transactionDate: Date,
+    public readonly sharedBudgetId: string | null = null,
   ) {}
 }
 
@@ -24,6 +25,8 @@ export class TransactionUpdatedEvent {
     public readonly oldAmount: number,
     public readonly newAmount: number,
     public readonly transactionDate: Date,
+    public readonly oldSharedBudgetId: string | null = null,
+    public readonly newSharedBudgetId: string | null = null,
   ) {}
 }
 
@@ -35,5 +38,6 @@ export class TransactionDeletedEvent {
     public readonly type: TransactionType,
     public readonly amount: number,
     public readonly transactionDate: Date,
+    public readonly sharedBudgetId: string | null = null,
   ) {}
 }

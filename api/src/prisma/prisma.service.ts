@@ -110,9 +110,6 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
   get sharedBudget() {
     return this._client.sharedBudget;
   }
-  get sharedExpense() {
-    return this._client.sharedExpense;
-  }
 
   // =============================================
   // Utility Methods

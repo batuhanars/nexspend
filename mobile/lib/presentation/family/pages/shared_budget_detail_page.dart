@@ -112,13 +112,6 @@ class _SharedBudgetDetailPageState extends State<SharedBudgetDetailPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.surface,
-      floatingActionButton: FloatingActionButton(
-        onPressed: _addTransaction,
-        backgroundColor: AppColors.primary,
-        foregroundColor: AppColors.onPrimary,
-        tooltip: AppStrings.of(context).budgetAddTransaction,
-        child: const Icon(Icons.add_rounded),
-      ),
       appBar: AppBar(
         backgroundColor: AppColors.surface,
         surfaceTintColor: Colors.transparent,
@@ -161,6 +154,8 @@ class _SharedBudgetDetailPageState extends State<SharedBudgetDetailPage> {
                   _MemberBreakdown(expenses: expenses),
                   const SizedBox(height: AppSpacing.xl),
                 ],
+                _AddTransactionButton(onPressed: _addTransaction),
+                const SizedBox(height: AppSpacing.xl),
                 Text(
                   AppStrings.of(context).sharedBudgetExpensesTitle,
                   style: AppTypography.labelSm,
@@ -224,6 +219,35 @@ class _SharedBudgetDetailPageState extends State<SharedBudgetDetailPage> {
       }
     });
     return widgets;
+  }
+}
+
+class _AddTransactionButton extends StatelessWidget {
+  const _AddTransactionButton({required this.onPressed});
+
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: double.infinity,
+      height: 56,
+      child: FilledButton.icon(
+        onPressed: onPressed,
+        icon: const Icon(Icons.add_rounded, size: 20),
+        label: Text(
+          AppStrings.of(context).budgetAddTransaction,
+          style: AppTypography.bodyMd.copyWith(fontWeight: FontWeight.w600),
+        ),
+        style: FilledButton.styleFrom(
+          backgroundColor: AppColors.primary,
+          foregroundColor: AppColors.onPrimary,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
+          ),
+        ),
+      ),
+    );
   }
 }
 

@@ -149,15 +149,6 @@ class _BudgetDetailPageState extends State<BudgetDetailPage> {
       },
       child: Scaffold(
         backgroundColor: AppColors.surface,
-        floatingActionButton: _budget.category != null
-            ? FloatingActionButton(
-                onPressed: _addTransaction,
-                backgroundColor: AppColors.primary,
-                foregroundColor: AppColors.onPrimary,
-                tooltip: AppStrings.of(context).budgetAddTransaction,
-                child: const Icon(Icons.add_rounded),
-              )
-            : null,
         appBar: AppBar(
           backgroundColor: AppColors.surface,
           surfaceTintColor: Colors.transparent,
@@ -200,6 +191,10 @@ class _BudgetDetailPageState extends State<BudgetDetailPage> {
                       transactions: transactions,
                       statusColor: _budget.statusColor,
                     ),
+                    const SizedBox(height: AppSpacing.xl),
+                  ],
+                  if (_budget.category != null) ...[
+                    _AddTransactionButton(onPressed: _addTransaction),
                     const SizedBox(height: AppSpacing.xl),
                   ],
                   Text(
@@ -264,6 +259,35 @@ class _BudgetDetailPageState extends State<BudgetDetailPage> {
       }
     });
     return widgets;
+  }
+}
+
+class _AddTransactionButton extends StatelessWidget {
+  const _AddTransactionButton({required this.onPressed});
+
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: double.infinity,
+      height: 56,
+      child: FilledButton.icon(
+        onPressed: onPressed,
+        icon: const Icon(Icons.add_rounded, size: 20),
+        label: Text(
+          AppStrings.of(context).budgetAddTransaction,
+          style: AppTypography.bodyMd.copyWith(fontWeight: FontWeight.w600),
+        ),
+        style: FilledButton.styleFrom(
+          backgroundColor: AppColors.primary,
+          foregroundColor: AppColors.onPrimary,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
+          ),
+        ),
+      ),
+    );
   }
 }
 

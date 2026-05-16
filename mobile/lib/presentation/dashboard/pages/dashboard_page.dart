@@ -8,7 +8,11 @@ import '../../../core/l10n/app_strings.dart';
 import '../../../core/di/injection.dart';
 import '../../../core/services/app_events.dart';
 import '../../../core/utils/coach_mark_keys.dart';
+import '../../../data/models/budget_model.dart';
+import '../../../data/models/family_model.dart';
+import '../../../data/repositories/budget_repository.dart';
 import '../../../data/repositories/dashboard_repository.dart';
+import '../../../data/repositories/family_repository.dart';
 import '../../../navigation/route_names.dart';
 import '../bloc/dashboard_bloc.dart';
 import '../widgets/account_carousel.dart';
@@ -43,11 +47,14 @@ class _DashboardView extends StatefulWidget {
 
 class _DashboardViewState extends State<_DashboardView> {
   bool _isBalanceHidden = false;
+  List<BudgetModel> _personalBudgets = const [];
+  List<MySharedBudgetModel> _sharedBudgets = const [];
 
   @override
   void initState() {
     super.initState();
     getIt<AppEvents>().addListener(_onTransactionAdded);
+    _loadBudgets();
   }
 
   @override
@@ -56,9 +63,26 @@ class _DashboardViewState extends State<_DashboardView> {
     super.dispose();
   }
 
+  Future<void> _loadBudgets() async {
+    try {
+      final results = await Future.wait([
+        getIt<BudgetRepository>().getAll(),
+        getIt<FamilyRepository>().getMySharedBudgets(),
+      ]);
+      if (!mounted) return;
+      setState(() {
+        _personalBudgets = results[0] as List<BudgetModel>;
+        _sharedBudgets = results[1] as List<MySharedBudgetModel>;
+      });
+    } catch (_) {
+      // Etiket cikmasa da liste calismaya devam etsin.
+    }
+  }
+
   void _onTransactionAdded() {
     if (mounted) {
       context.read<DashboardBloc>().add(const DashboardRefreshRequested());
+      _loadBudgets();
     }
   }
 
@@ -202,6 +226,8 @@ class _DashboardViewState extends State<_DashboardView> {
             const SizedBox(height: AppSpacing.xl),
             RecentTransactionsSection(
               transactions: dashboard.recentTransactions,
+              personalBudgets: _personalBudgets,
+              sharedBudgets: _sharedBudgets,
               onViewAll: () => context.go(RouteNames.transactions),
             ),
           ],

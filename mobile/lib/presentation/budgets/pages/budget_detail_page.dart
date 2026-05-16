@@ -193,13 +193,17 @@ class _BudgetDetailPageState extends State<BudgetDetailPage> {
                     ),
                     const SizedBox(height: AppSpacing.xl),
                   ],
-                  if (_budget.category != null) ...[
-                    _AddTransactionButton(onPressed: _addTransaction),
-                    const SizedBox(height: AppSpacing.xl),
-                  ],
-                  Text(
-                    AppStrings.of(context).budgetTransactionsTitle,
-                    style: AppTypography.labelSm,
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          AppStrings.of(context).budgetTransactionsTitle,
+                          style: AppTypography.labelSm,
+                        ),
+                      ),
+                      if (_budget.category != null)
+                        _AddTransactionInlineAction(onTap: _addTransaction),
+                    ],
                   ),
                   const SizedBox(height: AppSpacing.md),
                   if (loading)
@@ -262,29 +266,31 @@ class _BudgetDetailPageState extends State<BudgetDetailPage> {
   }
 }
 
-class _AddTransactionButton extends StatelessWidget {
-  const _AddTransactionButton({required this.onPressed});
+class _AddTransactionInlineAction extends StatelessWidget {
+  const _AddTransactionInlineAction({required this.onTap});
 
-  final VoidCallback onPressed;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: double.infinity,
-      height: 56,
-      child: FilledButton.icon(
-        onPressed: onPressed,
-        icon: const Icon(Icons.add_rounded, size: 20),
-        label: Text(
-          AppStrings.of(context).budgetAddTransaction,
-          style: AppTypography.bodyMd.copyWith(fontWeight: FontWeight.w600),
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.xs,
+          vertical: AppSpacing.xs,
         ),
-        style: FilledButton.styleFrom(
-          backgroundColor: AppColors.primary,
-          foregroundColor: AppColors.onPrimary,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
-          ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              AppStrings.of(context).budgetAddTransaction,
+              style: AppTypography.labelSm.copyWith(color: AppColors.primary),
+            ),
+            const SizedBox(width: 4),
+            const Icon(Icons.add_rounded, size: 14, color: AppColors.primary),
+          ],
         ),
       ),
     );

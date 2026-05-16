@@ -140,21 +140,31 @@ export class BudgetsService {
   @OnEvent('transaction.created')
   async onTransactionCreated(event: TransactionCreatedEvent) {
     if (event.type !== TransactionType.EXPENSE || !event.categoryId) return;
+    // Ortak bütçeye atanmış işlem kişisel bütçeyi etkilemez — gereksiz
+    // recalculate + spam bildirimleri (PR #X'ten önce yakalandı).
+    if (event.sharedBudgetId) return;
     await this.recalculateForCategory(event.userId, event.categoryId);
   }
 
   @OnEvent('transaction.deleted')
   async onTransactionDeleted(event: TransactionDeletedEvent) {
     if (event.type !== TransactionType.EXPENSE || !event.categoryId) return;
+    if (event.sharedBudgetId) return;
     await this.recalculateForCategory(event.userId, event.categoryId);
   }
 
   @OnEvent('transaction.updated')
   async onTransactionUpdated(event: TransactionUpdatedEvent) {
+    // Kişisele "dokunan" ucu seç: sadece sharedBudgetId NULL olan + EXPENSE +
+    // categoryId dolu olan tarafları toplama dahil et.
     const affectsOld =
-      event.oldType === TransactionType.EXPENSE && event.oldCategoryId;
+      event.oldType === TransactionType.EXPENSE &&
+      event.oldCategoryId &&
+      !event.oldSharedBudgetId;
     const affectsNew =
-      event.newType === TransactionType.EXPENSE && event.newCategoryId;
+      event.newType === TransactionType.EXPENSE &&
+      event.newCategoryId &&
+      !event.newSharedBudgetId;
 
     if (!affectsOld && !affectsNew) return;
 
@@ -194,6 +204,7 @@ export class BudgetsService {
           budget.category.name,
           budget.id,
           Number(budget.amount),
+          Number(budget.spent),
           spent,
         );
       } catch (err) {
@@ -230,31 +241,38 @@ export class BudgetsService {
     categoryName: string,
     budgetId: string,
     amount: number,
-    spent: number,
+    oldSpent: number,
+    newSpent: number,
   ) {
     if (amount <= 0) return;
-    const pct = (spent / amount) * 100;
+    const oldPct = (oldSpent / amount) * 100;
+    const newPct = (newSpent / amount) * 100;
+    // Yalnızca eşiği bu güncellemede AŞARSAK bildir — aynı eşikte kalan
+    // veya azalan harcamalarda spam atmayalım. Kullanıcı %100'ün üzerinde
+    // sabitse her yeni işlemde tekrar "aştınız" almasın.
+    const crossed = (threshold: number) =>
+      oldPct < threshold && newPct >= threshold;
 
-    if (pct >= 100) {
-      this.logger.warn(`Bütçe aşıldı [${budgetId}] — %${Math.round(pct)}`);
+    if (crossed(100)) {
+      this.logger.warn(`Bütçe aşıldı [${budgetId}] — %${Math.round(newPct)}`);
       await this.notifications.sendToUser(
         userId,
         'Bütçe Aşıldı!',
-        `${categoryName} bütçenizi %${Math.round(pct)} oranında aştınız.`,
+        `${categoryName} bütçenizi %${Math.round(newPct)} oranında aştınız.`,
       );
-    } else if (pct >= 90) {
-      this.logger.warn(`Bütçe kritik [${budgetId}] — %${Math.round(pct)}`);
+    } else if (crossed(90)) {
+      this.logger.warn(`Bütçe kritik [${budgetId}] — %${Math.round(newPct)}`);
       await this.notifications.sendToUser(
         userId,
         'Bütçe Kritik Seviyede',
-        `${categoryName} bütçenizin %${Math.round(pct)}'ini harcadınız.`,
+        `${categoryName} bütçenizin %${Math.round(newPct)}'ini harcadınız.`,
       );
-    } else if (pct >= 80) {
-      this.logger.log(`Bütçe uyarısı [${budgetId}] — %${Math.round(pct)}`);
+    } else if (crossed(80)) {
+      this.logger.log(`Bütçe uyarısı [${budgetId}] — %${Math.round(newPct)}`);
       await this.notifications.sendToUser(
         userId,
         'Bütçe Uyarısı',
-        `${categoryName} bütçenizin %${Math.round(pct)}'ini harcadınız.`,
+        `${categoryName} bütçenizin %${Math.round(newPct)}'ini harcadınız.`,
       );
     }
   }

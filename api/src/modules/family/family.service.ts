@@ -512,7 +512,7 @@ export class FamilyService {
       }),
       this.prisma.transaction.findMany({
         where: { id: { in: transactionIds } },
-        select: { id: true, note: true, transactionDate: true },
+        select: { id: true, title: true, note: true, transactionDate: true },
       }),
     ]);
 
@@ -527,6 +527,7 @@ export class FamilyService {
         userId: e.userId,
         userName: userMap.get(e.userId) ?? 'Bilinmeyen üye',
         amount: Number(e.amount),
+        description: tx?.title ?? null,
         note: tx?.note ?? null,
         transactionDate: (tx?.transactionDate ?? e.createdAt).toISOString(),
         createdAt: e.createdAt.toISOString(),

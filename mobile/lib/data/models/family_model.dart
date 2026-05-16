@@ -177,6 +177,7 @@ class SharedBudgetExpenseModel {
     required this.userId,
     required this.userName,
     required this.amount,
+    this.description,
     this.note,
     required this.transactionDate,
     required this.createdAt,
@@ -187,6 +188,7 @@ class SharedBudgetExpenseModel {
   final String userId;
   final String userName;
   final double amount;
+  final String? description;
   final String? note;
   final DateTime transactionDate;
   final DateTime createdAt;
@@ -198,6 +200,7 @@ class SharedBudgetExpenseModel {
         userId: json['userId'] as String,
         userName: json['userName'] as String,
         amount: (json['amount'] as num).toDouble(),
+        description: json['description'] as String?,
         note: json['note'] as String?,
         transactionDate: DateTime.parse(json['transactionDate'] as String),
         createdAt: DateTime.parse(json['createdAt'] as String),

@@ -553,7 +553,9 @@ class _ExpenseTile extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  expense.note ?? expense.userName,
+                  expense.description ??
+                      expense.note ??
+                      AppStrings.of(context).transactionFallback,
                   style: AppTypography.bodyMd
                       .copyWith(fontWeight: FontWeight.w500),
                   maxLines: 1,

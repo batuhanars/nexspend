@@ -234,6 +234,7 @@ GoRouter createRouter() {
             child: AddTransactionPage(
               initialAccountId: extra?['accountId'],
               initialType: extra?['type'],
+              initialCategoryId: extra?['categoryId'],
             ),
           );
         },

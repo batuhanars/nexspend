@@ -7,6 +7,7 @@ import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
 import '../../../core/di/injection.dart';
 import '../../../core/l10n/app_strings.dart';
+import '../../../navigation/route_names.dart';
 import '../../../core/utils/category_extensions.dart';
 import '../../../core/utils/currency_formatter.dart';
 import '../../../core/utils/date_formatter.dart';
@@ -79,6 +80,20 @@ class _BudgetDetailPageState extends State<BudgetDetailPage> {
     );
   }
 
+  Future<void> _addTransaction() async {
+    if (_budget.category == null) return;
+    await context.push(
+      RouteNames.addTransaction,
+      extra: {
+        'type': 'EXPENSE',
+        'categoryId': _budget.category!.id,
+      },
+    );
+    if (!mounted) return;
+    context.read<BudgetsBloc>().add(const BudgetsRefreshRequested());
+    setState(() => _txFuture = _loadTransactions());
+  }
+
   Future<void> _confirmDelete() async {
     final s = AppStrings.of(context);
     final ok = await showDialog<bool>(
@@ -134,6 +149,15 @@ class _BudgetDetailPageState extends State<BudgetDetailPage> {
       },
       child: Scaffold(
         backgroundColor: AppColors.surface,
+        floatingActionButton: _budget.category != null
+            ? FloatingActionButton.extended(
+                onPressed: _addTransaction,
+                backgroundColor: AppColors.primary,
+                foregroundColor: AppColors.onPrimary,
+                icon: const Icon(Icons.add_rounded),
+                label: Text(AppStrings.of(context).budgetAddTransaction),
+              )
+            : null,
         appBar: AppBar(
           backgroundColor: AppColors.surface,
           surfaceTintColor: Colors.transparent,

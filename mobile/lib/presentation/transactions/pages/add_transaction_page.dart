@@ -23,10 +23,12 @@ class AddTransactionPage extends StatefulWidget {
     super.key,
     this.initialAccountId,
     this.initialType,
+    this.initialCategoryId,
   });
 
   final String? initialAccountId;
   final String? initialType;
+  final String? initialCategoryId;
 
   @override
   State<AddTransactionPage> createState() => _AddTransactionPageState();
@@ -43,6 +45,7 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
   AccountModel? _transferToAccount;
   DateTime _date = DateTime.now();
   bool _accountsInitialized = false;
+  bool _categoryInitialized = false;
 
   bool _isRecurring = false;
   String _recurringFrequency = 'MONTHLY';
@@ -188,6 +191,17 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
             }
 
             final filtered = _filteredCategories(categories);
+
+            if (!_categoryInitialized && widget.initialCategoryId != null) {
+              final preselectId = widget.initialCategoryId;
+              final match = categories
+                  .where((c) => c.id == preselectId)
+                  .toList();
+              if (match.isNotEmpty) {
+                _selectedCategory = match.first;
+                _categoryInitialized = true;
+              }
+            }
 
             return ListView(
               padding: const EdgeInsets.symmetric(

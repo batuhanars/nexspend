@@ -7,6 +7,7 @@ import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
 import '../../../core/di/injection.dart';
 import '../../../core/l10n/app_strings.dart';
+import '../../../navigation/route_names.dart';
 import '../../../core/utils/currency_formatter.dart';
 import '../../../core/utils/date_formatter.dart';
 import '../../../core/utils/icon_mapper.dart';
@@ -50,6 +51,18 @@ class _SharedBudgetDetailPageState extends State<SharedBudgetDetailPage> {
       setState(() => _budget = detail.budget);
     }
     return detail;
+  }
+
+  Future<void> _addTransaction() async {
+    await context.push(
+      RouteNames.addTransaction,
+      extra: {
+        'type': 'EXPENSE',
+        'categoryId': _budget.categoryId,
+      },
+    );
+    if (!mounted) return;
+    setState(() => _future = _load());
   }
 
   Future<void> _confirmDelete() async {
@@ -99,6 +112,13 @@ class _SharedBudgetDetailPageState extends State<SharedBudgetDetailPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.surface,
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: _addTransaction,
+        backgroundColor: AppColors.primary,
+        foregroundColor: AppColors.onPrimary,
+        icon: const Icon(Icons.add_rounded),
+        label: Text(AppStrings.of(context).budgetAddTransaction),
+      ),
       appBar: AppBar(
         backgroundColor: AppColors.surface,
         surfaceTintColor: Colors.transparent,

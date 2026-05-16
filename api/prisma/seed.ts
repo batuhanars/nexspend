@@ -258,7 +258,7 @@ const EXPENSE_CATEGORIES: ParentCategory[] = [
     inflationKey: 'genel',
   },
   {
-    name: 'Makina Parçası',
+    name: 'Makine Parçası',
     icon: 'settings',
     color: '#78909C',
     type: 'EXPENSE',
@@ -356,6 +356,13 @@ const SYSTEM_SPECIAL_CATEGORIES: ParentCategory[] = [
 
 async function seedCategories() {
   console.log('Kategoriler oluşturuluyor...');
+
+  // Eski yazimla seed edilmis kayitlari temizle (Makina Parcasi -> Makine Parcasi).
+  // Yeni DB'lerde noop, eski DB'lerde tek seferlik temizlik gorur.
+  await prisma.category.deleteMany({
+    where: { id: 'sys_makina_par_as_' },
+  });
+
   const allCategories = [
     ...EXPENSE_CATEGORIES,
     ...INCOME_CATEGORIES,

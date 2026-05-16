@@ -257,6 +257,14 @@ const EXPENSE_CATEGORIES: ParentCategory[] = [
     sortOrder: 17,
     inflationKey: 'genel',
   },
+  {
+    name: 'Makina Parçası',
+    icon: 'settings',
+    color: '#78909C',
+    type: 'EXPENSE',
+    sortOrder: 18,
+    inflationKey: 'genel',
+  },
 ];
 
 const INCOME_CATEGORIES: ParentCategory[] = [

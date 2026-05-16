@@ -138,7 +138,7 @@ Font: Inter (`google_fonts` paketi).
 `google_mobile_ads` paketi. Banner, `AppShell.bottomNavigationBar` slot'unda nav bar'ın hemen üstünde — **ShellRoute child'larında** (Home/Transactions/Budgets/Subscriptions) görünür. Auth, modal'lar, kamera, settings root navigator'da olduğu için banner görmezler.
 
 **ID yönetimi (`core/services/ads_service.dart`):**
-- **Android release** → gerçek banner unit (`ca-app-pub-9972490944328521/1861785732`)
+- **Android release** → gerçek banner unit (`ca-app-pub-9972490944328521/3011139898`)
 - **Android debug (`kDebugMode`)** → Google test ID
 - **iOS** → her zaman test ID (iOS prod henüz yok)
 

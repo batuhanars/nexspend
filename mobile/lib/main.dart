@@ -1,12 +1,12 @@
 import 'dart:async';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'app.dart';
 import 'core/di/injection.dart';
+import 'core/services/ads_service.dart';
 import 'core/services/notification_service.dart';
 import 'core/storage/secure_storage.dart';
 import 'core/utils/currency_notifier.dart';
@@ -46,7 +46,7 @@ void main() async {
     initializeDateFormatting('en_US', null),
   ]);
 
-  if (!kIsWeb) {
+  if (AdsService.isSupported) {
     unawaited(MobileAds.instance.initialize());
   }
 

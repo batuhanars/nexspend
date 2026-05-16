@@ -1,4 +1,4 @@
-package com.nexspend.app
+package com.nexspend.finance
 
 import io.flutter.embedding.android.FlutterFragmentActivity
 

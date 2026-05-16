@@ -12,7 +12,7 @@ class AuthRepository {
   final Dio _dio;
   final SecureStorage _storage;
   final _googleSignIn = GoogleSignIn(
-    serverClientId: '31697958728-08g4o12cre3s1hle79v1gabugvviuvba.apps.googleusercontent.com',
+    serverClientId: '871262907652-h5p6uhcr1ug12f2mhr7dqo9ikg2n7354.apps.googleusercontent.com',
     scopes: ['email', 'profile'],
   );
 

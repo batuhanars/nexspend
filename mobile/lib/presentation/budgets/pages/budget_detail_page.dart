@@ -150,12 +150,12 @@ class _BudgetDetailPageState extends State<BudgetDetailPage> {
       child: Scaffold(
         backgroundColor: AppColors.surface,
         floatingActionButton: _budget.category != null
-            ? FloatingActionButton.extended(
+            ? FloatingActionButton(
                 onPressed: _addTransaction,
                 backgroundColor: AppColors.primary,
                 foregroundColor: AppColors.onPrimary,
-                icon: const Icon(Icons.add_rounded),
-                label: Text(AppStrings.of(context).budgetAddTransaction),
+                tooltip: AppStrings.of(context).budgetAddTransaction,
+                child: const Icon(Icons.add_rounded),
               )
             : null,
         appBar: AppBar(

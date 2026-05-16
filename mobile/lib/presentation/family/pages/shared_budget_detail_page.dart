@@ -112,12 +112,12 @@ class _SharedBudgetDetailPageState extends State<SharedBudgetDetailPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.surface,
-      floatingActionButton: FloatingActionButton.extended(
+      floatingActionButton: FloatingActionButton(
         onPressed: _addTransaction,
         backgroundColor: AppColors.primary,
         foregroundColor: AppColors.onPrimary,
-        icon: const Icon(Icons.add_rounded),
-        label: Text(AppStrings.of(context).budgetAddTransaction),
+        tooltip: AppStrings.of(context).budgetAddTransaction,
+        child: const Icon(Icons.add_rounded),
       ),
       appBar: AppBar(
         backgroundColor: AppColors.surface,

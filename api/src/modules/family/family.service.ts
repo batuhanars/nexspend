@@ -15,6 +15,7 @@ import {
   FamilyMember,
   FamilyRole,
   InviteStatus,
+  TransactionType,
 } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import { FAMILY_CONSTANTS } from './family.constants';
@@ -491,48 +492,61 @@ export class FamilyService {
     });
     if (!budget) throw new NotFoundException('Bütçe bulunamadı');
 
-    const expenses = await this.prisma.sharedExpense.findMany({
-      where: { sharedBudgetId: budgetId },
-      orderBy: { createdAt: 'desc' },
+    // Kişisel bütçeyle aynı mantık: bütçenin kategorisi + tarih aralığına uyan
+    // tüm grup üyelerinin EXPENSE işlemlerini doğrudan Transaction tablosundan
+    // çek — SharedExpense join'ine bağlı kalmıyoruz ki listener race
+    // condition'ı veya eski veriler liste dışı kalmasın.
+    const members = await this.prisma.familyMember.findMany({
+      where: { groupId },
+      select: { userId: true },
+    });
+    const memberIds = members.map((m) => m.userId);
+
+    const transactions = await this.prisma.transaction.findMany({
+      where: {
+        userId: { in: memberIds },
+        categoryId: budget.categoryId,
+        type: TransactionType.EXPENSE,
+        transactionDate: {
+          gte: budget.startDate,
+          ...(budget.endDate ? { lte: budget.endDate } : {}),
+        },
+      },
+      select: {
+        id: true,
+        userId: true,
+        amount: true,
+        title: true,
+        note: true,
+        transactionDate: true,
+        createdAt: true,
+      },
+      orderBy: { transactionDate: 'desc' },
     });
 
-    if (expenses.length === 0) {
+    if (transactions.length === 0) {
       return { budget: this.formatBudget(budget), expenses: [] };
     }
 
-    const userIds = Array.from(new Set(expenses.map((e) => e.userId)));
-    const transactionIds = Array.from(
-      new Set(expenses.map((e) => e.transactionId)),
-    );
-
-    const [users, transactions] = await Promise.all([
-      this.prisma.user.findMany({
-        where: { id: { in: userIds } },
-        select: { id: true, fullName: true },
-      }),
-      this.prisma.transaction.findMany({
-        where: { id: { in: transactionIds } },
-        select: { id: true, title: true, note: true, transactionDate: true },
-      }),
-    ]);
-
-    const userMap = new Map(users.map((u) => [u.id, u.fullName]));
-    const txMap = new Map(transactions.map((t) => [t.id, t]));
-
-    const formatted = expenses.map((e) => {
-      const tx = txMap.get(e.transactionId);
-      return {
-        id: e.id,
-        transactionId: e.transactionId,
-        userId: e.userId,
-        userName: userMap.get(e.userId) ?? 'Bilinmeyen üye',
-        amount: Number(e.amount),
-        description: tx?.title ?? null,
-        note: tx?.note ?? null,
-        transactionDate: (tx?.transactionDate ?? e.createdAt).toISOString(),
-        createdAt: e.createdAt.toISOString(),
-      };
+    const users = await this.prisma.user.findMany({
+      where: {
+        id: { in: Array.from(new Set(transactions.map((t) => t.userId))) },
+      },
+      select: { id: true, fullName: true },
     });
+    const userMap = new Map(users.map((u) => [u.id, u.fullName]));
+
+    const formatted = transactions.map((t) => ({
+      id: t.id,
+      transactionId: t.id,
+      userId: t.userId,
+      userName: userMap.get(t.userId) ?? 'Bilinmeyen üye',
+      amount: Number(t.amount),
+      description: t.title,
+      note: t.note,
+      transactionDate: t.transactionDate.toISOString(),
+      createdAt: t.createdAt.toISOString(),
+    }));
 
     return { budget: this.formatBudget(budget), expenses: formatted };
   }

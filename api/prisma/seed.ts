@@ -358,7 +358,12 @@ async function seedCategories() {
   console.log('Kategoriler oluşturuluyor...');
 
   // Eski yazimla seed edilmis kayitlari temizle (Makina Parcasi -> Makine Parcasi).
-  // Yeni DB'lerde noop, eski DB'lerde tek seferlik temizlik gorur.
+  // Yeni DB'lerde noop, eski DB'lerde tek seferlik temizlik gorur. Once
+  // CategoryInflationMap referansi (seed kendisi yaratiyor) silinmeli — yoksa
+  // foreign key constraint patlar.
+  await prisma.categoryInflationMap.deleteMany({
+    where: { categoryId: 'sys_makina_par_as_' },
+  });
   await prisma.category.deleteMany({
     where: { id: 'sys_makina_par_as_' },
   });

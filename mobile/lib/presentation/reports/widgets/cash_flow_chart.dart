@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:wallet_app/core/constants/app_colors.dart';
 import 'package:wallet_app/core/constants/app_spacing.dart';
 import 'package:wallet_app/core/constants/app_typography.dart';
+import 'package:wallet_app/core/l10n/app_strings.dart';
 import 'package:wallet_app/core/utils/currency_formatter.dart';
 import 'package:wallet_app/data/models/report_model.dart';
 
@@ -16,6 +17,7 @@ class CashFlowChart extends StatelessWidget {
   Widget build(BuildContext context) {
     if (items.isEmpty) return const SizedBox.shrink();
 
+    final s = AppStrings.of(context);
     final maxVal = items.expand((i) => [i.income, i.expense]).reduce(math.max);
     final topY = (maxVal * 1.2).ceilToDouble();
 
@@ -39,7 +41,7 @@ class CashFlowChart extends StatelessWidget {
             touchTooltipData: BarTouchTooltipData(
               getTooltipColor: (_) => AppColors.surfaceContainerHighest,
               getTooltipItem: (group, groupIndex, rod, rodIndex) {
-                final label = rodIndex == 0 ? 'Gelir' : 'Gider';
+                final label = rodIndex == 0 ? s.income : s.expense;
                 return BarTooltipItem(
                   '$label\n${CurrencyFormatter.formatCompact(rod.toY)}',
                   AppTypography.bodySm.copyWith(

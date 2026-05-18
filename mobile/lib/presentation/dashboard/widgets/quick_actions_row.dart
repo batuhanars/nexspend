@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
+import '../../../core/l10n/app_strings.dart';
 
 class QuickActionsRow extends StatelessWidget {
   const QuickActionsRow({
@@ -19,6 +20,7 @@ class QuickActionsRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final s = AppStrings.of(context);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.pagePadding),
       child: Row(
@@ -26,25 +28,25 @@ class QuickActionsRow extends StatelessWidget {
         children: [
           _ActionButton(
             icon: Icons.add_rounded,
-            label: 'Gelir',
+            label: s.income,
             color: AppColors.secondary,
             onTap: onIncome,
           ),
           _ActionButton(
             icon: Icons.remove_rounded,
-            label: 'Gider',
+            label: s.expense,
             color: AppColors.tertiary,
             onTap: onExpense,
           ),
           _ActionButton(
             icon: Icons.swap_horiz_rounded,
-            label: 'Transfer',
+            label: s.transfer,
             color: AppColors.primary,
             onTap: onTransfer,
           ),
           _ActionButton(
             icon: Icons.document_scanner_outlined,
-            label: 'Tara',
+            label: s.scanAction,
             color: AppColors.onSurfaceVariant,
             onTap: onScan,
           ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
+import '../../../core/l10n/app_strings.dart';
 import '../../../data/models/family_model.dart';
 
 class MemberAvatarRow extends StatelessWidget {
@@ -156,7 +157,9 @@ class _MemberListTile extends StatelessWidget {
               borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
             ),
             child: Text(
-              member.role == FamilyRole.OWNER ? 'Sahip' : 'Üye',
+              member.role == FamilyRole.OWNER
+                  ? AppStrings.of(context).roleOwner
+                  : AppStrings.of(context).roleMember,
               style: AppTypography.labelSm.copyWith(
                 color: member.role == FamilyRole.OWNER
                     ? AppColors.primary

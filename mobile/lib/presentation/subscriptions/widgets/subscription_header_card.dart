@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
+import '../../../core/l10n/app_strings.dart';
 import '../../../core/utils/currency_formatter.dart';
 import '../../../data/models/subscription_model.dart';
 
@@ -12,6 +13,7 @@ class SubscriptionHeaderCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final color = sub.cardColor;
+    final s = AppStrings.of(context);
 
     return Container(
       padding: const EdgeInsets.all(AppSpacing.xl),
@@ -35,7 +37,7 @@ class SubscriptionHeaderCard extends StatelessWidget {
             CurrencyFormatter.format(sub.amount),
             style: AppTypography.headlineMd.copyWith(color: color),
           ),
-          Text(sub.billingCycle.label, style: AppTypography.bodySm),
+          Text(sub.billingCycle.label(s), style: AppTypography.bodySm),
           const SizedBox(height: AppSpacing.md),
           Container(
             padding: const EdgeInsets.symmetric(
@@ -49,7 +51,7 @@ class SubscriptionHeaderCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
             ),
             child: Text(
-              sub.isActive ? 'Aktif' : 'Pasif',
+              sub.isActive ? s.activeLabel : s.inactiveLabel,
               style: AppTypography.labelSm.copyWith(
                 fontWeight: FontWeight.w600,
                 color: sub.isActive

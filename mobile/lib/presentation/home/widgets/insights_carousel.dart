@@ -5,6 +5,7 @@ import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
 import '../../../core/di/injection.dart';
+import '../../../core/l10n/app_strings.dart';
 import '../../../data/repositories/insights_repository.dart';
 import '../../../navigation/route_names.dart';
 import '../../insights/bloc/insights_bloc.dart';
@@ -53,6 +54,7 @@ class _InsightsCarouselView extends StatelessWidget {
     required int unreadCount,
   }) {
     final preview = insights.take(3).toList();
+    final s = AppStrings.of(context);
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.pagePadding),
@@ -61,7 +63,7 @@ class _InsightsCarouselView extends StatelessWidget {
         children: [
           Row(
             children: [
-              Text('AKILLI ÖNERİLER', style: AppTypography.labelSm),
+              Text(s.smartSuggestionsSection, style: AppTypography.labelSm),
               const SizedBox(width: AppSpacing.sm),
               if (unreadCount > 0)
                 Container(
@@ -86,7 +88,7 @@ class _InsightsCarouselView extends StatelessWidget {
                 child: Row(
                   children: [
                     Text(
-                      'Tümü',
+                      s.allOption,
                       style: AppTypography.bodySm
                           .copyWith(color: AppColors.primary),
                     ),
@@ -147,7 +149,7 @@ class _EmptyCarousel extends StatelessWidget {
         borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
       ),
       child: Text(
-        'Harika! Hiç öneriniz yok 🎉',
+        AppStrings.of(context).noSuggestionsEmpty,
         style: AppTypography.bodyMd.copyWith(color: AppColors.onSurfaceVariant),
         textAlign: TextAlign.center,
       ),

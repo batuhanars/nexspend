@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
+import '../../../core/l10n/app_strings.dart';
 import '../../../core/utils/currency_formatter.dart';
 import '../../../data/models/account_analytics_model.dart';
 
@@ -11,18 +12,19 @@ class ThisMonthSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final s = AppStrings.of(context);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.pagePadding),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Bu Ay', style: AppTypography.titleSm),
+          Text(s.periodThisMonth, style: AppTypography.titleSm),
           const SizedBox(height: AppSpacing.md),
           Row(
             children: [
               Expanded(
                 child: FlowChip(
-                  label: 'Gelir',
+                  label: s.income,
                   amount: analytics.currentMonthIncome,
                   color: AppColors.secondary,
                   icon: Icons.arrow_downward_rounded,
@@ -31,7 +33,7 @@ class ThisMonthSection extends StatelessWidget {
               const SizedBox(width: AppSpacing.md),
               Expanded(
                 child: FlowChip(
-                  label: 'Gider',
+                  label: s.expense,
                   amount: analytics.currentMonthExpense,
                   color: AppColors.tertiary,
                   icon: Icons.arrow_upward_rounded,

@@ -4,6 +4,7 @@ import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
 import '../../../core/di/injection.dart';
+import '../../../core/l10n/app_strings.dart';
 import '../../../data/repositories/insights_repository.dart';
 import '../bloc/insights_bloc.dart';
 import '../bloc/insights_event.dart';
@@ -102,9 +103,9 @@ class _InsightsViewState extends State<_InsightsView>
           unselectedLabelColor: AppColors.onSurfaceVariant,
           indicatorColor: AppColors.primary,
           dividerColor: Colors.transparent,
-          tabs: const [
-            Tab(text: 'Bu Ay'),
-            Tab(text: 'Geçen Ay'),
+          tabs: [
+            Tab(text: AppStrings.of(context).periodThisMonth),
+            Tab(text: AppStrings.of(context).tabLastMonth),
           ],
         ),
       ),

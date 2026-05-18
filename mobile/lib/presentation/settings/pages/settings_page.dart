@@ -175,10 +175,10 @@ class _SettingsView extends StatelessWidget {
                   onTap: () => _showLanguagePicker(context, s, user),
                 ),
                 const SizedBox(height: AppSpacing.lg),
-                SectionHeader('Gruplar'),
+                SectionHeader(s.familyGroupsSection),
                 SettingsTile(
                   icon: Icons.group_outlined,
-                  label: 'Ortak Bütçe',
+                  label: s.familyBudgetTitle,
                   onTap: () => context.push(RouteNames.family),
                 ),
                 const SizedBox(height: AppSpacing.lg),
@@ -199,15 +199,15 @@ class _SettingsView extends StatelessWidget {
                     ),
                 ],
                 const SizedBox(height: AppSpacing.lg),
-                SectionHeader('Yasal'),
+                SectionHeader(s.sectionLegal),
                 SettingsTile(
                   icon: Icons.privacy_tip_outlined,
-                  label: 'Gizlilik Politikası',
+                  label: s.privacyPolicyTitle,
                   onTap: () => context.push(RouteNames.privacyPolicy),
                 ),
                 SettingsTile(
                   icon: Icons.description_outlined,
-                  label: 'Kullanım Şartları',
+                  label: s.termsOfServiceTitle,
                   onTap: () => context.push(RouteNames.termsOfService),
                 ),
                 const SizedBox(height: AppSpacing.lg),
@@ -222,7 +222,7 @@ class _SettingsView extends StatelessWidget {
                 ),
                 SettingsTile(
                   icon: Icons.delete_forever_rounded,
-                  label: 'Hesabı Sil',
+                  label: s.deleteAccountTitle,
                   labelColor: AppColors.error,
                   iconColor: AppColors.error,
                   showChevron: false,
@@ -321,23 +321,24 @@ class _SettingsView extends StatelessWidget {
   }
 
   void _confirmDeleteAccount(BuildContext context) {
+    final s = AppStrings.of(context);
     showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: AppColors.surfaceContainerHigh,
-        title: Text('Hesabı Sil', style: AppTypography.titleSm),
+        title: Text(s.deleteAccountTitle, style: AppTypography.titleSm),
         content: Text(
-          'Hesabınız ve tüm verileriniz (işlemler, bütçeler, borçlar, abonelikler) kalıcı olarak silinecek. Bu işlem geri alınamaz.',
+          s.deleteUserAccountContent,
           style: AppTypography.bodyMd.copyWith(color: AppColors.onSurfaceVariant),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('İptal'),
+            child: Text(s.cancel),
           ),
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(true),
-            child: Text('Hesabı Sil',
+            child: Text(s.deleteAccountTitle,
                 style: TextStyle(color: AppColors.error)),
           ),
         ],

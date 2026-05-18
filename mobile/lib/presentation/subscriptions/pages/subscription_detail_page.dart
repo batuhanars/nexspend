@@ -256,7 +256,9 @@ class _SubscriptionDetailPageState extends State<SubscriptionDetailPage> {
               ),
             ),
             child: Text(
-              _sub.isActive ? 'Aboneliği Durdur' : 'Aboneliği Etkinleştir',
+              _sub.isActive
+                  ? AppStrings.of(context).stopSubscriptionBtn
+                  : AppStrings.of(context).activateSubscriptionBtn,
               style: AppTypography.bodyMd.copyWith(
                 fontWeight: FontWeight.w600,
                 color: _sub.isActive

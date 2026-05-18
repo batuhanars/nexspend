@@ -248,9 +248,9 @@ class _RegisterPageState extends State<RegisterPage> {
                             style: AppTypography.bodySm
                                 .copyWith(color: AppColors.onSurfaceVariant),
                             children: [
-                              const TextSpan(text: 'Okudum ve kabul ediyorum: '),
+                              TextSpan(text: AppStrings.of(context).legalAcceptPrefix),
                               TextSpan(
-                                text: 'Gizlilik Politikası',
+                                text: AppStrings.of(context).privacyPolicyTitle,
                                 recognizer: _privacyRecognizer,
                                 style: AppTypography.bodySm.copyWith(
                                   color: AppColors.primary,
@@ -258,9 +258,9 @@ class _RegisterPageState extends State<RegisterPage> {
                                   decorationColor: AppColors.primary,
                                 ),
                               ),
-                              const TextSpan(text: ' ve '),
+                              TextSpan(text: AppStrings.of(context).legalAcceptAnd),
                               TextSpan(
-                                text: 'Kullanım Şartları',
+                                text: AppStrings.of(context).termsOfServiceTitle,
                                 recognizer: _termsRecognizer,
                                 style: AppTypography.bodySm.copyWith(
                                   color: AppColors.primary,

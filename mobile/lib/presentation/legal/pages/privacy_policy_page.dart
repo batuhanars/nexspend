@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
+import '../../../core/l10n/app_strings.dart';
 
 class PrivacyPolicyPage extends StatelessWidget {
   const PrivacyPolicyPage({super.key});
@@ -14,7 +15,7 @@ class PrivacyPolicyPage extends StatelessWidget {
         backgroundColor: AppColors.surface,
         surfaceTintColor: Colors.transparent,
         iconTheme: const IconThemeData(color: AppColors.onSurface),
-        title: Text('Gizlilik Politikası', style: AppTypography.headlineSm),
+        title: Text(AppStrings.of(context).privacyPolicyTitle, style: AppTypography.headlineSm),
       ),
       body: ListView(
         padding: const EdgeInsets.all(AppSpacing.pagePadding),

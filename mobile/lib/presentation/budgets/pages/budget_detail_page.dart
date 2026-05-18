@@ -345,7 +345,7 @@ class _SummaryCard extends StatelessWidget {
                           color: AppColors.onSurfaceVariant,
                         ),
                       ),
-                    Text(budget.periodLabel, style: AppTypography.titleSm),
+                    Text(budget.periodLabel(AppStrings.of(context)), style: AppTypography.titleSm),
                   ],
                 ),
               ),
@@ -360,7 +360,7 @@ class _SummaryCard extends StatelessWidget {
                       BorderRadius.circular(AppSpacing.radiusSm),
                 ),
                 child: Text(
-                  '%${budget.percentage} · ${budget.statusLabel}',
+                  '%${budget.percentage} · ${budget.statusLabel(AppStrings.of(context))}',
                   style: AppTypography.labelSm.copyWith(
                     color: budget.statusColor,
                     fontWeight: FontWeight.w600,

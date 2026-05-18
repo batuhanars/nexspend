@@ -1,5 +1,6 @@
 // ignore_for_file: constant_identifier_names
 import 'package:flutter/material.dart';
+import '../../core/l10n/app_strings.dart';
 import 'category_model.dart';
 
 enum BudgetStatus { OK, WARNING, CRITICAL, EXCEEDED }
@@ -44,18 +45,18 @@ class BudgetModel {
         BudgetStatus.EXCEEDED => const Color(0xFFEF5350),
       };
 
-  String get statusLabel => switch (status) {
-        BudgetStatus.OK => 'Normal',
-        BudgetStatus.WARNING => 'Uyarı',
-        BudgetStatus.CRITICAL => 'Kritik',
-        BudgetStatus.EXCEEDED => 'Aşıldı',
+  String statusLabel(AppStrings s) => switch (status) {
+        BudgetStatus.OK => s.budgetStatusOk,
+        BudgetStatus.WARNING => s.budgetStatusWarning,
+        BudgetStatus.CRITICAL => s.budgetStatusCritical,
+        BudgetStatus.EXCEEDED => s.budgetStatusExceeded,
       };
 
-  String get periodLabel => switch (period) {
-        BudgetPeriod.MONTHLY => 'Aylık',
-        BudgetPeriod.WEEKLY => 'Haftalık',
-        BudgetPeriod.YEARLY => 'Yıllık',
-        BudgetPeriod.CUSTOM => 'Özel',
+  String periodLabel(AppStrings s) => switch (period) {
+        BudgetPeriod.MONTHLY => s.billingCycleMonthly,
+        BudgetPeriod.WEEKLY => s.billingCycleWeekly,
+        BudgetPeriod.YEARLY => s.billingCycleYearly,
+        BudgetPeriod.CUSTOM => s.budgetPeriodCustom,
       };
 
   factory BudgetModel.fromJson(Map<String, dynamic> json) => BudgetModel(

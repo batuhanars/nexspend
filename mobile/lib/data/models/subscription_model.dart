@@ -1,15 +1,16 @@
 // ignore_for_file: constant_identifier_names
 import 'package:flutter/material.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/l10n/app_strings.dart';
 
 enum BillingCycle { DAILY, WEEKLY, MONTHLY, YEARLY }
 
 extension BillingCycleX on BillingCycle {
-  String get label => switch (this) {
-        BillingCycle.DAILY => 'Günlük',
-        BillingCycle.WEEKLY => 'Haftalık',
-        BillingCycle.MONTHLY => 'Aylık',
-        BillingCycle.YEARLY => 'Yıllık',
+  String label(AppStrings s) => switch (this) {
+        BillingCycle.DAILY => s.billingCycleDaily,
+        BillingCycle.WEEKLY => s.billingCycleWeekly,
+        BillingCycle.MONTHLY => s.billingCycleMonthly,
+        BillingCycle.YEARLY => s.billingCycleYearly,
       };
 }
 

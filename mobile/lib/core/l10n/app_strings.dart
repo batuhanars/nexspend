@@ -496,6 +496,44 @@ abstract class AppStrings {
   String get createGroupError;
   String get familyGroupsSection;
   String get createFamilyGroupPrompt;
+
+  // v2 — Subscription detail
+  String get inactiveLabel;
+  String get detailsCardTitle;
+  String get onValue;
+  String get offValue;
+  String get nextRenewalLabel;
+  String get stopSubscriptionBtn;
+  String get activateSubscriptionBtn;
+
+  // v2 — Period extended (billing cycles already declared above)
+  String get budgetPeriodCustom;
+
+  // v2 — Budget status
+  String get budgetStatusOk;
+  String get budgetStatusWarning;
+  String get budgetStatusCritical;
+  String get budgetStatusExceeded;
+
+  // v2 — Family role
+  String get roleOwner;
+  String get roleMember;
+
+  // v2 — Insights
+  String get smartSuggestionsSection;
+  String get noSuggestionsEmpty;
+  String get tabLastMonth;
+
+  // v2 — Legal / settings
+  String get sectionLegal;
+  String get privacyPolicyTitle;
+  String get termsOfServiceTitle;
+  String get deleteUserAccountContent;
+  String get legalAcceptPrefix;
+  String get legalAcceptAnd;
+
+  // v2 — Quick actions
+  String get scanAction;
 }
 
 // ─── Turkish ────────────────────────────────────────────────────────────────
@@ -964,6 +1002,45 @@ class _Tr extends AppStrings {
   @override String get createGroupError => 'Grup oluşturulamadı';
   @override String get familyGroupsSection => 'GRUPLAR';
   @override String get createFamilyGroupPrompt => 'Grup oluştur';
+
+  // v2 — Subscription detail
+  @override String get inactiveLabel => 'Pasif';
+  @override String get detailsCardTitle => 'Detaylar';
+  @override String get onValue => 'Açık';
+  @override String get offValue => 'Kapalı';
+  @override String get nextRenewalLabel => 'Sonraki Yenilenme';
+  @override String get stopSubscriptionBtn => 'Aboneliği Durdur';
+  @override String get activateSubscriptionBtn => 'Aboneliği Etkinleştir';
+
+  // v2 — Period extended
+  @override String get budgetPeriodCustom => 'Özel';
+
+  // v2 — Budget status
+  @override String get budgetStatusOk => 'Normal';
+  @override String get budgetStatusWarning => 'Uyarı';
+  @override String get budgetStatusCritical => 'Kritik';
+  @override String get budgetStatusExceeded => 'Aşıldı';
+
+  // v2 — Family role
+  @override String get roleOwner => 'Sahip';
+  @override String get roleMember => 'Üye';
+
+  // v2 — Insights
+  @override String get smartSuggestionsSection => 'AKILLI ÖNERİLER';
+  @override String get noSuggestionsEmpty => 'Harika! Hiç öneriniz yok 🎉';
+  @override String get tabLastMonth => 'Geçen Ay';
+
+  // v2 — Legal / settings
+  @override String get sectionLegal => 'Yasal';
+  @override String get privacyPolicyTitle => 'Gizlilik Politikası';
+  @override String get termsOfServiceTitle => 'Kullanım Şartları';
+  @override String get deleteUserAccountContent =>
+      'Hesabınız ve tüm verileriniz (işlemler, bütçeler, borçlar, abonelikler) kalıcı olarak silinecek. Bu işlem geri alınamaz.';
+  @override String get legalAcceptPrefix => 'Okudum ve kabul ediyorum: ';
+  @override String get legalAcceptAnd => ' ve ';
+
+  // v2 — Quick actions
+  @override String get scanAction => 'Tara';
 }
 
 // ─── English ─────────────────────────────────────────────────────────────────
@@ -1526,4 +1603,43 @@ class _En extends AppStrings {
   @override String get createGroupError => 'Could not create group';
   @override String get familyGroupsSection => 'GROUPS';
   @override String get createFamilyGroupPrompt => 'Create group';
+
+  // v2 — Subscription detail
+  @override String get inactiveLabel => 'Inactive';
+  @override String get detailsCardTitle => 'Details';
+  @override String get onValue => 'On';
+  @override String get offValue => 'Off';
+  @override String get nextRenewalLabel => 'Next Renewal';
+  @override String get stopSubscriptionBtn => 'Cancel Subscription';
+  @override String get activateSubscriptionBtn => 'Reactivate Subscription';
+
+  // v2 — Period extended
+  @override String get budgetPeriodCustom => 'Custom';
+
+  // v2 — Budget status
+  @override String get budgetStatusOk => 'On Track';
+  @override String get budgetStatusWarning => 'Warning';
+  @override String get budgetStatusCritical => 'Critical';
+  @override String get budgetStatusExceeded => 'Exceeded';
+
+  // v2 — Family role
+  @override String get roleOwner => 'Owner';
+  @override String get roleMember => 'Member';
+
+  // v2 — Insights
+  @override String get smartSuggestionsSection => 'SMART SUGGESTIONS';
+  @override String get noSuggestionsEmpty => 'Awesome! No suggestions 🎉';
+  @override String get tabLastMonth => 'Last Month';
+
+  // v2 — Legal / settings
+  @override String get sectionLegal => 'Legal';
+  @override String get privacyPolicyTitle => 'Privacy Policy';
+  @override String get termsOfServiceTitle => 'Terms of Service';
+  @override String get deleteUserAccountContent =>
+      'Your account and all data (transactions, budgets, debts, subscriptions) will be permanently deleted. This cannot be undone.';
+  @override String get legalAcceptPrefix => 'I have read and accept: ';
+  @override String get legalAcceptAnd => ' and ';
+
+  // v2 — Quick actions
+  @override String get scanAction => 'Scan';
 }

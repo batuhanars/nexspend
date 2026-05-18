@@ -23,6 +23,7 @@ class BudgetCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final s = AppStrings.of(context);
     final progress = (budget.percentage.clamp(0, 100) / 100).toDouble();
     final category = budget.category;
 
@@ -127,7 +128,7 @@ class BudgetCard extends StatelessWidget {
                     borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
                   ),
                   child: Text(
-                    budget.periodLabel,
+                    budget.periodLabel(s),
                     style: AppTypography.labelSm.copyWith(
                       color: AppColors.onSurfaceVariant,
                       fontSize: 10,
@@ -183,7 +184,7 @@ class BudgetCard extends StatelessWidget {
                     borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
                   ),
                   child: Text(
-                    '%${budget.percentage} · ${budget.statusLabel}',
+                    '%${budget.percentage} · ${budget.statusLabel(s)}',
                     style: AppTypography.labelSm.copyWith(
                       color: budget.statusColor,
                       fontWeight: FontWeight.w600,

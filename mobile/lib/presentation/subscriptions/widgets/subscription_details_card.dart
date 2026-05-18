@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
+import '../../../core/l10n/app_strings.dart';
 import '../../../data/models/subscription_model.dart';
 
 class SubscriptionDetailsCard extends StatelessWidget {
@@ -10,6 +11,7 @@ class SubscriptionDetailsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final s = AppStrings.of(context);
     return Container(
       padding: const EdgeInsets.all(AppSpacing.lg),
       decoration: BoxDecoration(
@@ -19,32 +21,32 @@ class SubscriptionDetailsCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Detaylar', style: AppTypography.titleSm),
+          Text(s.detailsCardTitle, style: AppTypography.titleSm),
           const SizedBox(height: AppSpacing.md),
           if (sub.description != null) ...[
-            SubscriptionDetailRow(label: 'Açıklama', value: sub.description!),
+            SubscriptionDetailRow(label: s.descriptionLabel, value: sub.description!),
             const Divider(
                 color: AppColors.surfaceContainerHighest, height: 1),
           ],
           if (sub.categoryName != null) ...[
-            SubscriptionDetailRow(label: 'Kategori', value: sub.categoryName!),
+            SubscriptionDetailRow(label: s.categoryLabel, value: sub.categoryName!),
             const Divider(
                 color: AppColors.surfaceContainerHighest, height: 1),
           ],
           if (sub.accountName != null) ...[
-            SubscriptionDetailRow(label: 'Hesap', value: sub.accountName!),
+            SubscriptionDetailRow(label: s.accountLabel, value: sub.accountName!),
             const Divider(
                 color: AppColors.surfaceContainerHighest, height: 1),
           ],
           SubscriptionDetailRow(
-            label: 'Otomatik Kesinti',
-            value: sub.autoDeduct ? 'Açık' : 'Kapalı',
+            label: s.autoDeductLabel,
+            value: sub.autoDeduct ? s.onValue : s.offValue,
           ),
           if (sub.nextRenewalDate != null) ...[
             const Divider(
                 color: AppColors.surfaceContainerHighest, height: 1),
             SubscriptionDetailRow(
-              label: 'Sonraki Yenilenme',
+              label: s.nextRenewalLabel,
               value: _formatDate(sub.nextRenewalDate!),
               valueColor:
                   sub.isRenewingSoon ? AppColors.warning : null,

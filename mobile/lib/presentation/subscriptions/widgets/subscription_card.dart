@@ -16,6 +16,7 @@ class SubscriptionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final s = AppStrings.of(context);
     return Dismissible(
       key: ValueKey(sub.id),
       direction: DismissDirection.endToStart,
@@ -106,14 +107,14 @@ class SubscriptionCard extends StatelessWidget {
                       ],
                     ),
                     Text(
-                      '${sub.billingCycle.label} • ${sub.accountName ?? ''}',
+                      '${sub.billingCycle.label(s)} • ${sub.accountName ?? ''}',
                       style: AppTypography.bodySm.copyWith(
                         color: AppColors.onSurfaceVariant,
                       ),
                     ),
                     if (sub.nextRenewalDate != null)
                       Text(
-                        'Yenilenme: ${_formatDate(sub.nextRenewalDate!)}',
+                        '${s.nextRenewalLabel}: ${_formatDate(sub.nextRenewalDate!)}',
                         style: AppTypography.bodySm.copyWith(
                           color: sub.isRenewingSoon
                               ? AppColors.warning
@@ -154,7 +155,7 @@ class SubscriptionCard extends StatelessWidget {
                         ),
                       ),
                       child: Text(
-                        sub.isActive ? 'Aktif' : 'Pasif',
+                        sub.isActive ? s.activeLabel : s.inactiveLabel,
                         style: AppTypography.labelSm.copyWith(
                           fontWeight: FontWeight.w600,
                           color: sub.isActive

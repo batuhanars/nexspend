@@ -304,7 +304,7 @@ class _InflationSuggestionsSection extends StatelessWidget {
   }
 }
 
-// ── Aile Grupları Bölümü ───────────────────────────────────────────────────
+// ── Gruplar Bölümü ─────────────────────────────────────────────────────────
 
 class _FamilyGroupsSection extends StatefulWidget {
   const _FamilyGroupsSection();

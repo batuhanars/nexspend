@@ -150,7 +150,7 @@ class _OnboardingView extends StatelessWidget {
         _Type.welcome => 'NexSpend\'e\nHoş Geldin',
         _Type.features => 'Her Şey\nTek Yerde',
         _Type.inflation => 'Enflasyona\nKarşı Akıllı',
-        _Type.family => 'Aile ile\nBirlikte',
+        _Type.family => 'Grupla\nBirlikte',
       };
 
   String get _body => switch (data.type) {
@@ -161,7 +161,7 @@ class _OnboardingView extends StatelessWidget {
         _Type.inflation =>
           'TCMB verilerine dayalı bütçe önerileri alırsın. Alım gücünü korumak için ne yapman gerektiğini NexSpend söyler.',
         _Type.family =>
-          'Ayarlar > Aile sekmesinden paylaşımlı bütçe oluştur, aile üyelerini davet edebilirsin.',
+          'Ayarlar > Gruplar sekmesinden ortak bütçe oluştur, üyeleri davet edebilirsin.',
       };
 }
 

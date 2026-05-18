@@ -103,7 +103,7 @@ class ApiEndpoints {
   static String statementById(String id) => '/api/statements/$id';
   static String statementPay(String id) => '/api/statements/$id/pay';
 
-  // Family / Aile Bütçesi
+  // Family (kullanıcıya "Ortak Bütçe / Gruplar" olarak görünür)
   static const String familyGroups = '/api/family/groups';
   static String familyGroupById(String id) => '/api/family/groups/$id';
   static String familyGroupInvite(String id) => '/api/family/groups/$id/invite';

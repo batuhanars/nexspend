@@ -36,7 +36,7 @@ class RouteNames {
   // Insights (Home carousel'dan push)
   static const String insights = '/insights';
 
-  // Aile Bütçesi
+  // Ortak Bütçe (Gruplar)
   static const String family = '/family';
   static String familyGroupDetail(String id) => '/family/$id';
   static String sharedBudgetDetail(String groupId, String budgetId) =>

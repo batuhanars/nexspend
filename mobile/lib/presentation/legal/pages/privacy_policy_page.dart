@@ -45,7 +45,7 @@ class PrivacyPolicyPage extends StatelessWidget {
                 'Toplanan veriler yalnızca şu amaçlarla kullanılır:\n\n'
                 '• Uygulamanın temel finansal yönetim işlevlerini sağlamak\n'
                 '• Enflasyon karşılaştırması gibi kişiselleştirilmiş içgörüler sunmak\n'
-                '• Aile bütçesi özelliğinde grup üyeleriyle veri paylaşmak\n'
+                '• Ortak bütçe özelliğinde grup üyeleriyle veri paylaşmak\n'
                 '• Şifre sıfırlama gibi güvenlik işlemlerini gerçekleştirmek\n\n'
                 'Verileriniz üçüncü taraflara satılmaz, kiralanmaz veya pazarlama amacıyla paylaşılmaz.',
           ),

@@ -445,7 +445,7 @@ GoRouter createRouter() {
         builder: (context, _) => const InsightsPage(),
       ),
 
-      // Aile Bütçesi routes
+      // Ortak Bütçe (Gruplar) routes
       GoRoute(
         path: RouteNames.family,
         name: 'family',

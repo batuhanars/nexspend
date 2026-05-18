@@ -183,7 +183,7 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
               padding: const EdgeInsets.only(top: AppSpacing.xl),
               child: _CoachContent(
                 title: 'Ayarlar',
-                body: 'Profilini düzenleyebilir, Aile Bütçesi oluşturabilir ve bildirim tercihlerini ayarlayabilirsin.',
+                body: 'Profilini düzenleyebilir, Ortak Bütçe oluşturabilir ve bildirim tercihlerini ayarlayabilirsin.',
               ),
             ),
           ],

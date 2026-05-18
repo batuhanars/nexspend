@@ -928,7 +928,7 @@ class _Tr extends AppStrings {
   @override String get statementPeriodFmt => 'Dönem';
 
   // Family module
-  @override String get familyBudgetTitle => 'Aile Bütçesi';
+  @override String get familyBudgetTitle => 'Ortak Bütçe';
   @override String get createNewGroupTitle => 'Yeni Grup Oluştur';
   @override String get groupNameHint => 'Grup adı (örn. Ev Bütçesi)';
   @override String get createGroupBtn => 'Oluştur';
@@ -957,13 +957,13 @@ class _Tr extends AppStrings {
   @override String memberCountRole(int count, bool isOwner) =>
       '$count üye · ${isOwner ? 'Sahip' : 'Üye'}';
   @override String familyMemberCount(int count) => '$count üye';
-  @override String get noGroupsTitle => 'Aile bütçesi oluştur';
+  @override String get noGroupsTitle => 'Ortak bütçe oluştur';
   @override String get noGroupsSubtitle =>
-      'Partner\'ınla veya aile üyeleriyle ortak bütçe takibi yap. Her üyenin katkısı otomatik hesaplanır.';
+      'Grubunla ortak bütçe takibi yap. Ev arkadaşları, çiftler, küçük takımlar için ideal — her üyenin katkısı otomatik hesaplanır.';
   @override String get createGroupLargeBtn => 'Grup Oluştur';
   @override String get createGroupError => 'Grup oluşturulamadı';
-  @override String get familyGroupsSection => 'AİLE GRUPLARI';
-  @override String get createFamilyGroupPrompt => 'Aile grubu oluştur';
+  @override String get familyGroupsSection => 'GRUPLAR';
+  @override String get createFamilyGroupPrompt => 'Grup oluştur';
 }
 
 // ─── English ─────────────────────────────────────────────────────────────────
@@ -1489,7 +1489,7 @@ class _En extends AppStrings {
   };
 
   // Family module
-  @override String get familyBudgetTitle => 'Family Budget';
+  @override String get familyBudgetTitle => 'Shared Budget';
   @override String get createNewGroupTitle => 'Create New Group';
   @override String get groupNameHint => 'Group name (e.g. Home Budget)';
   @override String get createGroupBtn => 'Create';
@@ -1519,11 +1519,11 @@ class _En extends AppStrings {
       '$count member${count == 1 ? '' : 's'} · ${isOwner ? 'Owner' : 'Member'}';
   @override String familyMemberCount(int count) =>
       '$count member${count == 1 ? '' : 's'}';
-  @override String get noGroupsTitle => 'Create Family Budget';
+  @override String get noGroupsTitle => 'Create Shared Budget';
   @override String get noGroupsSubtitle =>
-      'Track shared budgets with your partner or family. Each member\'s contribution is calculated automatically.';
+      'Track shared budgets with your group. Ideal for housemates, couples, and small teams — each member\'s contribution is calculated automatically.';
   @override String get createGroupLargeBtn => 'Create Group';
   @override String get createGroupError => 'Could not create group';
-  @override String get familyGroupsSection => 'FAMILY GROUPS';
-  @override String get createFamilyGroupPrompt => 'Create family group';
+  @override String get familyGroupsSection => 'GROUPS';
+  @override String get createFamilyGroupPrompt => 'Create group';
 }

@@ -90,7 +90,7 @@ class _InviteView extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.xl),
           Text(
-            'Aile Bütçesine Davet',
+            'Ortak Bütçeye Davet',
             style: AppTypography.headlineSm,
             textAlign: TextAlign.center,
           ),

@@ -29,7 +29,7 @@ class TermsOfServicePage extends StatelessWidget {
             title: 'Hizmet Kapsamı',
             body:
                 'Uygulama; kişisel gelir-gider takibi, bütçe yönetimi, borç takibi, abonelik yönetimi '
-                've aile bütçesi gibi finansal yönetim araçları sunar. '
+                've ortak bütçe gibi finansal yönetim araçları sunar. '
                 'Uygulama bir finansal danışmanlık hizmeti değildir; sunulan veriler yalnızca bilgilendirme '
                 'amaçlıdır. Finansal kararlarınızın sorumluluğu size aittir.',
           ),
@@ -49,7 +49,7 @@ class TermsOfServicePage extends StatelessWidget {
                 '• Uygulamayı yasadışı amaçlarla kullanmak\n'
                 '• Başkalarının hesaplarına yetkisiz erişim sağlamaya çalışmak\n'
                 '• Uygulamanın altyapısına zarar verecek işlemler yapmak\n'
-                '• Aile bütçesi özelliğini kötüye kullanarak başkalarının finansal verilerini izinsiz görüntülemek\n\n'
+                '• Ortak bütçe özelliğini kötüye kullanarak başkalarının finansal verilerini izinsiz görüntülemek\n\n'
                 'Aykırı davranış tespit edildiğinde hesabınız askıya alınabilir veya silinebilir.',
           ),
           _Section(

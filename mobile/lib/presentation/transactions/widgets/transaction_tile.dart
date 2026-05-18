@@ -106,7 +106,7 @@ class TransactionTile extends StatelessWidget {
                     children: [
                       Flexible(
                         child: Text(
-                          '${transaction.account?.name ?? ''}  •  ${DateFormatter.formatShort(transaction.date)}, ${DateFormatter.formatTime(transaction.date)}',
+                          '${transaction.account?.name ?? ''}  •  ${DateFormatter.formatShort(transaction.date, context)}, ${DateFormatter.formatTime(transaction.date)}',
                           style: AppTypography.bodySm.copyWith(
                               color: AppColors.onSurfaceVariant),
                           maxLines: 1,

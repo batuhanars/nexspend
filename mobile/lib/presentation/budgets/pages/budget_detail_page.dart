@@ -229,7 +229,7 @@ class _BudgetDetailPageState extends State<BudgetDetailPage> {
                       ),
                     )
                   else
-                    ..._buildGroupedTransactions(transactions),
+                    ..._buildGroupedTransactions(transactions, context),
                   const SizedBox(height: AppSpacing.xxl),
                 ],
               );
@@ -240,11 +240,11 @@ class _BudgetDetailPageState extends State<BudgetDetailPage> {
     );
   }
 
-  List<Widget> _buildGroupedTransactions(List<TransactionModel> transactions) {
+  List<Widget> _buildGroupedTransactions(List<TransactionModel> transactions, BuildContext context) {
     final sorted = [...transactions]..sort((a, b) => b.date.compareTo(a.date));
     final groups = <String, List<TransactionModel>>{};
     for (final t in sorted) {
-      final key = DateFormatter.formatGroupHeader(t.date);
+      final key = DateFormatter.formatGroupHeader(t.date, context);
       groups.putIfAbsent(key, () => []).add(t);
     }
     final widgets = <Widget>[];
@@ -407,7 +407,7 @@ class _SummaryCard extends StatelessWidget {
               Expanded(
                 child: _StatColumn(
                   label: s.budgetStatStart,
-                  value: DateFormatter.formatMini(budget.startDate),
+                  value: DateFormatter.formatMini(budget.startDate, context),
                   color: AppColors.onSurfaceVariant,
                 ),
               ),
@@ -415,7 +415,7 @@ class _SummaryCard extends StatelessWidget {
                 child: _StatColumn(
                   label: s.budgetStatEnd,
                   value: budget.endDate != null
-                      ? DateFormatter.formatMini(budget.endDate!)
+                      ? DateFormatter.formatMini(budget.endDate!, context)
                       : '—',
                   color: AppColors.onSurfaceVariant,
                 ),
@@ -517,7 +517,7 @@ class _DailySpendChart extends StatelessWidget {
                       final date =
                           startDay.add(Duration(days: group.x));
                       return BarTooltipItem(
-                        '${DateFormatter.formatMini(date)}\n'
+                        '${DateFormatter.formatMini(date, context)}\n'
                         '${CurrencyFormatter.format(rod.toY)}',
                         AppTypography.labelSm
                             .copyWith(color: AppColors.onSurface),

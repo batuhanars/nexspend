@@ -45,15 +45,6 @@ class TransactionsLoaded extends TransactionsState {
     );
   }
 
-  Map<String, List<TransactionModel>> get grouped {
-    final sorted = [...transactions]..sort((a, b) => b.date.compareTo(a.date));
-    final map = <String, List<TransactionModel>>{};
-    for (final t in sorted) {
-      final key = DateFormatter.formatGroupHeader(t.date);
-      map.putIfAbsent(key, () => []).add(t);
-    }
-    return map;
-  }
 }
 
 class TransactionsError extends TransactionsState {

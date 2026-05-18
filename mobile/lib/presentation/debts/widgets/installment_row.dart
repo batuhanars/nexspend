@@ -74,7 +74,7 @@ class InstallmentRow extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  DateFormatter.formatLong(installment.dueDate),
+                  DateFormatter.formatLong(installment.dueDate, context),
                   style: AppTypography.bodySm.copyWith(
                     color: isOverdue
                         ? AppColors.error

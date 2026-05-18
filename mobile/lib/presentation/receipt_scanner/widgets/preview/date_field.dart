@@ -55,7 +55,7 @@ class DateField extends StatelessWidget {
             ),
             const SizedBox(width: AppSpacing.md),
             Text(
-              DateFormatter.formatLong(state.effectiveDate),
+              DateFormatter.formatLong(state.effectiveDate, context),
               style: const TextStyle(color: AppColors.onSurface, fontSize: 14),
             ),
             const Spacer(),

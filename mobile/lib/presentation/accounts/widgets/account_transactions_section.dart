@@ -129,7 +129,7 @@ class AccountTransactionTile extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                 ),
                 Text(
-                  DateFormatter.formatShort(transaction.date),
+                  DateFormatter.formatShort(transaction.date, context),
                   style: AppTypography.bodySm
                       .copyWith(color: AppColors.onSurfaceVariant),
                 ),

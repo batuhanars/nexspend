@@ -189,7 +189,7 @@ class _SharedBudgetDetailPageState extends State<SharedBudgetDetailPage> {
                     ),
                   )
                 else
-                  ..._buildGrouped(expenses, budget),
+                  ..._buildGrouped(expenses, budget, context),
                 const SizedBox(height: AppSpacing.xxl),
               ],
             );
@@ -200,12 +200,12 @@ class _SharedBudgetDetailPageState extends State<SharedBudgetDetailPage> {
   }
 
   List<Widget> _buildGrouped(
-      List<SharedBudgetExpenseModel> expenses, SharedBudgetModel budget) {
+      List<SharedBudgetExpenseModel> expenses, SharedBudgetModel budget, BuildContext context) {
     final sorted = [...expenses]
       ..sort((a, b) => b.transactionDate.compareTo(a.transactionDate));
     final groups = <String, List<SharedBudgetExpenseModel>>{};
     for (final e in sorted) {
-      final key = DateFormatter.formatGroupHeader(e.transactionDate);
+      final key = DateFormatter.formatGroupHeader(e.transactionDate, context);
       groups.putIfAbsent(key, () => []).add(e);
     }
     final widgets = <Widget>[];
@@ -414,7 +414,7 @@ class _DailyExpenseChart extends StatelessWidget {
                     getTooltipItem: (group, _, rod, idx) {
                       final date = startDay.add(Duration(days: group.x));
                       return BarTooltipItem(
-                        '${DateFormatter.formatMini(date)}\n'
+                        '${DateFormatter.formatMini(date, context)}\n'
                         '${CurrencyFormatter.format(rod.toY)}',
                         AppTypography.labelSm
                             .copyWith(color: AppColors.onSurface),

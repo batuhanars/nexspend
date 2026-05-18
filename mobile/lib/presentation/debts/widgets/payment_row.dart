@@ -56,7 +56,7 @@ class PaymentRow extends StatelessWidget {
                   )
                 else
                   Text(
-                    DateFormatter.formatFull(payment.paidAt),
+                    DateFormatter.formatFull(payment.paidAt, context),
                     style: AppTypography.bodySm,
                   ),
               ],

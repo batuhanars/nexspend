@@ -214,7 +214,7 @@ class _ReceiptCard extends StatelessWidget {
               children: [
                 _DetailRow(
                   label: s.dateLabel,
-                  value: DateFormatter.formatLong(transaction.date),
+                  value: DateFormatter.formatLong(transaction.date, context),
                 ),
                 _DetailRow(
                   label: s.timeLabel,

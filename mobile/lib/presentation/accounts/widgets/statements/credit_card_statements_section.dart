@@ -155,7 +155,7 @@ class _CurrentPeriodCard extends StatelessWidget {
               children: [
                 Text(s.currentPeriodTitle, style: AppTypography.titleSm),
                 Text(
-                  '${DateFormatter.formatMini(period.periodStart)} – ${DateFormatter.formatMini(period.periodEnd)}',
+                  '${DateFormatter.formatMini(period.periodStart, context)} – ${DateFormatter.formatMini(period.periodEnd, context)}',
                   style: AppTypography.labelSm
                       .copyWith(color: AppColors.onSurfaceVariant),
                 ),
@@ -206,7 +206,7 @@ class _StatementTile extends StatelessWidget {
               children: [
                 Expanded(
                   child: Text(
-                    '${DateFormatter.formatMini(statement.periodStart)} – ${DateFormatter.formatMini(statement.periodEnd)}',
+                    '${DateFormatter.formatMini(statement.periodStart, context)} – ${DateFormatter.formatMini(statement.periodEnd, context)}',
                     style: AppTypography.bodyMd
                         .copyWith(fontWeight: FontWeight.w600),
                   ),
@@ -237,7 +237,7 @@ class _StatementTile extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  '${s.dueDateLabel}: ${DateFormatter.formatMini(statement.dueDate)}',
+                  '${s.dueDateLabel}: ${DateFormatter.formatMini(statement.dueDate, context)}',
                   style: AppTypography.labelSm
                       .copyWith(color: AppColors.onSurfaceVariant),
                 ),

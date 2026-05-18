@@ -20,11 +20,11 @@ class TransactionList extends StatelessWidget {
   final List<BudgetModel> personalBudgets;
   final List<MySharedBudgetModel> sharedBudgets;
 
-  Map<String, List<TransactionModel>> _group(String locale) {
+  Map<String, List<TransactionModel>> _group(BuildContext context) {
     final sorted = [...transactions]..sort((a, b) => b.date.compareTo(a.date));
     final map = <String, List<TransactionModel>>{};
     for (final t in sorted) {
-      final key = DateFormatter.formatGroupHeaderLocalized(t.date, locale);
+      final key = DateFormatter.formatGroupHeader(t.date, context);
       map.putIfAbsent(key, () => []).add(t);
     }
     return map;
@@ -59,8 +59,7 @@ class TransactionList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final locale = Localizations.localeOf(context).languageCode;
-    final grouped = _group(locale);
+    final grouped = _group(context);
     final entries = grouped.entries.toList();
 
     return SliverList(

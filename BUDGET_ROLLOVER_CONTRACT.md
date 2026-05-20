@@ -1,80 +1,78 @@
-# Budget Rollover Contract — Aylık/Haftalık/Yıllık Bütçe Dönem Yönetimi
+# Budget Lifecycle Contract — Bütçe Dönem Sonu Arşivleme + Geçmiş Raporlama
 
 > **Bu dosya neden var?** Backend ve frontend dev session'ları tek doğruluk kaynağından çalışsın diye. PM (proje yöneticisi rolündeki Opus) yazar; iki dev session da kendi tarafını implemente ederken bu sözleşmeye uyar.
 >
 > **Değiştirme kuralı:** Bu dosya implementasyon sırasında değişirse → PM güncelleyip ilgili session'a haber verir. Tek taraflı sapma yasak.
 >
-> **Kapsam:** V1+V2 Budget + SharedBudget modüllerine retroaktif eklenen dönem yönetimi katmanı. Sprint 4 (Bütçeler) ve Sprint 11 (Ortak Bütçe) üstüne kurulur.
+> **Kapsam:** V1 + Sprint 11 Budget + SharedBudget modüllerine retroaktif eklenen **dönem sonu arşivleme** + **geçmiş raporlama** + **yeni dönem prefilled CTA**. Otomatik yenileme YOK — kullanıcı niyeti korunur.
 
 ---
 
 ## 0. Sprint Hedefi
 
-Bütçeler şu an `endDate=null` ile sonsuz açık kalıyor — `period=MONTHLY` davranışsız bir etiket. Bu sprint:
+Bütçeler şu an `endDate=null` ile sonsuza dek açık kalıyor — `period=MONTHLY` davranışsız bir etiket. Bu sprint:
 
-1. Her bütçeye `endDate` zorunlu hale getirilir (period + startDate'ten hesaplanır).
-2. Cron her gece dönemi biten bütçeleri arşivler ve bir sonraki dönemi otomatik açar.
-3. Aynı "mantıksal" bütçenin dönemleri `seriesId` ile bağlanır → geçmiş raporlama.
-4. Frontend'de bütçe detayında "Geçmiş" tab'ı → dönem dönem karşılaştırma.
+1. Her bütçeye (kişisel + ortak) `endDate` zorunlu — period + startDate'ten hesaplanır.
+2. Cron her gece dönemi biten bütçeleri **arşivler** (`isActive=false`).
+3. Bildirim atılır: "Bütçen kapandı, yenisini oluşturmak ister misin?" → deep link `AddBudgetPage`'i ilgili alanlar dolu açar.
+4. Frontend'de bütçe detayında "Geçmiş" tab'ı — aynı kategoride önceki dönem kayıtları görülür, karşılaştırma yapılır.
 
-**Out of scope:** "Şablon tutarını kalıcı değiştir" UX (kullanıcı her yeni dönem amount'u manuel günceller), birden fazla dönem geriye kopyalama (cron eksik bıraktığı boşlukları doldurmaz), kapanış raporu kartı (Insights modülü zaten "saving_streak"/"category_overrun" üretiyor).
+**Out of scope:**
+- **Otomatik yeni dönem yaratma** — kullanıcı manuel oluşturur (bildirim + prefilled CTA yeterli). Her ay aynı bütçeyi otomatik açmak hayalet bütçe sorununa yol açar; kullanıcı niyetini her dönem yeniden ifade etmeli.
+- Çoklu dönem geriye doldurma (cron eksik bıraktığı boşlukları yaratmaz).
+- "Şablon" kavramı (her bütçe kendi kendine bir kayıt).
 
 ---
 
 ## 1. Veri Modeli Değişiklikleri
 
-### 1.1 Budget tablosuna ekleme
+### 1.1 Budget tablosu
 
 ```prisma
 model Budget {
   // ... mevcut alanlar
-  endDate    DateTime  @map("end_date") @db.Date  // NULLABLE → NOT NULL'a çevrildi
-  seriesId   String    @map("series_id") @db.VarChar(36)  // YENİ
-  rolledOverFromId String? @map("rolled_over_from_id") @db.VarChar(36)  // YENİ — denetim izi
+  endDate DateTime @map("end_date") @db.Date  // NULLABLE → NOT NULL
+  // YENİ alan EKLENMEZ. seriesId YOK; geçmiş kategori bazlı sorgulanır.
 
-  // İlişki: opsiyonel self-reference
-  rolledOverFrom Budget? @relation("BudgetRollover", fields: [rolledOverFromId], references: [id])
-  rollovers      Budget[] @relation("BudgetRollover")
-
-  @@index([seriesId, startDate], map: "idx_budget_series_period")
   @@index([endDate, isActive], map: "idx_budget_endDate_active")  // Cron için
+  @@index([userId, categoryId, endDate], map: "idx_budget_history")  // History için
 }
 ```
 
-### 1.2 SharedBudget tablosuna aynı ekleme
+### 1.2 SharedBudget tablosu
 
 ```prisma
 model SharedBudget {
   // ... mevcut alanlar
-  endDate         DateTime  @map("end_date") @db.Date  // NULLABLE → NOT NULL
-  seriesId        String    @map("series_id") @db.VarChar(36)
-  rolledOverFromId String?  @map("rolled_over_from_id") @db.VarChar(36)
+  endDate DateTime @map("end_date") @db.Date  // NULLABLE → NOT NULL
 
-  rolledOverFrom SharedBudget? @relation("SharedBudgetRollover", fields: [rolledOverFromId], references: [id])
-  rollovers      SharedBudget[] @relation("SharedBudgetRollover")
-
-  @@index([seriesId, startDate], map: "idx_sb_series_period")
   @@index([endDate, isActive], map: "idx_sb_endDate_active")
+  @@index([groupId, categoryId, endDate], map: "idx_sb_history")
 }
 ```
 
-### 1.3 Migration adı
+### 1.3 Migration
 
 ```bash
-npx prisma migrate dev --name budget_period_lifecycle
+npx prisma migrate dev --name budget_endDate_required
 ```
 
-**Backfill stratejisi (migration script'i):**
-- Mevcut tüm Budget + SharedBudget kayıtları için:
-  - `seriesId = uuid()` (her kayıt kendi serisinin başı)
-  - `rolledOverFromId = null`
-  - `endDate` doluysa dokunma; null ise `period` ve `startDate`'ten hesaplanır:
-    - `MONTHLY`: `startDate + 1 ay - 1 gün`
-    - `WEEKLY`: `startDate + 7 gün - 1 gün`
-    - `YEARLY`: `startDate + 1 yıl - 1 gün`
-- Closed test'teyiz (üretim kullanıcı yok), data loss riski sıfır — backfill TypeScript raw SQL migration script'i olarak yazılabilir.
+**Backfill stratejisi** (migration SQL içinde):
+```sql
+-- Mevcut MONTHLY/WEEKLY/YEARLY bütçeler için endDate hesapla
+UPDATE budgets SET end_date = CASE period
+  WHEN 'WEEKLY'  THEN DATE_ADD(start_date, INTERVAL 6 DAY)
+  WHEN 'MONTHLY' THEN DATE_SUB(DATE_ADD(start_date, INTERVAL 1 MONTH), INTERVAL 1 DAY)
+  WHEN 'YEARLY'  THEN DATE_SUB(DATE_ADD(start_date, INTERVAL 1 YEAR), INTERVAL 1 DAY)
+END
+WHERE end_date IS NULL;
 
-> **Önemli:** Closed test sona ermeden bu migration deploy edilmeli. Açık beta veya prod'a geçildiğinde aynı migration daha katı validate edilir.
+-- Aynı SQL shared_budgets için tekrarlanır
+ALTER TABLE budgets MODIFY end_date DATE NOT NULL;
+ALTER TABLE shared_budgets MODIFY end_date DATE NOT NULL;
+```
+
+> Closed test'teyiz (üretim kullanıcı yok), destruktif migration güvenli.
 
 ---
 
@@ -87,7 +85,7 @@ Backend `api/src/modules/budgets/period.utils.ts` (yeni dosya):
 ```typescript
 import { BudgetPeriod } from '@prisma/client';
 
-/// startDate dahil, endDate dahil (`gte`/`lte` arası).
+/// startDate dahil, endDate dahil. ('gte' / 'lte' aralığı)
 export function computeEndDate(startDate: Date, period: BudgetPeriod): Date {
   const end = new Date(startDate);
   switch (period) {
@@ -98,145 +96,116 @@ export function computeEndDate(startDate: Date, period: BudgetPeriod): Date {
   end.setDate(end.getDate() - 1);
   return end;
 }
-
-/// Bir sonraki dönemin startDate'i = mevcut endDate + 1 gün.
-export function computeNextStartDate(currentEndDate: Date): Date {
-  const next = new Date(currentEndDate);
-  next.setDate(next.getDate() + 1);
-  return next;
-}
 ```
 
-Frontend `mobile/lib/core/utils/budget_period.dart` (yeni dosya): aynı mantığın Dart eşdeğeri (`BudgetPeriod` enum üzerinden). Frontend kullanıcı startDate seçtiğinde endDate'i preview olarak gösterir.
+Frontend `mobile/lib/core/utils/budget_period.dart`: aynı mantığın Dart eşdeğeri. Kullanıcı startDate seçtiğinde endDate'i preview olarak gösterir ("31 Mayıs 2026'da kapanacak").
 
-### 2.2 Tutar mirası kuralı
+### 2.2 Lifecycle kuralları
 
-Cron yenileme yeni dönem oluştururken `amount` değerini **eski dönemden** kopyalar:
-- Kullanıcı bu ay 5000₺'yi 6000₺'ye çekti → cron ay sonunda yeni dönemde **6000₺** açar (en son yürürlükteki tutar).
-- Hayır, "ilk dönem amount'u" template değildir — pragmatik tercih: kullanıcı tutarı değiştiriyorsa yeni durum kalıcıdır.
-
-> ⚠️ **PM notu:** İlk konuşmada "sadece bu dönemi değiştirir" denmişti, ama düşününce: kullanıcı amount'u artırırsa muhtemelen "kalıcı artırıyorum" niyetindedir; sıradaki ay tutarı geri çekmek sürpriz olur. **Cron'un kuralı: yeni dönem amount = bir önceki dönemin son amount değeri.** Eğer kullanıcı geçmişe dönüş istiyorsa edit ile düşürür.
-
-### 2.3 isActive yaşam döngüsü
-
-- `isActive=true` + `endDate >= today`: aktif, harcama yansıyor
-- `isActive=true` + `endDate < today`: cron'un işlemediği güncel olmayan kayıt (1 günlük buffer yakalanır)
-- `isActive=false`: arşiv, harcama hesaba katılmıyor, geçmiş raporda görünüyor
+- `isActive=true` + `endDate >= today` → **aktif**, yeni harcamalar yansır
+- `isActive=true` + `endDate < today` → cron'un henüz işlemediği (en fazla bir günlük buffer)
+- `isActive=false` → **arşiv**: harcama yansımaz (event listener `isActive=true` filtresine girer), geçmiş tab'da görünür
 
 ---
 
 ## 3. Backend — Cron Job
 
-### 3.1 BudgetRolloverJob (yeni dosya)
+### 3.1 BudgetDailyCheckJob güncellemesi
 
-`api/src/modules/budgets/jobs/budget-rollover.job.ts`:
+Mevcut `api/src/modules/budgets/jobs/budget-daily-check.job.ts` job'u 09:10'da çalışıyor ve sadece `spent` recompute ediyor. Bu job iki sorumluluğu birden alır:
 
 ```typescript
-import { Injectable, Logger } from '@nestjs/common';
-import { Cron } from '@nestjs/schedule';
-import { BudgetsService } from '../budgets.service';
-
-@Injectable()
-export class BudgetRolloverJob {
-  private readonly logger = new Logger(BudgetRolloverJob.name);
-  constructor(private readonly budgetsService: BudgetsService) {}
-
-  @Cron('30 0 * * *') // Her gün 00:30 (BudgetDailyCheckJob 09:10'dan önce çalışır)
-  async run() {
-    this.logger.log('Bütçe rollover işlemi başladı');
-    const stats = await this.budgetsService.processRollovers();
-    this.logger.log(
-      `Rollover tamamlandı — kişisel: ${stats.personal}, ortak: ${stats.shared}, hata: ${stats.errors}`,
-    );
-  }
+@Cron('30 0 * * *') // 09:10 → 00:30'a çekilir (dönem bittiği gün hemen arşivlensin)
+async run() {
+  this.logger.log('Bütçe dönem sonu kontrolü başladı');
+  const archiveStats = await this.budgetsService.archiveExpired();
+  this.logger.log(
+    `Arşivleme — kişisel: ${archiveStats.personal}, ortak: ${archiveStats.shared}`,
+  );
+  // Var olan davranış devam eder:
+  await this.budgetsService.recomputeAllActive();
 }
 ```
 
-### 3.2 BudgetsService.processRollovers
+> Cron saatini değiştirmek istemiyorsak (mevcut 09:10), arşivleme akşam saatlerine kalır. Önerilen: **00:30'a çek** — kullanıcı sabah uygulamayı açtığında "bütçen kapandı, yenisini ister misin?" bildirimi hazır olsun.
+
+### 3.2 BudgetsService.archiveExpired
 
 ```typescript
-async processRollovers(): Promise<{ personal: number; shared: number; errors: number }> {
+async archiveExpired(): Promise<{ personal: number; shared: number }> {
   const today = startOfDayUtc(new Date()); // 00:00 UTC
-  let personal = 0, shared = 0, errors = 0;
 
   // Kişisel bütçeler
-  const expired = await this.prisma.budget.findMany({
+  const expiredPersonal = await this.prisma.budget.findMany({
     where: { isActive: true, endDate: { lt: today } },
+    include: { category: true },
   });
-  for (const b of expired) {
-    try {
-      await this.rolloverPersonal(b);
-      personal++;
-    } catch (err) { this.logger.error(err); errors++; }
+  for (const b of expiredPersonal) {
+    await this.prisma.budget.update({
+      where: { id: b.id },
+      data: { isActive: false },
+    });
+    // Fire-and-forget bildirim
+    setImmediate(() =>
+      this.notifyPersonalArchive(b).catch((e) => this.logger.error(e)),
+    );
   }
 
   // Ortak bütçeler
-  const sharedExpired = await this.prisma.sharedBudget.findMany({
+  const expiredShared = await this.prisma.sharedBudget.findMany({
     where: { isActive: true, endDate: { lt: today } },
+    include: { category: true, group: { include: { members: true } } },
   });
-  for (const b of sharedExpired) {
-    try {
-      await this.rolloverShared(b);
-      shared++;
-    } catch (err) { this.logger.error(err); errors++; }
-  }
-
-  return { personal, shared, errors };
-}
-```
-
-### 3.3 rolloverPersonal — atomic transaction
-
-```typescript
-private async rolloverPersonal(old: Budget): Promise<Budget> {
-  return this.prisma.$transaction(async (tx) => {
-    // 1. Eskiyi arşivle
-    await tx.budget.update({
-      where: { id: old.id },
+  for (const b of expiredShared) {
+    await this.prisma.sharedBudget.update({
+      where: { id: b.id },
       data: { isActive: false },
     });
+    setImmediate(() =>
+      this.notifySharedArchive(b).catch((e) => this.logger.error(e)),
+    );
+  }
 
-    // 2. Yeniyi oluştur
-    const newStart = computeNextStartDate(old.endDate);
-    const newEnd = computeEndDate(newStart, old.period);
-    const newBudget = await tx.budget.create({
-      data: {
-        userId: old.userId,
-        categoryId: old.categoryId,
-        name: old.name,
-        amount: old.amount,                    // Son tutarı koru
-        spent: 0,
-        period: old.period,
-        note: old.note,
-        smartTracking: old.smartTracking,
-        isActive: true,
-        startDate: newStart,
-        endDate: newEnd,
-        seriesId: old.seriesId,                // Aynı seri
-        rolledOverFromId: old.id,              // Denetim izi
-      },
-    });
-
-    // 3. Bildirim (fire-and-forget, transaction dışı await edilmez)
-    setImmediate(() => this.notifyRollover(old, newBudget).catch(() => {}));
-    return newBudget;
-  });
+  return { personal: expiredPersonal.length, shared: expiredShared.length };
 }
 ```
 
-`rolloverShared` aynı yapı, `prisma.sharedBudget` üzerinde + grup üyelerinin **tümüne** bildirim.
+> Tek-satır arşivleme. Yeni dönem **yaratılmaz**.
 
-### 3.4 Bildirim formatı
+### 3.3 Bildirim formatı
 
-`NotificationService` üzerinden FCM, `data:{type:'BUDGET_ROLLOVER', budgetId:newId, seriesId}`:
+`NotificationService` üzerinden FCM, `data:{type:'BUDGET_CLOSED', closedBudgetId, scope:'personal'|'shared', groupId?}`:
 
-| Senaryo | Başlık | Gövde |
+**Kişisel bütçe arşivlendi** (sahibine 1 bildirim):
+
+| Durum | Başlık | Gövde |
 |---|---|---|
-| Kişisel, %100 altı | "Yeni dönem başladı" | "[Bütçe Adı]: önceki dönemi 4.500₺/5.000₺ ile kapattın. Yeni dönem başladı." |
-| Kişisel, %100 üstü | "Bütçeni aştın" | "[Bütçe Adı]: önceki dönemi 5.500₺/5.000₺ ile kapattın (%110). Yeni dönem başladı." |
-| Ortak (her üyeye) | "Ortak bütçe yenilendi" | "[Grup · Bütçe Adı]: önceki dönem 8.200₺/10.000₺. Yeni dönem başladı." |
+| Aşılmamış | "Bütçe dönemi kapandı" | "[Bütçe Adı]: 4.500₺/5.000₺ ile bitirdin. Yeni dönem için yenisini oluşturmak ister misin?" |
+| Aşılmış | "Bütçe dönemi kapandı (aşıldı)" | "[Bütçe Adı]: 5.500₺/5.000₺ — %110 ile kapandı. Yeni dönem için tutarı ayarlamak ister misin?" |
 
-Bildirime tıklama → `wallet://budgets/<newBudgetId>` (kişisel) veya `wallet://family/<groupId>/budgets/<newBudgetId>` (ortak).
+**Ortak bütçe arşivlendi** (grubun **tüm üyelerine** bildirim):
+
+| Durum | Başlık | Gövde |
+|---|---|---|
+| Aşılmamış | "Ortak bütçe kapandı" | "[Grup · Bütçe Adı]: 8.200₺/10.000₺ ile bitti. Grup için yenisini oluşturabilirsin." |
+| Aşılmış | "Ortak bütçe aşıldı" | "[Grup · Bütçe Adı]: 11.500₺/10.000₺ — %115. Yeni dönem için tutarı tekrar düşün." |
+
+> Ortak bütçe için "kim oluşturur" sınırlaması Sprint 11'de yok — grup üyesi herkes ortak bütçe yaratabiliyor. Bu sprint'te de aynı davranış: bildirim tüm üyelere gider, oluşturma kararı grup içi.
+
+### 3.4 Deep link payload
+
+Bildirime tıklama → `AddBudgetPage` veya `AddSharedBudgetPage` **prefilled** açılır. Frontend `data.closedBudgetId` ile eski kaydı `GET /api/budgets/:id` (veya shared) çağırır ve form'u doldurur:
+
+| Alan | Değer | Düzenlenebilir? |
+|---|---|---|
+| `name` | Eski isim | Evet |
+| `categoryId` | Eski kategori | Evet |
+| `amount` | Eski son tutar | Evet (genelde burada değiştirir) |
+| `period` | Eski period | Evet |
+| `startDate` | Eski `endDate + 1 gün` | Evet |
+| `smartTracking` | Eski değer | Evet |
+
+> Kullanıcı **hiçbir şeyi** değiştirmeden "Kaydet" diyebilir — tek dokunuş yenileme.
 
 ---
 
@@ -246,28 +215,31 @@ Bildirime tıklama → `wallet://budgets/<newBudgetId>` (kişisel) veya `wallet:
 
 | Endpoint | Değişiklik |
 |---|---|
-| `POST /api/budgets` | DTO'da `endDate` artık opsiyonel ama backend doluysa kullanır, yoksa `computeEndDate(startDate, period)` ile set eder. `seriesId` yoksa yeni UUID üretir. |
-| `PATCH /api/budgets/:id` | Sadece **aktif** dönemi günceller (varsayılan). Geçmiş döneme PATCH 400 döner. |
-| `GET /api/budgets` | Varsayılan filtre: `isActive=true`. Yeni query: `?includeArchived=true` |
-| `POST /api/family/groups/:id/budgets` | Aynı kurallar |
+| `POST /api/budgets` | DTO'da `endDate` opsiyonel kalır; backend doluysa kullanır, yoksa `computeEndDate(startDate, period)` ile set eder |
+| `POST /api/family/groups/:id/budgets` | Aynı kural |
+| `PATCH /api/budgets/:id` | Sadece **aktif** kayıt güncellenebilir (`isActive=true`). Arşiv kayıt → 400, message: `"Geçmiş döneme ait bütçe düzenlenemez"` |
+| `PATCH /api/family/.../budgets/:id` | Aynı kural |
+| `GET /api/budgets` | Varsayılan filtre: `isActive=true`. Yeni query param: `?includeArchived=true` |
+| `GET /api/family/groups/:id/budgets` | Aynı kural |
 
 ### 4.2 Yeni endpoint'ler
 
 ```
 GET /api/budgets/:id/history
-  → Aynı seriesId'deki tüm dönemler, eskiden yeniye, isActive dahil.
-  → Response: [{ id, startDate, endDate, amount, spent, isActive, percentage }, ...]
+  → Aynı userId + categoryId, endDate < bu kaydın startDate.
+  → Sıralama: endDate DESC (en yeni geçmiş başta).
+  → Response: [{ id, name, startDate, endDate, amount, spent, percentage, isActive }, ...]
+  → Limit: son 12 dönem (frontend chart için yeterli).
 
 GET /api/family/groups/:groupId/budgets/:id/history
-  → SharedBudget muadili
+  → SharedBudget muadili: aynı groupId + categoryId.
 ```
+
+> Geçmiş, **kategori bazlı** sorgulanır — `seriesId` yok. Kullanıcı kategoriyi farklılaştırırsa (örn. "Market" → "Süpermarket") yeni seri başlar. Bu kabul edilen bir trade-off: schema sade.
 
 ### 4.3 Hata durumları
 
-- `PATCH /api/budgets/:id` arşiv kayıt → `400 Bad Request`, message: `"Geçmiş döneme ait bütçe düzenlenemez"`.
-- `DELETE /api/budgets/:id` aktif kayıt → tüm seri silinir mi yoksa sadece aktif mi? **Karar: sadece bu dönem silinir, seri devam eder.** Tüm seriyi silmek için `DELETE /api/budgets/series/:seriesId` ayrı endpoint (sadece kullanıcı isterse).
-
-> ⚠️ Bu kararı doğrula: kullanıcı bir bütçeyi sildiğinde tüm seri mi gitmeli? Tek dönem silmek mantıksız olur — ileride seri silme zorunlu hale gelebilir.
+- `DELETE /api/budgets/:id` aktif veya arşiv — fark etmez, sadece o kayıt silinir. Geçmiş etkilenmez (history zaten o kategoride başka kayıtlardan gelir).
 
 ---
 
@@ -275,11 +247,11 @@ GET /api/family/groups/:groupId/budgets/:id/history
 
 ### 5.1 AddBudgetPage / EditBudgetSheet
 
-- Period seçimi sonrası `endDate` artık **kullanıcıya gösterilir** (read-only chip): "31 May 2026'da yenilenecek"
+- Period seçildikten sonra `endDate` **read-only chip** olarak gösterilir: "Bu dönem 31 Mayıs 2026'da kapanacak"
 - Frontend `BudgetPeriodUtils.computeEndDate(startDate, period)` ile hesaplar
-- Backend bu hesabı doğrulayıp persistlemez (frontend hint, backend kanonik kaynağı)
+- Backend kanonik kaynak; frontend hint olarak gösterir
 
-### 5.2 BudgetDetailPage — "Geçmiş" tab
+### 5.2 BudgetDetailPage — "Geçmiş" tab (kişisel)
 
 Mevcut Scaffold şuna dönüşür:
 
@@ -295,72 +267,89 @@ DefaultTabController(
       ]),
     ),
     body: TabBarView(children: [
-      _CurrentPeriodView(budget),   // Mevcut detay (özet kart + grafik + işlem listesi)
-      _HistoryView(seriesId: budget.seriesId), // YENİ
+      _CurrentPeriodView(budget),                          // Mevcut detay
+      _HistoryView(budgetId: budget.id),                   // YENİ
     ]),
   ),
 );
 ```
 
 `_HistoryView` içeriği:
-- Üstte mini bar chart (son 6-12 dönem: tutar vs harcama yan yana)
-- Altında liste: her dönem için `{period label, amount, spent, %, statusColor}`
-- Dönem kartına dokunmak → o döneme özel detay sayfası (read-only mode)
+- Üstte mini bar chart (son 6-12 dönem: tutar bar + harcama bar yan yana, aşılan dönemlerde harcama bar'ı renkli)
+- Altta liste: her dönem kartı `{period label, amount, spent, %, statusColor}` — dokununca read-only detay
+- Boş geçmiş için empty state: "Bu kategoride başka dönem yok"
 
-### 5.3 SharedBudgetDetailPage
+### 5.3 SharedBudgetDetailPage — aynı tab yapısı
 
-Aynı pattern: "Bu Dönem" + "Geçmiş" tab'ları.
+Aynı pattern; `_HistoryView` `groupId + budget.id` ile `GET /api/family/groups/:gid/budgets/:bid/history` çağırır.
 
-### 5.4 BudgetsPage liste
+### 5.4 "Yeni dönem oluştur" CTA
 
-- Varsayılan: sadece aktif (`isActive=true`) dönemler. Mevcut davranış zaten bu, değişiklik yok.
-- "Geçmiş bütçeler" sayfası ileride (out of scope) — kullanıcı detayda görüyor.
+Arşivlenmiş bütçenin detayında (Bu Dönem tab'ı aslında en son arşiv) prominent buton:
+- Kişisel: "Yeni Dönem Aç" → `AddBudgetPage` prefilled (eski kayıt verisi)
+- Ortak: "Yeni Dönem Aç" → `AddSharedBudgetPage` prefilled (grup içinde)
 
-### 5.5 Frontend BudgetModel + SharedBudgetModel
+Aynı CTA bildirim tıklamasından da tetiklenir (§3.4 deep link).
 
-Yeni alanlar:
+### 5.5 Frontend model
+
 ```dart
 class BudgetModel {
   // ... mevcutlar
-  final String seriesId;
-  final String? rolledOverFromId;
-  final DateTime endDate; // artık zorunlu
+  final DateTime endDate;  // nullable → non-nullable
+}
+
+class SharedBudgetModel {
+  // ... mevcutlar
+  final DateTime endDate;  // nullable → non-nullable
+}
+
+class BudgetHistoryEntry {
+  final String id;
+  final String name;
+  final DateTime startDate;
+  final DateTime endDate;
+  final double amount;
+  final double spent;
+  final double percentage;
+  final bool isActive;
 }
 ```
 
 ### 5.6 Push notification handling
 
-`NotificationService` `BUDGET_ROLLOVER` type'ı:
-- Foreground: snackbar + "Görüntüle" butonu → ilgili budget detay
-- Background tap: GoRouter ile budget detay sayfası
-- Cold start: pending budgetId mekanizması (Insights pattern'i)
+`NotificationService` `BUDGET_CLOSED` type'ı:
+- **Foreground:** SnackBar + "Yenisini Aç" butonu → prefilled AddBudgetPage
+- **Background tap:** GoRouter ile prefilled AddBudgetPage
+- **Cold start:** pending closedBudgetId mekanizması (Insights pattern'i)
 
 ---
 
 ## 6. Test Senaryoları
 
-### 6.1 Backend unit testleri (`budgets.service.spec.ts`)
+### 6.1 Backend unit (`budgets.service.spec.ts`)
 
-- ✅ `processRollovers` boş listeyle 0 işler
-- ✅ Süresi geçmiş 3 bütçe → 3 yeni dönem açılır + 3 arşiv
-- ✅ Yeni dönem `spent=0`, `seriesId` korunur, `rolledOverFromId` set edilir
-- ✅ Transaction içinde hata → rollback (eski dönem isActive=true kalır)
-- ✅ %100 altı bütçe → bildirim "Yeni dönem başladı"
-- ✅ %100 üstü bütçe → bildirim "Bütçeni aştın"
-- ✅ Ortak bütçe rollover → tüm grup üyelerine bildirim
+- ✅ `archiveExpired` boş listeyle 0 işler
+- ✅ Süresi geçmiş 3 kişisel + 2 ortak bütçe → tümü `isActive=false`
+- ✅ Süresi geçmemiş bütçeye dokunmaz
+- ✅ Bildirim formatı: aşılmamış vs aşılmış mesaj farklı
+- ✅ Ortak bütçe arşivinde tüm grup üyelerine bildirim gönderilir
+- ✅ Arşivlenmiş bütçeye PATCH → 400
+- ✅ Yeni bütçe oluştururken endDate verilmezse auto-compute
 
-### 6.2 Backend e2e (`test/budget-rollover.e2e-spec.ts`)
+### 6.2 Backend e2e (`test/budget-lifecycle.e2e-spec.ts`)
 
-- ✅ Bütçe oluştur → endDate otomatik hesaplandı mı
-- ✅ `GET /api/budgets/:id/history` aktif + arşiv döner mi, sıralı mı
-- ✅ Arşiv bütçeyi PATCH → 400
-- ✅ Cron'u manuel tetikle (test helper) → DB state bekleneni gösteriyor
+- ✅ Bütçe oluştur, endDate yok → response'ta endDate dolu
+- ✅ `GET /api/budgets/:id/history` aynı kategori arşivlerini sıralı döner
+- ✅ `?includeArchived=true` ile arşivler de listede
+- ✅ Bütçe arşivlendikten sonra yeni harcama yapılsa `spent` artmaz (BudgetListener `isActive=true` filtresine girer)
 
-### 6.3 Frontend test'leri
+### 6.3 Frontend
 
-- ✅ `BudgetPeriodUtils.computeEndDate` tüm periodlar için doğru
-- ✅ BudgetDetailPage Geçmiş tab'ı seriesId üzerinden veri çekiyor
-- ✅ Bildirim tap → GoRouter doğru sayfaya yönlendiriyor
+- ✅ `BudgetPeriodUtils.computeEndDate` her period için doğru
+- ✅ BudgetDetailPage Geçmiş tab'ı history endpoint'i çağırır
+- ✅ "Yeni Dönem Aç" CTA AddBudgetPage'i doğru prefill ile açar
+- ✅ Bildirim tap → cold start dahil doğru sayfaya yönlendirir
 
 ---
 
@@ -368,34 +357,49 @@ class BudgetModel {
 
 ### 7.1 Sıra
 
-1. **Backend dev session:** 
-   - schema.prisma güncellenir, migration yazılır, backfill SQL'i migration içinde
-   - `budgets.service.ts` + cron job + endpoint'ler
-   - Test'ler yeşil
+1. **Backend dev session:**
+   - schema.prisma güncellenir (`endDate` NOT NULL, index'ler)
+   - Migration: backfill SQL + sütun tipi değişimi
+   - `period.utils.ts` + `archiveExpired` + 2 history endpoint'i
+   - `BudgetDailyCheckJob` 00:30'a çekilir, archive akışı eklenir
+   - PATCH guard (arşiv kayıt 400)
+   - Bildirim payload + deep link data
+   - Unit + e2e testler
+
 2. **Frontend dev session:**
-   - Model genişletme, period utils, history endpoint çağrısı, tab UI
-   - Bildirim handling
-3. **PM:** Migration'ı Railway'de manuel deploy + monitör (ilk gece cron'unda log incelenir)
+   - `BudgetModel` + `SharedBudgetModel` `endDate` non-nullable
+   - `BudgetPeriodUtils` Dart helper
+   - `AddBudgetPage` endDate chip
+   - `BudgetDetailPage` + `SharedBudgetDetailPage` "Geçmiş" tab
+   - `_HistoryView` widget + mini chart
+   - "Yeni Dönem Aç" CTA + prefill flow
+   - `NotificationService` BUDGET_CLOSED handler + GoRouter
+   - l10n stringler (TR + EN)
 
-### 7.2 Geri alma planı
+3. **PM:** Migration'ı Railway'de deploy + ilk gece cron (00:30) log incelenir.
 
-Eğer cron yanlış dönem açarsa: `isActive` flag'iyle yanlış kayıtları silmeden gizleyebiliriz. seriesId koruduğu için kayıtları çakıştırmadan tekrar çalıştırılabilir (idempotent değil ama düzeltilebilir).
+### 7.2 Backend & Frontend bağımlılık sırası
 
-> Cron şu an idempotent değil — aynı gün iki kez çalışırsa duplicate kayıt açar. v1'de günde tek sefer çalışacağı varsayımıyla geçiyoruz; v2'de `seriesId + startDate` unique constraint eklenir.
+- Frontend session modelden başlayıp UI iskeletini yapabilir (mock veriyle), endpoint'ler hazır olmadan da çalışır.
+- Backend migration tamamlanmadan e2e test çalışmaz; frontend integration testleri backend deploy sonrası.
+
+### 7.3 Geri alma
+
+Cron yanlış kayıt arşivlerse: `isActive=true` set ederek geri açılabilir, veri kaybı yok. Migration backfill'i hatalıysa: ayrıca `endDate=NULL` set edilemez (NOT NULL constraint), ama UPDATE ile düzeltilir.
 
 ---
 
 ## 8. Açık Sorular — PM Karar Vermeli
 
-1. **DELETE davranışı (§4.3):** Aktif bütçeyi sil → sadece bu dönem mi, tüm seri mi? Önerilen: bu dönem; ayrı endpoint seri silme için.
-2. **Edit dönemi geriye kaydırma:** Kullanıcı startDate'i geçmişe çekerse mevcut harcamalar yeniden hesaplanır (event listener zaten yapıyor); endDate'i de yeniden hesaplanmalı mı, kullanıcı manuel mi vermeli?
-3. **Boş dönemler:** Kullanıcı 3 ay uygulamayı kullanmadıysa cron geriye dönük 3 boş dönem mi açar yoksa sadece bugünden geçerli bir dönem mi başlatır? Önerilen: sadece bir sonraki dönem (boşluklar history'de gözükmez).
+1. **Cron saati:** 00:30 vs mevcut 09:10? Önerilen: **00:30**, sabah bildirimi hazır olsun.
+2. **Ortak bütçe arşiv bildirimi:** Tüm grup üyelerine mi yoksa sadece bütçeyi oluşturan kullanıcıya mı? Önerilen: **tüm üyeler** — herkes haberdar olmalı, oluşturma kararı grup içi.
+3. **Geçmiş limiti:** History endpoint'i max kaç dönem döner? Önerilen: **son 12 dönem** (1 yıllık aylık için 12 ay, haftalık için ~3 ay yeterli).
 
 ---
 
 ## 9. Tahmini Süre
 
-- Backend dev: 1-1.5 gün (migration + cron + endpoint + test)
-- Frontend dev: 1 gün (model + period utils + history tab + bildirim)
-- PM koordinasyon + deploy: 0.5 gün
-- **Toplam: 2.5-3 iş günü**
+- Backend dev: ~1 gün (migration + cron archive + history endpoint + bildirim + test)
+- Frontend dev: ~1 gün (model + utils + history tab + prefilled CTA + notif handler)
+- PM koordinasyon + deploy: ~0.5 gün
+- **Toplam: ~2-2.5 iş günü**

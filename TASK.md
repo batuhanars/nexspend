@@ -1,6 +1,6 @@
 # Stitch Wallet App — Görev Takip Dosyası
 
-> Son güncelleme: 20 Mayıs 2026 (Bütçe rollover sprint'i planlandı — `BUDGET_ROLLOVER_CONTRACT.md`)  
+> Son güncelleme: 20 Mayıs 2026 (Bütçe lifecycle sprint'i planlandı — `BUDGET_ROLLOVER_CONTRACT.md` — arşivle + geçmiş + manuel yeni dönem)  
 > ✅ = Tamamlandı | 🔧 = Kısmen yapıldı | ❌ = Henüz başlanmadı  
 > ☑ = Kodda mevcut ancak migration henüz çalıştırılmadı
 
@@ -8,7 +8,7 @@
 - `SCHEMA.md` — Veritabanı şeması (Prisma modelleri, ER diyagramı, kategori sistemi)
 - `DEVELOPMENT_PLAN_V1.md` — Temel özellikler mimarisi (Sprint 0-8)
 - `DEVELOPMENT_PLAN_V2.md` — İleri özellikler mimarisi (Sprint 9-12)
-- `BUDGET_ROLLOVER_CONTRACT.md` — Bütçe dönem yönetimi sözleşmesi (planlandı 20 May 2026)
+- `BUDGET_ROLLOVER_CONTRACT.md` — Bütçe dönem sonu arşivleme + geçmiş raporlama sözleşmesi (planlandı 20 May 2026)
 - `STITCH_PROMPTS.md` — UI tasarım promptları
 
 ---
@@ -594,43 +594,45 @@
 
 ---
 
-## Sprint 12 — Bütçe Dönem Yönetimi (Rollover)
+## Sprint 12 — Bütçe Dönem Sonu Arşivleme + Geçmiş Raporlama
 > 📖 Contract: `BUDGET_ROLLOVER_CONTRACT.md`
 >
-> **Neden:** Bütçeler şu an `endDate=null` ile sonsuz açık — `period=MONTHLY` davranışsız bir etiket. Ay sonu geldiğinde otomatik yenileme yok, kullanıcı geçmiş dönemlerini karşılaştıramıyor.
+> **Neden:** Bütçeler şu an `endDate=null` ile sonsuz açık — `period=MONTHLY` davranışsız bir etiket. Ay sonu geldiğinde hiçbir şey olmuyor, kullanıcı geçmiş dönemlerini karşılaştıramıyor.
 >
-> **Hedef:** Her bütçe (kişisel + ortak) için periyot bitiminde otomatik arşivleme + yeni dönem açma + bütçe detayında "Geçmiş" tab'ı.
+> **Hedef:** Her bütçe (kişisel + ortak) için periyot bitiminde **arşivleme** + bildirim ("yenisini ister misin?") + bütçe detayında "Geçmiş" tab'ı + tek dokunuş prefilled yeni dönem oluşturma. **Otomatik yenileme YOK** — kullanıcı niyetli kalır.
 
 ### Backend
-- [ ] Migration: `budget_period_lifecycle` — Budget + SharedBudget'a `seriesId`, `rolledOverFromId` ekle; `endDate` NOT NULL'a çevir; mevcut kayıtları backfill
-- [ ] `api/src/modules/budgets/period.utils.ts` — `computeEndDate`, `computeNextStartDate` helper'ları
-- [ ] `BudgetRolloverJob` — `@Cron('30 0 * * *')` günlük yenileme
-- [ ] `BudgetsService.processRollovers` — atomik transaction + bildirim
-- [ ] `POST /api/budgets` — `endDate` opsiyonel, yoksa auto-compute; `seriesId` UUID
-- [ ] `PATCH /api/budgets/:id` — arşiv kayıt 400 döner
-- [ ] `GET /api/budgets/:id/history` — yeni endpoint (seriesId üzerinden)
-- [ ] `GET /api/budgets` — varsayılan `isActive=true`, `?includeArchived=true` opsiyonu
-- [ ] SharedBudget tarafında aynı 4 endpoint adaptasyonu (`/family/groups/:id/budgets`)
-- [ ] FCM bildirim — `type: BUDGET_ROLLOVER`, %100 altı/üstü farklı şablon
-- [ ] Unit testler (`budgets.service.spec.ts`) — rollover + bildirim + hata senaryoları
-- [ ] E2E testler (`test/budget-rollover.e2e-spec.ts`)
+- [ ] Migration: `budget_endDate_required` — Budget + SharedBudget `endDate` NOT NULL; mevcut kayıtların endDate'i `period + startDate`'ten backfill; index'ler eklenir
+- [ ] `api/src/modules/budgets/period.utils.ts` — `computeEndDate` helper
+- [ ] `BudgetDailyCheckJob` saatini 09:10 → **00:30**'a çek; `archiveExpired` adımı ekle (mevcut recompute korunur)
+- [ ] `BudgetsService.archiveExpired` — `isActive=false` set + fire-and-forget bildirim
+- [ ] `POST /api/budgets` — `endDate` opsiyonel, yoksa auto-compute
+- [ ] `POST /api/family/groups/:id/budgets` — aynı kural
+- [ ] `PATCH /api/budgets/:id` ve `PATCH /api/family/.../budgets/:id` — arşiv kayıt → 400
+- [ ] `GET /api/budgets/:id/history` — yeni endpoint (kategori bazlı, son 12 dönem)
+- [ ] `GET /api/family/groups/:gid/budgets/:bid/history` — ortak bütçe muadili
+- [ ] `GET /api/budgets` ve grup eşdeğeri — varsayılan `isActive=true`, `?includeArchived=true` opsiyonu
+- [ ] FCM bildirim — `type: BUDGET_CLOSED`, scope `personal | shared`, aşılan/aşılmayan farklı şablon, ortak için **tüm üyelere**
+- [ ] Unit testler (`budgets.service.spec.ts`) — arşivleme + bildirim + arşiv PATCH 400
+- [ ] E2E testler (`test/budget-lifecycle.e2e-spec.ts`)
 
 ### Frontend
-- [ ] `mobile/lib/core/utils/budget_period.dart` — period utils (Dart eşdeğeri)
-- [ ] `BudgetModel` + `SharedBudgetModel`: `seriesId`, `rolledOverFromId`, `endDate` (now required) alanları
-- [ ] `AddBudgetPage` + `EditBudgetSheet` — endDate read-only chip ("31 May 2026'da yenilenecek")
-- [ ] `BudgetDetailPage` — TabBar (Bu Dönem / Geçmiş) + `_HistoryView` (mini chart + dönem listesi)
+- [ ] `mobile/lib/core/utils/budget_period.dart` — `computeEndDate` (Dart eşdeğeri)
+- [ ] `BudgetModel` + `SharedBudgetModel` — `endDate` nullable → non-nullable
+- [ ] `BudgetHistoryEntry` modeli + repository metodları (`getHistory`, `getSharedHistory`)
+- [ ] `AddBudgetPage` + `EditBudgetSheet` — endDate read-only chip ("31 Mayıs 2026'da kapanacak")
+- [ ] `BudgetDetailPage` — TabBar (Bu Dönem / Geçmiş) + `_HistoryView` (mini bar chart + dönem listesi)
 - [ ] `SharedBudgetDetailPage` — aynı tab yapısı
-- [ ] `BudgetsRepository.getHistory(budgetId)` — yeni endpoint çağrısı
-- [ ] `NotificationService` — `BUDGET_ROLLOVER` type handling (foreground/background/cold-start)
-- [ ] Bildirim tap → GoRouter ile `/budgets/:id` (veya `/family/:gid/budgets/:bid`)
-- [ ] l10n stringler (TR + EN) — tab başlıkları, "yenilenecek" hint, bildirim sayfası snackbar
-- [ ] BLoC testler — history fetch + state
+- [ ] "Yeni Dönem Aç" CTA — arşivlenmiş bütçe detayında + bildirim tap'inde, `AddBudgetPage` prefilled açar
+- [ ] `NotificationService` — `BUDGET_CLOSED` type (foreground SnackBar + "Yenisini Aç" / background tap / cold start pending mekanizması)
+- [ ] GoRouter — `/budgets/add` ve `/family/:gid/budgets/add` route'ları prefill query/extra'sı kabul eder
+- [ ] l10n stringler (TR + EN) — tab başlıkları, "kapanacak" hint, "Yeni Dönem Aç", bildirim metinleri
+- [ ] BLoC testler — history fetch + prefilled add flow
 
 ### PM / Deploy
-- [ ] PM: contract içindeki "Açık Sorular §8" üç maddeyi karara bağla
-- [ ] Backend + frontend session merge → integration test
-- [ ] Railway'e migration deploy + ilk gece cron'unu monitör (00:30 logları)
+- [ ] PM: contract §8 açık sorular (cron saati, ortak bildirimi kapsamı, history limiti) karara bağlandı, dev session'lara ilet
+- [ ] Backend migration Railway'e deploy + 00:30 cron logları monitör
+- [ ] Backend + frontend merge sonrası integration test (bütçe oluştur → endDate dolu → cron simüle et → arşivlendi → bildirim alındı → prefilled CTA → kaydet → yeni dönem)
 
 ---
 

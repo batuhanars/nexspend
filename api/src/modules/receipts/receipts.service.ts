@@ -259,6 +259,7 @@ export class ReceiptsService {
           title: dto.merchant ?? receipt.parsedMerchant ?? 'Fiş İşlemi',
           note: dto.note ?? null,
           transactionDate,
+          sharedBudgetId: dto.sharedBudgetId ?? null,
         },
       });
 
@@ -292,6 +293,7 @@ export class ReceiptsService {
         TransactionSource.MANUAL,
         amount,
         transactionDate,
+        dto.sharedBudgetId ?? null,
       ),
     );
 

@@ -2,9 +2,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../data/models/receipt_model.dart';
 import '../../../data/models/category_model.dart';
 import '../../../data/models/account_model.dart';
+import '../../../data/models/family_model.dart';
 import '../../../data/repositories/receipt_repository.dart';
 import '../../../data/repositories/category_repository.dart';
 import '../../../data/repositories/account_repository.dart';
+import '../../../data/repositories/family_repository.dart';
 import '../helper/account_matcher.dart';
 
 part 'receipt_preview_event.dart';
@@ -16,15 +18,18 @@ class ReceiptPreviewBloc
     required ReceiptRepository receiptRepository,
     required CategoryRepository categoryRepository,
     required AccountRepository accountRepository,
+    required FamilyRepository familyRepository,
     required ReceiptParseResult initialResult,
   })  : _receiptRepo = receiptRepository,
         _categoryRepo = categoryRepository,
         _accountRepo = accountRepository,
+        _familyRepo = familyRepository,
         super(ReceiptPreviewInitial()) {
     on<ReceiptPreviewLoaded>(_onLoaded);
     on<ReceiptPreviewFieldUpdated>(_onFieldUpdated);
     on<ReceiptPreviewConfirmed>(_onConfirmed);
     on<ReceiptPreviewAccountAdded>(_onAccountAdded);
+    on<ReceiptPreviewSharedBudgetSelected>(_onSharedBudgetSelected);
 
     add(ReceiptPreviewLoaded(result: initialResult));
   }
@@ -32,6 +37,7 @@ class ReceiptPreviewBloc
   final ReceiptRepository _receiptRepo;
   final CategoryRepository _categoryRepo;
   final AccountRepository _accountRepo;
+  final FamilyRepository _familyRepo;
 
   Future<void> _onLoaded(
     ReceiptPreviewLoaded event,
@@ -41,6 +47,11 @@ class ReceiptPreviewBloc
     try {
       final categories = await _categoryRepo.getCategories();
       final accounts = await _accountRepo.getAccounts();
+      // Ortak bütçeler eksik kalsa da fiş akışı çalışabilmeli — sessizce yut.
+      List<MySharedBudgetModel> mySharedBudgets = const [];
+      try {
+        mySharedBudgets = await _familyRepo.getMySharedBudgets();
+      } catch (_) {}
 
       // Önce backend hint'iyle eşleşme dene — banka adı veya ödeme tipi.
       final hint = event.result.suggestedAccountHint;
@@ -64,6 +75,7 @@ class ReceiptPreviewBloc
         result: event.result,
         categories: categories,
         accounts: accounts,
+        mySharedBudgets: mySharedBudgets,
         selectedCategoryId: event.result.suggestedCategoryId,
         selectedAccountId: selectedAccountId,
         unmatchedBankName: unmatchedBankName,
@@ -80,12 +92,28 @@ class ReceiptPreviewBloc
   ) {
     if (state is! ReceiptPreviewReady) return;
     final current = state as ReceiptPreviewReady;
+    // Kategori değiştiyse ortak bütçe seçimi de geçersiz olur — sıfırla.
+    final categoryChanged = event.categoryId != null &&
+        event.categoryId != current.selectedCategoryId;
     emit(current.copyWith(
       amount: event.amount,
       date: event.date,
       merchantName: event.merchantName,
       selectedCategoryId: event.categoryId,
       selectedAccountId: event.accountId,
+      clearSelectedSharedBudgetId: categoryChanged,
+    ));
+  }
+
+  void _onSharedBudgetSelected(
+    ReceiptPreviewSharedBudgetSelected event,
+    Emitter<ReceiptPreviewState> emit,
+  ) {
+    if (state is! ReceiptPreviewReady) return;
+    final current = state as ReceiptPreviewReady;
+    emit(current.copyWith(
+      selectedSharedBudgetId: event.sharedBudgetId,
+      clearSelectedSharedBudgetId: event.sharedBudgetId == null,
     ));
   }
 
@@ -122,6 +150,8 @@ class ReceiptPreviewBloc
         if (current.selectedCategoryId != null)
           'categoryId': current.selectedCategoryId,
         'accountId': current.selectedAccountId,
+        if (current.selectedSharedBudgetId != null)
+          'sharedBudgetId': current.selectedSharedBudgetId,
       });
 
       emit(ReceiptPreviewSuccess());

@@ -34,3 +34,9 @@ class ReceiptPreviewAccountAdded extends ReceiptPreviewEvent {
   const ReceiptPreviewAccountAdded(this.account);
   final AccountModel account;
 }
+
+/// "Kişisel" (null) veya ortak bütçe id seçimi.
+class ReceiptPreviewSharedBudgetSelected extends ReceiptPreviewEvent {
+  const ReceiptPreviewSharedBudgetSelected(this.sharedBudgetId);
+  final String? sharedBudgetId;
+}

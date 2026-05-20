@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:wallet_app/presentation/receipt_scanner/bloc/receipt_preview_bloc.dart';
 import 'package:wallet_app/presentation/receipt_scanner/widgets/preview/account_dropdown.dart';
 import 'package:wallet_app/presentation/receipt_scanner/widgets/preview/amount_field.dart';
+import 'package:wallet_app/presentation/receipt_scanner/widgets/preview/budget_scope_chips.dart';
 import 'package:wallet_app/presentation/receipt_scanner/widgets/preview/category_dropdown.dart';
 import 'package:wallet_app/presentation/receipt_scanner/widgets/preview/confidence_badge.dart';
 import 'package:wallet_app/presentation/receipt_scanner/widgets/preview/date_field.dart';
@@ -136,6 +137,15 @@ class _ReadyViewState extends State<ReadyView> {
           const SizedBox(height: AppSpacing.sm),
           CategoryDropdown(state: s),
           const SizedBox(height: AppSpacing.lg),
+
+          // Budget scope (Kişisel / ortak bütçe) — sadece seçili kategori
+          // için kullanıcının ortak bütçesi varsa görünür.
+          if (s.sharedBudgetsForSelectedCategory.isNotEmpty) ...[
+            FieldLabel(text: AppStrings.of(context).budgetScopeLabel),
+            const SizedBox(height: AppSpacing.sm),
+            BudgetScopeChips(state: s),
+            const SizedBox(height: AppSpacing.lg),
+          ],
 
           // Account
           FieldLabel(text: AppStrings.of(context).accountLabel),

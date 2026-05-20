@@ -30,4 +30,8 @@ export class ConfirmReceiptDto {
   @IsString()
   @IsOptional()
   note?: string;
+
+  @IsString()
+  @IsOptional()
+  sharedBudgetId?: string;
 }

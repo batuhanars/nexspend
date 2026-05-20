@@ -9,6 +9,7 @@ import '../../../core/di/injection.dart';
 import '../../../data/models/receipt_model.dart';
 import '../../../data/repositories/account_repository.dart';
 import '../../../data/repositories/category_repository.dart';
+import '../../../data/repositories/family_repository.dart';
 import '../../../data/repositories/receipt_repository.dart';
 import '../bloc/receipt_preview_bloc.dart';
 
@@ -29,6 +30,7 @@ class ReceiptPreviewPage extends StatelessWidget {
         receiptRepository: getIt<ReceiptRepository>(),
         categoryRepository: getIt<CategoryRepository>(),
         accountRepository: getIt<AccountRepository>(),
+        familyRepository: getIt<FamilyRepository>(),
         initialResult: ocrResult,
       ),
       child: _ReceiptPreviewView(imagePath: imagePath),

@@ -18,8 +18,10 @@ class ReceiptPreviewReady extends ReceiptPreviewState {
     required this.result,
     required this.categories,
     required this.accounts,
+    this.mySharedBudgets = const [],
     this.selectedCategoryId,
     this.selectedAccountId,
+    this.selectedSharedBudgetId,
     this.overrideAmount,
     this.overrideDate,
     this.overrideMerchant,
@@ -32,8 +34,11 @@ class ReceiptPreviewReady extends ReceiptPreviewState {
   final ReceiptParseResult result;
   final List<CategoryModel> categories;
   final List<AccountModel> accounts;
+  final List<MySharedBudgetModel> mySharedBudgets;
   final String? selectedCategoryId;
   final String? selectedAccountId;
+  /// null = "Kişisel"; doluysa seçilen ortak bütçenin id'si.
+  final String? selectedSharedBudgetId;
   final double? overrideAmount;
   final DateTime? overrideDate;
   final String? overrideMerchant;
@@ -52,12 +57,27 @@ class ReceiptPreviewReady extends ReceiptPreviewState {
   String get effectiveMerchant =>
       overrideMerchant ?? result.merchantName ?? '';
 
+  /// Seçili kategoriye bağlı (kendisi veya parent'ı eşleşen) ortak bütçeler.
+  List<MySharedBudgetModel> get sharedBudgetsForSelectedCategory {
+    final cid = selectedCategoryId;
+    if (cid == null) return const [];
+    final matches = categories.where((c) => c.id == cid).toList();
+    if (matches.isEmpty) return const [];
+    final cat = matches.first;
+    return mySharedBudgets
+        .where((b) => b.categoryId == cat.id || b.categoryId == cat.parentId)
+        .toList();
+  }
+
   ReceiptPreviewReady copyWith({
     ReceiptParseResult? result,
     List<CategoryModel>? categories,
     List<AccountModel>? accounts,
+    List<MySharedBudgetModel>? mySharedBudgets,
     String? selectedCategoryId,
     String? selectedAccountId,
+    String? selectedSharedBudgetId,
+    bool clearSelectedSharedBudgetId = false,
     double? amount,
     DateTime? date,
     String? merchantName,
@@ -71,8 +91,12 @@ class ReceiptPreviewReady extends ReceiptPreviewState {
         result: result ?? this.result,
         categories: categories ?? this.categories,
         accounts: accounts ?? this.accounts,
+        mySharedBudgets: mySharedBudgets ?? this.mySharedBudgets,
         selectedCategoryId: selectedCategoryId ?? this.selectedCategoryId,
         selectedAccountId: selectedAccountId ?? this.selectedAccountId,
+        selectedSharedBudgetId: clearSelectedSharedBudgetId
+            ? null
+            : (selectedSharedBudgetId ?? this.selectedSharedBudgetId),
         overrideAmount: amount ?? overrideAmount,
         overrideDate: date ?? overrideDate,
         overrideMerchant: merchantName ?? overrideMerchant,

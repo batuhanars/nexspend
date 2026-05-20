@@ -29,6 +29,7 @@ class ReceiptPreviewReady extends ReceiptPreviewState {
     this.errorMessage,
     this.unmatchedBankName,
     this.unmatchedCash = false,
+    this.isBudgetLocked = false,
   });
 
   final ReceiptParseResult result;
@@ -51,6 +52,11 @@ class ReceiptPreviewReady extends ReceiptPreviewState {
 
   /// Backend nakit ödeme tespit etti ama kullanıcının CASH tipinde hesabı yok.
   final bool unmatchedCash;
+
+  /// Fiş bir bütçe detayından açıldıysa true: bütçe kapsamı chip'leri kilitli
+  /// (tek seçenek gösterilir / tamamen gizlenir). Kullanıcı kategoriyi
+  /// değiştirirse kilit kırılır (niyet değişmiş demektir).
+  final bool isBudgetLocked;
 
   double get effectiveAmount => overrideAmount ?? result.amount ?? 0.0;
   DateTime get effectiveDate => overrideDate ?? result.date ?? DateTime.now();
@@ -86,6 +92,7 @@ class ReceiptPreviewReady extends ReceiptPreviewState {
     String? unmatchedBankName,
     bool clearUnmatchedBankName = false,
     bool? unmatchedCash,
+    bool? isBudgetLocked,
   }) =>
       ReceiptPreviewReady(
         result: result ?? this.result,
@@ -106,5 +113,6 @@ class ReceiptPreviewReady extends ReceiptPreviewState {
             ? null
             : (unmatchedBankName ?? this.unmatchedBankName),
         unmatchedCash: unmatchedCash ?? this.unmatchedCash,
+        isBudgetLocked: isBudgetLocked ?? this.isBudgetLocked,
       );
 }

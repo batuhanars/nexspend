@@ -15,9 +15,34 @@ class BudgetScopeChips extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final personalLabel = AppStrings.of(context).budgetScopePersonal;
+
+    // Bütçe kapsamı kilitliyse (fiş bir bütçe detayından açıldıysa):
+    //  - Ortak bütçe ön-seçiliyse: tek chip olarak o bütçeyi göster.
+    //  - Aksi halde (kişisel bütçeden açılmış): tek chip olarak "Kişisel" göster.
+    if (state.isBudgetLocked) {
+      final lockedId = state.selectedSharedBudgetId;
+      String label = personalLabel;
+      if (lockedId != null) {
+        final locked = state.mySharedBudgets
+            .where((b) => b.id == lockedId)
+            .toList();
+        if (locked.isNotEmpty) {
+          final b = locked.first;
+          label = '${b.groupName} · ${b.name}';
+        }
+      }
+      return Wrap(
+        spacing: AppSpacing.sm,
+        runSpacing: AppSpacing.sm,
+        children: [
+          _Chip(label: label, selected: true, onTap: () {}),
+        ],
+      );
+    }
+
     final budgets = state.sharedBudgetsForSelectedCategory;
     if (budgets.isEmpty) return const SizedBox.shrink();
-    final personalLabel = AppStrings.of(context).budgetScopePersonal;
     return Wrap(
       spacing: AppSpacing.sm,
       runSpacing: AppSpacing.sm,

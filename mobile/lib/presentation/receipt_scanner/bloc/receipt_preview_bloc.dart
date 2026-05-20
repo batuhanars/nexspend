@@ -21,10 +21,14 @@ class ReceiptPreviewBloc
     required AccountRepository accountRepository,
     required FamilyRepository familyRepository,
     required ReceiptParseResult initialResult,
+    String? initialCategoryId,
+    String? initialSharedBudgetId,
   })  : _receiptRepo = receiptRepository,
         _categoryRepo = categoryRepository,
         _accountRepo = accountRepository,
         _familyRepo = familyRepository,
+        _initialCategoryId = initialCategoryId,
+        _initialSharedBudgetId = initialSharedBudgetId,
         super(ReceiptPreviewInitial()) {
     on<ReceiptPreviewLoaded>(_onLoaded);
     on<ReceiptPreviewFieldUpdated>(_onFieldUpdated);
@@ -39,6 +43,8 @@ class ReceiptPreviewBloc
   final CategoryRepository _categoryRepo;
   final AccountRepository _accountRepo;
   final FamilyRepository _familyRepo;
+  final String? _initialCategoryId;
+  final String? _initialSharedBudgetId;
 
   Future<void> _onLoaded(
     ReceiptPreviewLoaded event,
@@ -77,13 +83,30 @@ class ReceiptPreviewBloc
           hint?.paymentMethod == 'CASH' &&
           !accounts.any((a) => !a.isArchived && a.type == AccountType.CASH);
 
+      // Budget detayından açıldıysa o bütçenin kategorisini ön-seçili getir;
+      // yoksa AI önerisine düş. Kategori listede yoksa (örn. INCOME) yine AI'a düş.
+      final preselectedCategoryId =
+          (_initialCategoryId != null &&
+                  categories.any((c) => c.id == _initialCategoryId))
+              ? _initialCategoryId
+              : event.result.suggestedCategoryId;
+
+      // Ortak bütçe detayından açıldıysa o bütçeyi ön-seçili getir
+      // (kullanıcının mySharedBudgets listesinde gerçekten var olduğunu doğrula).
+      final preselectedSharedBudgetId = (_initialSharedBudgetId != null &&
+              mySharedBudgets.any((b) => b.id == _initialSharedBudgetId))
+          ? _initialSharedBudgetId
+          : null;
+
       emit(ReceiptPreviewReady(
         result: event.result,
         categories: categories,
         accounts: accounts,
         mySharedBudgets: mySharedBudgets,
-        selectedCategoryId: event.result.suggestedCategoryId,
+        selectedCategoryId: preselectedCategoryId,
         selectedAccountId: selectedAccountId,
+        selectedSharedBudgetId: preselectedSharedBudgetId,
+        isBudgetLocked: _initialCategoryId != null,
         unmatchedBankName: unmatchedBankName,
         unmatchedCash: unmatchedCash,
       ));
@@ -99,6 +122,7 @@ class ReceiptPreviewBloc
     if (state is! ReceiptPreviewReady) return;
     final current = state as ReceiptPreviewReady;
     // Kategori değiştiyse ortak bütçe seçimi de geçersiz olur — sıfırla.
+    // Aynı zamanda kilitliyse kilidi kır: user'ın niyeti değişmiş demektir.
     final categoryChanged = event.categoryId != null &&
         event.categoryId != current.selectedCategoryId;
     emit(current.copyWith(
@@ -108,6 +132,7 @@ class ReceiptPreviewBloc
       selectedCategoryId: event.categoryId,
       selectedAccountId: event.accountId,
       clearSelectedSharedBudgetId: categoryChanged,
+      isBudgetLocked: categoryChanged ? false : current.isBudgetLocked,
     ));
   }
 

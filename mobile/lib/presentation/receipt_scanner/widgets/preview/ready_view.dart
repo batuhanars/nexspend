@@ -138,9 +138,11 @@ class _ReadyViewState extends State<ReadyView> {
           CategoryDropdown(state: s),
           const SizedBox(height: AppSpacing.lg),
 
-          // Budget scope (Kişisel / ortak bütçe) — sadece seçili kategori
-          // için kullanıcının ortak bütçesi varsa görünür.
-          if (s.sharedBudgetsForSelectedCategory.isNotEmpty) ...[
+          // Budget scope (Kişisel / ortak bütçe):
+          // - Kilitliyse her zaman göster (tek chip kullanıcının nereden geldiğini belirtir).
+          // - Kilitli değilse sadece eşleşen ortak bütçe varsa göster; yoksa
+          //   etiketiyle birlikte komple gizle.
+          if (s.isBudgetLocked || s.sharedBudgetsForSelectedCategory.isNotEmpty) ...[
             FieldLabel(text: AppStrings.of(context).budgetScopeLabel),
             const SizedBox(height: AppSpacing.sm),
             BudgetScopeChips(state: s),

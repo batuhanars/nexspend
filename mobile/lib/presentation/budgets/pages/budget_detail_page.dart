@@ -15,6 +15,7 @@ import '../../../core/utils/icon_mapper.dart';
 import '../../../data/models/budget_model.dart';
 import '../../../data/models/transaction_model.dart';
 import '../../../data/repositories/transaction_repository.dart';
+import '../../shared/widgets/budget_add_entry_sheet.dart';
 import '../bloc/budgets_bloc.dart';
 import '../bloc/budgets_event.dart';
 import '../bloc/budgets_state.dart';
@@ -80,15 +81,31 @@ class _BudgetDetailPageState extends State<BudgetDetailPage> {
     );
   }
 
-  Future<void> _addTransaction() async {
+  Future<void> _openAddEntrySheet() async {
     if (_budget.category == null) return;
-    await context.push(
-      RouteNames.addTransaction,
-      extra: {
-        'type': 'EXPENSE',
-        'categoryId': _budget.category!.id,
-      },
-    );
+    final choice = await showBudgetAddEntrySheet(context);
+    if (choice == null || !mounted) return;
+
+    switch (choice) {
+      case BudgetAddEntryChoice.expense:
+        await context.push(
+          RouteNames.addTransaction,
+          extra: {
+            'type': 'EXPENSE',
+            'categoryId': _budget.category!.id,
+          },
+        );
+        break;
+      case BudgetAddEntryChoice.receipt:
+        await context.push(
+          RouteNames.receiptScanner,
+          extra: <String, String?>{
+            'categoryId': _budget.category!.id,
+          },
+        );
+        break;
+    }
+
     if (!mounted) return;
     context.read<BudgetsBloc>().add(const BudgetsRefreshRequested());
     setState(() => _txFuture = _loadTransactions());
@@ -202,7 +219,7 @@ class _BudgetDetailPageState extends State<BudgetDetailPage> {
                         ),
                       ),
                       if (_budget.category != null)
-                        _AddTransactionInlineAction(onTap: _addTransaction),
+                        _AddTransactionInlineAction(onTap: _openAddEntrySheet),
                     ],
                   ),
                   const SizedBox(height: AppSpacing.md),

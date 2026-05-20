@@ -235,6 +235,7 @@ GoRouter createRouter() {
               initialAccountId: extra?['accountId'],
               initialType: extra?['type'],
               initialCategoryId: extra?['categoryId'],
+              initialSharedBudgetId: extra?['sharedBudgetId'],
             ),
           );
         },
@@ -307,7 +308,13 @@ GoRouter createRouter() {
         path: RouteNames.receiptScanner,
         name: 'receipt-scanner',
         parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, _) => const ReceiptScannerPage(),
+        builder: (context, state) {
+          final extra = state.extra as Map<String, String?>?;
+          return ReceiptScannerPage(
+            initialCategoryId: extra?['categoryId'],
+            initialSharedBudgetId: extra?['sharedBudgetId'],
+          );
+        },
       ),
       GoRoute(
         path: RouteNames.accounts,

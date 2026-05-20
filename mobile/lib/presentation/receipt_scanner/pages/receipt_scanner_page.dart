@@ -18,7 +18,19 @@ import '../../../data/repositories/receipt_repository.dart';
 import 'receipt_preview_page.dart';
 
 class ReceiptScannerPage extends StatefulWidget {
-  const ReceiptScannerPage({super.key});
+  const ReceiptScannerPage({
+    super.key,
+    this.initialCategoryId,
+    this.initialSharedBudgetId,
+  });
+
+  /// Budget detayından açıldığında ilgili bütçenin kategorisi.
+  /// Receipt preview'a forward edilir; AI önerisini override eder.
+  final String? initialCategoryId;
+
+  /// Ortak bütçe detayından açıldığında o ortak bütçenin id'si.
+  /// Receipt preview'da ön-seçili gelir; chip listesi kilitlenir.
+  final String? initialSharedBudgetId;
 
   @override
   State<ReceiptScannerPage> createState() => _ReceiptScannerPageState();
@@ -154,8 +166,12 @@ class _ReceiptScannerPageState extends State<ReceiptScannerPage>
 
       final confirmed = await Navigator.of(context).push<bool>(
         MaterialPageRoute(
-          builder: (_) =>
-              ReceiptPreviewPage(imagePath: imagePath, ocrResult: result),
+          builder: (_) => ReceiptPreviewPage(
+            imagePath: imagePath,
+            ocrResult: result,
+            initialCategoryId: widget.initialCategoryId,
+            initialSharedBudgetId: widget.initialSharedBudgetId,
+          ),
         ),
       );
 

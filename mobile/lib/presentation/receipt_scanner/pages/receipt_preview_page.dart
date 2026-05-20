@@ -18,10 +18,14 @@ class ReceiptPreviewPage extends StatelessWidget {
     super.key,
     required this.imagePath,
     required this.ocrResult,
+    this.initialCategoryId,
+    this.initialSharedBudgetId,
   });
 
   final String imagePath;
   final ReceiptParseResult ocrResult;
+  final String? initialCategoryId;
+  final String? initialSharedBudgetId;
 
   @override
   Widget build(BuildContext context) {
@@ -32,6 +36,8 @@ class ReceiptPreviewPage extends StatelessWidget {
         accountRepository: getIt<AccountRepository>(),
         familyRepository: getIt<FamilyRepository>(),
         initialResult: ocrResult,
+        initialCategoryId: initialCategoryId,
+        initialSharedBudgetId: initialSharedBudgetId,
       ),
       child: _ReceiptPreviewView(imagePath: imagePath),
     );

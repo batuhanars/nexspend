@@ -26,11 +26,16 @@ class AddTransactionPage extends StatefulWidget {
     this.initialAccountId,
     this.initialType,
     this.initialCategoryId,
+    this.initialSharedBudgetId,
   });
 
   final String? initialAccountId;
   final String? initialType;
   final String? initialCategoryId;
+
+  /// Ortak bütçe detayından açıldığında o ortak bütçenin id'si.
+  /// Kapsam chip'lerini kilitler (sadece o chip görünür).
+  final String? initialSharedBudgetId;
 
   @override
   State<AddTransactionPage> createState() => _AddTransactionPageState();
@@ -53,6 +58,11 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
   // null = "Kişisel"; doluysa seçilen ortak bütçenin id'si.
   String? _selectedSharedBudgetId;
 
+  /// Form bir bütçe detayından açıldıysa true: kapsam chip'leri kilitli
+  /// (tek chip gösterilir). Kullanıcı kategoriyi değiştirirse kilit kırılır.
+  late bool _isBudgetLocked;
+  bool _sharedBudgetInitialized = false;
+
   bool _isRecurring = false;
   String _recurringFrequency = 'MONTHLY';
   DateTime? _recurringEndDate;
@@ -61,6 +71,7 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
   void initState() {
     super.initState();
     _type = widget.initialType ?? 'EXPENSE';
+    _isBudgetLocked = widget.initialCategoryId != null;
     context.read<AddTransactionBloc>().add(AddTransactionInitialized());
     _loadMySharedBudgets();
   }
@@ -68,9 +79,20 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
   Future<void> _loadMySharedBudgets() async {
     try {
       final list = await getIt<FamilyRepository>().getMySharedBudgets();
-      if (mounted) setState(() => _mySharedBudgets = list);
+      if (!mounted) return;
+      setState(() {
+        _mySharedBudgets = list;
+        // İlk yükte ön-seçili ortak bütçeyi listeden doğrula.
+        if (!_sharedBudgetInitialized &&
+            widget.initialSharedBudgetId != null &&
+            list.any((b) => b.id == widget.initialSharedBudgetId)) {
+          _selectedSharedBudgetId = widget.initialSharedBudgetId;
+        }
+        _sharedBudgetInitialized = true;
+      });
     } catch (_) {
       // Sessizce yutalım — chip group olmasa da form çalışmaya devam etsin.
+      _sharedBudgetInitialized = true;
     }
   }
 
@@ -241,6 +263,7 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                     _type = t;
                     _selectedCategory = null;
                     _selectedSharedBudgetId = null;
+                    _isBudgetLocked = false;
                   }),
                 ),
                 const SizedBox(height: AppSpacing.xl),
@@ -255,13 +278,18 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                     categories: filtered,
                     selected: _selectedCategory,
                     onSelected: (c) => setState(() {
+                      final changed = c.id != _selectedCategory?.id;
                       _selectedCategory = c;
-                      _selectedSharedBudgetId = null;
+                      if (changed) {
+                        _selectedSharedBudgetId = null;
+                        _isBudgetLocked = false;
+                      }
                     }),
                   ),
                 ],
                 if (_type == 'EXPENSE' &&
-                    _sharedBudgetsForCategory().isNotEmpty) ...[
+                    (_isBudgetLocked ||
+                        _sharedBudgetsForCategory().isNotEmpty)) ...[
                   const SizedBox(height: AppSpacing.lg),
                   _sectionLabel(AppStrings.of(context).budgetScopeLabel),
                   const SizedBox(height: AppSpacing.sm),
@@ -269,6 +297,13 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                     budgets: _sharedBudgetsForCategory(),
                     selectedId: _selectedSharedBudgetId,
                     personalLabel: AppStrings.of(context).budgetScopePersonal,
+                    isLocked: _isBudgetLocked,
+                    lockedSharedBudget: _isBudgetLocked &&
+                            _selectedSharedBudgetId != null
+                        ? _mySharedBudgets
+                            .where((b) => b.id == _selectedSharedBudgetId)
+                            .firstOrNull
+                        : null,
                     onSelected: (id) =>
                         setState(() => _selectedSharedBudgetId = id),
                   ),
@@ -376,21 +411,40 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
 /// İşlem ekleme formunda kategori seçildikten sonra çıkar:
 /// "Kişisel" + kullanıcının üye olduğu o kategori için ortak bütçeler.
 /// null = Kişisel, doluysa ortak bütçeye atanır.
+///
+/// Kilitli modda (bir bütçe detayından açıldığında): kullanıcının nereden
+/// geldiğine göre tek bir chip ("Kişisel" veya o ortak bütçe) gösterilir.
 class _BudgetScopeChips extends StatelessWidget {
   const _BudgetScopeChips({
     required this.budgets,
     required this.selectedId,
     required this.personalLabel,
     required this.onSelected,
+    this.isLocked = false,
+    this.lockedSharedBudget,
   });
 
   final List<MySharedBudgetModel> budgets;
   final String? selectedId;
   final String personalLabel;
   final ValueChanged<String?> onSelected;
+  final bool isLocked;
+  final MySharedBudgetModel? lockedSharedBudget;
 
   @override
   Widget build(BuildContext context) {
+    if (isLocked) {
+      final label = lockedSharedBudget != null
+          ? '${lockedSharedBudget!.groupName} · ${lockedSharedBudget!.name}'
+          : personalLabel;
+      return Wrap(
+        spacing: AppSpacing.sm,
+        runSpacing: AppSpacing.sm,
+        children: [
+          _Chip(label: label, selected: true, onTap: () {}),
+        ],
+      );
+    }
     return Wrap(
       spacing: AppSpacing.sm,
       runSpacing: AppSpacing.sm,

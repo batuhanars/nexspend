@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../data/models/receipt_model.dart';
 import '../../../data/models/category_model.dart';
@@ -45,7 +46,12 @@ class ReceiptPreviewBloc
   ) async {
     emit(ReceiptPreviewInitial());
     try {
-      final categories = await _categoryRepo.getCategories();
+      final allCategories = await _categoryRepo.getCategories();
+      // Fiş = gider; INCOME kategorileri (Maaş, Freelance vb.) listelenmez.
+      final categories = allCategories
+          .where((c) =>
+              c.type == CategoryType.EXPENSE || c.type == CategoryType.BOTH)
+          .toList();
       final accounts = await _accountRepo.getAccounts();
       // Ortak bütçeler eksik kalsa da fiş akışı çalışabilmeli — sessizce yut.
       List<MySharedBudgetModel> mySharedBudgets = const [];
@@ -156,7 +162,27 @@ class ReceiptPreviewBloc
 
       emit(ReceiptPreviewSuccess());
     } catch (e) {
-      emit(current.copyWith(isSubmitting: false, errorMessage: e.toString()));
+      emit(current.copyWith(
+        isSubmitting: false,
+        errorMessage: _extractErrorMessage(e),
+      ));
     }
+  }
+
+  String _extractErrorMessage(Object e) {
+    if (e is DioException) {
+      final data = e.response?.data;
+      if (data is Map) {
+        // GlobalExceptionFilter validation'da message="Validation failed"
+        // gönderip detayları errors[] alanına atıyor; önce o listeye bak.
+        final errors = data['errors'];
+        if (errors is List && errors.isNotEmpty) return errors.join(', ');
+        final msg = data['message'];
+        if (msg is List && msg.isNotEmpty) return msg.join(', ');
+        if (msg is String && msg.isNotEmpty) return msg;
+      }
+      if (data is String && data.isNotEmpty) return data;
+    }
+    return e.toString();
   }
 }

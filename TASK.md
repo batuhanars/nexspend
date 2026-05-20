@@ -1,6 +1,6 @@
 # Stitch Wallet App — Görev Takip Dosyası
 
-> Son güncelleme: 13 Mayıs 2026 (Sprint 10 push notification, l10n tamamlandı, family bloc testleri düzeltildi)  
+> Son güncelleme: 20 Mayıs 2026 (Bütçe rollover sprint'i planlandı — `BUDGET_ROLLOVER_CONTRACT.md`)  
 > ✅ = Tamamlandı | 🔧 = Kısmen yapıldı | ❌ = Henüz başlanmadı  
 > ☑ = Kodda mevcut ancak migration henüz çalıştırılmadı
 
@@ -8,6 +8,7 @@
 - `SCHEMA.md` — Veritabanı şeması (Prisma modelleri, ER diyagramı, kategori sistemi)
 - `DEVELOPMENT_PLAN_V1.md` — Temel özellikler mimarisi (Sprint 0-8)
 - `DEVELOPMENT_PLAN_V2.md` — İleri özellikler mimarisi (Sprint 9-12)
+- `BUDGET_ROLLOVER_CONTRACT.md` — Bütçe dönem yönetimi sözleşmesi (planlandı 20 May 2026)
 - `STITCH_PROMPTS.md` — UI tasarım promptları
 
 ---
@@ -590,6 +591,46 @@
 - [x] **l10n tamamlandı (aile modülü):** `FamilyGroupPage`, `FamilyGroupDetailPage`, `BudgetsPage` aile bölümü için 32 yeni AppStrings anahtarı eklendi (TR + EN); `budgetNameHint` çakışması `sharedBudgetNameHint` ile giderildi; import eksiklikleri düzeltildi
 - [x] **FamilyBloc test düzeltmesi:** `_parseError` metodu plain `Exception` mesajlarından HTTP kodu parse edecek şekilde genişletildi; 3 başarısız test giderildi (toplam Flutter testleri: 66/66 ✅)
 - [x] **Insights push notification navigasyonu:** `MonthlyInsightJob` `data:{type:'MONTHLY_REPORT'}` ile gönderir; `NotificationService` üç senaryoyu (foreground/background/cold-start) handle eder; `AppShell` `onInsightsNav` stream'i ile `/insights` sayfasına yönlendiriyor
+
+---
+
+## Sprint 12 — Bütçe Dönem Yönetimi (Rollover)
+> 📖 Contract: `BUDGET_ROLLOVER_CONTRACT.md`
+>
+> **Neden:** Bütçeler şu an `endDate=null` ile sonsuz açık — `period=MONTHLY` davranışsız bir etiket. Ay sonu geldiğinde otomatik yenileme yok, kullanıcı geçmiş dönemlerini karşılaştıramıyor.
+>
+> **Hedef:** Her bütçe (kişisel + ortak) için periyot bitiminde otomatik arşivleme + yeni dönem açma + bütçe detayında "Geçmiş" tab'ı.
+
+### Backend
+- [ ] Migration: `budget_period_lifecycle` — Budget + SharedBudget'a `seriesId`, `rolledOverFromId` ekle; `endDate` NOT NULL'a çevir; mevcut kayıtları backfill
+- [ ] `api/src/modules/budgets/period.utils.ts` — `computeEndDate`, `computeNextStartDate` helper'ları
+- [ ] `BudgetRolloverJob` — `@Cron('30 0 * * *')` günlük yenileme
+- [ ] `BudgetsService.processRollovers` — atomik transaction + bildirim
+- [ ] `POST /api/budgets` — `endDate` opsiyonel, yoksa auto-compute; `seriesId` UUID
+- [ ] `PATCH /api/budgets/:id` — arşiv kayıt 400 döner
+- [ ] `GET /api/budgets/:id/history` — yeni endpoint (seriesId üzerinden)
+- [ ] `GET /api/budgets` — varsayılan `isActive=true`, `?includeArchived=true` opsiyonu
+- [ ] SharedBudget tarafında aynı 4 endpoint adaptasyonu (`/family/groups/:id/budgets`)
+- [ ] FCM bildirim — `type: BUDGET_ROLLOVER`, %100 altı/üstü farklı şablon
+- [ ] Unit testler (`budgets.service.spec.ts`) — rollover + bildirim + hata senaryoları
+- [ ] E2E testler (`test/budget-rollover.e2e-spec.ts`)
+
+### Frontend
+- [ ] `mobile/lib/core/utils/budget_period.dart` — period utils (Dart eşdeğeri)
+- [ ] `BudgetModel` + `SharedBudgetModel`: `seriesId`, `rolledOverFromId`, `endDate` (now required) alanları
+- [ ] `AddBudgetPage` + `EditBudgetSheet` — endDate read-only chip ("31 May 2026'da yenilenecek")
+- [ ] `BudgetDetailPage` — TabBar (Bu Dönem / Geçmiş) + `_HistoryView` (mini chart + dönem listesi)
+- [ ] `SharedBudgetDetailPage` — aynı tab yapısı
+- [ ] `BudgetsRepository.getHistory(budgetId)` — yeni endpoint çağrısı
+- [ ] `NotificationService` — `BUDGET_ROLLOVER` type handling (foreground/background/cold-start)
+- [ ] Bildirim tap → GoRouter ile `/budgets/:id` (veya `/family/:gid/budgets/:bid`)
+- [ ] l10n stringler (TR + EN) — tab başlıkları, "yenilenecek" hint, bildirim sayfası snackbar
+- [ ] BLoC testler — history fetch + state
+
+### PM / Deploy
+- [ ] PM: contract içindeki "Açık Sorular §8" üç maddeyi karara bağla
+- [ ] Backend + frontend session merge → integration test
+- [ ] Railway'e migration deploy + ilk gece cron'unu monitör (00:30 logları)
 
 ---
 

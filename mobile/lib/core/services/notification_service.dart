@@ -174,12 +174,15 @@ class NotificationService {
       _pendingInsights = true;
     } else if (type == 'BUDGET_CLOSED') {
       final scope = message.data['scope'] as String?;
-      final budgetId = message.data['budgetId'] as String?;
-      if (scope == 'personal' && budgetId != null) {
-        _pendingClosedBudgetId = budgetId;
-      } else if (scope == 'shared' && budgetId != null) {
+      if (scope == 'personal') {
+        final budgetId = message.data['closedBudgetId'] as String?;
+        if (budgetId != null) {
+          _pendingClosedBudgetId = budgetId;
+        }
+      } else if (scope == 'shared') {
+        final budgetId = message.data['closedSharedBudgetId'] as String?;
         final groupId = message.data['groupId'] as String?;
-        if (groupId != null) {
+        if (budgetId != null && groupId != null) {
           _pendingClosedSharedBudget =
               (budgetId: budgetId, groupId: groupId);
         }
@@ -236,12 +239,15 @@ class NotificationService {
     } else if (type == 'BUDGET_CLOSED') {
       // App is in foreground: emit to stream so AppShell shows a SnackBar
       final scope = message.data['scope'] as String?;
-      final budgetId = message.data['budgetId'] as String?;
-      if (scope == 'personal' && budgetId != null) {
-        _personalBudgetClosedController.add(budgetId);
-      } else if (scope == 'shared' && budgetId != null) {
+      if (scope == 'personal') {
+        final budgetId = message.data['closedBudgetId'] as String?;
+        if (budgetId != null) {
+          _personalBudgetClosedController.add(budgetId);
+        }
+      } else if (scope == 'shared') {
+        final budgetId = message.data['closedSharedBudgetId'] as String?;
         final groupId = message.data['groupId'] as String?;
-        if (groupId != null) {
+        if (budgetId != null && groupId != null) {
           _sharedBudgetClosedController
               .add((budgetId: budgetId, groupId: groupId));
         }

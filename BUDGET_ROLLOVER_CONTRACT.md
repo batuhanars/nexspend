@@ -274,9 +274,11 @@ DefaultTabController(
 - Altta liste: her dönem kartı `{period label, amount, spent, %, statusColor}` — dokununca read-only detay
 - Boş geçmiş için empty state: "Bu kategoride başka dönem yok"
 
+> **Karar (21 May 2026, smoke test sonrası):** Tab yapısı **yalnız `isActive=true` (aktif) bütçeler için**. Arşivlenmiş kayıt (`isActive=false`) detayı tek panel olarak render edilir — sadece "Bu Dönem" panelinin içeriği (kaydın kendi verisi: tutar, harcama, %, kategori). Sebep: arşiv kayıt zaten bir dönemin tamamı, kendi başına; Geçmiş tab'ın anlamı dönem karşılaştırması ve bu sayfa zaten geçmişin bir parçası. Geçmiş erişimi: aynı kategoride aktif bütçe varsa onun Geçmiş tab'ından veya Arşivlenmiş Bütçeler ekranından başka kart tıklayarak.
+
 ### 5.3 SharedBudgetDetailPage — aynı tab yapısı
 
-Aynı pattern; `_HistoryView` `groupId + budget.id` ile `GET /api/family/groups/:gid/budgets/:bid/history` çağırır.
+Aynı pattern; `_HistoryView` `groupId + budget.id` ile `GET /api/family/groups/:gid/budgets/:bid/history` çağırır. **Aynı kural geçerli:** `isActive=false` olan ortak bütçe detayı tek panel (tab yok).
 
 ### 5.4 "Yeni dönem oluştur" CTA — kaldırıldı
 
@@ -402,6 +404,9 @@ Cron yanlış kayıt arşivlerse: `isActive=true` set ederek geri açılabilir, 
 | 3 | History endpoint'inde max kaç dönem dönsün? | **Son 12 dönem**, period bağımsız. | MONTHLY için 1 yıl tam; WEEKLY için ~3 ay; YEARLY için 12 yıl (yeterinden fazla). MVP için tek sabit limit pratik; period'a göre dinamik limit ileride gerekirse eklenir. |
 | 4 | (21 May, smoke test sonrası ek) Kişisel prefilled CTA flow korunsun mu? | **Geri çekildi.** Kişisel tap → `BudgetDetailPage` (Geçmiş tab default). Bildirim CTA içermez (foreground SnackBar dahil). Kişisel + ortak parite. | **UX gerekçesi (asıl):** Prefilled CTA tüm bütçeleri *döngüsel* kabul ediyordu. Oysa bütçelerin önemli bir kısmı **tek seferlik niyet**: tatil bütçesi, taşınma, düğün, doğum günü, sınav hazırlık dönemi… Dönem sonunda "yenisini oluşturmak ister misin?" dürtüsü bu kullanıcılarda yanlış müdahale olur. Bilgi bildirimi + arşivde görme nötr UX sağlar; kullanıcı isterse normal akıştan yeni bir bütçe açar, isterse bırakır. **Teknik gerekçe (ikincil):** Smoke test'te async fetch chain (`getById` + `addPostFrameCallback` + push) timing bug'ı üretti — kullanıcı başka bir ekrana (örn. kredi kartı detayı) tıklarken pending consume geç tetiklendi, alakasız yerde AddBudgetPage prefilled açıldı. Senkron push akışı bu hata yüzeyini de ortadan kaldırır + iki scope arasında tutarlılık sağlar. |
 | 5 | (21 May ek) Arşivlenmiş bütçeleri DB seviyesinde ayrı tabloya mı taşıyalım? | **Hayır, mevcut `isActive` soft-delete pattern korunur.** UX ayrımı için Settings altına "Arşivlenmiş Bütçeler" sayfası (`ArchivedBudgetsPage`) eklendi. | DB ayrımı 2-3 ek gün backend rewrite + 142 test revize anlamına gelirdi; mevcut pattern projenin (`accounts` tablosundaki `isArchived`) konvansiyonuyla zaten uyumlu. UX karışıklığı sorunu frontend tarafında daha küçük bir maliyetle çözüldü. |
+| 6 | (21 May, smoke test 3. tur sonrası) Bildirim tap default tab "Bu Dönem" mi "Geçmiş" mi? | **"Bu Dönem"** default. | İlk karar Geçmiş tab idi; ama Geçmiş tab kategorideki **önceki** arşivler listesi — kapanan bütçe o kategoride ilk arşivse boş düşer, kullanıcı kendi kapanan bütçesinin verisini hiç göremez. Doğrusu: arşivin kendi verisi önce, kullanıcı isterse Geçmiş tab'ına geçer. |
+| 7 | (21 May ek) Arşivlenmiş bütçe detayında tab yapısı kalsın mı? | **Hayır, arşiv detayı tek panel** (tab yok). `isActive=true` aktif kayıtlarda tab yapısı korunur. | Arşiv kayıt zaten bir dönemin tamamı, kendi başına; Geçmiş tab'ın anlamı dönem karşılaştırması ve bu sayfa zaten geçmişin bir parçası. UX: gereksiz tab kullanıcıyı yanıltıyordu (Geçmiş tıkladığında ya boş ya farklı bir kategori arşivleri görüyordu). Geçmiş erişimi aktif bütçe detayından veya Arşivlenmiş Bütçeler listesinden başka kartla. |
+| 8 | (21 May ek) Ortak bütçe oluşturma UI'ı modal mi full-page form mu? | **Full-page form** (`AddSharedBudgetPage`) — kişisel `AddBudgetPage` ile parite. | Modal içinde period selector + date picker bileşenleri dar alana sıkışıyor + tutar input'u standart TextField (custom `AmountField` widget yok). Full-page form mobile UI'da en yaygın pattern; mevcut kişisel sayfa template olarak kullanılabilir. |
 
 > Bu kararlar §3.1, §3.3, §3.4, §5.4, §5.6 ve §6'ya işlendi. §8 kapalı.
 

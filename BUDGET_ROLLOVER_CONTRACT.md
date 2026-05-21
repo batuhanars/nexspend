@@ -194,9 +194,11 @@ async archiveExpired(): Promise<{ personal: number; shared: number }> {
 
 ### 3.4 Deep link payload
 
-**Kişisel bildirim tap'i** → `BudgetDetailPage` (kapanan bütçenin kendi detayı), **Geçmiş tab default açık**. Prefilled form **açılmaz**; kullanıcı tarihçeyi görür, ihtiyaç duyarsa normal akıştan (`+ Bütçe Ekle`) yeni dönem oluşturur.
+**Kişisel bildirim tap'i** → `BudgetDetailPage` (kapanan bütçenin kendi detayı), **"Bu Dönem" tab default açık** (yani kapanan bütçenin kendi verileri: tutar, harcama, %, kategori). Kullanıcı isterse "Geçmiş" tab'ına geçerek aynı kategorideki önceki dönemleri görür. Prefilled form açılmaz.
 
-**Ortak bildirim tap'i** → `SharedBudgetDetailPage` (kapanan bütçenin kendi detayı), **Geçmiş tab default açık**. Aynı davranış, üyeler tarihçeyi görür.
+**Ortak bildirim tap'i** → `SharedBudgetDetailPage` (kapanan bütçenin kendi detayı), **"Bu Dönem" tab default açık**. Aynı davranış.
+
+> **Karar düzeltmesi (21 May, smoke test 3. tur):** İlk kararda "Geçmiş tab default" yazılıydı; ama Geçmiş tab "aynı kategorideki önceki arşivler" listesidir — kapanan bütçe o kategorideki ilk arşiv ise tab boş düşer ve kullanıcı kendi kapanan bütçesinin verilerini hiç göremez. Doğrusu: "Bu Dönem" tab default — kullanıcı arşivlenmiş bütçesinin kendi verilerini görür (artık arşiv olarak), istediğinde Geçmiş tab'ına geçer.
 
 > **Karar (§8/4):** Prefilled CTA akışı geri çekildi. Hem kişisel hem ortak için tap → spesifik bütçe detayı (Geçmiş tab). Sebep: smoke test'te async fetch chain (`getById` + `addPostFrameCallback` + push) timing bug'larına yol açtı (kullanıcı başka bir ekrana tıklarken alakasız yerde AddBudgetPage prefilled açılması). Senkron push akışı bu yüzey'i ortadan kaldırır + UX kişisel/ortak arasında tutarlı kalır.
 
@@ -311,12 +313,12 @@ class BudgetHistoryEntry {
 
 **`scope='personal'`** — kişisel:
 - **Foreground:** Bilgi SnackBar (CTA action button **yok**)
-- **Background tap:** GoRouter ile `BudgetDetailPage` (kapanan bütçenin detayı, Geçmiş tab default)
+- **Background tap:** GoRouter ile `BudgetDetailPage` (kapanan bütçenin detayı, **"Bu Dönem" tab default**)
 - **Cold start:** pending `closedBudgetId` mekanizması (Insights pattern'i)
 
 **`scope='shared'`** — ortak:
 - **Foreground:** Bilgi SnackBar
-- **Background tap:** GoRouter ile `SharedBudgetDetailPage` (kapanan bütçenin detayı, Geçmiş tab default)
+- **Background tap:** GoRouter ile `SharedBudgetDetailPage` (kapanan bütçenin detayı, **"Bu Dönem" tab default**)
 - **Cold start:** pending `closedSharedBudgetId` → detay sayfasına yönlendirir
 
 > **Senkron push gereği (§8/4):** Detay sayfası constructor'ları, model objesi yerine `budgetId` ile de açılabilmeli (model verilmemişse sayfa kendi içinde fetch eder). Bu, notification handler'ı async fetch zincirinden kurtarır → `addPostFrameCallback + push` deterministik kalır → pending consume timing bug'ları yüzey'i ortadan kalkar.

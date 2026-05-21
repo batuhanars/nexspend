@@ -272,6 +272,15 @@ GoRouter createRouter() {
         },
       ),
       GoRoute(
+        // ÖNEMLİ: Statik /budgets/archived rotası, dinamik /budgets/:id'den önce
+        // tanımlanmalı; aksi halde GoRouter "archived"ı id parametresi olarak
+        // yorumlar ve BudgetDetailPage'i fetch fail ile patlar.
+        path: RouteNames.archivedBudgets,
+        name: 'archived-budgets',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, _) => const ArchivedBudgetsPage(),
+      ),
+      GoRoute(
         path: '/budgets/:id',
         name: 'budget-detail',
         parentNavigatorKey: _rootNavigatorKey,
@@ -424,12 +433,6 @@ GoRouter createRouter() {
           ),
           child: const ArchivedAccountsPage(),
         ),
-      ),
-      GoRoute(
-        path: RouteNames.archivedBudgets,
-        name: 'archived-budgets',
-        parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, _) => const ArchivedBudgetsPage(),
       ),
       GoRoute(
         path: RouteNames.settings,

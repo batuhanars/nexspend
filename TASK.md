@@ -638,7 +638,34 @@
 - [x] PM: kontrat §3.4 + §5.6 düzeltmesi — bildirim tap default tab "Bu Dönem" (Geçmiş değil); sebep: Geçmiş tab kategoride önceki arşivler, ilk arşiv senaryosunda boş düşüyordu
 - [x] PM hotfix: `/budgets/archived` route precedence (af4bd06) + initialTabIndex 0 (03f32e3) + timezone date kayması (0431b2d, ab80288)
 - [x] Smoke test 3. tur ✅ — timezone fix, bildirim tap routing, Bu Dönem default, Geçmiş tab dolu/boş, arşiv ekranı, ortak form, PATCH 400, cron archive, hepsi yeşil
-- [ ] Backend migration Railway'e deploy + 00:30 cron logları monitör (bu gece 22 May 00:30)
+- [x] Backend migration Railway'e deploy (21 May 2026, push `90a586d..a6e47c9`)
+- [ ] 22 May sabahı: Railway 00:30 cron loglarını verify
+
+---
+
+## Mini Sprint 12.5 — Kredi Kartı Analytics Semantiği
+> 📖 Contract: `CREDIT_CARD_ANALYTICS_CONTRACT.md`
+>
+> **Neden:** Sprint 12 smoke test sonunda fark edildi — kredi kartı hesap detayında "Gelir" istatistiği gösteriliyordu. Kredi kartı bir borç hesabı, gelir kavramı anlamsız. Kavramsal model netleştirildi (21 May 2026): kredi kartı için **Harcama (EXPENSE)** + **Ödeme (TRANSFER gelen)**; "Gelir" yok.
+
+### Backend
+- [ ] `AccountsService.getAnalytics` kredi kartı için şartlı dal: months `{ payment, spend }` döner; standart için mevcut `{ income, expense }` korunur
+- [ ] Response top-level `isCreditCard: boolean` alanı eklenir
+- [ ] `TransactionsService.create` + `update` — `type=INCOME` + `account.type=CREDIT_CARD` reject (400 + Türkçe mesaj)
+- [ ] Unit + e2e test güncellemeleri
+
+### Frontend
+- [ ] `AccountAnalyticsModel` `isCreditCard` flag + `payment`/`spend` opsiyonel alanları
+- [ ] `ThisMonthSection` şartlı render: kredi kartı için "Ödeme / Harcama"
+- [ ] `MonthlyChartSection` şartlı render: kredi kartı için payment + spend bar
+- [ ] l10n stringler (TR + EN): "Ödeme", "Harcama"
+- [ ] (Opsiyonel) `AddTransactionPage` INCOME tipinde kredi kartı seçimini disable et / tooltip
+- [ ] BLoC + widget testleri
+
+### PM / Deploy
+- [ ] PM: backend + frontend dev session brief'leri ilet
+- [ ] PM: integration smoke test (kart harcama + TRANSFER ödeme → analytics doğru çiziyor)
+- [ ] Railway deploy + verify
 
 ---
 

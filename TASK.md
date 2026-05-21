@@ -601,39 +601,39 @@
 >
 > **Hedef:** Her bütçe (kişisel + ortak) için periyot bitiminde **arşivleme** + bildirim ("yenisini ister misin?") + bütçe detayında "Geçmiş" tab'ı + tek dokunuş prefilled yeni dönem oluşturma. **Otomatik yenileme YOK** — kullanıcı niyetli kalır.
 
-### Backend
-- [ ] Migration: `budget_endDate_required` — Budget + SharedBudget `endDate` NOT NULL; mevcut kayıtların endDate'i `period + startDate`'ten backfill; index'ler eklenir
-- [ ] `api/src/modules/budgets/period.utils.ts` — `computeEndDate` helper
-- [ ] `BudgetDailyCheckJob` saatini 09:10 → **00:30**'a çek; `archiveExpired` adımı ekle (mevcut recompute korunur)
-- [ ] `BudgetsService.archiveExpired` — `isActive=false` set + fire-and-forget bildirim
-- [ ] `POST /api/budgets` — `endDate` opsiyonel, yoksa auto-compute
-- [ ] `POST /api/family/groups/:id/budgets` — aynı kural
-- [ ] `PATCH /api/budgets/:id` ve `PATCH /api/family/.../budgets/:id` — arşiv kayıt → 400
-- [ ] `GET /api/budgets/:id/history` — yeni endpoint (kategori bazlı, son 12 dönem)
-- [ ] `GET /api/family/groups/:gid/budgets/:bid/history` — ortak bütçe muadili
-- [ ] `GET /api/budgets` ve grup eşdeğeri — varsayılan `isActive=true`, `?includeArchived=true` opsiyonu
-- [ ] FCM bildirim — `type: BUDGET_CLOSED`, scope `personal | shared`, aşılan/aşılmayan farklı şablon, ortak için **tüm üyelere**
-- [ ] Unit testler (`budgets.service.spec.ts`) — arşivleme + bildirim + arşiv PATCH 400
-- [ ] E2E testler (`test/budget-lifecycle.e2e-spec.ts`)
+### Backend ✅ (commit 859fae1, 21 May 2026)
+- [x] Migration: `budget_endDate_required` — Budget + SharedBudget `endDate` NOT NULL; mevcut kayıtların endDate'i `period + startDate`'ten backfill; index'ler eklenir
+- [x] `api/src/modules/budgets/period.utils.ts` — `computeEndDate` helper
+- [x] `BudgetDailyCheckJob` saatini 09:10 → **00:30**'a çek; `archiveExpired` adımı ekle (mevcut recompute korunur)
+- [x] `BudgetsService.archiveExpired` — `isActive=false` set + fire-and-forget bildirim
+- [x] `POST /api/budgets` — `endDate` opsiyonel, yoksa auto-compute
+- [x] `POST /api/family/groups/:id/budgets` — aynı kural
+- [x] `PATCH /api/budgets/:id` ve `PATCH /api/family/.../budgets/:id` — arşiv kayıt → 400
+- [x] `GET /api/budgets/:id/history` — yeni endpoint (kategori bazlı, son 12 dönem)
+- [x] `GET /api/family/groups/:gid/budgets/:bid/history` — ortak bütçe muadili
+- [x] `GET /api/budgets` ve grup eşdeğeri — varsayılan `isActive=true`, `?includeArchived=true` opsiyonu
+- [x] FCM bildirim — `type: BUDGET_CLOSED`, scope `personal | shared`, aşılan/aşılmayan farklı şablon, ortak için **tüm üyelere** salt bilgi
+- [x] Unit testler (`budgets.service.spec.ts`) — arşivleme + bildirim + arşiv PATCH 400 (142 test ✅)
+- [x] E2E testler (`test/budget-lifecycle.e2e-spec.ts`)
 
-### Frontend
-- [ ] `mobile/lib/core/utils/budget_period.dart` — `computeEndDate` (Dart eşdeğeri)
-- [ ] `BudgetModel` + `SharedBudgetModel` — `endDate` nullable → non-nullable
-- [ ] `BudgetHistoryEntry` modeli + repository metodları (`getHistory`, `getSharedHistory`)
-- [ ] `AddBudgetPage` + `EditBudgetSheet` — endDate read-only chip ("31 Mayıs 2026'da kapanacak")
-- [ ] `BudgetDetailPage` — TabBar (Bu Dönem / Geçmiş) + `_HistoryView` (mini bar chart + dönem listesi)
-- [ ] `SharedBudgetDetailPage` — aynı tab yapısı
-- [ ] "Yeni Dönem Aç" CTA — **yalnız kişisel** arşiv detayında + kişisel bildirim tap'inde, `AddBudgetPage` prefilled açar (ortakta CTA yok)
-- [ ] `NotificationService` — `BUDGET_CLOSED` type `scope`'a göre ayrışır: kişisel = SnackBar + "Yenisini Aç" + prefilled AddBudgetPage; ortak = bilgi SnackBar + tap → `SharedBudgetDetailPage` (cold start pending mekanizması her ikisinde)
-- [ ] GoRouter — `/budgets/add` ve `/family/:gid/budgets/add` route'ları prefill query/extra'sı kabul eder
-- [ ] l10n stringler (TR + EN) — tab başlıkları, "kapanacak" hint, "Yeni Dönem Aç", bildirim metinleri
-- [ ] BLoC testler — history fetch + prefilled add flow
+### Frontend ✅ (commit 0bb32b4, 21 May 2026)
+- [x] `mobile/lib/core/utils/budget_period.dart` — `computeEndDate` (Dart eşdeğeri)
+- [x] `BudgetModel` + `SharedBudgetModel` — `endDate` nullable → non-nullable
+- [x] `BudgetHistoryEntry` modeli + repository metodları (`getHistory`, `getSharedHistory`)
+- [x] `AddBudgetPage` + `EditBudgetSheet` — endDate read-only chip ("31 Mayıs 2026'da kapanacak")
+- [x] `BudgetDetailPage` — TabBar (Bu Dönem / Geçmiş) + `_HistoryView` (mini bar chart + dönem listesi)
+- [x] `SharedBudgetDetailPage` — aynı tab yapısı
+- [x] "Yeni Dönem Aç" CTA — **yalnız kişisel** arşiv detayında + kişisel bildirim tap'inde, `AddBudgetPage` prefilled açar (ortakta CTA yok)
+- [x] `NotificationService` — `BUDGET_CLOSED` type `scope`'a göre ayrışır: kişisel = SnackBar + "Yenisini Aç" + prefilled AddBudgetPage; ortak = bilgi SnackBar + tap → `SharedBudgetDetailPage` (cold start pending mekanizması her ikisinde)
+- [x] GoRouter — `/budgets/add` ve `/family/:gid/budgets/add` route'ları prefill query/extra'sı kabul eder
+- [x] l10n stringler (TR + EN) — tab başlıkları, "kapanacak" hint, "Yeni Dönem Aç", bildirim metinleri
+- [x] BLoC testler — history fetch + prefilled add flow (BudgetPeriodUtils 8 test + BudgetsUpdateError BLoC testi)
 
 ### PM / Deploy
 - [x] PM: contract §8 açık sorular karara bağlandı (21 May 2026) — (1) tek job 00:30, (2) ortak bildirimi tüm üyelere salt bilgi (CTA yok), (3) history limit son 12 dönem
-- [ ] PM: kararları backend + frontend dev session'larına ilet (kickoff brief)
+- [x] PM: kararları backend + frontend dev session'larına ilet (kickoff brief, 21 May 2026)
 - [ ] Backend migration Railway'e deploy + 00:30 cron logları monitör
-- [ ] Backend + frontend merge sonrası integration test (bütçe oluştur → endDate dolu → cron simüle et → arşivlendi → bildirim alındı → prefilled CTA → kaydet → yeni dönem)
+- [ ] Backend + frontend integration test (bütçe oluştur → endDate dolu → cron simüle et → arşivlendi → bildirim alındı → prefilled CTA → kaydet → yeni dönem)
 
 ---
 

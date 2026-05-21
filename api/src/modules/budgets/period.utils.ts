@@ -1,13 +1,18 @@
 import { BudgetPeriod } from '@prisma/client';
 
-/// ISO tarih string'ini ("YYYY-MM-DD") timezone-safe Date object'e çevirir.
-/// UTC noon olarak parse eder; hangi timezone'da olursa olsun günün kaymasını engeller.
-/// `new Date("2026-05-21")` JS davranışı UTC midnight oluşturur → local TZ'ye
-/// (örn. TR = +3) çevrilince bir önceki güne kayabilir + @db.Date kolonuna
-/// yanlış gün yazılır. parseLocalDate bu sorunu çözer.
+/// ISO tarih string'ini timezone-safe Date object'e çevirir.
+/// "YYYY-MM-DD" ve "YYYY-MM-DDTHH:mm:ss..." formatlarını kabul eder; her zaman
+/// gün bileşenini koruyarak UTC noon'a normalize eder. Hangi timezone'da olursa
+/// olsun gün kaymaz.
+/// Sebep: `new Date("2026-05-21")` JS davranışı UTC midnight üretir, MariaDB
+/// local TZ'ye (örn. TR = +3) çevirip @db.Date'e yanlış gün yazar.
 export function parseLocalDate(s: string): Date {
-  const [y, m, d] = s.split('-').map(Number);
-  return new Date(Date.UTC(y, m - 1, d, 12, 0, 0));
+  const match = s.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (!match) {
+    throw new Error(`Geçersiz tarih formatı: "${s}". Beklenen: YYYY-MM-DD veya ISO datetime.`);
+  }
+  const [, y, m, d] = match;
+  return new Date(Date.UTC(Number(y), Number(m) - 1, Number(d), 12, 0, 0));
 }
 
 /// startDate dahil, endDate dahil. ('gte' / 'lte' aralığı)

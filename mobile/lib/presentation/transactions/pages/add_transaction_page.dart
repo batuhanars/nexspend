@@ -264,6 +264,12 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                     _selectedCategory = null;
                     _selectedSharedBudgetId = null;
                     _isBudgetLocked = false;
+                    // INCOME'a geçilince kredi kartı seçimi mantıksız —
+                    // hesap seçimini sıfırla, kullanıcı banka/nakit seçer.
+                    if (t == 'INCOME' &&
+                        _selectedAccount?.type == AccountType.CREDIT_CARD) {
+                      _selectedAccount = null;
+                    }
                   }),
                 ),
                 const SizedBox(height: AppSpacing.xl),
@@ -312,7 +318,13 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                 _sectionLabel(AppStrings.of(context).accountLabel),
                 const SizedBox(height: AppSpacing.sm),
                 AccountChips(
-                  accounts: accounts,
+                  // INCOME için kredi kartı listede gözükmez (mantıksız — kart
+                  // borç hesabı, gelir akmaz). Backend validation güvenlik ağı.
+                  accounts: _type == 'INCOME'
+                      ? accounts
+                          .where((a) => a.type != AccountType.CREDIT_CARD)
+                          .toList()
+                      : accounts,
                   selected: _selectedAccount,
                   onSelected: (a) => setState(() => _selectedAccount = a),
                 ),

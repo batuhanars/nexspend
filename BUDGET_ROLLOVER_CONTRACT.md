@@ -176,38 +176,29 @@ async archiveExpired(): Promise<{ personal: number; shared: number }> {
 
 `NotificationService` üzerinden FCM, `data:{type:'BUDGET_CLOSED', closedBudgetId, scope:'personal'|'shared', groupId?}`:
 
-**Kişisel bütçe arşivlendi** (sahibine 1 bildirim):
+**Kişisel bütçe arşivlendi** (sahibine 1 salt bilgi bildirimi):
 
 | Durum | Başlık | Gövde |
 |---|---|---|
-| Aşılmamış | "Bütçe dönemi kapandı" | "[Bütçe Adı]: 4.500₺/5.000₺ ile bitirdin. Yeni dönem için yenisini oluşturmak ister misin?" |
-| Aşılmış | "Bütçe dönemi kapandı (aşıldı)" | "[Bütçe Adı]: 5.500₺/5.000₺ — %110 ile kapandı. Yeni dönem için tutarı ayarlamak ister misin?" |
+| Aşılmamış | "Bütçe dönemi kapandı" | "[Bütçe Adı]: 4.500₺/5.000₺ ile bitirdin." |
+| Aşılmış | "Bütçe dönemi kapandı (aşıldı)" | "[Bütçe Adı]: 5.500₺/5.000₺ — %110 ile kapandı." |
 
-**Ortak bütçe arşivlendi** (grubun **tüm üyelerine** salt bilgi bildirimi — CTA içermez):
+**Ortak bütçe arşivlendi** (grubun **tüm üyelerine** salt bilgi bildirimi):
 
 | Durum | Başlık | Gövde |
 |---|---|---|
 | Aşılmamış | "Ortak bütçe kapandı" | "[Grup · Bütçe Adı]: 8.200₺/10.000₺ ile bitti." |
 | Aşılmış | "Ortak bütçe aşıldı" | "[Grup · Bütçe Adı]: 11.500₺/10.000₺ — %115 ile kapandı." |
 
-> **Karar (§8/2):** Ortak bütçede bildirim **sadece bilgilendirme**. "Yenisini oluştur" CTA'sı yok — yeni dönem üyelerin grup içinde konuşup karar vermesi gereken bir adım, sistem tek bir kullanıcıyı acele tetiklememeli. Üyeler hazır olduğunda normal akıştan (`+ Bütçe Ekle`) sıfırdan oluşturur. Kişisel bütçede ise prefilled CTA korunur (kullanıcı kendi niyetinin sahibi).
+> **Karar (§8/2 + §8/4):** Hem kişisel hem ortak bütçede bildirim **salt bilgilendirme**. "Yenisini oluştur" CTA'sı **iki tarafta da yok**. Yeni dönem kullanıcı/grup hazır olduğunda normal akıştan (`+ Bütçe Ekle`) oluşturulur. Prefilled CTA flow §8/4 ile geri çekildi.
 
 ### 3.4 Deep link payload
 
-**Kişisel bildirim tap'i** → `AddBudgetPage` **prefilled** açılır. Frontend `data.closedBudgetId` ile eski kaydı `GET /api/budgets/:id` çağırır ve form'u doldurur:
+**Kişisel bildirim tap'i** → `BudgetDetailPage` (kapanan bütçenin kendi detayı), **Geçmiş tab default açık**. Prefilled form **açılmaz**; kullanıcı tarihçeyi görür, ihtiyaç duyarsa normal akıştan (`+ Bütçe Ekle`) yeni dönem oluşturur.
 
-| Alan | Değer | Düzenlenebilir? |
-|---|---|---|
-| `name` | Eski isim | Evet |
-| `categoryId` | Eski kategori | Evet |
-| `amount` | Eski son tutar | Evet (genelde burada değiştirir) |
-| `period` | Eski period | Evet |
-| `startDate` | Eski `endDate + 1 gün` | Evet |
-| `smartTracking` | Eski değer | Evet |
+**Ortak bildirim tap'i** → `SharedBudgetDetailPage` (kapanan bütçenin kendi detayı), **Geçmiş tab default açık**. Aynı davranış, üyeler tarihçeyi görür.
 
-> Kullanıcı **hiçbir şeyi** değiştirmeden "Kaydet" diyebilir — tek dokunuş yenileme.
-
-**Ortak bildirim tap'i** → `SharedBudgetDetailPage` arşiv detayına yönlendirir (Geçmiş tab'ı default açık). Prefilled form **açılmaz** — yeni dönem grup kararı, normal akıştan (`+ Bütçe Ekle`) oluşturulur.
+> **Karar (§8/4):** Prefilled CTA akışı geri çekildi. Hem kişisel hem ortak için tap → spesifik bütçe detayı (Geçmiş tab). Sebep: smoke test'te async fetch chain (`getById` + `addPostFrameCallback` + push) timing bug'larına yol açtı (kullanıcı başka bir ekrana tıklarken alakasız yerde AddBudgetPage prefilled açılması). Senkron push akışı bu yüzey'i ortadan kaldırır + UX kişisel/ortak arasında tutarlı kalır.
 
 ---
 
@@ -285,10 +276,9 @@ DefaultTabController(
 
 Aynı pattern; `_HistoryView` `groupId + budget.id` ile `GET /api/family/groups/:gid/budgets/:bid/history` çağırır.
 
-### 5.4 "Yeni dönem oluştur" CTA
+### 5.4 "Yeni dönem oluştur" CTA — kaldırıldı
 
-- **Kişisel** arşiv detayında prominent buton: "Yeni Dönem Aç" → `AddBudgetPage` prefilled (eski kayıt verisi). Aynı CTA bildirim tıklamasından da tetiklenir (§3.4 deep link).
-- **Ortak** arşiv detayında bu CTA **yoktur**. Yeni dönem grup kararı — üyeler grup ekranındaki normal `+ Bütçe Ekle` akışından sıfırdan oluşturur. Bildirim de salt bilgi (§3.3).
+Hem **kişisel** hem **ortak** arşiv detayında bu CTA **YOK** (§8/4). Yeni dönem normal akıştan (`+ Bütçe Ekle`) sıfırdan oluşturulur. Bildirim de salt bilgi (§3.3), prefilled form yok (§3.4).
 
 ### 5.5 Frontend model
 
@@ -317,17 +307,21 @@ class BudgetHistoryEntry {
 
 ### 5.6 Push notification handling
 
-`NotificationService` `BUDGET_CLOSED` type'ı `scope` alanına göre ayrışır:
+`NotificationService` `BUDGET_CLOSED` type'ı `scope` alanına göre ayrışır, ama hedef davranış iki tarafta **aynı**: salt bilgi + spesifik bütçe detayına (Geçmiş tab) yönlendirme.
 
 **`scope='personal'`** — kişisel:
-- **Foreground:** SnackBar + "Yenisini Aç" butonu → prefilled `AddBudgetPage`
-- **Background tap:** GoRouter ile prefilled `AddBudgetPage`
+- **Foreground:** Bilgi SnackBar (CTA action button **yok**)
+- **Background tap:** GoRouter ile `BudgetDetailPage` (kapanan bütçenin detayı, Geçmiş tab default)
 - **Cold start:** pending `closedBudgetId` mekanizması (Insights pattern'i)
 
 **`scope='shared'`** — ortak:
-- **Foreground:** SnackBar (CTA yok, sadece bilgi) — istenirse "Detayı Gör" linki `SharedBudgetDetailPage`'e
-- **Background tap:** GoRouter ile `SharedBudgetDetailPage` arşiv detayı (Geçmiş tab'ı default)
-- **Cold start:** pending `closedSharedBudgetId` → detay sayfasına yönlendirir, form açmaz
+- **Foreground:** Bilgi SnackBar
+- **Background tap:** GoRouter ile `SharedBudgetDetailPage` (kapanan bütçenin detayı, Geçmiş tab default)
+- **Cold start:** pending `closedSharedBudgetId` → detay sayfasına yönlendirir
+
+> **Senkron push gereği (§8/4):** Detay sayfası constructor'ları, model objesi yerine `budgetId` ile de açılabilmeli (model verilmemişse sayfa kendi içinde fetch eder). Bu, notification handler'ı async fetch zincirinden kurtarır → `addPostFrameCallback + push` deterministik kalır → pending consume timing bug'ları yüzey'i ortadan kalkar.
+>
+> **Pending consume güvenliği (§8/4):** Cold start'ta AppShell mount olmadan pending'in tüketilmemesini sağlamak için: `_consumePending` `mounted=false` durumunda pending'i **geri set etmeli** (consume'u geri al), AppShell mount olunca yeniden tetiklenmeli. Aksi halde sonraki lifecycle resumed event'inde pending consume edilip alakasız yerde navigasyon tetiklenir.
 
 ---
 
@@ -402,8 +396,10 @@ Cron yanlış kayıt arşivlerse: `isActive=true` set ederek geri açılabilir, 
 | # | Soru | Karar | Gerekçe |
 |---|---|---|---|
 | 1 | Cron saati 00:30 mı yoksa mevcut 09:10 mu? Job ikiye mi bölünsün? | **Tek job, 00:30.** `archiveExpired` + `recomputeAllActive` sırasıyla aynı runda. | Job kullanıcıya bildirim atmıyor; eşik bildirimleri zaten event-driven. Sıralama doğal: arşivlenen `isActive=false` olur, recompute sadece aktiflere çalışır. İkiye bölmek gereksiz karmaşa. |
-| 2 | Ortak bütçe arşiv bildirimi yalnız oluşturana mı, tüm üyelere mi? Prefilled CTA olsun mu? | **Tüm üyelere salt bilgi.** "Yenisini oluştur" CTA YOK. Tap → `SharedBudgetDetailPage` arşiv detayı. | Yeni dönem grup kararı — sistem tek bir üyeyi tetikleyip bütçe tutarını/kapsamını tek başına belirletmemeli. Üyeler hazır olduğunda normal akıştan sıfırdan açar. Kişiselde prefilled CTA korunur (kullanıcı kendi niyetinin sahibi). |
+| 2 | Ortak bütçe arşiv bildirimi yalnız oluşturana mı, tüm üyelere mi? Prefilled CTA olsun mu? | **Tüm üyelere salt bilgi.** "Yenisini oluştur" CTA YOK. Tap → `SharedBudgetDetailPage` arşiv detayı. | Yeni dönem grup kararı — sistem tek bir üyeyi tetikleyip bütçe tutarını/kapsamını tek başına belirletmemeli. Üyeler hazır olduğunda normal akıştan sıfırdan açar. |
 | 3 | History endpoint'inde max kaç dönem dönsün? | **Son 12 dönem**, period bağımsız. | MONTHLY için 1 yıl tam; WEEKLY için ~3 ay; YEARLY için 12 yıl (yeterinden fazla). MVP için tek sabit limit pratik; period'a göre dinamik limit ileride gerekirse eklenir. |
+| 4 | (21 May, smoke test sonrası ek) Kişisel prefilled CTA flow korunsun mu? | **Geri çekildi.** Kişisel tap → `BudgetDetailPage` (Geçmiş tab default). Bildirim CTA içermez (foreground SnackBar dahil). Kişisel + ortak parite. | Smoke test'te async fetch chain (`getById` + `addPostFrameCallback` + push) timing bug'ı üretti: kullanıcı başka bir ekrana (örn. kredi kartı detayı) tıklarken pending consume geç tetiklendi, alakasız yerde AddBudgetPage prefilled açıldı. Kullanıcı geri bildirimi: "tek dokunuş yenileme bir teferruat, sade davranış daha doğru." Senkron push akışı bu hata yüzeyini ortadan kaldırır + iki scope arasında tutarlılık sağlar. |
+| 5 | (21 May ek) Arşivlenmiş bütçeleri DB seviyesinde ayrı tabloya mı taşıyalım? | **Hayır, mevcut `isActive` soft-delete pattern korunur.** UX ayrımı için Settings altına "Arşivlenmiş Bütçeler" sayfası (`ArchivedBudgetsPage`) eklendi. | DB ayrımı 2-3 ek gün backend rewrite + 142 test revize anlamına gelirdi; mevcut pattern projenin (`accounts` tablosundaki `isArchived`) konvansiyonuyla zaten uyumlu. UX karışıklığı sorunu frontend tarafında daha küçük bir maliyetle çözüldü. |
 
 > Bu kararlar §3.1, §3.3, §3.4, §5.4, §5.6 ve §6'ya işlendi. §8 kapalı.
 

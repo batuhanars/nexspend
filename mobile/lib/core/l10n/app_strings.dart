@@ -195,6 +195,7 @@ abstract class AppStrings {
   String get inviteCancelledSuccess;
   String get budgetAddTransaction;
   String get budgetSheetAddExpense;
+  String get accountSheetAddTransaction;
   String get budgetScopeLabel;
   String get budgetScopePersonal;
   String get debtDeletedSuccess;
@@ -731,6 +732,7 @@ class _Tr extends AppStrings {
   @override String get inviteCancelledSuccess => 'Davet iptal edildi';
   @override String get budgetAddTransaction => 'Ekle';
   @override String get budgetSheetAddExpense => 'Gider Ekle';
+  @override String get accountSheetAddTransaction => 'İşlem Ekle';
   @override String get budgetScopeLabel => 'Bütçe Tipi';
   @override String get budgetScopePersonal => 'Kişisel';
   @override String get debtDeletedSuccess => 'Borç kaydı başarıyla silindi';
@@ -1257,6 +1259,7 @@ class _En extends AppStrings {
   @override String get inviteCancelledSuccess => 'Invite cancelled';
   @override String get budgetAddTransaction => 'Add';
   @override String get budgetSheetAddExpense => 'Add Expense';
+  @override String get accountSheetAddTransaction => 'Add Transaction';
   @override String get budgetScopeLabel => 'Budget Type';
   @override String get budgetScopePersonal => 'Personal';
   @override String get debtDeletedSuccess => 'Debt record deleted successfully';

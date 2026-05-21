@@ -6,9 +6,15 @@ import '../../../core/l10n/app_strings.dart';
 
 enum BudgetAddEntryChoice { expense, receipt }
 
-/// Bütçe detayında "Ekle" butonuna basıldığında açılan modal sheet.
-/// Kullanıcının seçimi (gider/fiş) `BudgetAddEntryChoice` ile döner, iptalde null.
-Future<BudgetAddEntryChoice?> showBudgetAddEntrySheet(BuildContext context) {
+/// Bütçe / hesap detayında "Ekle" butonuna basıldığında açılan modal sheet.
+/// Kullanıcının seçimi (işlem/fiş) `BudgetAddEntryChoice` ile döner, iptalde null.
+///
+/// `entryLabel` özelleştirilebilir — null ise default "Gider Ekle" (bütçe için).
+/// Hesap detayında "İşlem Ekle" geçilir.
+Future<BudgetAddEntryChoice?> showBudgetAddEntrySheet(
+  BuildContext context, {
+  String? entryLabel,
+}) {
   return showModalBottomSheet<BudgetAddEntryChoice>(
     context: context,
     backgroundColor: AppColors.surfaceContainerHigh,
@@ -38,7 +44,7 @@ Future<BudgetAddEntryChoice?> showBudgetAddEntrySheet(BuildContext context) {
             ),
             _SheetActionTile(
               icon: Icons.add_card_outlined,
-              label: AppStrings.of(sheetCtx).budgetSheetAddExpense,
+              label: entryLabel ?? AppStrings.of(sheetCtx).budgetSheetAddExpense,
               onTap: () =>
                   Navigator.pop(sheetCtx, BudgetAddEntryChoice.expense),
             ),

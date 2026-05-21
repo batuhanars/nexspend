@@ -19,6 +19,7 @@ import '../widgets/monthly_chart_section.dart';
 import '../widgets/statements/credit_card_statements_section.dart';
 import '../widgets/this_month_section.dart';
 import '../widgets/top_categories_section.dart';
+import '../../shared/widgets/budget_add_entry_sheet.dart';
 import '../../shared/widgets/error_view.dart';
 
 class AccountDetailPage extends StatefulWidget {
@@ -53,8 +54,24 @@ class _AccountDetailPageState extends State<AccountDetailPage> {
 
   Future<void> _addTransaction() async {
     final bloc = context.read<AccountDetailBloc>();
-    await context.push(RouteNames.addTransaction,
-        extra: {'accountId': widget.accountId});
+    final choice = await showBudgetAddEntrySheet(
+      context,
+      entryLabel: AppStrings.of(context).accountSheetAddTransaction,
+    );
+    if (choice == null || !mounted) return;
+
+    switch (choice) {
+      case BudgetAddEntryChoice.expense:
+        await context.push(
+          RouteNames.addTransaction,
+          extra: {'accountId': widget.accountId},
+        );
+        break;
+      case BudgetAddEntryChoice.receipt:
+        await context.push(RouteNames.receiptScanner);
+        break;
+    }
+
     if (mounted) {
       bloc.add(AccountDetailRefreshRequested(accountId: widget.accountId));
     }

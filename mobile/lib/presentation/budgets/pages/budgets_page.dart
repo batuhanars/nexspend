@@ -20,6 +20,7 @@ import '../bloc/budgets_bloc.dart';
 import '../bloc/budgets_event.dart';
 import '../bloc/budgets_state.dart';
 import '../widgets/budget_card.dart';
+import '../widgets/budget_create_sheet.dart';
 import '../widgets/budgets_shimmer.dart';
 import '../widgets/edit_budget_sheet.dart';
 import '../../shared/widgets/empty_state_view.dart';
@@ -36,8 +37,31 @@ class BudgetsPage extends StatelessWidget {
   }
 }
 
-class _BudgetsView extends StatelessWidget {
+class _BudgetsView extends StatefulWidget {
   const _BudgetsView();
+
+  @override
+  State<_BudgetsView> createState() => _BudgetsViewState();
+}
+
+class _BudgetsViewState extends State<_BudgetsView> {
+  final GlobalKey<FamilyGroupsSectionState> _familyGroupsKey =
+      GlobalKey<FamilyGroupsSectionState>();
+
+  Future<void> _onCreatePressed(BuildContext context) async {
+    final choice = await showBudgetCreateSheet(context);
+    if (choice == null || !context.mounted) return;
+    switch (choice) {
+      case BudgetCreateChoice.budget:
+        await context.push(RouteNames.addBudget);
+        if (!context.mounted) return;
+        context.read<BudgetsBloc>().add(const BudgetsRefreshRequested());
+        break;
+      case BudgetCreateChoice.group:
+        _familyGroupsKey.currentState?.showCreateDialog();
+        break;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -138,14 +162,7 @@ class _BudgetsView extends StatelessWidget {
                           Icons.add_rounded,
                           color: AppColors.primary,
                         ),
-                        onPressed: () async {
-                          await context.push(RouteNames.addBudget);
-                          if (context.mounted) {
-                            context
-                                .read<BudgetsBloc>()
-                                .add(const BudgetsRefreshRequested());
-                          }
-                        },
+                        onPressed: () => _onCreatePressed(context),
                       ),
                     ],
                   ),
@@ -181,7 +198,7 @@ class _BudgetsView extends StatelessWidget {
               OverviewCard(overview: overview),
               const SizedBox(height: AppSpacing.xl),
             ],
-            const _FamilyGroupsSection(),
+            _FamilyGroupsSection(key: _familyGroupsKey),
             _InflationSuggestionsSection(budgets: budgets),
             if (budgets.isEmpty)
               EmptyStateView(
@@ -316,13 +333,13 @@ class _InflationSuggestionsSection extends StatelessWidget {
 // ── Gruplar Bölümü ─────────────────────────────────────────────────────────
 
 class _FamilyGroupsSection extends StatefulWidget {
-  const _FamilyGroupsSection();
+  const _FamilyGroupsSection({super.key});
 
   @override
-  State<_FamilyGroupsSection> createState() => _FamilyGroupsSectionState();
+  State<_FamilyGroupsSection> createState() => FamilyGroupsSectionState();
 }
 
-class _FamilyGroupsSectionState extends State<_FamilyGroupsSection> {
+class FamilyGroupsSectionState extends State<_FamilyGroupsSection> {
   late Future<List<FamilyGroupModel>> _future;
   bool _isCreating = false;
 
@@ -358,6 +375,8 @@ class _FamilyGroupsSectionState extends State<_FamilyGroupsSection> {
       if (mounted) setState(() => _isCreating = false);
     }
   }
+
+  void showCreateDialog() => _showCreateDialog();
 
   void _showCreateDialog() {
     final nameCtrl = TextEditingController();

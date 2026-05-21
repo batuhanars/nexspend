@@ -36,4 +36,17 @@ class BudgetRepository {
   Future<void> delete(String id) async {
     await _dio.delete(ApiEndpoints.budgetById(id));
   }
+
+  Future<BudgetModel> getById(String id) async {
+    final response = await _dio.get(ApiEndpoints.budgetById(id));
+    return BudgetModel.fromJson(response.data['data'] as Map<String, dynamic>);
+  }
+
+  Future<List<BudgetHistoryEntry>> getHistory(String budgetId) async {
+    final response = await _dio.get(ApiEndpoints.budgetHistory(budgetId));
+    final list = response.data['data'] as List;
+    return list
+        .map((e) => BudgetHistoryEntry.fromJson(e as Map<String, dynamic>))
+        .toList();
+  }
 }

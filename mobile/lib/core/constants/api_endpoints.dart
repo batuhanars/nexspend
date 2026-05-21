@@ -52,6 +52,7 @@ class ApiEndpoints {
   static const String budgets = '/api/budgets';
   static const String budgetsOverview = '/api/budgets/overview';
   static String budgetById(String id) => '/api/budgets/$id';
+  static String budgetHistory(String id) => '/api/budgets/$id/history';
 
   // Debts
   static const String debts = '/api/debts';
@@ -117,6 +118,8 @@ class ApiEndpoints {
       '/api/family/groups/$groupId/budgets/$budgetId';
   static String familyGroupBudgetExpenses(String groupId, String budgetId) =>
       '/api/family/groups/$groupId/budgets/$budgetId/expenses';
+  static String familyGroupBudgetHistory(String groupId, String budgetId) =>
+      '/api/family/groups/$groupId/budgets/$budgetId/history';
   static String familyInviteAccept(String token) =>
       '/api/family/invites/$token/accept';
   static String familyInviteReject(String token) =>

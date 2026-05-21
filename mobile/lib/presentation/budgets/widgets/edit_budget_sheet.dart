@@ -4,6 +4,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
+import '../../../core/utils/budget_period.dart';
+import '../../../core/utils/date_formatter.dart';
 import '../../../data/models/budget_model.dart';
 import '../../shared/widgets/split_amount_field.dart';
 import '../bloc/budgets_bloc.dart';
@@ -22,7 +24,6 @@ class _EditBudgetSheetState extends State<EditBudgetSheet> {
   late double? _amount;
   late BudgetPeriod _period;
   late bool _smartTracking;
-  DateTime? _endDate;
 
   @override
   void initState() {
@@ -31,7 +32,6 @@ class _EditBudgetSheetState extends State<EditBudgetSheet> {
     _amount = widget.budget.amount;
     _period = widget.budget.period;
     _smartTracking = widget.budget.smartTracking;
-    _endDate = widget.budget.endDate;
   }
 
   @override
@@ -59,7 +59,7 @@ class _EditBudgetSheetState extends State<EditBudgetSheet> {
               'amount': amount,
               'period': _period.name,
               'smartTracking': _smartTracking,
-              if (_endDate != null) 'endDate': _endDate!.toIso8601String(),
+              'endDate': _computedEndDate.toIso8601String(),
             },
           ),
         );
@@ -81,29 +81,10 @@ class _EditBudgetSheetState extends State<EditBudgetSheet> {
     );
   }
 
-  Future<void> _pickEndDate() async {
-    final picked = await showDatePicker(
-      context: context,
-      initialDate: _endDate ?? DateTime.now(),
-      firstDate: DateTime.now(),
-      lastDate: DateTime(2030),
-      builder: (ctx, child) => Theme(
-        data: Theme.of(ctx).copyWith(
-          colorScheme: ColorScheme.dark(
-            primary: AppColors.primary,
-            onPrimary: AppColors.surface,
-            surface: AppColors.surfaceContainerHigh,
-            onSurface: AppColors.onSurface,
-          ),
-        ),
-        child: child!,
-      ),
-    );
-    if (picked != null) setState(() => _endDate = picked);
+  DateTime get _computedEndDate {
+    if (_period == BudgetPeriod.CUSTOM) return widget.budget.endDate;
+    return BudgetPeriodUtils.computeEndDate(widget.budget.startDate, _period);
   }
-
-  String _fmtDate(DateTime dt) =>
-      '${dt.day.toString().padLeft(2, '0')}.${dt.month.toString().padLeft(2, '0')}.${dt.year}';
 
   Map<BudgetPeriod, String> _periodLabels(BuildContext context) {
     final s = AppStrings.of(context);
@@ -224,52 +205,29 @@ class _EditBudgetSheetState extends State<EditBudgetSheet> {
             ),
             const SizedBox(height: AppSpacing.xl),
 
-            // End date (optional)
-            GestureDetector(
-              onTap: _pickEndDate,
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.md, vertical: AppSpacing.md),
-                decoration: BoxDecoration(
-                  color: AppColors.surfaceContainerHighest,
-                  borderRadius:
-                      BorderRadius.circular(AppSpacing.radiusMd),
-                ),
-                child: Row(
-                  children: [
-                    const Icon(Icons.calendar_today_outlined,
-                        size: 16,
-                        color: AppColors.onSurfaceVariant),
-                    const SizedBox(width: AppSpacing.sm),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            AppStrings.of(context).budgetEndDate,
-                            style: AppTypography.labelSm.copyWith(
-                              color: AppColors.onSurfaceVariant,
-                              fontSize: 10,
-                            ),
-                          ),
-                          Text(
-                            _endDate != null
-                                ? _fmtDate(_endDate!)
-                                : AppStrings.of(context).budgetEndDateUnset,
-                            style: AppTypography.bodySm,
-                          ),
-                        ],
-                      ),
-                    ),
-                    if (_endDate != null)
-                      GestureDetector(
-                        onTap: () => setState(() => _endDate = null),
-                        child: const Icon(Icons.close,
-                            size: 16,
-                            color: AppColors.onSurfaceVariant),
-                      ),
-                  ],
-                ),
+            // End date (read-only computed chip)
+            Container(
+              padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.md, vertical: AppSpacing.sm),
+              decoration: BoxDecoration(
+                color: AppColors.primary.withValues(alpha: 0.08),
+                borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                border: Border.all(
+                    color: AppColors.primary.withValues(alpha: 0.2)),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.event_available_outlined,
+                      size: 14, color: AppColors.primary),
+                  const SizedBox(width: AppSpacing.xs),
+                  Text(
+                    AppStrings.of(context).budgetEndsOn(
+                        DateFormatter.formatLong(_computedEndDate, context)),
+                    style: AppTypography.bodySm
+                        .copyWith(color: AppColors.primary),
+                  ),
+                ],
               ),
             ),
             const SizedBox(height: AppSpacing.md),

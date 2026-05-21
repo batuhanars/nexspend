@@ -535,6 +535,19 @@ abstract class AppStrings {
 
   // v2 — Quick actions
   String get scanAction;
+
+  // Sprint 12 — Bütçe dönem geçmişi
+  String get budgetTabCurrentPeriod;
+  String get budgetTabHistory;
+  String budgetEndsOn(String date);
+  String get openNewPeriodBtn;
+  String get budgetHistoryEmpty;
+  String get budgetHistoryChartTitle;
+  String get budgetArchivedBadge;
+  String get budgetArchivedEditError;
+  String get budgetClosedPersonalSnackbar;
+  String get budgetClosedSharedSnackbar;
+  String get openNewPeriodAction;
 }
 
 // ─── Turkish ────────────────────────────────────────────────────────────────
@@ -1043,6 +1056,19 @@ class _Tr extends AppStrings {
 
   // v2 — Quick actions
   @override String get scanAction => 'Tara';
+
+  // Sprint 12 — Bütçe dönem geçmişi
+  @override String get budgetTabCurrentPeriod => 'Bu Dönem';
+  @override String get budgetTabHistory => 'Geçmiş';
+  @override String budgetEndsOn(String date) => 'Bu dönem $date kapanacak';
+  @override String get openNewPeriodBtn => 'Yeni Dönem Aç';
+  @override String get budgetHistoryEmpty => 'Bu kategoride başka dönem yok';
+  @override String get budgetHistoryChartTitle => 'DÖNEM GEÇMİŞİ';
+  @override String get budgetArchivedBadge => 'Arşiv';
+  @override String get budgetArchivedEditError => 'Geçmiş döneme ait bütçe düzenlenemez';
+  @override String get budgetClosedPersonalSnackbar => 'Bütçe dönemi kapandı';
+  @override String get budgetClosedSharedSnackbar => 'Ortak bütçe dönemi kapandı';
+  @override String get openNewPeriodAction => 'Yenisini Aç';
 }
 
 // ─── English ─────────────────────────────────────────────────────────────────
@@ -1645,4 +1671,17 @@ class _En extends AppStrings {
 
   // v2 — Quick actions
   @override String get scanAction => 'Scan';
+
+  // Sprint 12 — Bütçe dönem geçmişi
+  @override String get budgetTabCurrentPeriod => 'This Period';
+  @override String get budgetTabHistory => 'History';
+  @override String budgetEndsOn(String date) => 'This period closes on $date';
+  @override String get openNewPeriodBtn => 'Open New Period';
+  @override String get budgetHistoryEmpty => 'No other periods for this category';
+  @override String get budgetHistoryChartTitle => 'PERIOD HISTORY';
+  @override String get budgetArchivedBadge => 'Archived';
+  @override String get budgetArchivedEditError => 'Cannot edit an archived budget';
+  @override String get budgetClosedPersonalSnackbar => 'Budget period closed';
+  @override String get budgetClosedSharedSnackbar => 'Shared budget period closed';
+  @override String get openNewPeriodAction => 'Open New';
 }

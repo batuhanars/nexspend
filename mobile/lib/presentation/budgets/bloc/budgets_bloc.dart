@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../data/models/budget_model.dart';
 import '../../../data/repositories/budget_repository.dart';
@@ -87,7 +88,7 @@ class BudgetsBloc extends Bloc<BudgetsEvent, BudgetsState> {
           smartTracking: smartTracking ?? b.smartTracking,
           isActive: b.isActive,
           startDate: b.startDate,
-          endDate: hasEndDate ? (endDateStr != null ? DateTime.parse(endDateStr) : null) : b.endDate,
+          endDate: hasEndDate ? (endDateStr != null ? DateTime.parse(endDateStr) : b.endDate) : b.endDate,
           category: b.category,
         );
       }).toList();
@@ -96,8 +97,20 @@ class BudgetsBloc extends Bloc<BudgetsEvent, BudgetsState> {
     try {
       await _repo.update(event.id, event.data);
       await _fetch(emit);
-    } catch (_) {
-      if (current is BudgetsLoaded) emit(current);
+    } catch (e) {
+      if (e is DioException && e.response?.statusCode == 400) {
+        final msg = (e.response?.data?['message'] as String?) ??
+            'Bütçe güncellenemedi';
+        if (current is BudgetsLoaded) {
+          emit(BudgetsUpdateError(
+            message: msg,
+            budgets: current.budgets,
+            overview: current.overview,
+          ));
+        }
+      } else {
+        if (current is BudgetsLoaded) emit(current);
+      }
     }
   }
 

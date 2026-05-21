@@ -57,6 +57,7 @@ final _group1Detail = FamilyGroupModel(
       remainingPercent: 58,
       period: 'MONTHLY',
       startDate: '2026-05-01',
+      endDate: DateTime(2026, 5, 31),
       isActive: true,
     ),
   ],

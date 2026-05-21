@@ -14,6 +14,7 @@ import '../../../core/utils/date_formatter.dart';
 import '../../../core/utils/icon_mapper.dart';
 import '../../../data/models/budget_model.dart';
 import '../../../data/models/transaction_model.dart';
+import '../../../data/repositories/budget_repository.dart';
 import '../../../data/repositories/transaction_repository.dart';
 import '../../shared/widgets/budget_add_entry_sheet.dart';
 import '../bloc/budgets_bloc.dart';
@@ -30,28 +31,36 @@ class BudgetDetailPage extends StatefulWidget {
   State<BudgetDetailPage> createState() => _BudgetDetailPageState();
 }
 
-class _BudgetDetailPageState extends State<BudgetDetailPage> {
+class _BudgetDetailPageState extends State<BudgetDetailPage>
+    with SingleTickerProviderStateMixin {
   late BudgetModel _budget;
   late Future<List<TransactionModel>> _txFuture;
+  late TabController _tabController;
 
   @override
   void initState() {
     super.initState();
     _budget = widget.budget;
+    _tabController = TabController(length: 2, vsync: this);
     _txFuture = _loadTransactions();
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
   }
 
   Future<List<TransactionModel>> _loadTransactions() async {
     if (_budget.category == null) return [];
     final repo = getIt<TransactionRepository>();
-    final end = _budget.endDate ?? DateTime.now();
     final result = await repo.getTransactions(
       page: 1,
       limit: 200,
       type: 'EXPENSE',
       categoryId: _budget.category!.id,
       startDate: _budget.startDate.toIso8601String(),
-      endDate: end.toIso8601String(),
+      endDate: _budget.endDate.toIso8601String(),
     );
     return result.data;
   }
@@ -108,7 +117,18 @@ class _BudgetDetailPageState extends State<BudgetDetailPage> {
 
     if (!mounted) return;
     context.read<BudgetsBloc>().add(const BudgetsRefreshRequested());
-    setState(() => _txFuture = _loadTransactions());
+    setState(() {
+      _txFuture = _loadTransactions();
+    });
+  }
+
+  Future<void> _openNewPeriod() async {
+    await context.push(
+      RouteNames.addBudget,
+      extra: {'prefill': _budget},
+    );
+    if (!mounted) return;
+    context.read<BudgetsBloc>().add(const BudgetsRefreshRequested());
   }
 
   Future<void> _confirmDelete() async {
@@ -153,15 +173,20 @@ class _BudgetDetailPageState extends State<BudgetDetailPage> {
 
   @override
   Widget build(BuildContext context) {
+    final s = AppStrings.of(context);
     return BlocListener<BudgetsBloc, BudgetsState>(
-      listenWhen: (_, curr) => curr is BudgetsLoaded,
+      listenWhen: (_, curr) =>
+          curr is BudgetsLoaded || curr is BudgetsUpdateError,
       listener: (context, state) {
         if (state is BudgetsLoaded) {
-          final matches =
+          final match =
               state.budgets.where((b) => b.id == _budget.id).toList();
-          if (matches.isNotEmpty) {
-            _refreshFromBloc(matches.first);
-          }
+          if (match.isNotEmpty) _refreshFromBloc(match.first);
+        } else if (state is BudgetsUpdateError) {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text(state.message),
+            backgroundColor: AppColors.error,
+          ));
         }
       },
       child: Scaffold(
@@ -169,96 +194,180 @@ class _BudgetDetailPageState extends State<BudgetDetailPage> {
         appBar: AppBar(
           backgroundColor: AppColors.surface,
           surfaceTintColor: Colors.transparent,
-          title: Text(_budget.name, style: AppTypography.headlineSm),
+          title: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(_budget.name, style: AppTypography.headlineSm),
+              if (!_budget.isActive) ...[
+                const SizedBox(width: AppSpacing.sm),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.xs, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: AppColors.onSurfaceVariant.withValues(alpha: 0.15),
+                    borderRadius:
+                        BorderRadius.circular(AppSpacing.radiusSm),
+                  ),
+                  child: Text(
+                    s.budgetArchivedBadge,
+                    style: AppTypography.labelSm.copyWith(
+                      color: AppColors.onSurfaceVariant,
+                      fontSize: 9,
+                    ),
+                  ),
+                ),
+              ],
+            ],
+          ),
           actions: [
-            IconButton(
-              icon: const Icon(Icons.edit_outlined,
-                  color: AppColors.onSurfaceVariant),
-              onPressed: _openEdit,
-            ),
+            if (_budget.isActive) ...[
+              IconButton(
+                icon: const Icon(Icons.edit_outlined,
+                    color: AppColors.onSurfaceVariant),
+                onPressed: _openEdit,
+              ),
+            ],
             IconButton(
               icon: const Icon(Icons.delete_outline, color: AppColors.error),
               onPressed: _confirmDelete,
             ),
           ],
-        ),
-        body: RefreshIndicator(
-          color: AppColors.primary,
-          backgroundColor: AppColors.surfaceContainerHigh,
-          onRefresh: () async {
-            context.read<BudgetsBloc>().add(const BudgetsRefreshRequested());
-            setState(() => _txFuture = _loadTransactions());
-            await _txFuture;
-          },
-          child: FutureBuilder<List<TransactionModel>>(
-            future: _txFuture,
-            builder: (context, snapshot) {
-              final transactions = snapshot.data ?? const <TransactionModel>[];
-              final loading =
-                  snapshot.connectionState == ConnectionState.waiting;
-              return ListView(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.pagePadding,
-                ),
-                children: [
-                  _SummaryCard(budget: _budget),
-                  const SizedBox(height: AppSpacing.xl),
-                  if (transactions.isNotEmpty) ...[
-                    _DailySpendChart(
-                      transactions: transactions,
-                      statusColor: _budget.statusColor,
-                    ),
-                    const SizedBox(height: AppSpacing.xl),
-                  ],
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          AppStrings.of(context).budgetTransactionsTitle,
-                          style: AppTypography.labelSm,
-                        ),
-                      ),
-                      if (_budget.category != null)
-                        _AddTransactionInlineAction(onTap: _openAddEntrySheet),
-                    ],
-                  ),
-                  const SizedBox(height: AppSpacing.md),
-                  if (loading)
-                    const Padding(
-                      padding: EdgeInsets.symmetric(vertical: AppSpacing.xxl),
-                      child: Center(
-                        child: CircularProgressIndicator(
-                          color: AppColors.primary,
-                        ),
-                      ),
-                    )
-                  else if (transactions.isEmpty)
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                          vertical: AppSpacing.xxl),
-                      child: Center(
-                        child: Text(
-                          AppStrings.of(context).budgetNoTransactions,
-                          style: AppTypography.bodyMd.copyWith(
-                            color: AppColors.onSurfaceVariant,
-                          ),
-                        ),
-                      ),
-                    )
-                  else
-                    ..._buildGroupedTransactions(transactions, context),
-                  const SizedBox(height: AppSpacing.xxl),
-                ],
-              );
-            },
+          bottom: TabBar(
+            controller: _tabController,
+            labelColor: AppColors.primary,
+            unselectedLabelColor: AppColors.onSurfaceVariant,
+            indicatorColor: AppColors.primary,
+            indicatorSize: TabBarIndicatorSize.label,
+            tabs: [
+              Tab(text: s.budgetTabCurrentPeriod),
+              Tab(text: s.budgetTabHistory),
+            ],
           ),
+        ),
+        body: TabBarView(
+          controller: _tabController,
+          children: [
+            _CurrentPeriodView(
+              budget: _budget,
+              txFuture: _txFuture,
+              onRefresh: () async {
+                context
+                    .read<BudgetsBloc>()
+                    .add(const BudgetsRefreshRequested());
+                setState(() {
+                  _txFuture = _loadTransactions();
+                });
+                await _txFuture;
+              },
+              onAddEntry: _budget.isActive ? _openAddEntrySheet : null,
+              onOpenNewPeriod: !_budget.isActive ? _openNewPeriod : null,
+            ),
+            _HistoryView(budgetId: _budget.id),
+          ],
         ),
       ),
     );
   }
+}
 
-  List<Widget> _buildGroupedTransactions(List<TransactionModel> transactions, BuildContext context) {
-    final sorted = [...transactions]..sort((a, b) => b.date.compareTo(a.date));
+// ─── Mevcut Dönem Tab ────────────────────────────────────────────────────────
+
+class _CurrentPeriodView extends StatelessWidget {
+  const _CurrentPeriodView({
+    required this.budget,
+    required this.txFuture,
+    required this.onRefresh,
+    this.onAddEntry,
+    this.onOpenNewPeriod,
+  });
+
+  final BudgetModel budget;
+  final Future<List<TransactionModel>> txFuture;
+  final Future<void> Function() onRefresh;
+  final VoidCallback? onAddEntry;
+  final VoidCallback? onOpenNewPeriod;
+
+  @override
+  Widget build(BuildContext context) {
+    final s = AppStrings.of(context);
+    return RefreshIndicator(
+      color: AppColors.primary,
+      backgroundColor: AppColors.surfaceContainerHigh,
+      onRefresh: onRefresh,
+      child: FutureBuilder<List<TransactionModel>>(
+        future: txFuture,
+        builder: (context, snapshot) {
+          final transactions = snapshot.data ?? const <TransactionModel>[];
+          final loading =
+              snapshot.connectionState == ConnectionState.waiting;
+          return ListView(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.pagePadding,
+            ),
+            children: [
+              _SummaryCard(budget: budget),
+              const SizedBox(height: AppSpacing.xl),
+              // Arşiv CTA
+              if (onOpenNewPeriod != null) ...[
+                _OpenNewPeriodButton(onTap: onOpenNewPeriod!),
+                const SizedBox(height: AppSpacing.xl),
+              ],
+              if (transactions.isNotEmpty) ...[
+                _DailySpendChart(
+                  transactions: transactions,
+                  statusColor: budget.statusColor,
+                ),
+                const SizedBox(height: AppSpacing.xl),
+              ],
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      s.budgetTransactionsTitle,
+                      style: AppTypography.labelSm,
+                    ),
+                  ),
+                  if (onAddEntry != null && budget.category != null)
+                    _AddTransactionInlineAction(onTap: onAddEntry!),
+                ],
+              ),
+              const SizedBox(height: AppSpacing.md),
+              if (loading)
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: AppSpacing.xxl),
+                  child: Center(
+                    child: CircularProgressIndicator(
+                      color: AppColors.primary,
+                    ),
+                  ),
+                )
+              else if (transactions.isEmpty)
+                Padding(
+                  padding:
+                      const EdgeInsets.symmetric(vertical: AppSpacing.xxl),
+                  child: Center(
+                    child: Text(
+                      s.budgetNoTransactions,
+                      style: AppTypography.bodyMd.copyWith(
+                        color: AppColors.onSurfaceVariant,
+                      ),
+                    ),
+                  ),
+                )
+              else
+                ..._buildGroupedTransactions(transactions, context),
+              const SizedBox(height: AppSpacing.xxl),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  List<Widget> _buildGroupedTransactions(
+      List<TransactionModel> transactions, BuildContext context) {
+    final sorted = [...transactions]
+      ..sort((a, b) => b.date.compareTo(a.date));
     final groups = <String, List<TransactionModel>>{};
     for (final t in sorted) {
       final key = DateFormatter.formatGroupHeader(t.date, context);
@@ -267,8 +376,8 @@ class _BudgetDetailPageState extends State<BudgetDetailPage> {
     final widgets = <Widget>[];
     groups.forEach((header, items) {
       widgets.add(Padding(
-        padding: const EdgeInsets.only(
-            top: AppSpacing.md, bottom: AppSpacing.sm),
+        padding:
+            const EdgeInsets.only(top: AppSpacing.md, bottom: AppSpacing.sm),
         child: Text(
           header,
           style: AppTypography.labelSm
@@ -283,9 +392,310 @@ class _BudgetDetailPageState extends State<BudgetDetailPage> {
   }
 }
 
+class _OpenNewPeriodButton extends StatelessWidget {
+  const _OpenNewPeriodButton({required this.onTap});
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: double.infinity,
+      height: 52,
+      child: FilledButton.icon(
+        onPressed: onTap,
+        style: FilledButton.styleFrom(
+          backgroundColor: AppColors.primary,
+          foregroundColor: AppColors.surface,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
+          ),
+        ),
+        icon: const Icon(Icons.add_circle_outline, size: 18),
+        label: Text(
+          AppStrings.of(context).openNewPeriodBtn,
+          style: AppTypography.bodyMd.copyWith(
+            fontWeight: FontWeight.w600,
+            color: AppColors.surface,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ─── Geçmiş Tab ──────────────────────────────────────────────────────────────
+
+class _HistoryView extends StatefulWidget {
+  const _HistoryView({required this.budgetId});
+  final String budgetId;
+
+  @override
+  State<_HistoryView> createState() => _HistoryViewState();
+}
+
+class _HistoryViewState extends State<_HistoryView> {
+  late Future<List<BudgetHistoryEntry>> _future;
+
+  @override
+  void initState() {
+    super.initState();
+    _future = getIt<BudgetRepository>().getHistory(widget.budgetId);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final s = AppStrings.of(context);
+    return FutureBuilder<List<BudgetHistoryEntry>>(
+      future: _future,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(
+            child: CircularProgressIndicator(color: AppColors.primary),
+          );
+        }
+        final entries = snapshot.data ?? [];
+        if (entries.isEmpty) {
+          return Center(
+            child: Padding(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: AppSpacing.pagePadding),
+              child: Text(
+                s.budgetHistoryEmpty,
+                style:
+                    AppTypography.bodyMd.copyWith(color: AppColors.onSurfaceVariant),
+                textAlign: TextAlign.center,
+              ),
+            ),
+          );
+        }
+        return ListView(
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.pagePadding,
+            vertical: AppSpacing.md,
+          ),
+          children: [
+            _HistoryBarChart(entries: entries),
+            const SizedBox(height: AppSpacing.xl),
+            for (final entry in entries) ...[
+              _HistoryEntryCard(entry: entry),
+              const SizedBox(height: AppSpacing.md),
+            ],
+            const SizedBox(height: AppSpacing.xxl),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class _HistoryBarChart extends StatelessWidget {
+  const _HistoryBarChart({required this.entries});
+  final List<BudgetHistoryEntry> entries;
+
+  @override
+  Widget build(BuildContext context) {
+    final s = AppStrings.of(context);
+    // Son 12 dönem, eskiden yeniye
+    final display = entries.length > 12 ? entries.sublist(0, 12) : entries;
+    final reversed = display.reversed.toList();
+
+    final maxVal = reversed
+        .expand((e) => [e.amount, e.spent])
+        .fold<double>(1, (m, v) => v > m ? v : m);
+
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.lg),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceContainerHigh,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(s.budgetHistoryChartTitle, style: AppTypography.labelSm),
+          const SizedBox(height: AppSpacing.md),
+          SizedBox(
+            height: 140,
+            child: BarChart(
+              BarChartData(
+                alignment: BarChartAlignment.spaceAround,
+                maxY: maxVal * 1.1,
+                barTouchData: BarTouchData(
+                  enabled: true,
+                  touchTooltipData: BarTouchTooltipData(
+                    getTooltipColor: (_) => AppColors.surfaceContainerHighest,
+                    getTooltipItem: (group, _, rod, rodIdx) {
+                      final e = reversed[group.x];
+                      return BarTooltipItem(
+                        rodIdx == 0
+                            ? CurrencyFormatter.format(e.amount)
+                            : CurrencyFormatter.format(e.spent),
+                        AppTypography.labelSm
+                            .copyWith(color: AppColors.onSurface),
+                      );
+                    },
+                  ),
+                ),
+                gridData: const FlGridData(show: false),
+                borderData: FlBorderData(show: false),
+                titlesData: FlTitlesData(
+                  leftTitles: const AxisTitles(
+                      sideTitles: SideTitles(showTitles: false)),
+                  rightTitles: const AxisTitles(
+                      sideTitles: SideTitles(showTitles: false)),
+                  topTitles: const AxisTitles(
+                      sideTitles: SideTitles(showTitles: false)),
+                  bottomTitles: AxisTitles(
+                    sideTitles: SideTitles(
+                      showTitles: true,
+                      reservedSize: 18,
+                      getTitlesWidget: (value, _) {
+                        final idx = value.toInt();
+                        if (idx < 0 || idx >= reversed.length) {
+                          return const SizedBox.shrink();
+                        }
+                        final e = reversed[idx];
+                        return Padding(
+                          padding: const EdgeInsets.only(top: 4),
+                          child: Text(
+                            '${e.startDate.month}/${e.startDate.day.toString().padLeft(2, '0')}',
+                            style: AppTypography.labelSm.copyWith(
+                              color: AppColors.onSurfaceVariant,
+                              fontSize: 8,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ),
+                barGroups: [
+                  for (var i = 0; i < reversed.length; i++)
+                    BarChartGroupData(
+                      x: i,
+                      groupVertically: false,
+                      barRods: [
+                        BarChartRodData(
+                          toY: reversed[i].amount,
+                          width: 6,
+                          borderRadius: BorderRadius.circular(3),
+                          color: AppColors.primary.withValues(alpha: 0.3),
+                        ),
+                        BarChartRodData(
+                          toY: reversed[i].spent,
+                          width: 6,
+                          borderRadius: BorderRadius.circular(3),
+                          color: reversed[i].percentage >= 100
+                              ? AppColors.tertiary
+                              : AppColors.secondary,
+                        ),
+                      ],
+                    ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _HistoryEntryCard extends StatelessWidget {
+  const _HistoryEntryCard({required this.entry});
+  final BudgetHistoryEntry entry;
+
+  @override
+  Widget build(BuildContext context) {
+    final pct = entry.percentage.clamp(0, 200).toDouble();
+    final color = pct >= 100
+        ? AppColors.tertiary
+        : pct >= 90
+            ? const Color(0xFFFF9800)
+            : pct >= 75
+                ? AppColors.tertiary.withValues(alpha: 0.7)
+                : AppColors.secondary;
+
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.lg),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceContainerHigh,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '${DateFormatter.formatMini(entry.startDate, context)}'
+                      ' → ${DateFormatter.formatMini(entry.endDate, context)}',
+                      style: AppTypography.bodySm
+                          .copyWith(color: AppColors.onSurfaceVariant),
+                    ),
+                    Text(entry.name, style: AppTypography.titleSm),
+                  ],
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.sm, vertical: 3),
+                decoration: BoxDecoration(
+                  color: color.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+                ),
+                child: Text(
+                  '%${entry.percentage.toInt()}',
+                  style: AppTypography.labelSm.copyWith(
+                    color: color,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 10,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          Row(
+            children: [
+              Text(
+                CurrencyFormatter.format(entry.spent),
+                style: AppTypography.bodyMd.copyWith(
+                  color: color,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              Text(
+                ' / ${CurrencyFormatter.format(entry.amount)}',
+                style: AppTypography.bodyMd
+                    .copyWith(color: AppColors.onSurfaceVariant),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(4),
+            child: LinearProgressIndicator(
+              value: (pct / 100).clamp(0.0, 1.0),
+              minHeight: 4,
+              backgroundColor: AppColors.surfaceContainerHighest,
+              valueColor: AlwaysStoppedAnimation(color),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ─── Shared widgets ───────────────────────────────────────────────────────────
+
 class _AddTransactionInlineAction extends StatelessWidget {
   const _AddTransactionInlineAction({required this.onTap});
-
   final VoidCallback onTap;
 
   @override
@@ -303,7 +713,8 @@ class _AddTransactionInlineAction extends StatelessWidget {
           children: [
             Text(
               AppStrings.of(context).budgetAddTransaction,
-              style: AppTypography.labelSm.copyWith(color: AppColors.primary),
+              style:
+                  AppTypography.labelSm.copyWith(color: AppColors.primary),
             ),
             const SizedBox(width: 4),
             const Icon(Icons.add_rounded, size: 14, color: AppColors.primary),
@@ -316,7 +727,6 @@ class _AddTransactionInlineAction extends StatelessWidget {
 
 class _SummaryCard extends StatelessWidget {
   const _SummaryCard({required this.budget});
-
   final BudgetModel budget;
 
   @override
@@ -345,7 +755,8 @@ class _SummaryCard extends StatelessWidget {
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
-                  IconMapper.fromString(category?.icon ?? 'account_balance'),
+                  IconMapper.fromString(
+                      category?.icon ?? 'account_balance'),
                   color: category?.cardColor ?? AppColors.primary,
                   size: 24,
                 ),
@@ -362,7 +773,8 @@ class _SummaryCard extends StatelessWidget {
                           color: AppColors.onSurfaceVariant,
                         ),
                       ),
-                    Text(budget.periodLabel(AppStrings.of(context)), style: AppTypography.titleSm),
+                    Text(budget.periodLabel(AppStrings.of(context)),
+                        style: AppTypography.titleSm),
                   ],
                 ),
               ),
@@ -424,16 +836,15 @@ class _SummaryCard extends StatelessWidget {
               Expanded(
                 child: _StatColumn(
                   label: s.budgetStatStart,
-                  value: DateFormatter.formatMini(budget.startDate, context),
+                  value:
+                      DateFormatter.formatMini(budget.startDate, context),
                   color: AppColors.onSurfaceVariant,
                 ),
               ),
               Expanded(
                 child: _StatColumn(
                   label: s.budgetStatEnd,
-                  value: budget.endDate != null
-                      ? DateFormatter.formatMini(budget.endDate!, context)
-                      : '—',
+                  value: DateFormatter.formatMini(budget.endDate, context),
                   color: AppColors.onSurfaceVariant,
                 ),
               ),
@@ -503,8 +914,9 @@ class _DailySpendChart extends StatelessWidget {
       }
     }
 
-    final maxVal =
-        buckets.fold<double>(0, (m, v) => v > m ? v : m).clamp(1.0, double.infinity);
+    final maxVal = buckets
+        .fold<double>(0, (m, v) => v > m ? v : m)
+        .clamp(1.0, double.infinity);
 
     return Container(
       padding: const EdgeInsets.all(AppSpacing.lg),
@@ -529,7 +941,8 @@ class _DailySpendChart extends StatelessWidget {
                 barTouchData: BarTouchData(
                   enabled: true,
                   touchTooltipData: BarTouchTooltipData(
-                    getTooltipColor: (_) => AppColors.surfaceContainerHighest,
+                    getTooltipColor: (_) =>
+                        AppColors.surfaceContainerHighest,
                     getTooltipItem: (group, _, rod, idx) {
                       final date =
                           startDay.add(Duration(days: group.x));
@@ -546,14 +959,11 @@ class _DailySpendChart extends StatelessWidget {
                 borderData: FlBorderData(show: false),
                 titlesData: FlTitlesData(
                   leftTitles: const AxisTitles(
-                    sideTitles: SideTitles(showTitles: false),
-                  ),
+                      sideTitles: SideTitles(showTitles: false)),
                   rightTitles: const AxisTitles(
-                    sideTitles: SideTitles(showTitles: false),
-                  ),
+                      sideTitles: SideTitles(showTitles: false)),
                   topTitles: const AxisTitles(
-                    sideTitles: SideTitles(showTitles: false),
-                  ),
+                      sideTitles: SideTitles(showTitles: false)),
                   bottomTitles: AxisTitles(
                     sideTitles: SideTitles(
                       showTitles: true,

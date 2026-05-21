@@ -258,13 +258,17 @@ GoRouter createRouter() {
         path: RouteNames.addBudget,
         name: 'add-budget',
         parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, _) => BlocProvider(
-          create: (_) => AddBudgetBloc(
-            budgetRepository: getIt<BudgetRepository>(),
-            categoryRepository: getIt<CategoryRepository>(),
-          )..add(const AddBudgetInitialized()),
-          child: const AddBudgetPage(),
-        ),
+        builder: (context, state) {
+          final extra = state.extra as Map<String, dynamic>?;
+          final prefill = extra?['prefill'] as BudgetModel?;
+          return BlocProvider(
+            create: (_) => AddBudgetBloc(
+              budgetRepository: getIt<BudgetRepository>(),
+              categoryRepository: getIt<CategoryRepository>(),
+            )..add(const AddBudgetInitialized()),
+            child: AddBudgetPage(prefill: prefill),
+          );
+        },
       ),
       GoRoute(
         path: '/budgets/:id',

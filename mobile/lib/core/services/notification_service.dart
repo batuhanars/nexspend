@@ -10,6 +10,8 @@ const _channelName = 'Bildirimler';
 const _invitePrefix = 'INVITE:';
 const _groupPrefix = 'GROUP:';
 const _insightsPayload = 'INSIGHTS';
+const _budgetClosedPrefix = 'BUDGET_CLOSED:';
+const _sharedBudgetClosedPrefix = 'SHARED_BUDGET_CLOSED:';
 const _acceptActionId = 'accept_invite';
 const _rejectActionId = 'reject_invite';
 
@@ -19,6 +21,9 @@ final _actionController =
     StreamController<({String token, String action})>.broadcast();
 final _groupNavController = StreamController<String>.broadcast();
 final _insightsNavController = StreamController<void>.broadcast();
+final _personalBudgetClosedController = StreamController<String>.broadcast();
+final _sharedBudgetClosedController =
+    StreamController<({String budgetId, String groupId})>.broadcast();
 
 @pragma('vm:entry-point')
 Future<void> firebaseBackgroundHandler(RemoteMessage message) async {}
@@ -43,6 +48,17 @@ void _onNotificationTap(NotificationResponse details) {
     _groupNavController.add(groupId);
   } else if (payload == _insightsPayload) {
     _insightsNavController.add(null);
+  } else if (payload.startsWith(_budgetClosedPrefix)) {
+    final budgetId = payload.substring(_budgetClosedPrefix.length);
+    _personalBudgetClosedController.add(budgetId);
+  } else if (payload.startsWith(_sharedBudgetClosedPrefix)) {
+    final rest = payload.substring(_sharedBudgetClosedPrefix.length);
+    final sep = rest.indexOf(':');
+    if (sep > 0) {
+      final groupId = rest.substring(0, sep);
+      final budgetId = rest.substring(sep + 1);
+      _sharedBudgetClosedController.add((budgetId: budgetId, groupId: groupId));
+    }
   }
 }
 
@@ -51,6 +67,8 @@ class NotificationService {
   String? _pendingInviteToken;
   String? _pendingGroupId;
   bool _pendingInsights = false;
+  String? _pendingClosedBudgetId;
+  ({String budgetId, String groupId})? _pendingClosedSharedBudget;
   bool _initialized = false;
 
   NotificationService(this._apiClient);
@@ -60,6 +78,10 @@ class NotificationService {
       _actionController.stream;
   static Stream<String> get onGroupNav => _groupNavController.stream;
   static Stream<void> get onInsightsNav => _insightsNavController.stream;
+  static Stream<String> get onPersonalBudgetClosed =>
+      _personalBudgetClosedController.stream;
+  static Stream<({String budgetId, String groupId})> get onSharedBudgetClosed =>
+      _sharedBudgetClosedController.stream;
 
   String? consumePendingInvite() {
     final token = _pendingInviteToken;
@@ -76,6 +98,18 @@ class NotificationService {
   bool consumePendingInsights() {
     final pending = _pendingInsights;
     _pendingInsights = false;
+    return pending;
+  }
+
+  String? consumePendingClosedBudget() {
+    final id = _pendingClosedBudgetId;
+    _pendingClosedBudgetId = null;
+    return id;
+  }
+
+  ({String budgetId, String groupId})? consumePendingClosedSharedBudget() {
+    final pending = _pendingClosedSharedBudget;
+    _pendingClosedSharedBudget = null;
     return pending;
   }
 
@@ -138,6 +172,18 @@ class NotificationService {
       if (groupId != null) _pendingGroupId = groupId;
     } else if (type == 'MONTHLY_REPORT') {
       _pendingInsights = true;
+    } else if (type == 'BUDGET_CLOSED') {
+      final scope = message.data['scope'] as String?;
+      final budgetId = message.data['budgetId'] as String?;
+      if (scope == 'personal' && budgetId != null) {
+        _pendingClosedBudgetId = budgetId;
+      } else if (scope == 'shared' && budgetId != null) {
+        final groupId = message.data['groupId'] as String?;
+        if (groupId != null) {
+          _pendingClosedSharedBudget =
+              (budgetId: budgetId, groupId: groupId);
+        }
+      }
     }
   }
 
@@ -187,6 +233,20 @@ class NotificationService {
         importance: Importance.high,
         priority: Priority.high,
       );
+    } else if (type == 'BUDGET_CLOSED') {
+      // App is in foreground: emit to stream so AppShell shows a SnackBar
+      final scope = message.data['scope'] as String?;
+      final budgetId = message.data['budgetId'] as String?;
+      if (scope == 'personal' && budgetId != null) {
+        _personalBudgetClosedController.add(budgetId);
+      } else if (scope == 'shared' && budgetId != null) {
+        final groupId = message.data['groupId'] as String?;
+        if (groupId != null) {
+          _sharedBudgetClosedController
+              .add((budgetId: budgetId, groupId: groupId));
+        }
+      }
+      return;
     } else {
       androidDetails = const AndroidNotificationDetails(
         _channelId,

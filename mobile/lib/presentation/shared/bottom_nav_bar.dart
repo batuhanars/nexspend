@@ -10,6 +10,7 @@ import '../../core/l10n/app_strings.dart';
 import '../../core/services/notification_service.dart';
 import '../../core/storage/secure_storage.dart';
 import '../../core/utils/coach_mark_keys.dart';
+import '../../data/repositories/budget_repository.dart';
 import '../../data/repositories/family_repository.dart';
 import '../../navigation/route_names.dart';
 import 'banner_ad_widget.dart';
@@ -28,6 +29,9 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
   StreamSubscription<({String token, String action})>? _actionSub;
   StreamSubscription<String>? _groupNavSub;
   StreamSubscription<void>? _insightsNavSub;
+  StreamSubscription<String>? _personalBudgetClosedSub;
+  StreamSubscription<({String budgetId, String groupId})>?
+      _sharedBudgetClosedSub;
 
   @override
   void initState() {
@@ -44,6 +48,8 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
     _actionSub?.cancel();
     _groupNavSub?.cancel();
     _insightsNavSub?.cancel();
+    _personalBudgetClosedSub?.cancel();
+    _sharedBudgetClosedSub?.cancel();
     super.dispose();
   }
 
@@ -79,6 +85,46 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) context.push(RouteNames.insights);
       });
+      return;
+    }
+
+    final closedBudgetId = ns.consumePendingClosedBudget();
+    if (closedBudgetId != null) {
+      _openNewPeriodForBudget(closedBudgetId);
+      return;
+    }
+
+    final closedShared = ns.consumePendingClosedSharedBudget();
+    if (closedShared != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          context.push(RouteNames.familyGroupDetail(closedShared.groupId));
+        }
+      });
+    }
+  }
+
+  Future<void> _openNewPeriodForBudget(String budgetId) async {
+    try {
+      final budget =
+          await getIt<BudgetRepository>().getById(budgetId);
+      if (!mounted) return;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          context.push(
+            RouteNames.addBudget,
+            extra: {'prefill': budget},
+          );
+        }
+      });
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(AppStrings.of(context).budgetClosedPersonalSnackbar),
+          backgroundColor: AppColors.primary,
+        ),
+      );
     }
   }
 
@@ -110,6 +156,36 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) context.push(RouteNames.insights);
       });
+    });
+
+    // Foreground BUDGET_CLOSED personal → SnackBar + "Yenisini Aç" action
+    _personalBudgetClosedSub =
+        NotificationService.onPersonalBudgetClosed.listen((budgetId) {
+      if (!mounted) return;
+      final s = AppStrings.of(context);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(s.budgetClosedPersonalSnackbar),
+          backgroundColor: AppColors.primary,
+          action: SnackBarAction(
+            label: s.openNewPeriodAction,
+            textColor: AppColors.surface,
+            onPressed: () => _openNewPeriodForBudget(budgetId),
+          ),
+        ),
+      );
+    });
+
+    // Foreground BUDGET_CLOSED shared → info SnackBar
+    _sharedBudgetClosedSub =
+        NotificationService.onSharedBudgetClosed.listen((event) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(AppStrings.of(context).budgetClosedSharedSnackbar),
+          backgroundColor: AppColors.primary,
+        ),
+      );
     });
 
     // Cold start ve başlangıç pending token'larını tüket

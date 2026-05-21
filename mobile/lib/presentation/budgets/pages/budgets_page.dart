@@ -166,7 +166,9 @@ class _BudgetsView extends StatelessWidget {
                 context.read<BudgetsBloc>().add(const BudgetsLoadRequested()),
           ),
         ),
-      BudgetsLoaded(:final overview, :final budgets) => SliverList(
+      BudgetsUpdateError(:final overview, :final budgets) ||
+      BudgetsLoaded(:final overview, :final budgets) =>
+        SliverList(
           delegate: SliverChildListDelegate([
             if (overview.count > 0) ...[
               OverviewCard(overview: overview),

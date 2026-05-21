@@ -1,4 +1,5 @@
 import 'package:bloc_test/bloc_test.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:wallet_app/data/models/budget_model.dart';
@@ -29,6 +30,7 @@ final _budget1 = BudgetModel(
   smartTracking: true,
   isActive: true,
   startDate: DateTime(2026, 5, 1),
+  endDate: DateTime(2026, 5, 31),
 );
 
 final _budget2 = BudgetModel(
@@ -43,6 +45,7 @@ final _budget2 = BudgetModel(
   smartTracking: false,
   isActive: true,
   startDate: DateTime(2026, 5, 1),
+  endDate: DateTime(2026, 5, 31),
 );
 
 void main() {
@@ -149,6 +152,32 @@ void main() {
       expect: () => [
         isA<BudgetsLoaded>().having((s) => s.budgets.length, 'optimistic', 2),
         isA<BudgetsLoaded>().having((s) => s.budgets.length, 'revert', 2),
+      ],
+    );
+
+    blocTest<BudgetsBloc, BudgetsState>(
+      'PATCH 400 hatası BudgetsUpdateError emitler ve hata mesajı backend\'den gelir',
+      build: () {
+        final dioError = DioException(
+          requestOptions: RequestOptions(path: '/api/budgets/b-1'),
+          response: Response(
+            requestOptions: RequestOptions(path: '/api/budgets/b-1'),
+            statusCode: 400,
+            data: {'message': 'Geçmiş döneme ait bütçe düzenlenemez'},
+          ),
+          type: DioExceptionType.badResponse,
+        );
+        when(() => repo.update('b-1', any())).thenThrow(dioError);
+        return buildBloc();
+      },
+      seed: () => BudgetsLoaded(overview: _overview, budgets: [_budget1, _budget2]),
+      act: (bloc) => bloc.add(BudgetUpdateRequested(id: 'b-1', data: {'amount': 3500})),
+      expect: () => [
+        isA<BudgetsLoaded>().having((s) => s.budgets.length, 'optimistic', 2),
+        isA<BudgetsUpdateError>()
+            .having((s) => s.message, 'hata mesajı',
+                'Geçmiş döneme ait bütçe düzenlenemez')
+            .having((s) => s.budgets.length, 'bütçe listesi korunur', 2),
       ],
     );
   });

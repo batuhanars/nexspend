@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import '../../core/constants/api_endpoints.dart';
 import '../../core/network/api_client.dart';
+import '../models/budget_model.dart' show BudgetHistoryEntry;
 import '../models/family_model.dart';
 
 class FamilyRepository {
@@ -136,5 +137,17 @@ class FamilyRepository {
         .get(ApiEndpoints.familyGroupBudgetExpenses(groupId, budgetId));
     return SharedBudgetDetailModel.fromJson(
         response.data['data'] as Map<String, dynamic>);
+  }
+
+  Future<List<BudgetHistoryEntry>> getSharedBudgetHistory({
+    required String groupId,
+    required String budgetId,
+  }) async {
+    final response = await _dio
+        .get(ApiEndpoints.familyGroupBudgetHistory(groupId, budgetId));
+    final list = response.data['data'] as List;
+    return list
+        .map((e) => BudgetHistoryEntry.fromJson(e as Map<String, dynamic>))
+        .toList();
   }
 }

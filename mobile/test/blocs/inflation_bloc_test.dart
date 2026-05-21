@@ -70,6 +70,7 @@ final _updatedBudget = BudgetModel(
   smartTracking: true,
   isActive: true,
   startDate: DateTime(2026, 5, 1),
+  endDate: DateTime(2026, 5, 31),
 );
 
 void main() {

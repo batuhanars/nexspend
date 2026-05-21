@@ -6,8 +6,9 @@ import '../../../core/l10n/app_strings.dart';
 import '../../shared/widgets/split_amount_field.dart';
 
 class AmountField extends StatelessWidget {
-  const AmountField({super.key, required this.onChanged});
+  const AmountField({super.key, required this.onChanged, this.initialValue});
   final ValueChanged<double?> onChanged;
+  final double? initialValue;
 
   @override
   Widget build(BuildContext context) {
@@ -23,7 +24,7 @@ class AmountField extends StatelessWidget {
           ),
         ),
         const SizedBox(height: AppSpacing.lg),
-        SplitAmountField(onChanged: onChanged),
+        SplitAmountField(onChanged: onChanged, initialValue: initialValue),
       ],
     );
   }

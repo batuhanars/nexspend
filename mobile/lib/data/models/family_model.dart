@@ -139,6 +139,7 @@ class SharedBudgetModel {
     required this.remainingPercent,
     required this.period,
     required this.startDate,
+    required this.endDate,
     required this.isActive,
   });
 
@@ -154,6 +155,7 @@ class SharedBudgetModel {
   final double remainingPercent;
   final String period;
   final String startDate;
+  final DateTime endDate;
   final bool isActive;
 
   double get spentPercent => amount > 0 ? (spent / amount).clamp(0.0, 1.0) : 0.0;
@@ -172,6 +174,9 @@ class SharedBudgetModel {
         remainingPercent: (json['remainingPercent'] as num).toDouble(),
         period: json['period'] as String,
         startDate: json['startDate'] as String,
+        endDate: json['endDate'] != null
+            ? DateTime.parse(json['endDate'] as String)
+            : DateTime.parse(json['startDate'] as String),
         isActive: json['isActive'] as bool,
       );
 }

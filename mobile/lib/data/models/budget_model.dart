@@ -20,7 +20,7 @@ class BudgetModel {
     required this.smartTracking,
     required this.isActive,
     required this.startDate,
-    this.endDate,
+    required this.endDate,
     this.category,
   });
 
@@ -35,7 +35,7 @@ class BudgetModel {
   final bool smartTracking;
   final bool isActive;
   final DateTime startDate;
-  final DateTime? endDate;
+  final DateTime endDate;
   final CategoryModel? category;
 
   Color get statusColor => switch (status) {
@@ -79,7 +79,7 @@ class BudgetModel {
         startDate: DateTime.parse(json['startDate'] as String),
         endDate: json['endDate'] != null
             ? DateTime.parse(json['endDate'] as String)
-            : null,
+            : DateTime.parse(json['startDate'] as String),
         category: json['category'] != null
             ? CategoryModel.fromJson(json['category'] as Map<String, dynamic>)
             : null,
@@ -116,5 +116,39 @@ class BudgetOverviewModel {
         remaining: 0,
         percentage: 0,
         count: 0,
+      );
+}
+
+class BudgetHistoryEntry {
+  const BudgetHistoryEntry({
+    required this.id,
+    required this.name,
+    required this.startDate,
+    required this.endDate,
+    required this.amount,
+    required this.spent,
+    required this.percentage,
+    required this.isActive,
+  });
+
+  final String id;
+  final String name;
+  final DateTime startDate;
+  final DateTime endDate;
+  final double amount;
+  final double spent;
+  final double percentage;
+  final bool isActive;
+
+  factory BudgetHistoryEntry.fromJson(Map<String, dynamic> json) =>
+      BudgetHistoryEntry(
+        id: json['id'] as String,
+        name: json['name'] as String,
+        startDate: DateTime.parse(json['startDate'] as String),
+        endDate: DateTime.parse(json['endDate'] as String),
+        amount: (json['amount'] as num).toDouble(),
+        spent: (json['spent'] as num).toDouble(),
+        percentage: (json['percentage'] as num).toDouble(),
+        isActive: json['isActive'] as bool? ?? false,
       );
 }

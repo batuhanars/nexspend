@@ -40,6 +40,8 @@ class RouteNames {
   // Ortak Bütçe (Gruplar)
   static const String family = '/family';
   static String familyGroupDetail(String id) => '/family/$id';
+  static String addSharedBudget(String groupId) =>
+      '/family/$groupId/budgets/add';
   static String sharedBudgetDetail(String groupId, String budgetId) =>
       '/family/$groupId/budgets/$budgetId';
   static String familyContributions(String id) => '/family/$id/contributions';

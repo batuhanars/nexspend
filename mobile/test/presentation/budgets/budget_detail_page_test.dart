@@ -31,7 +31,7 @@ final _budget = BudgetModel(
   status: BudgetStatus.WARNING,
   period: BudgetPeriod.MONTHLY,
   smartTracking: false,
-  isActive: false,
+  isActive: true,
   startDate: DateTime(2026, 4, 1),
   endDate: DateTime(2026, 4, 30),
 );

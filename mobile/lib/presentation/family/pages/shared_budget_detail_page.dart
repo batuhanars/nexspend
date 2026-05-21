@@ -185,38 +185,50 @@ class _SharedBudgetDetailPageState extends State<SharedBudgetDetailPage>
               onPressed: _confirmDelete,
             ),
         ],
-        bottom: TabBar(
-          controller: _tabController,
-          labelColor: AppColors.primary,
-          unselectedLabelColor: AppColors.onSurfaceVariant,
-          indicatorColor: AppColors.primary,
-          labelStyle: AppTypography.bodySm
-              .copyWith(fontWeight: FontWeight.w600),
-          unselectedLabelStyle: AppTypography.bodySm,
-          tabs: [
-            Tab(text: s.budgetTabCurrentPeriod),
-            Tab(text: s.budgetTabHistory),
-          ],
-        ),
+        bottom: isArchived
+            ? null
+            : TabBar(
+                controller: _tabController,
+                labelColor: AppColors.primary,
+                unselectedLabelColor: AppColors.onSurfaceVariant,
+                indicatorColor: AppColors.primary,
+                labelStyle: AppTypography.bodySm
+                    .copyWith(fontWeight: FontWeight.w600),
+                unselectedLabelStyle: AppTypography.bodySm,
+                tabs: [
+                  Tab(text: s.budgetTabCurrentPeriod),
+                  Tab(text: s.budgetTabHistory),
+                ],
+              ),
       ),
-      body: TabBarView(
-        controller: _tabController,
-        children: [
-          _CurrentPeriodView(
-            groupId: widget.groupId,
-            budget: _budget,
-            future: _future,
-            onAddEntry: _openAddEntrySheet,
-            onRefresh: () {
-              setState(() => _future = _load());
-            },
-          ),
-          _HistoryView(
-            groupId: widget.groupId,
-            budgetId: _budget.id,
-          ),
-        ],
-      ),
+      body: isArchived
+          ? _CurrentPeriodView(
+              groupId: widget.groupId,
+              budget: _budget,
+              future: _future,
+              onAddEntry: () {},
+              onRefresh: () {
+                setState(() => _future = _load());
+              },
+            )
+          : TabBarView(
+              controller: _tabController,
+              children: [
+                _CurrentPeriodView(
+                  groupId: widget.groupId,
+                  budget: _budget,
+                  future: _future,
+                  onAddEntry: _openAddEntrySheet,
+                  onRefresh: () {
+                    setState(() => _future = _load());
+                  },
+                ),
+                _HistoryView(
+                  groupId: widget.groupId,
+                  budgetId: _budget.id,
+                ),
+              ],
+            ),
     );
   }
 }

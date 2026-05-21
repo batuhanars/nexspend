@@ -26,6 +26,9 @@ import '../presentation/budgets/pages/budgets_page.dart';
 import '../presentation/budgets/pages/add_budget_page.dart';
 import '../presentation/budgets/pages/budget_detail_page.dart';
 import '../data/models/budget_model.dart' show BudgetModel;
+import '../presentation/family/bloc/add_shared_budget_bloc.dart';
+import '../presentation/family/bloc/add_shared_budget_event.dart';
+import '../presentation/family/pages/add_shared_budget_page.dart';
 import '../presentation/family/pages/shared_budget_detail_page.dart';
 import '../data/models/debt_model.dart' show DebtModel;
 import '../data/models/subscription_model.dart' show SubscriptionModel;
@@ -304,6 +307,21 @@ GoRouter createRouter() {
               budgetRepository: getIt<BudgetRepository>(),
             )..add(const BudgetsLoadRequested()),
             child: page,
+          );
+        },
+      ),
+      GoRoute(
+        path: '/family/:groupId/budgets/add',
+        name: 'add-shared-budget',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) {
+          final groupId = state.pathParameters['groupId']!;
+          return BlocProvider(
+            create: (_) => AddSharedBudgetBloc(
+              familyRepository: getIt<FamilyRepository>(),
+              categoryRepository: getIt<CategoryRepository>(),
+            )..add(const AddSharedBudgetInitialized()),
+            child: AddSharedBudgetPage(groupId: groupId),
           );
         },
       ),

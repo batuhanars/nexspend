@@ -297,38 +297,55 @@ class _BudgetDetailPageState extends State<BudgetDetailPage>
               onPressed: _confirmDelete,
             ),
           ],
-          bottom: TabBar(
-            controller: _tabController,
-            labelColor: AppColors.primary,
-            unselectedLabelColor: AppColors.onSurfaceVariant,
-            indicatorColor: AppColors.primary,
-            indicatorSize: TabBarIndicatorSize.label,
-            tabs: [
-              Tab(text: s.budgetTabCurrentPeriod),
-              Tab(text: s.budgetTabHistory),
-            ],
-          ),
+          bottom: budget.isActive
+              ? TabBar(
+                  controller: _tabController,
+                  labelColor: AppColors.primary,
+                  unselectedLabelColor: AppColors.onSurfaceVariant,
+                  indicatorColor: AppColors.primary,
+                  indicatorSize: TabBarIndicatorSize.label,
+                  tabs: [
+                    Tab(text: s.budgetTabCurrentPeriod),
+                    Tab(text: s.budgetTabHistory),
+                  ],
+                )
+              : null,
         ),
-        body: TabBarView(
-          controller: _tabController,
-          children: [
-            _CurrentPeriodView(
-              budget: budget,
-              txFuture: _txFuture,
-              onRefresh: () async {
-                context
-                    .read<BudgetsBloc>()
-                    .add(const BudgetsRefreshRequested());
-                setState(() {
-                  _txFuture = _loadTransactions();
-                });
-                await _txFuture;
-              },
-              onAddEntry: budget.isActive ? _openAddEntrySheet : null,
-            ),
-            _HistoryView(budgetId: _budgetId),
-          ],
-        ),
+        body: budget.isActive
+            ? TabBarView(
+                controller: _tabController,
+                children: [
+                  _CurrentPeriodView(
+                    budget: budget,
+                    txFuture: _txFuture,
+                    onRefresh: () async {
+                      context
+                          .read<BudgetsBloc>()
+                          .add(const BudgetsRefreshRequested());
+                      setState(() {
+                        _txFuture = _loadTransactions();
+                      });
+                      await _txFuture;
+                    },
+                    onAddEntry: _openAddEntrySheet,
+                  ),
+                  _HistoryView(budgetId: _budgetId),
+                ],
+              )
+            : _CurrentPeriodView(
+                budget: budget,
+                txFuture: _txFuture,
+                onRefresh: () async {
+                  context
+                      .read<BudgetsBloc>()
+                      .add(const BudgetsRefreshRequested());
+                  setState(() {
+                    _txFuture = _loadTransactions();
+                  });
+                  await _txFuture;
+                },
+                onAddEntry: null,
+              ),
       ),
     );
   }

@@ -23,9 +23,16 @@ import '../bloc/budgets_state.dart';
 import '../widgets/edit_budget_sheet.dart';
 
 class BudgetDetailPage extends StatefulWidget {
-  const BudgetDetailPage({super.key, required this.budget});
+  const BudgetDetailPage({
+    super.key,
+    this.budget,
+    this.budgetId,
+    this.initialTabIndex = 0,
+  }) : assert(budget != null || budgetId != null);
 
-  final BudgetModel budget;
+  final BudgetModel? budget;
+  final String? budgetId;
+  final int initialTabIndex;
 
   @override
   State<BudgetDetailPage> createState() => _BudgetDetailPageState();
@@ -33,16 +40,43 @@ class BudgetDetailPage extends StatefulWidget {
 
 class _BudgetDetailPageState extends State<BudgetDetailPage>
     with SingleTickerProviderStateMixin {
-  late BudgetModel _budget;
+  BudgetModel? _budget;
+  bool _loading = false;
   late Future<List<TransactionModel>> _txFuture;
   late TabController _tabController;
 
   @override
   void initState() {
     super.initState();
-    _budget = widget.budget;
-    _tabController = TabController(length: 2, vsync: this);
-    _txFuture = _loadTransactions();
+    _tabController = TabController(
+      length: 2,
+      vsync: this,
+      initialIndex: widget.initialTabIndex,
+    );
+    if (widget.budget != null) {
+      _budget = widget.budget;
+      _txFuture = _loadTransactions();
+    } else {
+      _loading = true;
+      _txFuture = Future.value(const []);
+      _fetchById();
+    }
+  }
+
+  Future<void> _fetchById() async {
+    try {
+      final budget =
+          await getIt<BudgetRepository>().getById(widget.budgetId!);
+      if (!mounted) return;
+      setState(() {
+        _budget = budget;
+        _loading = false;
+        _txFuture = _loadTransactions();
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _loading = false);
+    }
   }
 
   @override
@@ -52,15 +86,16 @@ class _BudgetDetailPageState extends State<BudgetDetailPage>
   }
 
   Future<List<TransactionModel>> _loadTransactions() async {
-    if (_budget.category == null) return [];
+    final budget = _budget;
+    if (budget == null || budget.category == null) return [];
     final repo = getIt<TransactionRepository>();
     final result = await repo.getTransactions(
       page: 1,
       limit: 200,
       type: 'EXPENSE',
-      categoryId: _budget.category!.id,
-      startDate: _budget.startDate.toIso8601String(),
-      endDate: _budget.endDate.toIso8601String(),
+      categoryId: budget.category!.id,
+      startDate: budget.startDate.toIso8601String(),
+      endDate: budget.endDate.toIso8601String(),
     );
     return result.data;
   }
@@ -72,7 +107,11 @@ class _BudgetDetailPageState extends State<BudgetDetailPage>
     });
   }
 
+  String get _budgetId => _budget?.id ?? widget.budgetId!;
+
   Future<void> _openEdit() async {
+    final budget = _budget;
+    if (budget == null) return;
     final bloc = context.read<BudgetsBloc>();
     await showModalBottomSheet<void>(
       context: context,
@@ -85,13 +124,14 @@ class _BudgetDetailPageState extends State<BudgetDetailPage>
       ),
       builder: (_) => BlocProvider.value(
         value: bloc,
-        child: EditBudgetSheet(budget: _budget),
+        child: EditBudgetSheet(budget: budget),
       ),
     );
   }
 
   Future<void> _openAddEntrySheet() async {
-    if (_budget.category == null) return;
+    final budget = _budget;
+    if (budget == null || budget.category == null) return;
     final choice = await showBudgetAddEntrySheet(context);
     if (choice == null || !mounted) return;
 
@@ -101,7 +141,7 @@ class _BudgetDetailPageState extends State<BudgetDetailPage>
           RouteNames.addTransaction,
           extra: {
             'type': 'EXPENSE',
-            'categoryId': _budget.category!.id,
+            'categoryId': budget.category!.id,
           },
         );
         break;
@@ -109,7 +149,7 @@ class _BudgetDetailPageState extends State<BudgetDetailPage>
         await context.push(
           RouteNames.receiptScanner,
           extra: <String, String?>{
-            'categoryId': _budget.category!.id,
+            'categoryId': budget.category!.id,
           },
         );
         break;
@@ -122,16 +162,9 @@ class _BudgetDetailPageState extends State<BudgetDetailPage>
     });
   }
 
-  Future<void> _openNewPeriod() async {
-    await context.push(
-      RouteNames.addBudget,
-      extra: {'prefill': _budget},
-    );
-    if (!mounted) return;
-    context.read<BudgetsBloc>().add(const BudgetsRefreshRequested());
-  }
-
   Future<void> _confirmDelete() async {
+    final budget = _budget;
+    if (budget == null) return;
     final s = AppStrings.of(context);
     final ok = await showDialog<bool>(
       context: context,
@@ -139,7 +172,7 @@ class _BudgetDetailPageState extends State<BudgetDetailPage>
         backgroundColor: AppColors.surfaceContainerHigh,
         title: Text(s.deleteBudgetTitle, style: AppTypography.titleSm),
         content: Text(
-          s.deleteBudgetContent(_budget.name),
+          s.deleteBudgetContent(budget.name),
           style: AppTypography.bodyMd
               .copyWith(color: AppColors.onSurfaceVariant),
         ),
@@ -162,7 +195,7 @@ class _BudgetDetailPageState extends State<BudgetDetailPage>
       ),
     );
     if (ok == true && mounted) {
-      context.read<BudgetsBloc>().add(BudgetDeleteRequested(_budget.id));
+      context.read<BudgetsBloc>().add(BudgetDeleteRequested(budget.id));
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text(AppStrings.of(context).budgetDeletedSuccess),
         backgroundColor: AppColors.secondary,
@@ -174,13 +207,45 @@ class _BudgetDetailPageState extends State<BudgetDetailPage>
   @override
   Widget build(BuildContext context) {
     final s = AppStrings.of(context);
+
+    if (_loading) {
+      return Scaffold(
+        backgroundColor: AppColors.surface,
+        appBar: AppBar(
+          backgroundColor: AppColors.surface,
+          surfaceTintColor: Colors.transparent,
+        ),
+        body: const Center(
+          child: CircularProgressIndicator(color: AppColors.primary),
+        ),
+      );
+    }
+
+    final budget = _budget;
+    if (budget == null) {
+      return Scaffold(
+        backgroundColor: AppColors.surface,
+        appBar: AppBar(
+          backgroundColor: AppColors.surface,
+          surfaceTintColor: Colors.transparent,
+        ),
+        body: Center(
+          child: Text(
+            s.serverError,
+            style: AppTypography.bodyMd
+                .copyWith(color: AppColors.onSurfaceVariant),
+          ),
+        ),
+      );
+    }
+
     return BlocListener<BudgetsBloc, BudgetsState>(
       listenWhen: (_, curr) =>
           curr is BudgetsLoaded || curr is BudgetsUpdateError,
       listener: (context, state) {
         if (state is BudgetsLoaded) {
           final match =
-              state.budgets.where((b) => b.id == _budget.id).toList();
+              state.budgets.where((b) => b.id == budget.id).toList();
           if (match.isNotEmpty) _refreshFromBloc(match.first);
         } else if (state is BudgetsUpdateError) {
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -197,8 +262,8 @@ class _BudgetDetailPageState extends State<BudgetDetailPage>
           title: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(_budget.name, style: AppTypography.headlineSm),
-              if (!_budget.isActive) ...[
+              Text(budget.name, style: AppTypography.headlineSm),
+              if (!budget.isActive) ...[
                 const SizedBox(width: AppSpacing.sm),
                 Container(
                   padding: const EdgeInsets.symmetric(
@@ -220,7 +285,7 @@ class _BudgetDetailPageState extends State<BudgetDetailPage>
             ],
           ),
           actions: [
-            if (_budget.isActive) ...[
+            if (budget.isActive) ...[
               IconButton(
                 icon: const Icon(Icons.edit_outlined,
                     color: AppColors.onSurfaceVariant),
@@ -248,7 +313,7 @@ class _BudgetDetailPageState extends State<BudgetDetailPage>
           controller: _tabController,
           children: [
             _CurrentPeriodView(
-              budget: _budget,
+              budget: budget,
               txFuture: _txFuture,
               onRefresh: () async {
                 context
@@ -259,10 +324,9 @@ class _BudgetDetailPageState extends State<BudgetDetailPage>
                 });
                 await _txFuture;
               },
-              onAddEntry: _budget.isActive ? _openAddEntrySheet : null,
-              onOpenNewPeriod: !_budget.isActive ? _openNewPeriod : null,
+              onAddEntry: budget.isActive ? _openAddEntrySheet : null,
             ),
-            _HistoryView(budgetId: _budget.id),
+            _HistoryView(budgetId: _budgetId),
           ],
         ),
       ),
@@ -278,14 +342,12 @@ class _CurrentPeriodView extends StatelessWidget {
     required this.txFuture,
     required this.onRefresh,
     this.onAddEntry,
-    this.onOpenNewPeriod,
   });
 
   final BudgetModel budget;
   final Future<List<TransactionModel>> txFuture;
   final Future<void> Function() onRefresh;
   final VoidCallback? onAddEntry;
-  final VoidCallback? onOpenNewPeriod;
 
   @override
   Widget build(BuildContext context) {
@@ -310,11 +372,6 @@ class _CurrentPeriodView extends StatelessWidget {
             children: [
               _SummaryCard(budget: budget),
               const SizedBox(height: AppSpacing.xl),
-              // Arşiv CTA
-              if (onOpenNewPeriod != null) ...[
-                _OpenNewPeriodButton(onTap: onOpenNewPeriod!),
-                const SizedBox(height: AppSpacing.xl),
-              ],
               if (transactions.isNotEmpty) ...[
                 _DailySpendChart(
                   transactions: transactions,
@@ -392,37 +449,6 @@ class _CurrentPeriodView extends StatelessWidget {
       }
     });
     return widgets;
-  }
-}
-
-class _OpenNewPeriodButton extends StatelessWidget {
-  const _OpenNewPeriodButton({required this.onTap});
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: double.infinity,
-      height: 52,
-      child: FilledButton.icon(
-        onPressed: onTap,
-        style: FilledButton.styleFrom(
-          backgroundColor: AppColors.primary,
-          foregroundColor: AppColors.surface,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
-          ),
-        ),
-        icon: const Icon(Icons.add_circle_outline, size: 18),
-        label: Text(
-          AppStrings.of(context).openNewPeriodBtn,
-          style: AppTypography.bodyMd.copyWith(
-            fontWeight: FontWeight.w600,
-            color: AppColors.surface,
-          ),
-        ),
-      ),
-    );
   }
 }
 

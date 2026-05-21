@@ -113,6 +113,17 @@ class NotificationService {
     return pending;
   }
 
+  void restorePendingClosedBudget(String id) {
+    _pendingClosedBudgetId = id;
+  }
+
+  void restorePendingClosedSharedBudget({
+    required String budgetId,
+    required String groupId,
+  }) {
+    _pendingClosedSharedBudget = (budgetId: budgetId, groupId: groupId);
+  }
+
   Future<void> initialize() async {
     if (_initialized) return;
     _initialized = true;

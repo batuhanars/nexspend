@@ -276,12 +276,25 @@ GoRouter createRouter() {
         name: 'budget-detail',
         parentNavigatorKey: _rootNavigatorKey,
         builder: (context, state) {
-          final extra = state.extra as Map<String, dynamic>;
-          final budget = extra['budget'] as BudgetModel;
-          final bloc = extra['bloc'] as BudgetsBloc;
-          return BlocProvider.value(
-            value: bloc,
-            child: BudgetDetailPage(budget: budget),
+          final extra = state.extra as Map<String, dynamic>?;
+          final budget = extra?['budget'] as BudgetModel?;
+          final budgetId =
+              extra?['budgetId'] as String? ?? state.pathParameters['id'];
+          final initialTabIndex = (extra?['initialTabIndex'] as int?) ?? 0;
+          final bloc = extra?['bloc'] as BudgetsBloc?;
+          final page = BudgetDetailPage(
+            budget: budget,
+            budgetId: budgetId,
+            initialTabIndex: initialTabIndex,
+          );
+          if (bloc != null) {
+            return BlocProvider.value(value: bloc, child: page);
+          }
+          return BlocProvider(
+            create: (_) => BudgetsBloc(
+              budgetRepository: getIt<BudgetRepository>(),
+            )..add(const BudgetsLoadRequested()),
+            child: page,
           );
         },
       ),

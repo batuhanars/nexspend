@@ -623,14 +623,15 @@
 - [ ] `AddBudgetPage` + `EditBudgetSheet` — endDate read-only chip ("31 Mayıs 2026'da kapanacak")
 - [ ] `BudgetDetailPage` — TabBar (Bu Dönem / Geçmiş) + `_HistoryView` (mini bar chart + dönem listesi)
 - [ ] `SharedBudgetDetailPage` — aynı tab yapısı
-- [ ] "Yeni Dönem Aç" CTA — arşivlenmiş bütçe detayında + bildirim tap'inde, `AddBudgetPage` prefilled açar
-- [ ] `NotificationService` — `BUDGET_CLOSED` type (foreground SnackBar + "Yenisini Aç" / background tap / cold start pending mekanizması)
+- [ ] "Yeni Dönem Aç" CTA — **yalnız kişisel** arşiv detayında + kişisel bildirim tap'inde, `AddBudgetPage` prefilled açar (ortakta CTA yok)
+- [ ] `NotificationService` — `BUDGET_CLOSED` type `scope`'a göre ayrışır: kişisel = SnackBar + "Yenisini Aç" + prefilled AddBudgetPage; ortak = bilgi SnackBar + tap → `SharedBudgetDetailPage` (cold start pending mekanizması her ikisinde)
 - [ ] GoRouter — `/budgets/add` ve `/family/:gid/budgets/add` route'ları prefill query/extra'sı kabul eder
 - [ ] l10n stringler (TR + EN) — tab başlıkları, "kapanacak" hint, "Yeni Dönem Aç", bildirim metinleri
 - [ ] BLoC testler — history fetch + prefilled add flow
 
 ### PM / Deploy
-- [ ] PM: contract §8 açık sorular (cron saati, ortak bildirimi kapsamı, history limiti) karara bağlandı, dev session'lara ilet
+- [x] PM: contract §8 açık sorular karara bağlandı (21 May 2026) — (1) tek job 00:30, (2) ortak bildirimi tüm üyelere salt bilgi (CTA yok), (3) history limit son 12 dönem
+- [ ] PM: kararları backend + frontend dev session'larına ilet (kickoff brief)
 - [ ] Backend migration Railway'e deploy + 00:30 cron logları monitör
 - [ ] Backend + frontend merge sonrası integration test (bütçe oluştur → endDate dolu → cron simüle et → arşivlendi → bildirim alındı → prefilled CTA → kaydet → yeni dönem)
 

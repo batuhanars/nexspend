@@ -115,19 +115,19 @@ Frontend `mobile/lib/core/utils/budget_period.dart`: aynı mantığın Dart eşd
 Mevcut `api/src/modules/budgets/jobs/budget-daily-check.job.ts` job'u 09:10'da çalışıyor ve sadece `spent` recompute ediyor. Bu job iki sorumluluğu birden alır:
 
 ```typescript
-@Cron('30 0 * * *') // 09:10 → 00:30'a çekilir (dönem bittiği gün hemen arşivlensin)
+@Cron('30 0 * * *') // Tek job, 00:30 — önce arşivle, sonra aktiflerin spent'ini recompute et
 async run() {
   this.logger.log('Bütçe dönem sonu kontrolü başladı');
   const archiveStats = await this.budgetsService.archiveExpired();
   this.logger.log(
     `Arşivleme — kişisel: ${archiveStats.personal}, ortak: ${archiveStats.shared}`,
   );
-  // Var olan davranış devam eder:
+  // Var olan davranış devam eder (arşivlenenler `isActive=false` olduğu için recompute dışı kalır):
   await this.budgetsService.recomputeAllActive();
 }
 ```
 
-> Cron saatini değiştirmek istemiyorsak (mevcut 09:10), arşivleme akşam saatlerine kalır. Önerilen: **00:30'a çek** — kullanıcı sabah uygulamayı açtığında "bütçen kapandı, yenisini ister misin?" bildirimi hazır olsun.
+> **Karar (§8/1):** Tek job, **00:30**. `recomputeAllActive` kullanıcıya bildirim atmıyor (eşik bildirimleri zaten `transaction.created` listener'ında, event-driven). Job'ı ikiye bölmek (00:30 archive + 09:10 recalc) gereksiz karmaşa — sıralama tek runda doğal: önce `isActive=false` set edilir, sonra recompute sadece aktiflere çalışır.
 
 ### 3.2 BudgetsService.archiveExpired
 
@@ -183,18 +183,18 @@ async archiveExpired(): Promise<{ personal: number; shared: number }> {
 | Aşılmamış | "Bütçe dönemi kapandı" | "[Bütçe Adı]: 4.500₺/5.000₺ ile bitirdin. Yeni dönem için yenisini oluşturmak ister misin?" |
 | Aşılmış | "Bütçe dönemi kapandı (aşıldı)" | "[Bütçe Adı]: 5.500₺/5.000₺ — %110 ile kapandı. Yeni dönem için tutarı ayarlamak ister misin?" |
 
-**Ortak bütçe arşivlendi** (grubun **tüm üyelerine** bildirim):
+**Ortak bütçe arşivlendi** (grubun **tüm üyelerine** salt bilgi bildirimi — CTA içermez):
 
 | Durum | Başlık | Gövde |
 |---|---|---|
-| Aşılmamış | "Ortak bütçe kapandı" | "[Grup · Bütçe Adı]: 8.200₺/10.000₺ ile bitti. Grup için yenisini oluşturabilirsin." |
-| Aşılmış | "Ortak bütçe aşıldı" | "[Grup · Bütçe Adı]: 11.500₺/10.000₺ — %115. Yeni dönem için tutarı tekrar düşün." |
+| Aşılmamış | "Ortak bütçe kapandı" | "[Grup · Bütçe Adı]: 8.200₺/10.000₺ ile bitti." |
+| Aşılmış | "Ortak bütçe aşıldı" | "[Grup · Bütçe Adı]: 11.500₺/10.000₺ — %115 ile kapandı." |
 
-> Ortak bütçe için "kim oluşturur" sınırlaması Sprint 11'de yok — grup üyesi herkes ortak bütçe yaratabiliyor. Bu sprint'te de aynı davranış: bildirim tüm üyelere gider, oluşturma kararı grup içi.
+> **Karar (§8/2):** Ortak bütçede bildirim **sadece bilgilendirme**. "Yenisini oluştur" CTA'sı yok — yeni dönem üyelerin grup içinde konuşup karar vermesi gereken bir adım, sistem tek bir kullanıcıyı acele tetiklememeli. Üyeler hazır olduğunda normal akıştan (`+ Bütçe Ekle`) sıfırdan oluşturur. Kişisel bütçede ise prefilled CTA korunur (kullanıcı kendi niyetinin sahibi).
 
 ### 3.4 Deep link payload
 
-Bildirime tıklama → `AddBudgetPage` veya `AddSharedBudgetPage` **prefilled** açılır. Frontend `data.closedBudgetId` ile eski kaydı `GET /api/budgets/:id` (veya shared) çağırır ve form'u doldurur:
+**Kişisel bildirim tap'i** → `AddBudgetPage` **prefilled** açılır. Frontend `data.closedBudgetId` ile eski kaydı `GET /api/budgets/:id` çağırır ve form'u doldurur:
 
 | Alan | Değer | Düzenlenebilir? |
 |---|---|---|
@@ -206,6 +206,8 @@ Bildirime tıklama → `AddBudgetPage` veya `AddSharedBudgetPage` **prefilled** 
 | `smartTracking` | Eski değer | Evet |
 
 > Kullanıcı **hiçbir şeyi** değiştirmeden "Kaydet" diyebilir — tek dokunuş yenileme.
+
+**Ortak bildirim tap'i** → `SharedBudgetDetailPage` arşiv detayına yönlendirir (Geçmiş tab'ı default açık). Prefilled form **açılmaz** — yeni dönem grup kararı, normal akıştan (`+ Bütçe Ekle`) oluşturulur.
 
 ---
 
@@ -285,11 +287,8 @@ Aynı pattern; `_HistoryView` `groupId + budget.id` ile `GET /api/family/groups/
 
 ### 5.4 "Yeni dönem oluştur" CTA
 
-Arşivlenmiş bütçenin detayında (Bu Dönem tab'ı aslında en son arşiv) prominent buton:
-- Kişisel: "Yeni Dönem Aç" → `AddBudgetPage` prefilled (eski kayıt verisi)
-- Ortak: "Yeni Dönem Aç" → `AddSharedBudgetPage` prefilled (grup içinde)
-
-Aynı CTA bildirim tıklamasından da tetiklenir (§3.4 deep link).
+- **Kişisel** arşiv detayında prominent buton: "Yeni Dönem Aç" → `AddBudgetPage` prefilled (eski kayıt verisi). Aynı CTA bildirim tıklamasından da tetiklenir (§3.4 deep link).
+- **Ortak** arşiv detayında bu CTA **yoktur**. Yeni dönem grup kararı — üyeler grup ekranındaki normal `+ Bütçe Ekle` akışından sıfırdan oluşturur. Bildirim de salt bilgi (§3.3).
 
 ### 5.5 Frontend model
 
@@ -318,10 +317,17 @@ class BudgetHistoryEntry {
 
 ### 5.6 Push notification handling
 
-`NotificationService` `BUDGET_CLOSED` type'ı:
-- **Foreground:** SnackBar + "Yenisini Aç" butonu → prefilled AddBudgetPage
-- **Background tap:** GoRouter ile prefilled AddBudgetPage
-- **Cold start:** pending closedBudgetId mekanizması (Insights pattern'i)
+`NotificationService` `BUDGET_CLOSED` type'ı `scope` alanına göre ayrışır:
+
+**`scope='personal'`** — kişisel:
+- **Foreground:** SnackBar + "Yenisini Aç" butonu → prefilled `AddBudgetPage`
+- **Background tap:** GoRouter ile prefilled `AddBudgetPage`
+- **Cold start:** pending `closedBudgetId` mekanizması (Insights pattern'i)
+
+**`scope='shared'`** — ortak:
+- **Foreground:** SnackBar (CTA yok, sadece bilgi) — istenirse "Detayı Gör" linki `SharedBudgetDetailPage`'e
+- **Background tap:** GoRouter ile `SharedBudgetDetailPage` arşiv detayı (Geçmiş tab'ı default)
+- **Cold start:** pending `closedSharedBudgetId` → detay sayfasına yönlendirir, form açmaz
 
 ---
 
@@ -333,6 +339,7 @@ class BudgetHistoryEntry {
 - ✅ Süresi geçmiş 3 kişisel + 2 ortak bütçe → tümü `isActive=false`
 - ✅ Süresi geçmemiş bütçeye dokunmaz
 - ✅ Bildirim formatı: aşılmamış vs aşılmış mesaj farklı
+- ✅ Kişisel bildirim CTA içerir ("yenisini oluştur"), ortak bildirim salt bilgilendirme — mesaj gövdeleri §3.3 tablosuyla aynı
 - ✅ Ortak bütçe arşivinde tüm grup üyelerine bildirim gönderilir
 - ✅ Arşivlenmiş bütçeye PATCH → 400
 - ✅ Yeni bütçe oluştururken endDate verilmezse auto-compute
@@ -348,8 +355,9 @@ class BudgetHistoryEntry {
 
 - ✅ `BudgetPeriodUtils.computeEndDate` her period için doğru
 - ✅ BudgetDetailPage Geçmiş tab'ı history endpoint'i çağırır
-- ✅ "Yeni Dönem Aç" CTA AddBudgetPage'i doğru prefill ile açar
-- ✅ Bildirim tap → cold start dahil doğru sayfaya yönlendirir
+- ✅ Kişisel "Yeni Dönem Aç" CTA AddBudgetPage'i doğru prefill ile açar
+- ✅ Ortak detayda "Yeni Dönem Aç" CTA **bulunmaz** (regression koruması)
+- ✅ Bildirim tap → kişisel: prefilled AddBudgetPage; ortak: SharedBudgetDetailPage (cold start dahil)
 
 ---
 
@@ -389,11 +397,15 @@ Cron yanlış kayıt arşivlerse: `isActive=true` set ederek geri açılabilir, 
 
 ---
 
-## 8. Açık Sorular — PM Karar Vermeli
+## 8. Açık Sorular — Kararlar (21 May 2026, PM)
 
-1. **Cron saati:** 00:30 vs mevcut 09:10? Önerilen: **00:30**, sabah bildirimi hazır olsun.
-2. **Ortak bütçe arşiv bildirimi:** Tüm grup üyelerine mi yoksa sadece bütçeyi oluşturan kullanıcıya mı? Önerilen: **tüm üyeler** — herkes haberdar olmalı, oluşturma kararı grup içi.
-3. **Geçmiş limiti:** History endpoint'i max kaç dönem döner? Önerilen: **son 12 dönem** (1 yıllık aylık için 12 ay, haftalık için ~3 ay yeterli).
+| # | Soru | Karar | Gerekçe |
+|---|---|---|---|
+| 1 | Cron saati 00:30 mı yoksa mevcut 09:10 mu? Job ikiye mi bölünsün? | **Tek job, 00:30.** `archiveExpired` + `recomputeAllActive` sırasıyla aynı runda. | Job kullanıcıya bildirim atmıyor; eşik bildirimleri zaten event-driven. Sıralama doğal: arşivlenen `isActive=false` olur, recompute sadece aktiflere çalışır. İkiye bölmek gereksiz karmaşa. |
+| 2 | Ortak bütçe arşiv bildirimi yalnız oluşturana mı, tüm üyelere mi? Prefilled CTA olsun mu? | **Tüm üyelere salt bilgi.** "Yenisini oluştur" CTA YOK. Tap → `SharedBudgetDetailPage` arşiv detayı. | Yeni dönem grup kararı — sistem tek bir üyeyi tetikleyip bütçe tutarını/kapsamını tek başına belirletmemeli. Üyeler hazır olduğunda normal akıştan sıfırdan açar. Kişiselde prefilled CTA korunur (kullanıcı kendi niyetinin sahibi). |
+| 3 | History endpoint'inde max kaç dönem dönsün? | **Son 12 dönem**, period bağımsız. | MONTHLY için 1 yıl tam; WEEKLY için ~3 ay; YEARLY için 12 yıl (yeterinden fazla). MVP için tek sabit limit pratik; period'a göre dinamik limit ileride gerekirse eklenir. |
+
+> Bu kararlar §3.1, §3.3, §3.4, §5.4, §5.6 ve §6'ya işlendi. §8 kapalı.
 
 ---
 

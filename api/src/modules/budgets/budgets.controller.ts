@@ -6,10 +6,13 @@ import {
   Delete,
   Body,
   Param,
+  Query,
   Res,
   UseGuards,
   HttpCode,
   HttpStatus,
+  DefaultValuePipe,
+  ParseBoolPipe,
 } from '@nestjs/common';
 import { Response } from 'express';
 import { BudgetsService } from './budgets.service';
@@ -25,13 +28,22 @@ export class BudgetsController {
   constructor(private readonly budgetsService: BudgetsService) {}
 
   @Get()
-  findAll(@CurrentUser() user: { id: string }) {
-    return this.budgetsService.findAll(user.id);
+  findAll(
+    @CurrentUser() user: { id: string },
+    @Query('includeArchived', new DefaultValuePipe(false), ParseBoolPipe)
+    includeArchived: boolean,
+  ) {
+    return this.budgetsService.findAll(user.id, includeArchived);
   }
 
   @Get('overview')
   getOverview(@CurrentUser() user: { id: string }) {
     return this.budgetsService.getOverview(user.id);
+  }
+
+  @Get(':id/history')
+  getHistory(@CurrentUser() user: { id: string }, @Param('id') id: string) {
+    return this.budgetsService.getHistory(user.id, id);
   }
 
   @Get(':id')

@@ -8,6 +8,7 @@ import {
   HttpStatus,
   Param,
   ParseBoolPipe,
+  Patch,
   Post,
   Query,
   UseGuards,
@@ -18,6 +19,7 @@ import { FamilyService } from './family.service';
 import { CreateGroupDto } from './dto/create-group.dto';
 import { SendInviteDto } from './dto/send-invite.dto';
 import { CreateSharedBudgetDto } from './dto/create-shared-budget.dto';
+import { UpdateSharedBudgetDto } from './dto/update-shared-budget.dto';
 
 @Controller('family')
 @UseGuards(JwtAuthGuard)
@@ -95,17 +97,45 @@ export class FamilyController {
     return this.familyService.createSharedBudget(user.id, groupId, dto);
   }
 
+  @Patch('groups/:id/budgets/:budgetId')
+  updateSharedBudget(
+    @CurrentUser() user: { id: string },
+    @Param('id') groupId: string,
+    @Param('budgetId') budgetId: string,
+    @Body() dto: UpdateSharedBudgetDto,
+  ) {
+    return this.familyService.updateSharedBudget(
+      user.id,
+      groupId,
+      budgetId,
+      dto,
+    );
+  }
+
   @Get('groups/:id/budgets')
   findSharedBudgets(
     @CurrentUser() user: { id: string },
     @Param('id') groupId: string,
-    @Query('includeInactive', new DefaultValuePipe(false), ParseBoolPipe)
-    includeInactive: boolean,
+    @Query('includeArchived', new DefaultValuePipe(false), ParseBoolPipe)
+    includeArchived: boolean,
   ) {
     return this.familyService.findSharedBudgets(
       user.id,
       groupId,
-      includeInactive,
+      includeArchived,
+    );
+  }
+
+  @Get('groups/:id/budgets/:budgetId/history')
+  getSharedBudgetHistory(
+    @CurrentUser() user: { id: string },
+    @Param('id') groupId: string,
+    @Param('budgetId') budgetId: string,
+  ) {
+    return this.familyService.getSharedBudgetHistory(
+      user.id,
+      groupId,
+      budgetId,
     );
   }
 

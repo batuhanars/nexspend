@@ -23,6 +23,10 @@ const mockPrisma = {
     update: jest.fn(),
     delete: jest.fn(),
   },
+  sharedBudget: {
+    findMany: jest.fn(),
+    update: jest.fn(),
+  },
   transaction: {
     aggregate: jest.fn(),
   },
@@ -52,17 +56,22 @@ const baseBudget = {
   smartTracking: true,
   isActive: true,
   startDate: new Date('2026-01-01'),
-  endDate: null,
+  endDate: new Date('2026-01-31'),
   createdAt: new Date(),
+  updatedAt: new Date(),
   category: { id: CATEGORY_ID, name: 'Market', icon: 'cart', color: '#aaa' },
 };
+
+const flushSetImmediate = () => new Promise<void>((resolve) => setImmediate(resolve));
 
 describe('BudgetsService', () => {
   let service: BudgetsService;
 
-  beforeEach(() => {
-    service = new BudgetsService(mockPrisma as any, mockNotifications as any);
+  beforeEach(async () => {
+    // Önceki testten kalan setImmediate callback'leri flush et, sonra mock'ları temizle.
+    await flushSetImmediate();
     jest.clearAllMocks();
+    service = new BudgetsService(mockPrisma as any, mockNotifications as any);
   });
 
   // ─── findAll ─────────────────────────────────────────────────────────────────
@@ -77,6 +86,16 @@ describe('BudgetsService', () => {
       expect(result[0].id).toBe(BUDGET_ID);
       expect(mockPrisma.budget.findMany).toHaveBeenCalledWith(
         expect.objectContaining({ where: { userId: USER_ID, isActive: true } }),
+      );
+    });
+
+    it('includeArchived=true ile hem aktif hem arşiv döner', async () => {
+      mockPrisma.budget.findMany.mockResolvedValue([baseBudget]);
+
+      await service.findAll(USER_ID, true);
+
+      expect(mockPrisma.budget.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({ where: { userId: USER_ID } }),
       );
     });
   });
@@ -134,6 +153,20 @@ describe('BudgetsService', () => {
       );
     });
 
+    it('endDate verilmezse period bazlı auto-compute yapılır', async () => {
+      mockPrisma.budget.findFirst.mockResolvedValueOnce(null);
+      mockPrisma.budget.create.mockResolvedValue(baseBudget);
+      mockPrisma.transaction.aggregate.mockResolvedValue({ _sum: { amount: 0 } });
+      mockPrisma.budget.update.mockResolvedValue(baseBudget);
+
+      await service.create(USER_ID, { ...dto, period: 'MONTHLY' });
+
+      const createCall = mockPrisma.budget.create.mock.calls[0][0];
+      // MONTHLY: 2026-02-01 → 2026-02-28
+      expect(createCall.data.endDate).toBeDefined();
+      expect(createCall.data.endDate).toBeInstanceOf(Date);
+    });
+
     it('aynı kategoride aktif bütçe varsa ConflictException fırlatır', async () => {
       mockPrisma.budget.findFirst.mockResolvedValueOnce(baseBudget);
 
@@ -165,6 +198,17 @@ describe('BudgetsService', () => {
         NotFoundException,
       );
     });
+
+    it('arşivlenmiş bütçeye PATCH → 400 BadRequestException', async () => {
+      mockPrisma.budget.findFirst.mockResolvedValue({
+        ...baseBudget,
+        isActive: false,
+      });
+
+      await expect(
+        service.update(USER_ID, BUDGET_ID, { amount: 4000 }),
+      ).rejects.toThrow(BadRequestException);
+    });
   });
 
   // ─── remove ──────────────────────────────────────────────────────────────────
@@ -187,6 +231,173 @@ describe('BudgetsService', () => {
       await expect(service.remove(USER_ID, 'nonexistent')).rejects.toThrow(
         NotFoundException,
       );
+    });
+  });
+
+  // ─── archiveExpired ───────────────────────────────────────────────────────────
+
+  describe('archiveExpired()', () => {
+    it('boş liste ile 0 işler', async () => {
+      mockPrisma.budget.findMany.mockResolvedValue([]);
+      mockPrisma.sharedBudget.findMany.mockResolvedValue([]);
+
+      const result = await service.archiveExpired();
+
+      expect(result).toEqual({ personal: 0, shared: 0 });
+      expect(mockPrisma.budget.update).not.toHaveBeenCalled();
+      expect(mockPrisma.sharedBudget.update).not.toHaveBeenCalled();
+    });
+
+    it('süresi geçmiş 3 kişisel + 2 ortak bütçeyi arşivler', async () => {
+      const expiredPersonal = [
+        { ...baseBudget, id: 'b1' },
+        { ...baseBudget, id: 'b2' },
+        { ...baseBudget, id: 'b3' },
+      ];
+      const expiredShared = [
+        {
+          id: 'sb1',
+          groupId: 'g1',
+          name: 'Ortak Market',
+          amount: 5000,
+          spent: 3000,
+          group: { name: 'Ev', members: [{ userId: 'u1' }, { userId: 'u2' }] },
+          category: { name: 'Market' },
+        },
+        {
+          id: 'sb2',
+          groupId: 'g1',
+          name: 'Ortak Eğlence',
+          amount: 2000,
+          spent: 2500,
+          group: { name: 'Ev', members: [{ userId: 'u1' }] },
+          category: { name: 'Eğlence' },
+        },
+      ];
+
+      mockPrisma.budget.findMany.mockResolvedValue(expiredPersonal);
+      mockPrisma.sharedBudget.findMany.mockResolvedValue(expiredShared);
+      mockPrisma.budget.update.mockResolvedValue({});
+      mockPrisma.sharedBudget.update.mockResolvedValue({});
+      mockNotifications.sendToUser.mockResolvedValue(undefined);
+
+      const result = await service.archiveExpired();
+
+      expect(result).toEqual({ personal: 3, shared: 2 });
+      expect(mockPrisma.budget.update).toHaveBeenCalledTimes(3);
+      expect(mockPrisma.sharedBudget.update).toHaveBeenCalledTimes(2);
+
+      // Tüm bütçelere isActive: false set edildi
+      for (const call of mockPrisma.budget.update.mock.calls) {
+        expect(call[0].data).toEqual({ isActive: false });
+      }
+    });
+
+    it('kişisel bildirim aşılmamışta CTA içerir, aşılmışta tutarı ayarla mesajı içerir', async () => {
+      const notExceeded = { ...baseBudget, id: 'b1', amount: 5000, spent: 4500 };
+      const exceeded = { ...baseBudget, id: 'b2', amount: 5000, spent: 5500 };
+
+      mockPrisma.budget.findMany.mockResolvedValue([notExceeded, exceeded]);
+      mockPrisma.sharedBudget.findMany.mockResolvedValue([]);
+      mockPrisma.budget.update.mockResolvedValue({});
+      mockNotifications.sendToUser.mockResolvedValue(undefined);
+
+      await service.archiveExpired();
+      await flushSetImmediate();
+
+      const calls = mockNotifications.sendToUser.mock.calls;
+      expect(calls).toHaveLength(2);
+
+      // Aşılmamış — CTA "yenisini oluşturmak"
+      const [notExcCall] = calls.find((c) => c[1] === 'Bütçe dönemi kapandı')!;
+      const notExcBody = calls.find((c) => c[1] === 'Bütçe dönemi kapandı')![2] as string;
+      expect(notExcBody).toContain('yenisini oluşturmak ister misin?');
+
+      // Aşılmış — CTA "tutarı ayarlamak"
+      const excBody = calls.find((c) => c[1] === 'Bütçe dönemi kapandı (aşıldı)')![2] as string;
+      expect(excBody).toContain('tutarı ayarlamak ister misin?');
+    });
+
+    it('ortak bildirim CTA içermez (salt bilgi), tüm üyelere gönderilir', async () => {
+      const sharedBudget = {
+        id: 'sb1',
+        groupId: 'g1',
+        name: 'Ortak Market',
+        amount: 10000,
+        spent: 8200,
+        group: {
+          name: 'Ev',
+          members: [{ userId: 'u1' }, { userId: 'u2' }, { userId: 'u3' }],
+        },
+        category: { name: 'Market' },
+      };
+
+      mockPrisma.budget.findMany.mockResolvedValue([]);
+      mockPrisma.sharedBudget.findMany.mockResolvedValue([sharedBudget]);
+      mockPrisma.sharedBudget.update.mockResolvedValue({});
+      mockNotifications.sendToUser.mockResolvedValue(undefined);
+
+      await service.archiveExpired();
+      await flushSetImmediate();
+
+      const calls = mockNotifications.sendToUser.mock.calls;
+      // 3 üyeye bildirim
+      expect(calls).toHaveLength(3);
+      expect(calls.map((c) => c[0])).toEqual(
+        expect.arrayContaining(['u1', 'u2', 'u3']),
+      );
+
+      // Hiçbirinde prefilled CTA yok
+      for (const call of calls) {
+        const body = call[2] as string;
+        expect(body).not.toContain('yenisini oluşturmak');
+        expect(body).not.toContain('tutarı ayarlamak');
+      }
+    });
+
+    it('kişisel bildirim data payload scope=personal ve closedBudgetId içerir', async () => {
+      mockPrisma.budget.findMany.mockResolvedValue([{ ...baseBudget, id: 'b1' }]);
+      mockPrisma.sharedBudget.findMany.mockResolvedValue([]);
+      mockPrisma.budget.update.mockResolvedValue({});
+      mockNotifications.sendToUser.mockResolvedValue(undefined);
+
+      await service.archiveExpired();
+      await flushSetImmediate();
+
+      const [, , , data] = mockNotifications.sendToUser.mock.calls[0];
+      expect(data).toMatchObject({
+        type: 'BUDGET_CLOSED',
+        scope: 'personal',
+        closedBudgetId: 'b1',
+      });
+    });
+
+    it('ortak bildirim data payload scope=shared ve closedSharedBudgetId içerir', async () => {
+      const sharedBudget = {
+        id: 'sb1',
+        groupId: 'g1',
+        name: 'Ortak',
+        amount: 1000,
+        spent: 500,
+        group: { name: 'Ev', members: [{ userId: 'u1' }] },
+        category: { name: 'Market' },
+      };
+
+      mockPrisma.budget.findMany.mockResolvedValue([]);
+      mockPrisma.sharedBudget.findMany.mockResolvedValue([sharedBudget]);
+      mockPrisma.sharedBudget.update.mockResolvedValue({});
+      mockNotifications.sendToUser.mockResolvedValue(undefined);
+
+      await service.archiveExpired();
+      await flushSetImmediate();
+
+      const [, , , data] = mockNotifications.sendToUser.mock.calls[0];
+      expect(data).toMatchObject({
+        type: 'BUDGET_CLOSED',
+        scope: 'shared',
+        closedSharedBudgetId: 'sb1',
+        groupId: 'g1',
+      });
     });
   });
 

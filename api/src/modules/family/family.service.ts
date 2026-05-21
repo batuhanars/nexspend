@@ -23,6 +23,8 @@ import { NotificationsService } from '../notifications/notifications.service';
 import { CreateGroupDto } from './dto/create-group.dto';
 import { SendInviteDto } from './dto/send-invite.dto';
 import { CreateSharedBudgetDto } from './dto/create-shared-budget.dto';
+import { UpdateSharedBudgetDto } from './dto/update-shared-budget.dto';
+import { computeEndDate } from '../budgets/period.utils';
 
 @Injectable()
 export class FamilyService {
@@ -310,13 +312,21 @@ export class FamilyService {
   ) {
     await this.requireMember(userId, groupId);
 
+    const period = dto.period ?? 'MONTHLY';
+    const startDate = new Date(dto.startDate);
+    const endDate = dto.endDate
+      ? new Date(dto.endDate)
+      : computeEndDate(startDate, period);
+
     const budget = await this.prisma.sharedBudget.create({
       data: {
         groupId,
         categoryId: dto.categoryId,
         name: dto.name,
         amount: dto.amount,
-        startDate: new Date(dto.startDate),
+        period,
+        startDate,
+        endDate,
       },
       include: {
         category: { select: { name: true, icon: true, color: true } },
@@ -326,17 +336,50 @@ export class FamilyService {
     return this.formatBudget(budget);
   }
 
+  async updateSharedBudget(
+    userId: string,
+    groupId: string,
+    budgetId: string,
+    dto: UpdateSharedBudgetDto,
+  ) {
+    await this.requireMember(userId, groupId);
+
+    const budget = await this.prisma.sharedBudget.findFirst({
+      where: { id: budgetId, groupId },
+    });
+    if (!budget) throw new NotFoundException('Bütçe bulunamadı');
+
+    if (!budget.isActive) {
+      throw new BadRequestException('Geçmiş döneme ait bütçe düzenlenemez');
+    }
+
+    const updated = await this.prisma.sharedBudget.update({
+      where: { id: budgetId },
+      data: {
+        ...(dto.name !== undefined && { name: dto.name }),
+        ...(dto.amount !== undefined && { amount: dto.amount }),
+        ...(dto.period !== undefined && { period: dto.period }),
+        ...(dto.endDate !== undefined && { endDate: new Date(dto.endDate) }),
+      },
+      include: {
+        category: { select: { name: true, icon: true, color: true } },
+      },
+    });
+
+    return this.formatBudget(updated);
+  }
+
   async findSharedBudgets(
     userId: string,
     groupId: string,
-    includeInactive: boolean,
+    includeArchived: boolean,
   ) {
     await this.requireMember(userId, groupId);
 
     const budgets = await this.prisma.sharedBudget.findMany({
       where: {
         groupId,
-        ...(includeInactive ? {} : { isActive: true }),
+        ...(includeArchived ? {} : { isActive: true }),
       },
       include: {
         category: { select: { name: true, icon: true, color: true } },
@@ -345,6 +388,37 @@ export class FamilyService {
     });
 
     return budgets.map((b) => this.formatBudget(b as any));
+  }
+
+  async getSharedBudgetHistory(
+    userId: string,
+    groupId: string,
+    budgetId: string,
+  ) {
+    await this.requireMember(userId, groupId);
+
+    const budget = await this.prisma.sharedBudget.findFirst({
+      where: { id: budgetId, groupId },
+      include: {
+        category: { select: { name: true, icon: true, color: true } },
+      },
+    });
+    if (!budget) throw new NotFoundException('Bütçe bulunamadı');
+
+    const history = await this.prisma.sharedBudget.findMany({
+      where: {
+        groupId,
+        categoryId: budget.categoryId,
+        endDate: { lt: budget.startDate },
+      },
+      include: {
+        category: { select: { name: true, icon: true, color: true } },
+      },
+      orderBy: { endDate: 'desc' },
+      take: 12,
+    });
+
+    return history.map((b) => this.formatBudget(b as any));
   }
 
   // ─── Katkı Raporu ─────────────────────────────────────────────────────────────
@@ -626,6 +700,7 @@ export class FamilyService {
     spent: unknown;
     period: string;
     startDate: Date;
+    endDate: Date;
     isActive: boolean;
     category: { name: string; icon?: string; color?: string };
   }) {
@@ -633,6 +708,7 @@ export class FamilyService {
     const spent = Number(budget.spent);
     const remainingPercent =
       amount > 0 ? Math.round(((amount - spent) / amount) * 100) : 100;
+    const percentage = amount > 0 ? Math.round((spent / amount) * 100) : 0;
 
     return {
       id: budget.id,
@@ -645,8 +721,10 @@ export class FamilyService {
       amount,
       spent,
       remainingPercent,
+      percentage,
       period: budget.period,
       startDate: budget.startDate.toISOString().split('T')[0],
+      endDate: budget.endDate.toISOString().split('T')[0],
       isActive: budget.isActive,
     };
   }

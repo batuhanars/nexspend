@@ -18,6 +18,13 @@ import { CreateBudgetDto } from './dto/create-budget.dto';
 import { UpdateBudgetDto } from './dto/update-budget.dto';
 import { ApplyInflationDto } from './dto/apply-inflation.dto';
 import { NotificationsService } from '../notifications/notifications.service';
+import { computeEndDate } from './period.utils';
+
+function startOfDayUtc(date: Date): Date {
+  const d = new Date(date);
+  d.setUTCHours(0, 0, 0, 0);
+  return d;
+}
 
 @Injectable()
 export class BudgetsService {
@@ -28,9 +35,12 @@ export class BudgetsService {
     private readonly notifications: NotificationsService,
   ) {}
 
-  async findAll(userId: string) {
+  async findAll(userId: string, includeArchived = false) {
     const budgets = await this.prisma.budget.findMany({
-      where: { userId, isActive: true },
+      where: {
+        userId,
+        ...(includeArchived ? {} : { isActive: true }),
+      },
       include: { category: true },
       orderBy: { createdAt: 'desc' },
     });
@@ -60,14 +70,37 @@ export class BudgetsService {
     return this.format(await this.findOwned(userId, id));
   }
 
+  async getHistory(userId: string, id: string) {
+    const budget = await this.findOwned(userId, id);
+
+    const history = await this.prisma.budget.findMany({
+      where: {
+        userId,
+        categoryId: budget.categoryId,
+        endDate: { lt: budget.startDate },
+      },
+      include: { category: true },
+      orderBy: { endDate: 'desc' },
+      take: 12,
+    });
+
+    return history.map((b) => this.format(b));
+  }
+
   async create(userId: string, dto: CreateBudgetDto) {
+    const period = dto.period ?? 'MONTHLY';
+    const startDate = new Date(dto.startDate);
+    const endDate = dto.endDate
+      ? new Date(dto.endDate)
+      : computeEndDate(startDate, period);
+
     const existing = await this.prisma.budget.findFirst({
       where: {
         userId,
         categoryId: dto.categoryId,
         isActive: true,
-        startDate: { lte: new Date(dto.startDate) },
-        OR: [{ endDate: null }, { endDate: { gte: new Date(dto.startDate) } }],
+        startDate: { lte: startDate },
+        endDate: { gte: startDate },
       },
     });
     if (existing) {
@@ -80,16 +113,15 @@ export class BudgetsService {
         categoryId: dto.categoryId,
         name: dto.name,
         amount: dto.amount,
-        period: dto.period ?? 'MONTHLY',
+        period,
         note: dto.note ?? null,
         smartTracking: dto.smartTracking ?? true,
-        startDate: new Date(dto.startDate),
-        endDate: dto.endDate ? new Date(dto.endDate) : null,
+        startDate,
+        endDate,
       },
       include: { category: true },
     });
 
-    // Geçmiş işlemlerden spent hesapla
     const spent = await this.calcSpent(
       userId,
       budget.categoryId,
@@ -106,7 +138,11 @@ export class BudgetsService {
   }
 
   async update(userId: string, id: string, dto: UpdateBudgetDto) {
-    await this.findOwned(userId, id);
+    const budget = await this.findOwned(userId, id);
+
+    if (!budget.isActive) {
+      throw new BadRequestException('Geçmiş döneme ait bütçe düzenlenemez');
+    }
 
     const updated = await this.prisma.budget.update({
       where: { id },
@@ -131,6 +167,73 @@ export class BudgetsService {
     await this.findOwned(userId, id);
     await this.prisma.budget.delete({ where: { id } });
     return { message: 'Bütçe silindi' };
+  }
+
+  // =============================================
+  // Arşivleme
+  // =============================================
+
+  async archiveExpired(): Promise<{ personal: number; shared: number }> {
+    const today = startOfDayUtc(new Date());
+
+    const expiredPersonal = await this.prisma.budget.findMany({
+      where: { isActive: true, endDate: { lt: today } },
+      include: { category: true },
+    });
+    for (const b of expiredPersonal) {
+      await this.prisma.budget.update({
+        where: { id: b.id },
+        data: { isActive: false },
+      });
+      setImmediate(
+        () =>
+          void this.notifyPersonalArchive(b).catch((e) => this.logger.error(e)),
+      );
+    }
+
+    const expiredShared = await this.prisma.sharedBudget.findMany({
+      where: { isActive: true, endDate: { lt: today } },
+      include: {
+        category: true,
+        group: {
+          include: { members: { select: { userId: true } } },
+        },
+      },
+    });
+    for (const b of expiredShared) {
+      await this.prisma.sharedBudget.update({
+        where: { id: b.id },
+        data: { isActive: false },
+      });
+      setImmediate(
+        () =>
+          void this.notifySharedArchive(b).catch((e) => this.logger.error(e)),
+      );
+    }
+
+    return { personal: expiredPersonal.length, shared: expiredShared.length };
+  }
+
+  // =============================================
+  // Aktif bütçeleri yeniden hesapla (cron)
+  // =============================================
+
+  async recomputeAllActive() {
+    const activeBudgets = await this.prisma.budget.findMany({
+      where: { isActive: true },
+      select: { userId: true, categoryId: true },
+      distinct: ['userId', 'categoryId'],
+    });
+
+    for (const { userId, categoryId } of activeBudgets) {
+      try {
+        await this.recalculateForCategory(userId, categoryId);
+      } catch (err) {
+        this.logger.error(
+          `userId=${userId} categoryId=${categoryId} güncellenemedi: ${err}`,
+        );
+      }
+    }
   }
 
   // =============================================
@@ -217,7 +320,7 @@ export class BudgetsService {
     userId: string,
     categoryId: string,
     startDate: Date,
-    endDate: Date | null,
+    endDate: Date,
   ): Promise<number> {
     const result = await this.prisma.transaction.aggregate({
       where: {
@@ -228,12 +331,66 @@ export class BudgetsService {
         sharedBudgetId: null,
         transactionDate: {
           gte: startDate,
-          ...(endDate ? { lte: endDate } : {}),
+          lte: endDate,
         },
       },
       _sum: { amount: true },
     });
     return Number(result._sum.amount ?? 0);
+  }
+
+  private async notifyPersonalArchive(b: {
+    id: string;
+    userId: string;
+    name: string;
+    amount: unknown;
+    spent: unknown;
+  }) {
+    const amount = Number(b.amount);
+    const spent = Number(b.spent);
+    const pct = amount > 0 ? Math.round((spent / amount) * 100) : 0;
+    const exceeded = spent > amount;
+
+    const title = exceeded
+      ? 'Bütçe dönemi kapandı (aşıldı)'
+      : 'Bütçe dönemi kapandı';
+    const body = exceeded
+      ? `${b.name}: ${spent.toFixed(0)}₺/${amount.toFixed(0)}₺ — %${pct} ile kapandı. Yeni dönem için tutarı ayarlamak ister misin?`
+      : `${b.name}: ${spent.toFixed(0)}₺/${amount.toFixed(0)}₺ ile bitirdin. Yeni dönem için yenisini oluşturmak ister misin?`;
+
+    await this.notifications.sendToUser(b.userId, title, body, {
+      type: 'BUDGET_CLOSED',
+      scope: 'personal',
+      closedBudgetId: b.id,
+    });
+  }
+
+  private async notifySharedArchive(b: {
+    id: string;
+    groupId: string;
+    name: string;
+    amount: unknown;
+    spent: unknown;
+    group: { name: string; members: { userId: string }[] };
+  }) {
+    const amount = Number(b.amount);
+    const spent = Number(b.spent);
+    const pct = amount > 0 ? Math.round((spent / amount) * 100) : 0;
+    const exceeded = spent > amount;
+
+    const title = exceeded ? 'Ortak bütçe aşıldı' : 'Ortak bütçe kapandı';
+    const body = exceeded
+      ? `${b.group.name} · ${b.name}: ${spent.toFixed(0)}₺/${amount.toFixed(0)}₺ — %${pct} ile kapandı.`
+      : `${b.group.name} · ${b.name}: ${spent.toFixed(0)}₺/${amount.toFixed(0)}₺ ile bitti.`;
+
+    for (const member of b.group.members) {
+      await this.notifications.sendToUser(member.userId, title, body, {
+        type: 'BUDGET_CLOSED',
+        scope: 'shared',
+        closedSharedBudgetId: b.id,
+        groupId: b.groupId,
+      });
+    }
   }
 
   private async notifyThreshold(

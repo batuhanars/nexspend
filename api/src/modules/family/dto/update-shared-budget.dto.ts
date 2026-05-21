@@ -10,25 +10,21 @@ import {
 } from 'class-validator';
 import { BudgetPeriod } from '@prisma/client';
 
-export class CreateSharedBudgetDto {
-  @IsString()
-  categoryId: string;
-
+export class UpdateSharedBudgetDto {
   @IsString()
   @MaxLength(100)
-  name: string;
+  @IsOptional()
+  name?: string;
 
   @Type(() => Number)
   @IsNumber()
   @Min(0.01)
-  amount: number;
+  @IsOptional()
+  amount?: number;
 
   @IsEnum(BudgetPeriod)
   @IsOptional()
   period?: BudgetPeriod;
-
-  @IsDateString()
-  startDate: string;
 
   @IsDateString()
   @IsOptional()

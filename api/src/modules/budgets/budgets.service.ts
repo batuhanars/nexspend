@@ -18,7 +18,7 @@ import { CreateBudgetDto } from './dto/create-budget.dto';
 import { UpdateBudgetDto } from './dto/update-budget.dto';
 import { ApplyInflationDto } from './dto/apply-inflation.dto';
 import { NotificationsService } from '../notifications/notifications.service';
-import { computeEndDate } from './period.utils';
+import { computeEndDate, parseLocalDate } from './period.utils';
 
 function startOfDayUtc(date: Date): Date {
   const d = new Date(date);
@@ -89,9 +89,9 @@ export class BudgetsService {
 
   async create(userId: string, dto: CreateBudgetDto) {
     const period = dto.period ?? 'MONTHLY';
-    const startDate = new Date(dto.startDate);
+    const startDate = parseLocalDate(dto.startDate);
     const endDate = dto.endDate
-      ? new Date(dto.endDate)
+      ? parseLocalDate(dto.endDate)
       : computeEndDate(startDate, period);
 
     const existing = await this.prisma.budget.findFirst({
@@ -155,7 +155,7 @@ export class BudgetsService {
           smartTracking: dto.smartTracking,
         }),
         ...(dto.isActive !== undefined && { isActive: dto.isActive }),
-        ...(dto.endDate !== undefined && { endDate: new Date(dto.endDate) }),
+        ...(dto.endDate !== undefined && { endDate: parseLocalDate(dto.endDate) }),
       },
       include: { category: true },
     });

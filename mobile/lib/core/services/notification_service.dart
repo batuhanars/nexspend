@@ -24,6 +24,9 @@ final _insightsNavController = StreamController<void>.broadcast();
 final _personalBudgetClosedController = StreamController<String>.broadcast();
 final _sharedBudgetClosedController =
     StreamController<({String budgetId, String groupId})>.broadcast();
+// Foreground bildirim tap'inde lifecycle event tetiklenmediği için
+// `_consumePending`'i manuel tetiklemek üzere AppShell'in dinlediği stream.
+final _consumeTriggerController = StreamController<void>.broadcast();
 
 @pragma('vm:entry-point')
 Future<void> firebaseBackgroundHandler(RemoteMessage message) async {}
@@ -82,6 +85,7 @@ class NotificationService {
       _personalBudgetClosedController.stream;
   static Stream<({String budgetId, String groupId})> get onSharedBudgetClosed =>
       _sharedBudgetClosedController.stream;
+  static Stream<void> get onConsumeTrigger => _consumeTriggerController.stream;
 
   String? consumePendingInvite() {
     final token = _pendingInviteToken;
@@ -165,8 +169,13 @@ class NotificationService {
     final initial = await FirebaseMessaging.instance.getInitialMessage();
     if (initial != null) _processMessage(initial);
 
-    // Arka plan → ön plan: her zaman pending token mekanizması kullan
-    FirebaseMessaging.onMessageOpenedApp.listen(_processMessage);
+    // Arka plan → ön plan: pending token mekanizması + AppShell'i uyandırmak için
+    // consume trigger yayını. Uygulama foreground'dayken lifecycle resumed event'i
+    // tetiklenmediği için AppShell'in `_consumePending`'ini manuel uyandırmak gerek.
+    FirebaseMessaging.onMessageOpenedApp.listen((message) {
+      _processMessage(message);
+      _consumeTriggerController.add(null);
+    });
 
     // Uygulama açıkken gelen bildirim → yerel bildirim göster
     FirebaseMessaging.onMessage.listen(_handleForegroundMessage);

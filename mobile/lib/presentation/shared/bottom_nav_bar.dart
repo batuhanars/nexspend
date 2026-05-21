@@ -32,6 +32,7 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
   StreamSubscription<String>? _personalBudgetClosedSub;
   StreamSubscription<({String budgetId, String groupId})>?
       _sharedBudgetClosedSub;
+  StreamSubscription<void>? _consumeTriggerSub;
 
   @override
   void initState() {
@@ -50,6 +51,7 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
     _insightsNavSub?.cancel();
     _personalBudgetClosedSub?.cancel();
     _sharedBudgetClosedSub?.cancel();
+    _consumeTriggerSub?.cancel();
     super.dispose();
   }
 
@@ -211,6 +213,11 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
         ),
       );
     });
+
+    // Foreground tap'inde NotificationService manuel tetikleyici yayar
+    // (lifecycle resumed event'i tetiklenmediği durumlar için).
+    _consumeTriggerSub =
+        NotificationService.onConsumeTrigger.listen((_) => _consumePending());
 
     // Cold start ve başlangıç pending token'larını tüket
     _consumePending();

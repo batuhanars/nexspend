@@ -501,8 +501,10 @@ class FamilyGroupsSectionState extends State<_FamilyGroupsSection> {
               Row(
                 children: [
                   Expanded(
-                    child:
-                        Text(AppStrings.of(context).familyGroupsSection, style: AppTypography.labelSm),
+                    child: Text(
+                      AppStrings.of(context).familyGroupsSection,
+                      style: AppTypography.labelSm,
+                    ),
                   ),
                   if (_isCreating)
                     const SizedBox(
@@ -510,15 +512,6 @@ class FamilyGroupsSectionState extends State<_FamilyGroupsSection> {
                       height: 18,
                       child: CircularProgressIndicator(
                         strokeWidth: 2,
-                        color: AppColors.primary,
-                      ),
-                    )
-                  else
-                    GestureDetector(
-                      onTap: _showCreateDialog,
-                      child: const Icon(
-                        Icons.add_rounded,
-                        size: 20,
                         color: AppColors.primary,
                       ),
                     ),

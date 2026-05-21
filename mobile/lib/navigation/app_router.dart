@@ -66,6 +66,7 @@ import '../presentation/accounts/pages/account_detail_page.dart';
 import '../presentation/accounts/pages/add_account_page.dart';
 import '../presentation/accounts/pages/accounts_list_page.dart';
 import '../presentation/accounts/pages/archived_accounts_page.dart';
+import '../presentation/budgets/pages/archived_budgets_page.dart';
 import '../presentation/accounts/pages/edit_account_page.dart';
 import '../presentation/transactions/bloc/add_transaction_bloc.dart';
 import '../presentation/transactions/bloc/transactions_bloc.dart';
@@ -292,12 +293,14 @@ GoRouter createRouter() {
           final groupId = state.pathParameters['groupId']!;
           final extra = state.extra as Map<String, dynamic>;
           final budget = extra['budget'] as SharedBudgetModel;
-          final bloc = extra['bloc'] as FamilyBloc;
-          return BlocProvider.value(
-            value: bloc,
+          final initialTabIndex = (extra['initialTabIndex'] as int?) ?? 0;
+          return BlocProvider(
+            create: (_) =>
+                FamilyBloc(familyRepository: getIt<FamilyRepository>()),
             child: SharedBudgetDetailPage(
               groupId: groupId,
               budget: budget,
+              initialTabIndex: initialTabIndex,
             ),
           );
         },
@@ -408,6 +411,12 @@ GoRouter createRouter() {
           ),
           child: const ArchivedAccountsPage(),
         ),
+      ),
+      GoRoute(
+        path: RouteNames.archivedBudgets,
+        name: 'archived-budgets',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, _) => const ArchivedBudgetsPage(),
       ),
       GoRoute(
         path: RouteNames.settings,

@@ -32,6 +32,7 @@ class RouteNames {
 
   // Arşiv
   static const String archivedAccounts = '/settings/archived-accounts';
+  static const String archivedBudgets = '/budgets/archived';
 
   // Insights (Home carousel'dan push)
   static const String insights = '/insights';

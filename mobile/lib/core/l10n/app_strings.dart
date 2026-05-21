@@ -548,6 +548,10 @@ abstract class AppStrings {
   String get budgetClosedPersonalSnackbar;
   String get budgetClosedSharedSnackbar;
   String get openNewPeriodAction;
+  String get archivedBudgetsTitle;
+  String get archivedBudgetsTabPersonal;
+  String get archivedBudgetsTabShared;
+  String get archivedBudgetsEmpty;
 }
 
 // ─── Turkish ────────────────────────────────────────────────────────────────
@@ -1069,6 +1073,10 @@ class _Tr extends AppStrings {
   @override String get budgetClosedPersonalSnackbar => 'Bütçe dönemi kapandı';
   @override String get budgetClosedSharedSnackbar => 'Ortak bütçe dönemi kapandı';
   @override String get openNewPeriodAction => 'Yenisini Aç';
+  @override String get archivedBudgetsTitle => 'Arşivlenmiş Bütçeler';
+  @override String get archivedBudgetsTabPersonal => 'Kişisel';
+  @override String get archivedBudgetsTabShared => 'Ortak';
+  @override String get archivedBudgetsEmpty => 'Arşivlenmiş bütçe bulunamadı';
 }
 
 // ─── English ─────────────────────────────────────────────────────────────────
@@ -1684,4 +1692,8 @@ class _En extends AppStrings {
   @override String get budgetClosedPersonalSnackbar => 'Budget period closed';
   @override String get budgetClosedSharedSnackbar => 'Shared budget period closed';
   @override String get openNewPeriodAction => 'Open New';
+  @override String get archivedBudgetsTitle => 'Archived Budgets';
+  @override String get archivedBudgetsTabPersonal => 'Personal';
+  @override String get archivedBudgetsTabShared => 'Shared';
+  @override String get archivedBudgetsEmpty => 'No archived budgets found';
 }

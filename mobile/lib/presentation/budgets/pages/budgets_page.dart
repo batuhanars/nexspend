@@ -128,6 +128,13 @@ class _BudgetsView extends StatelessWidget {
                     actions: [
                       IconButton(
                         icon: const Icon(
+                          Icons.inventory_2_outlined,
+                          color: AppColors.onSurfaceVariant,
+                        ),
+                        onPressed: () => context.push(RouteNames.archivedBudgets),
+                      ),
+                      IconButton(
+                        icon: const Icon(
                           Icons.add_rounded,
                           color: AppColors.primary,
                         ),

@@ -68,6 +68,7 @@ class FamilyRepository {
     required String name,
     required double amount,
     required String startDate,
+    required String period,
   }) async {
     final response = await _dio.post(
       ApiEndpoints.familyGroupBudgets(groupId),
@@ -76,15 +77,20 @@ class FamilyRepository {
         'name': name,
         'amount': amount,
         'startDate': startDate,
+        'period': period,
       },
     );
     return SharedBudgetModel.fromJson(
         response.data['data'] as Map<String, dynamic>);
   }
 
-  Future<List<SharedBudgetModel>> getSharedBudgets(String groupId) async {
-    final response =
-        await _dio.get(ApiEndpoints.familyGroupBudgets(groupId));
+  Future<List<SharedBudgetModel>> getSharedBudgets(String groupId,
+      {bool includeArchived = false}) async {
+    final response = await _dio.get(
+      ApiEndpoints.familyGroupBudgets(groupId),
+      queryParameters:
+          includeArchived ? {'includeArchived': 'true'} : null,
+    );
     final list = response.data['data'] as List? ?? [];
     return list
         .map((e) => SharedBudgetModel.fromJson(e as Map<String, dynamic>))

@@ -7,6 +7,9 @@ import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
 import '../../../core/l10n/app_strings.dart';
+import '../../../core/utils/budget_period.dart';
+import '../../../core/utils/date_formatter.dart';
+import '../../../data/models/budget_model.dart' show BudgetPeriod;
 import '../../../data/models/category_model.dart';
 import '../../../data/models/family_model.dart';
 import '../../../data/repositories/category_repository.dart';
@@ -300,10 +303,7 @@ class _DetailBody extends StatelessWidget {
                             budget: b,
                             onTap: () => context.push(
                               RouteNames.sharedBudgetDetail(groupId, b.id),
-                              extra: {
-                                'budget': b,
-                                'bloc': context.read<FamilyBloc>(),
-                              },
+                              extra: {'budget': b},
                             ),
                           ),
                         ),
@@ -413,13 +413,14 @@ class _DetailBody extends StatelessWidget {
       context: context,
       builder: (ctx) => _AddBudgetDialog(
         groupId: groupId,
-        onSubmit: (name, amount, categoryId, startDate) {
+        onSubmit: (name, amount, categoryId, startDate, period) {
           context.read<FamilyBloc>().add(FamilySharedBudgetCreateRequested(
                 groupId: groupId,
                 categoryId: categoryId,
                 name: name,
                 amount: amount,
                 startDate: startDate,
+                period: period,
               ));
         },
       ),
@@ -614,7 +615,9 @@ class _AddBudgetDialog extends StatefulWidget {
   const _AddBudgetDialog({required this.groupId, required this.onSubmit});
 
   final String groupId;
-  final void Function(String name, double amount, String categoryId, String startDate) onSubmit;
+  final void Function(
+          String name, double amount, String categoryId, String startDate, String period)
+      onSubmit;
 
   @override
   State<_AddBudgetDialog> createState() => _AddBudgetDialogState();
@@ -624,6 +627,8 @@ class _AddBudgetDialogState extends State<_AddBudgetDialog> {
   final _nameCtrl = TextEditingController();
   final _amountCtrl = TextEditingController();
   CategoryModel? _selectedCategory;
+  BudgetPeriod _period = BudgetPeriod.MONTHLY;
+  DateTime _startDate = DateTime(DateTime.now().year, DateTime.now().month, 1);
   late Future<List<CategoryModel>> _categoriesFuture;
 
   @override
@@ -645,11 +650,44 @@ class _AddBudgetDialogState extends State<_AddBudgetDialog> {
     return double.tryParse(cleaned);
   }
 
+  Future<void> _pickStartDate() async {
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _startDate,
+      firstDate: DateTime(2020),
+      lastDate: DateTime(2030),
+      builder: (ctx, child) => Theme(
+        data: Theme.of(ctx).copyWith(
+          colorScheme: ColorScheme.dark(
+            primary: AppColors.primary,
+            onPrimary: AppColors.surface,
+            surface: AppColors.surfaceContainerHigh,
+            onSurface: AppColors.onSurface,
+          ),
+        ),
+        child: child!,
+      ),
+    );
+    if (picked != null) setState(() => _startDate = picked);
+  }
+
   @override
   Widget build(BuildContext context) {
+    final s = AppStrings.of(context);
+    final computedEnd = _period == BudgetPeriod.CUSTOM
+        ? _startDate
+        : BudgetPeriodUtils.computeEndDate(_startDate, _period);
+
+    final periodLabels = {
+      BudgetPeriod.MONTHLY: s.billingCycleMonthly,
+      BudgetPeriod.WEEKLY: s.billingCycleWeekly,
+      BudgetPeriod.YEARLY: s.billingCycleYearly,
+      BudgetPeriod.CUSTOM: s.periodCustom,
+    };
+
     return AlertDialog(
       backgroundColor: AppColors.surfaceContainerHigh,
-      title: Text(AppStrings.of(context).addSharedBudgetTitle, style: AppTypography.titleSm),
+      title: Text(s.addSharedBudgetTitle, style: AppTypography.titleSm),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -659,7 +697,7 @@ class _AddBudgetDialogState extends State<_AddBudgetDialog> {
               controller: _nameCtrl,
               style: AppTypography.bodyMd,
               decoration: InputDecoration(
-                hintText: AppStrings.of(context).sharedBudgetNameHint,
+                hintText: s.sharedBudgetNameHint,
                 hintStyle: AppTypography.bodyMd
                     .copyWith(color: AppColors.onSurfaceVariant),
                 filled: true,
@@ -680,7 +718,7 @@ class _AddBudgetDialogState extends State<_AddBudgetDialog> {
               ],
               style: AppTypography.bodyMd,
               decoration: InputDecoration(
-                hintText: AppStrings.of(context).amountTRYHint,
+                hintText: s.amountTRYHint,
                 hintStyle: AppTypography.bodyMd
                     .copyWith(color: AppColors.onSurfaceVariant),
                 filled: true,
@@ -689,6 +727,99 @@ class _AddBudgetDialogState extends State<_AddBudgetDialog> {
                   borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
                   borderSide: BorderSide.none,
                 ),
+              ),
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            // Period selector
+            Text(s.periodLabel,
+                style: AppTypography.bodySm
+                    .copyWith(color: AppColors.onSurfaceVariant)),
+            const SizedBox(height: AppSpacing.xs),
+            Wrap(
+              spacing: AppSpacing.xs,
+              children: BudgetPeriod.values.map((p) {
+                final selected = p == _period;
+                return GestureDetector(
+                  onTap: () => setState(() => _period = p),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.sm, vertical: AppSpacing.xs),
+                    decoration: BoxDecoration(
+                      color: selected
+                          ? AppColors.primary.withValues(alpha: 0.15)
+                          : AppColors.surfaceContainerHighest,
+                      borderRadius:
+                          BorderRadius.circular(AppSpacing.radiusMd),
+                      border: Border.all(
+                        color: selected
+                            ? AppColors.primary
+                            : Colors.transparent,
+                        width: 1.5,
+                      ),
+                    ),
+                    child: Text(
+                      periodLabels[p]!,
+                      style: AppTypography.bodySm.copyWith(
+                        color: selected
+                            ? AppColors.primary
+                            : AppColors.onSurface,
+                        fontWeight: selected
+                            ? FontWeight.w600
+                            : FontWeight.w400,
+                      ),
+                    ),
+                  ),
+                );
+              }).toList(),
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            // Start date picker
+            GestureDetector(
+              onTap: _pickStartDate,
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.md, vertical: AppSpacing.sm),
+                decoration: BoxDecoration(
+                  color: AppColors.surfaceContainerHighest,
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.calendar_today_outlined,
+                        size: 14, color: AppColors.onSurfaceVariant),
+                    const SizedBox(width: AppSpacing.xs),
+                    Text(
+                      '${s.startDateLabel}: ${DateFormatter.formatMini(_startDate, context)}',
+                      style: AppTypography.bodySm,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: AppSpacing.xs),
+            // End date chip (read-only)
+            Container(
+              padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.md, vertical: AppSpacing.xs),
+              decoration: BoxDecoration(
+                color: AppColors.primary.withValues(alpha: 0.08),
+                borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                border: Border.all(
+                    color: AppColors.primary.withValues(alpha: 0.2)),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.event_available_outlined,
+                      size: 12, color: AppColors.primary),
+                  const SizedBox(width: AppSpacing.xs),
+                  Text(
+                    s.budgetEndsOn(
+                        DateFormatter.formatMini(computedEnd, context)),
+                    style: AppTypography.bodySm
+                        .copyWith(color: AppColors.primary, fontSize: 11),
+                  ),
+                ],
               ),
             ),
             const SizedBox(height: AppSpacing.sm),
@@ -710,7 +841,7 @@ class _AddBudgetDialogState extends State<_AddBudgetDialog> {
                   dropdownColor: AppColors.surfaceContainerHigh,
                   style: AppTypography.bodyMd,
                   decoration: InputDecoration(
-                    hintText: AppStrings.of(context).selectCategory,
+                    hintText: s.selectCategory,
                     hintStyle: AppTypography.bodyMd
                         .copyWith(color: AppColors.onSurfaceVariant),
                     filled: true,
@@ -746,10 +877,10 @@ class _AddBudgetDialogState extends State<_AddBudgetDialog> {
             final amount = _parseAmount(_amountCtrl.text);
             if (name.isEmpty || amount == null || _selectedCategory == null) return;
             Navigator.of(context).pop();
-            final now = DateTime.now();
             final startDate =
-                '${now.year}-${now.month.toString().padLeft(2, '0')}-01';
-            widget.onSubmit(name, amount, _selectedCategory!.id, startDate);
+                '${_startDate.year}-${_startDate.month.toString().padLeft(2, '0')}-${_startDate.day.toString().padLeft(2, '0')}';
+            widget.onSubmit(
+                name, amount, _selectedCategory!.id, startDate, _period.name);
           },
           style: FilledButton.styleFrom(
             backgroundColor: AppColors.primary,

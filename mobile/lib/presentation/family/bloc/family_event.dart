@@ -52,12 +52,14 @@ class FamilySharedBudgetCreateRequested extends FamilyEvent {
     required this.name,
     required this.amount,
     required this.startDate,
+    required this.period,
   });
   final String groupId;
   final String categoryId;
   final String name;
   final double amount;
   final String startDate;
+  final String period;
 }
 
 class FamilySharedBudgetsLoadRequested extends FamilyEvent {

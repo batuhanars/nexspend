@@ -301,8 +301,11 @@ class _CurrentPeriodView extends StatelessWidget {
           final loading =
               snapshot.connectionState == ConnectionState.waiting;
           return ListView(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.pagePadding,
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.pagePadding,
+              AppSpacing.lg,
+              AppSpacing.pagePadding,
+              0,
             ),
             children: [
               _SummaryCard(budget: budget),
@@ -457,13 +460,24 @@ class _HistoryViewState extends State<_HistoryView> {
         if (entries.isEmpty) {
           return Center(
             child: Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: AppSpacing.pagePadding),
-              child: Text(
-                s.budgetHistoryEmpty,
-                style:
-                    AppTypography.bodyMd.copyWith(color: AppColors.onSurfaceVariant),
-                textAlign: TextAlign.center,
+              padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.pagePadding),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.history_toggle_off_outlined,
+                    size: 48,
+                    color: AppColors.onSurfaceVariant.withValues(alpha: 0.4),
+                  ),
+                  const SizedBox(height: AppSpacing.md),
+                  Text(
+                    s.budgetHistoryEmpty,
+                    style: AppTypography.bodyMd
+                        .copyWith(color: AppColors.onSurfaceVariant),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
               ),
             ),
           );

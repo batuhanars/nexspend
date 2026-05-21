@@ -8,8 +8,12 @@ class BudgetRepository {
 
   final Dio _dio;
 
-  Future<List<BudgetModel>> getAll() async {
-    final response = await _dio.get(ApiEndpoints.budgets);
+  Future<List<BudgetModel>> getAll({bool includeArchived = false}) async {
+    final response = await _dio.get(
+      ApiEndpoints.budgets,
+      queryParameters:
+          includeArchived ? {'includeArchived': 'true'} : null,
+    );
     final list = response.data['data'] as List;
     return list
         .map((b) => BudgetModel.fromJson(b as Map<String, dynamic>))

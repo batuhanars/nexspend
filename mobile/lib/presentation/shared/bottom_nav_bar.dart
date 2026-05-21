@@ -10,6 +10,7 @@ import '../../core/l10n/app_strings.dart';
 import '../../core/services/notification_service.dart';
 import '../../core/storage/secure_storage.dart';
 import '../../core/utils/coach_mark_keys.dart';
+import '../../data/models/family_model.dart' show SharedBudgetModel;
 import '../../data/repositories/budget_repository.dart';
 import '../../data/repositories/family_repository.dart';
 import '../../navigation/route_names.dart';
@@ -96,10 +97,42 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
 
     final closedShared = ns.consumePendingClosedSharedBudget();
     if (closedShared != null) {
+      _openSharedBudgetHistory(closedShared.groupId, closedShared.budgetId);
+    }
+  }
+
+  Future<void> _openSharedBudgetHistory(
+      String groupId, String budgetId) async {
+    try {
+      final budgets =
+          await getIt<FamilyRepository>().getSharedBudgets(groupId);
+      if (!mounted) return;
+      final budget = budgets.cast<SharedBudgetModel?>().firstWhere(
+            (b) => b!.id == budgetId,
+            orElse: () => null,
+          );
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) {
-          context.push(RouteNames.familyGroupDetail(closedShared.groupId));
+        if (!mounted) return;
+        if (budget != null) {
+          context.push(
+            RouteNames.sharedBudgetDetail(groupId, budgetId),
+            extra: {'budget': budget, 'initialTabIndex': 1},
+          );
+        } else {
+          context.push(RouteNames.familyGroupDetail(groupId));
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content:
+                  Text(AppStrings.of(context).budgetClosedSharedSnackbar),
+              backgroundColor: AppColors.primary,
+            ),
+          );
         }
+      });
+    } catch (_) {
+      if (!mounted) return;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) context.push(RouteNames.familyGroupDetail(groupId));
       });
     }
   }

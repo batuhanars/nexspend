@@ -23,10 +23,12 @@ class SharedBudgetDetailPage extends StatefulWidget {
     super.key,
     required this.groupId,
     required this.budget,
+    this.initialTabIndex = 0,
   });
 
   final String groupId;
   final SharedBudgetModel budget;
+  final int initialTabIndex;
 
   @override
   State<SharedBudgetDetailPage> createState() =>
@@ -44,7 +46,11 @@ class _SharedBudgetDetailPageState extends State<SharedBudgetDetailPage>
     super.initState();
     _budget = widget.budget;
     _future = _load();
-    _tabController = TabController(length: 2, vsync: this);
+    _tabController = TabController(
+      length: 2,
+      vsync: this,
+      initialIndex: widget.initialTabIndex,
+    );
   }
 
   @override
@@ -280,8 +286,11 @@ class _CurrentPeriodView extends StatelessWidget {
               detail?.expenses ?? const <SharedBudgetExpenseModel>[];
 
           return ListView(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.pagePadding,
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.pagePadding,
+              AppSpacing.lg,
+              AppSpacing.pagePadding,
+              0,
             ),
             children: [
               _SummaryCard(budget: currentBudget),
@@ -378,10 +387,27 @@ class _HistoryViewState extends State<_HistoryView> {
         final entries = snapshot.data ?? [];
         if (entries.isEmpty) {
           return Center(
-            child: Text(
-              s.budgetHistoryEmpty,
-              style: AppTypography.bodyMd
-                  .copyWith(color: AppColors.onSurfaceVariant),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.pagePadding),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.history_toggle_off_outlined,
+                    size: 48,
+                    color:
+                        AppColors.onSurfaceVariant.withValues(alpha: 0.4),
+                  ),
+                  const SizedBox(height: AppSpacing.md),
+                  Text(
+                    s.budgetHistoryEmpty,
+                    style: AppTypography.bodyMd
+                        .copyWith(color: AppColors.onSurfaceVariant),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
             ),
           );
         }

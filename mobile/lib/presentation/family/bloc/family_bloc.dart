@@ -137,6 +137,7 @@ class FamilyBloc extends Bloc<FamilyEvent, FamilyState> {
         name: event.name,
         amount: event.amount,
         startDate: event.startDate,
+        period: event.period,
       );
       emit(FamilySharedBudgetCreated(budget: budget));
     } catch (e) {

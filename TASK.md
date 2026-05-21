@@ -633,10 +633,12 @@
 - [x] PM: contract §8 açık sorular karara bağlandı (21 May 2026) — (1) tek job 00:30, (2) ortak bildirimi tüm üyelere salt bilgi (CTA yok), (3) history limit son 12 dönem
 - [x] PM: kararları backend + frontend dev session'larına ilet (kickoff brief, 21 May 2026)
 - [x] PM: smoke test 1-2. tur — backend payload doğru, frontend BUDGET_CLOSED key uyumsuzluğu fix (PM commit 62088f4), 5 maddelik hotfix (frontend dev commit a49c2c8)
-- [x] PM: §8 ek kararlar (21 May 2026, smoke test sonrası) — (4) prefilled CTA geri çekildi, kişisel+ortak parite (detay sayfası Geçmiş tab); (5) ArchivedBudgetsPage UX ayrımı (DB ayrımı reddedildi)
-- [ ] Frontend: §8/4 hotfix — BudgetDetailPage initialTabIndex + opsiyonel budgetId, notification handler senkron push, pending consume timing fix, CTA + SnackBar action kaldır
-- [ ] Backend migration Railway'e deploy + 00:30 cron logları monitör
-- [ ] Backend + frontend integration test 3. tur (bütçe oluştur → endDate dolu → cron simüle et → arşivlendi → bildirim alındı → detay sayfası Geçmiş tab → sıfırdan yeni dönem oluştur)
+- [x] PM: §8 ek kararlar (21 May 2026, smoke test sonrası) — (4) prefilled CTA geri çekildi, kişisel+ortak parite; (5) ArchivedBudgetsPage UX ayrımı (DB ayrımı reddedildi)
+- [x] Frontend: §8/4 hotfix — BudgetDetailPage initialTabIndex + opsiyonel budgetId, notification handler senkron push, pending consume timing fix, CTA + SnackBar action kaldır
+- [x] PM: kontrat §3.4 + §5.6 düzeltmesi — bildirim tap default tab "Bu Dönem" (Geçmiş değil); sebep: Geçmiş tab kategoride önceki arşivler, ilk arşiv senaryosunda boş düşüyordu
+- [x] PM hotfix: `/budgets/archived` route precedence (af4bd06) + initialTabIndex 0 (03f32e3) + timezone date kayması (0431b2d, ab80288)
+- [x] Smoke test 3. tur ✅ — timezone fix, bildirim tap routing, Bu Dönem default, Geçmiş tab dolu/boş, arşiv ekranı, ortak form, PATCH 400, cron archive, hepsi yeşil
+- [ ] Backend migration Railway'e deploy + 00:30 cron logları monitör (bu gece 22 May 00:30)
 
 ---
 

@@ -126,7 +126,7 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
         if (budget != null) {
           context.push(
             RouteNames.sharedBudgetDetail(groupId, budgetId),
-            extra: {'budget': budget, 'initialTabIndex': 1},
+            extra: {'budget': budget, 'initialTabIndex': 0},
           );
         } else {
           context.push(RouteNames.familyGroupDetail(groupId));
@@ -153,7 +153,7 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
       if (!mounted) return;
       context.push(
         RouteNames.budgetDetail(budgetId),
-        extra: {'budgetId': budgetId, 'initialTabIndex': 1},
+        extra: {'budgetId': budgetId, 'initialTabIndex': 0},
       );
     });
   }

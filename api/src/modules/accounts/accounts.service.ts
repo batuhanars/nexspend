@@ -240,7 +240,8 @@ export class AccountsService {
   }
 
   async getAnalytics(userId: string, id: string) {
-    await this.findOwned(userId, id);
+    const account = await this.findOwned(userId, id);
+    const isCreditCard = account.type === AccountType.CREDIT_CARD;
 
     const now = new Date();
 
@@ -251,14 +252,23 @@ export class AccountsService {
         const end = endOfMonth(date);
 
         return Promise.all([
-          this.prisma.transaction.aggregate({
-            where: {
-              accountId: id,
-              type: 'INCOME',
-              transactionDate: { gte: start, lte: end },
-            },
-            _sum: { amount: true },
-          }),
+          isCreditCard
+            ? this.prisma.transaction.aggregate({
+                where: {
+                  transferToAccountId: id,
+                  type: 'TRANSFER',
+                  transactionDate: { gte: start, lte: end },
+                },
+                _sum: { amount: true },
+              })
+            : this.prisma.transaction.aggregate({
+                where: {
+                  accountId: id,
+                  type: 'INCOME',
+                  transactionDate: { gte: start, lte: end },
+                },
+                _sum: { amount: true },
+              }),
           this.prisma.transaction.aggregate({
             where: {
               accountId: id,
@@ -267,10 +277,17 @@ export class AccountsService {
             },
             _sum: { amount: true },
           }),
-        ]).then(([inc, exp]) => ({
+        ]).then(([primary, exp]) => ({
           month: date.toISOString().slice(0, 7),
-          income: Number(inc._sum.amount ?? 0),
-          expense: Number(exp._sum.amount ?? 0),
+          ...(isCreditCard
+            ? {
+                payment: Number(primary._sum?.amount ?? 0),
+                spend: Number(exp._sum?.amount ?? 0),
+              }
+            : {
+                income: Number(primary._sum?.amount ?? 0),
+                expense: Number(exp._sum?.amount ?? 0),
+              }),
         }));
       }),
     );
@@ -304,7 +321,7 @@ export class AccountsService {
       }),
     );
 
-    return { months: monthlyData, topCategories };
+    return { months: monthlyData, topCategories, isCreditCard };
   }
 
   async getTransactions(

@@ -18,6 +18,7 @@ const mockPrisma = {
   },
   account: {
     update: jest.fn(),
+    findFirst: jest.fn(),
   },
   recurringTransaction: {
     create: jest.fn(),
@@ -237,6 +238,22 @@ describe('TransactionsService', () => {
         amount: 500,
         title: 'Transfer',
       };
+
+      await expect(service.create(USER_ID, dto)).rejects.toThrow(
+        BadRequestException,
+      );
+    });
+
+    it('INCOME + CREDIT_CARD hesabı → BadRequestException fırlatır', async () => {
+      const dto = {
+        accountId: ACCOUNT_ID,
+        type: TransactionType.INCOME,
+        amount: 1000,
+        title: 'Yanlış Kayıt',
+        categoryId: 'cat-1',
+      };
+
+      mockPrisma.account.findFirst.mockResolvedValue({ type: 'CREDIT_CARD' });
 
       await expect(service.create(USER_ID, dto)).rejects.toThrow(
         BadRequestException,

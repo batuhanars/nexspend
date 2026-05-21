@@ -5,7 +5,7 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { TransactionType } from '@prisma/client';
+import { AccountType, TransactionType } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import { BalanceService } from '../../common/services/balance.service';
 import {
@@ -139,6 +139,18 @@ export class TransactionsService {
       );
     }
 
+    if (dto.type === TransactionType.INCOME) {
+      const account = await this.prisma.account.findFirst({
+        where: { id: dto.accountId, userId },
+        select: { type: true },
+      });
+      if (account?.type === AccountType.CREDIT_CARD) {
+        throw new BadRequestException(
+          'Kredi kartı hesabına gelir kaydedilemez. Kart borcu kapatmak için hesaplar arası transfer kullanın.',
+        );
+      }
+    }
+
     const transactionDate = dto.transactionDate
       ? new Date(dto.transactionDate)
       : new Date();
@@ -226,6 +238,18 @@ export class TransactionsService {
     const newAmount = dto.amount ?? Number(existing.amount);
     const newType = dto.type ?? existing.type;
     const oldAmount = Number(existing.amount);
+
+    if (newType === TransactionType.INCOME) {
+      const account = await this.prisma.account.findFirst({
+        where: { id: existing.accountId },
+        select: { type: true },
+      });
+      if (account?.type === AccountType.CREDIT_CARD) {
+        throw new BadRequestException(
+          'Kredi kartı hesabına gelir kaydedilemez. Kart borcu kapatmak için hesaplar arası transfer kullanın.',
+        );
+      }
+    }
 
     // Bakiye düzeltmesi: eski işlemi geri al, yeni işlemi uygula
     const transaction = await this.prisma.$transaction(async (tx) => {

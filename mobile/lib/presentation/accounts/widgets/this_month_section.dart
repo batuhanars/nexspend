@@ -13,6 +13,7 @@ class ThisMonthSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final s = AppStrings.of(context);
+    final isCreditCard = analytics.isCreditCard;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.pagePadding),
       child: Column(
@@ -24,8 +25,10 @@ class ThisMonthSection extends StatelessWidget {
             children: [
               Expanded(
                 child: FlowChip(
-                  label: s.income,
-                  amount: analytics.currentMonthIncome,
+                  label: isCreditCard ? s.paymentLabel : s.income,
+                  amount: isCreditCard
+                      ? analytics.currentMonthPayment
+                      : analytics.currentMonthIncome,
                   color: AppColors.secondary,
                   icon: Icons.arrow_downward_rounded,
                 ),
@@ -33,8 +36,10 @@ class ThisMonthSection extends StatelessWidget {
               const SizedBox(width: AppSpacing.md),
               Expanded(
                 child: FlowChip(
-                  label: s.expense,
-                  amount: analytics.currentMonthExpense,
+                  label: isCreditCard ? s.spendChartLabel : s.expense,
+                  amount: isCreditCard
+                      ? analytics.currentMonthSpend
+                      : analytics.currentMonthExpense,
                   color: AppColors.tertiary,
                   icon: Icons.arrow_upward_rounded,
                 ),

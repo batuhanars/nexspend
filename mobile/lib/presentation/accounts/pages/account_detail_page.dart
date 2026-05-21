@@ -388,7 +388,10 @@ class _DetailContent extends StatelessWidget {
         ThisMonthSection(analytics: analytics),
         if (analytics.months.isNotEmpty) ...[
           const SizedBox(height: AppSpacing.xl),
-          MonthlyChartSection(months: analytics.months),
+          MonthlyChartSection(
+            months: analytics.months,
+            isCreditCard: analytics.isCreditCard,
+          ),
         ],
         if (analytics.topCategories.isNotEmpty) ...[
           const SizedBox(height: AppSpacing.xl),

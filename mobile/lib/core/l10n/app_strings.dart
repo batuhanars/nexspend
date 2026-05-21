@@ -419,6 +419,7 @@ abstract class AppStrings {
   String get topCategoriesThisMonth;
   String get incomeChartLabel;
   String get expenseChartLabel;
+  String get spendChartLabel;
   String get restoreBtn;
   String get loadFailed;
   String get archiveHint;
@@ -941,6 +942,7 @@ class _Tr extends AppStrings {
   @override String get topCategoriesThisMonth => 'Bu Ay En Çok Harcanan';
   @override String get incomeChartLabel => 'Gelir';
   @override String get expenseChartLabel => 'Gider';
+  @override String get spendChartLabel => 'Harcama';
   @override String get restoreBtn => 'Geri Yükle';
   @override String get loadFailed => 'Yüklenemedi';
   @override String get archiveHint => 'Hesap detayından arşivleyebilirsiniz';
@@ -1466,6 +1468,7 @@ class _En extends AppStrings {
   @override String get topCategoriesThisMonth => 'Top Spending This Month';
   @override String get incomeChartLabel => 'Income';
   @override String get expenseChartLabel => 'Expense';
+  @override String get spendChartLabel => 'Spend';
   @override String get restoreBtn => 'Restore';
   @override String get loadFailed => 'Failed to load';
   @override String get archiveHint => 'You can archive from account details';

@@ -7,17 +7,23 @@ class MonthlyFlowModel {
     required this.month,
     required this.income,
     required this.expense,
+    this.payment,
+    this.spend,
   });
 
   final String month; // "2026-04"
   final double income;
   final double expense;
+  final double? payment; // kredi kartı: TRANSFER toAccountId=card
+  final double? spend;   // kredi kartı: EXPENSE accountId=card
 
   factory MonthlyFlowModel.fromJson(Map<String, dynamic> json) =>
       MonthlyFlowModel(
         month: json['month'] as String,
-        income: (json['income'] as num).toDouble(),
-        expense: (json['expense'] as num).toDouble(),
+        income: (json['income'] as num?)?.toDouble() ?? 0.0,
+        expense: (json['expense'] as num?)?.toDouble() ?? 0.0,
+        payment: (json['payment'] as num?)?.toDouble(),
+        spend: (json['spend'] as num?)?.toDouble(),
       );
 }
 
@@ -60,19 +66,32 @@ class AccountAnalyticsModel {
   const AccountAnalyticsModel({
     required this.months,
     required this.topCategories,
+    this.isCreditCard = false,
   });
 
   final List<MonthlyFlowModel> months;
   final List<CategoryBreakdownModel> topCategories;
+  final bool isCreditCard;
 
   double get currentMonthIncome => months.isEmpty ? 0 : months.last.income;
   double get currentMonthExpense => months.isEmpty ? 0 : months.last.expense;
+  double get currentMonthPayment =>
+      months.isEmpty ? 0 : (months.last.payment ?? 0);
+  double get currentMonthSpend =>
+      months.isEmpty ? 0 : (months.last.spend ?? 0);
 
   double get maxMonthlyValue => months.fold<double>(
         0,
-        (m, e) => m > e.income
-            ? (m > e.expense ? m : e.expense)
-            : (e.income > e.expense ? e.income : e.expense),
+        (m, e) {
+          if (isCreditCard) {
+            final p = e.payment ?? 0;
+            final s = e.spend ?? 0;
+            return m > p ? (m > s ? m : s) : (p > s ? p : s);
+          }
+          return m > e.income
+              ? (m > e.expense ? m : e.expense)
+              : (e.income > e.expense ? e.income : e.expense);
+        },
       );
 
   factory AccountAnalyticsModel.fromJson(Map<String, dynamic> json) =>
@@ -84,6 +103,7 @@ class AccountAnalyticsModel {
             .map((c) =>
                 CategoryBreakdownModel.fromJson(c as Map<String, dynamic>))
             .toList(),
+        isCreditCard: json['isCreditCard'] as bool? ?? false,
       );
 
   static AccountAnalyticsModel empty() => const AccountAnalyticsModel(

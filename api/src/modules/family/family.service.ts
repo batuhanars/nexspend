@@ -359,7 +359,9 @@ export class FamilyService {
         ...(dto.name !== undefined && { name: dto.name }),
         ...(dto.amount !== undefined && { amount: dto.amount }),
         ...(dto.period !== undefined && { period: dto.period }),
-        ...(dto.endDate !== undefined && { endDate: parseLocalDate(dto.endDate) }),
+        ...(dto.endDate !== undefined && {
+          endDate: parseLocalDate(dto.endDate),
+        }),
       },
       include: {
         category: { select: { name: true, icon: true, color: true } },

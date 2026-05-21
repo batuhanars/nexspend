@@ -155,7 +155,9 @@ export class BudgetsService {
           smartTracking: dto.smartTracking,
         }),
         ...(dto.isActive !== undefined && { isActive: dto.isActive }),
-        ...(dto.endDate !== undefined && { endDate: parseLocalDate(dto.endDate) }),
+        ...(dto.endDate !== undefined && {
+          endDate: parseLocalDate(dto.endDate),
+        }),
       },
       include: { category: true },
     });

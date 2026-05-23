@@ -157,6 +157,22 @@ class FamilyGroupDeleteError extends FamilyState {
   final String message;
 }
 
+// --- Bütçe güncelleme ---
+
+class FamilySharedBudgetUpdating extends FamilyState {
+  const FamilySharedBudgetUpdating();
+}
+
+class FamilySharedBudgetUpdated extends FamilyState {
+  const FamilySharedBudgetUpdated({required this.budget});
+  final SharedBudgetModel budget;
+}
+
+class FamilySharedBudgetUpdateError extends FamilyState {
+  const FamilySharedBudgetUpdateError(this.message);
+  final String message;
+}
+
 // --- Bütçe silme ---
 
 class FamilySharedBudgetDeleting extends FamilyState {

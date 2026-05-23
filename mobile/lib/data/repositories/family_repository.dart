@@ -120,6 +120,19 @@ class FamilyRepository {
     await _dio.delete(ApiEndpoints.familyGroupById(groupId));
   }
 
+  Future<SharedBudgetModel> updateSharedBudget({
+    required String groupId,
+    required String budgetId,
+    required Map<String, dynamic> data,
+  }) async {
+    final response = await _dio.patch(
+      ApiEndpoints.familyGroupBudgetById(groupId, budgetId),
+      data: data,
+    );
+    return SharedBudgetModel.fromJson(
+        response.data['data'] as Map<String, dynamic>);
+  }
+
   Future<void> deleteSharedBudget({
     required String groupId,
     required String budgetId,

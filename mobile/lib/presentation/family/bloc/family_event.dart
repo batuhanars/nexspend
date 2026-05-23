@@ -90,6 +90,17 @@ class FamilyGroupDeleteRequested extends FamilyEvent {
   final String groupId;
 }
 
+class FamilySharedBudgetUpdateRequested extends FamilyEvent {
+  const FamilySharedBudgetUpdateRequested({
+    required this.groupId,
+    required this.budgetId,
+    required this.data,
+  });
+  final String groupId;
+  final String budgetId;
+  final Map<String, dynamic> data;
+}
+
 class FamilySharedBudgetDeleteRequested extends FamilyEvent {
   const FamilySharedBudgetDeleteRequested({
     required this.groupId,

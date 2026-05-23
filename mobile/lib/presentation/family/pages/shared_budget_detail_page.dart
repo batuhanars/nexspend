@@ -17,6 +17,10 @@ import '../../../data/repositories/family_repository.dart';
 import '../../shared/widgets/budget_add_entry_sheet.dart';
 import '../bloc/family_bloc.dart';
 import '../bloc/family_event.dart';
+import '../bloc/family_state.dart';
+import '../widgets/shared_budget_edit_sheet.dart';
+
+enum _BudgetMenuAction { edit, delete }
 
 class SharedBudgetDetailPage extends StatefulWidget {
   const SharedBudgetDetailPage({
@@ -31,8 +35,7 @@ class SharedBudgetDetailPage extends StatefulWidget {
   final int initialTabIndex;
 
   @override
-  State<SharedBudgetDetailPage> createState() =>
-      _SharedBudgetDetailPageState();
+  State<SharedBudgetDetailPage> createState() => _SharedBudgetDetailPageState();
 }
 
 class _SharedBudgetDetailPageState extends State<SharedBudgetDetailPage>
@@ -100,45 +103,70 @@ class _SharedBudgetDetailPageState extends State<SharedBudgetDetailPage>
     setState(() => _future = _load());
   }
 
+  Future<void> _openEdit() async {
+    final bloc = context.read<FamilyBloc>();
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: AppColors.surfaceContainerHigh,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(AppSpacing.radiusLg),
+        ),
+      ),
+      builder: (_) => BlocProvider.value(
+        value: bloc,
+        child: SharedBudgetEditSheet(groupId: widget.groupId, budget: _budget),
+      ),
+    );
+  }
+
   Future<void> _confirmDelete() async {
     final s = AppStrings.of(context);
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: AppColors.surfaceContainerHigh,
-        title:
-            Text(s.deleteSharedBudgetTitle, style: AppTypography.titleSm),
+        title: Text(s.deleteSharedBudgetTitle, style: AppTypography.titleSm),
         content: Text(
           s.deleteBudgetContent(_budget.name),
-          style: AppTypography.bodyMd
-              .copyWith(color: AppColors.onSurfaceVariant),
+          style: AppTypography.bodyMd.copyWith(
+            color: AppColors.onSurfaceVariant,
+          ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: Text(s.cancel,
-                style: AppTypography.bodyMd
-                    .copyWith(color: AppColors.onSurfaceVariant)),
+            child: Text(
+              s.cancel,
+              style: AppTypography.bodyMd.copyWith(
+                color: AppColors.onSurfaceVariant,
+              ),
+            ),
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: Text(s.delete,
-                style: const TextStyle(color: AppColors.error)),
+            child: Text(
+              s.delete,
+              style: const TextStyle(color: AppColors.error),
+            ),
           ),
         ],
       ),
     );
     if (ok == true && mounted) {
       context.read<FamilyBloc>().add(
-            FamilySharedBudgetDeleteRequested(
-              groupId: widget.groupId,
-              budgetId: _budget.id,
-            ),
-          );
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text(AppStrings.of(context).sharedBudgetDeletedSuccess),
-        backgroundColor: AppColors.secondary,
-      ));
+        FamilySharedBudgetDeleteRequested(
+          groupId: widget.groupId,
+          budgetId: _budget.id,
+        ),
+      );
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(AppStrings.of(context).sharedBudgetDeletedSuccess),
+          backgroundColor: AppColors.secondary,
+        ),
+      );
       context.pop();
     }
   }
@@ -148,91 +176,163 @@ class _SharedBudgetDetailPageState extends State<SharedBudgetDetailPage>
     final s = AppStrings.of(context);
     final isArchived = !_budget.isActive;
 
-    return Scaffold(
-      backgroundColor: AppColors.surface,
-      appBar: AppBar(
+    return BlocListener<FamilyBloc, FamilyState>(
+      listenWhen: (_, current) =>
+          current is FamilySharedBudgetUpdated ||
+          current is FamilySharedBudgetUpdateError,
+      listener: (context, state) {
+        if (state is FamilySharedBudgetUpdated) {
+          setState(() {
+            _budget = state.budget;
+            _future = _load();
+          });
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(AppStrings.of(context).budgetUpdatedSuccess),
+              backgroundColor: AppColors.secondary,
+            ),
+          );
+        } else if (state is FamilySharedBudgetUpdateError) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(state.message),
+              backgroundColor: AppColors.error,
+            ),
+          );
+        }
+      },
+      child: Scaffold(
         backgroundColor: AppColors.surface,
-        surfaceTintColor: Colors.transparent,
-        iconTheme: const IconThemeData(color: AppColors.onSurface),
-        title: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(_budget.name, style: AppTypography.headlineSm),
-            if (isArchived) ...[
-              const SizedBox(width: AppSpacing.sm),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.sm, vertical: 2),
-                decoration: BoxDecoration(
-                  color: AppColors.onSurfaceVariant.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
-                ),
-                child: Text(
-                  s.budgetArchivedBadge,
-                  style: AppTypography.labelSm.copyWith(
-                    color: AppColors.onSurfaceVariant,
-                    fontSize: 10,
+        appBar: AppBar(
+          backgroundColor: AppColors.surface,
+          surfaceTintColor: Colors.transparent,
+          iconTheme: const IconThemeData(color: AppColors.onSurface),
+          title: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(_budget.name, style: AppTypography.headlineSm),
+              if (isArchived) ...[
+                const SizedBox(width: AppSpacing.sm),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.sm,
+                    vertical: 2,
+                  ),
+                  decoration: BoxDecoration(
+                    color: AppColors.onSurfaceVariant.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+                  ),
+                  child: Text(
+                    s.budgetArchivedBadge,
+                    style: AppTypography.labelSm.copyWith(
+                      color: AppColors.onSurfaceVariant,
+                      fontSize: 10,
+                    ),
                   ),
                 ),
+              ],
+            ],
+          ),
+          actions: [
+            if (!isArchived) ...[
+              IconButton(
+                icon: const Icon(Icons.add_rounded, color: AppColors.primary),
+                tooltip: s.budgetAddTransaction,
+                onPressed: _openAddEntrySheet,
+              ),
+              PopupMenuButton<_BudgetMenuAction>(
+                icon: const Icon(Icons.more_vert, color: AppColors.onSurface),
+                color: AppColors.surfaceContainerHigh,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                ),
+                onSelected: (action) {
+                  switch (action) {
+                    case _BudgetMenuAction.edit:
+                      _openEdit();
+                    case _BudgetMenuAction.delete:
+                      _confirmDelete();
+                  }
+                },
+                itemBuilder: (context) => [
+                  PopupMenuItem(
+                    value: _BudgetMenuAction.edit,
+                    child: Row(
+                      children: [
+                        const Icon(
+                          Icons.edit_outlined,
+                          size: 20,
+                          color: AppColors.onSurfaceVariant,
+                        ),
+                        const SizedBox(width: AppSpacing.md),
+                        Text(s.edit, style: AppTypography.bodyMd),
+                      ],
+                    ),
+                  ),
+                  PopupMenuItem(
+                    value: _BudgetMenuAction.delete,
+                    child: Row(
+                      children: [
+                        const Icon(
+                          Icons.delete_outline,
+                          size: 20,
+                          color: AppColors.error,
+                        ),
+                        const SizedBox(width: AppSpacing.md),
+                        Text(
+                          s.delete,
+                          style: AppTypography.bodyMd.copyWith(
+                            color: AppColors.error,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
             ],
           ],
+          bottom: isArchived
+              ? null
+              : TabBar(
+                  controller: _tabController,
+                  labelColor: AppColors.primary,
+                  unselectedLabelColor: AppColors.onSurfaceVariant,
+                  indicatorColor: AppColors.primary,
+                  labelStyle: AppTypography.bodySm.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                  unselectedLabelStyle: AppTypography.bodySm,
+                  tabs: [
+                    Tab(text: s.budgetTabCurrentPeriod),
+                    Tab(text: s.budgetTabHistory),
+                  ],
+                ),
         ),
-        actions: [
-          if (!isArchived) ...[
-            IconButton(
-              icon: const Icon(Icons.add_rounded, color: AppColors.primary),
-              tooltip: s.budgetAddTransaction,
-              onPressed: _openAddEntrySheet,
-            ),
-            IconButton(
-              icon: const Icon(Icons.delete_outline, color: AppColors.error),
-              onPressed: _confirmDelete,
-            ),
-          ],
-        ],
-        bottom: isArchived
-            ? null
-            : TabBar(
+        body: isArchived
+            ? _CurrentPeriodView(
+                groupId: widget.groupId,
+                budget: _budget,
+                future: _future,
+                onRefresh: () {
+                  setState(() => _future = _load());
+                },
+              )
+            : TabBarView(
                 controller: _tabController,
-                labelColor: AppColors.primary,
-                unselectedLabelColor: AppColors.onSurfaceVariant,
-                indicatorColor: AppColors.primary,
-                labelStyle: AppTypography.bodySm
-                    .copyWith(fontWeight: FontWeight.w600),
-                unselectedLabelStyle: AppTypography.bodySm,
-                tabs: [
-                  Tab(text: s.budgetTabCurrentPeriod),
-                  Tab(text: s.budgetTabHistory),
+                children: [
+                  _CurrentPeriodView(
+                    groupId: widget.groupId,
+                    budget: _budget,
+                    future: _future,
+                    onRefresh: () {
+                      setState(() => _future = _load());
+                    },
+                  ),
+                  _HistoryView(groupId: widget.groupId, budgetId: _budget.id),
                 ],
               ),
       ),
-      body: isArchived
-          ? _CurrentPeriodView(
-              groupId: widget.groupId,
-              budget: _budget,
-              future: _future,
-              onRefresh: () {
-                setState(() => _future = _load());
-              },
-            )
-          : TabBarView(
-              controller: _tabController,
-              children: [
-                _CurrentPeriodView(
-                  groupId: widget.groupId,
-                  budget: _budget,
-                  future: _future,
-                  onRefresh: () {
-                    setState(() => _future = _load());
-                  },
-                ),
-                _HistoryView(
-                  groupId: widget.groupId,
-                  budgetId: _budget.id,
-                ),
-              ],
-            ),
     );
   }
 }
@@ -251,9 +351,10 @@ class _CurrentPeriodView extends StatelessWidget {
   final VoidCallback onRefresh;
 
   List<Widget> _buildGrouped(
-      List<SharedBudgetExpenseModel> expenses,
-      SharedBudgetModel budget,
-      BuildContext context) {
+    List<SharedBudgetExpenseModel> expenses,
+    SharedBudgetModel budget,
+    BuildContext context,
+  ) {
     final sorted = [...expenses]
       ..sort((a, b) => b.transactionDate.compareTo(a.transactionDate));
     final groups = <String, List<SharedBudgetExpenseModel>>{};
@@ -263,15 +364,20 @@ class _CurrentPeriodView extends StatelessWidget {
     }
     final widgets = <Widget>[];
     groups.forEach((header, items) {
-      widgets.add(Padding(
-        padding:
-            const EdgeInsets.only(top: AppSpacing.md, bottom: AppSpacing.sm),
-        child: Text(
-          header,
-          style: AppTypography.labelSm
-              .copyWith(color: AppColors.onSurfaceVariant),
+      widgets.add(
+        Padding(
+          padding: const EdgeInsets.only(
+            top: AppSpacing.md,
+            bottom: AppSpacing.sm,
+          ),
+          child: Text(
+            header,
+            style: AppTypography.labelSm.copyWith(
+              color: AppColors.onSurfaceVariant,
+            ),
+          ),
         ),
-      ));
+      );
       for (final e in items) {
         widgets.add(_ExpenseTile(expense: e, budget: budget));
       }
@@ -292,8 +398,7 @@ class _CurrentPeriodView extends StatelessWidget {
       child: FutureBuilder<SharedBudgetDetailModel>(
         future: future,
         builder: (context, snapshot) {
-          final loading =
-              snapshot.connectionState == ConnectionState.waiting;
+          final loading = snapshot.connectionState == ConnectionState.waiting;
           final detail = snapshot.data;
           final currentBudget = detail?.budget ?? budget;
           final expenses =
@@ -315,23 +420,18 @@ class _CurrentPeriodView extends StatelessWidget {
                 _MemberBreakdown(expenses: expenses),
                 const SizedBox(height: AppSpacing.xl),
               ],
-              Text(s.sharedBudgetExpensesTitle,
-                  style: AppTypography.labelSm),
+              Text(s.sharedBudgetExpensesTitle, style: AppTypography.labelSm),
               const SizedBox(height: AppSpacing.md),
               if (loading)
                 const Padding(
-                  padding:
-                      EdgeInsets.symmetric(vertical: AppSpacing.xxl),
+                  padding: EdgeInsets.symmetric(vertical: AppSpacing.xxl),
                   child: Center(
-                    child: CircularProgressIndicator(
-                      color: AppColors.primary,
-                    ),
+                    child: CircularProgressIndicator(color: AppColors.primary),
                   ),
                 )
               else if (expenses.isEmpty)
                 Padding(
-                  padding:
-                      const EdgeInsets.symmetric(vertical: AppSpacing.xxl),
+                  padding: const EdgeInsets.symmetric(vertical: AppSpacing.xxl),
                   child: Center(
                     child: Text(
                       s.sharedBudgetNoExpenses,
@@ -382,29 +482,30 @@ class _HistoryViewState extends State<_HistoryView> {
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(
-              child:
-                  CircularProgressIndicator(color: AppColors.primary));
+            child: CircularProgressIndicator(color: AppColors.primary),
+          );
         }
         final entries = snapshot.data ?? [];
         if (entries.isEmpty) {
           return Center(
             child: Padding(
               padding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.pagePadding),
+                horizontal: AppSpacing.pagePadding,
+              ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Icon(
                     Icons.history_toggle_off_outlined,
                     size: 48,
-                    color:
-                        AppColors.onSurfaceVariant.withValues(alpha: 0.4),
+                    color: AppColors.onSurfaceVariant.withValues(alpha: 0.4),
                   ),
                   const SizedBox(height: AppSpacing.md),
                   Text(
                     s.budgetHistoryEmpty,
-                    style: AppTypography.bodyMd
-                        .copyWith(color: AppColors.onSurfaceVariant),
+                    style: AppTypography.bodyMd.copyWith(
+                      color: AppColors.onSurfaceVariant,
+                    ),
                     textAlign: TextAlign.center,
                   ),
                 ],
@@ -439,8 +540,7 @@ class _HistoryBarChart extends StatelessWidget {
   Widget build(BuildContext context) {
     final recent = entries.take(6).toList().reversed.toList();
     final maxVal = recent
-        .fold<double>(
-            0, (m, e) => e.amount > m ? e.amount : m)
+        .fold<double>(0, (m, e) => e.amount > m ? e.amount : m)
         .clamp(1.0, double.infinity);
 
     return SizedBox(
@@ -456,8 +556,7 @@ class _HistoryBarChart extends StatelessWidget {
               getTooltipItem: (group, _, rod, i) {
                 return BarTooltipItem(
                   CurrencyFormatter.format(rod.toY),
-                  AppTypography.labelSm
-                      .copyWith(color: AppColors.onSurface),
+                  AppTypography.labelSm.copyWith(color: AppColors.onSurface),
                 );
               },
             ),
@@ -466,11 +565,14 @@ class _HistoryBarChart extends StatelessWidget {
           borderData: FlBorderData(show: false),
           titlesData: FlTitlesData(
             leftTitles: const AxisTitles(
-                sideTitles: SideTitles(showTitles: false)),
+              sideTitles: SideTitles(showTitles: false),
+            ),
             rightTitles: const AxisTitles(
-                sideTitles: SideTitles(showTitles: false)),
+              sideTitles: SideTitles(showTitles: false),
+            ),
             topTitles: const AxisTitles(
-                sideTitles: SideTitles(showTitles: false)),
+              sideTitles: SideTitles(showTitles: false),
+            ),
             bottomTitles: AxisTitles(
               sideTitles: SideTitles(
                 showTitles: true,
@@ -504,15 +606,13 @@ class _HistoryBarChart extends StatelessWidget {
                   BarChartRodData(
                     toY: recent[i].amount,
                     width: 8,
-                    borderRadius:
-                        BorderRadius.circular(AppSpacing.radiusSm),
+                    borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
                     color: AppColors.primary.withValues(alpha: 0.4),
                   ),
                   BarChartRodData(
                     toY: recent[i].spent,
                     width: 8,
-                    borderRadius:
-                        BorderRadius.circular(AppSpacing.radiusSm),
+                    borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
                     color: recent[i].percentage >= 100
                         ? AppColors.tertiary
                         : AppColors.secondary,
@@ -537,8 +637,8 @@ class _HistoryEntryCard extends StatelessWidget {
     final color = entry.percentage >= 100
         ? AppColors.tertiary
         : entry.percentage >= 90
-            ? AppColors.tertiary.withValues(alpha: 0.7)
-            : AppColors.secondary;
+        ? AppColors.tertiary.withValues(alpha: 0.7)
+        : AppColors.secondary;
 
     return Container(
       padding: const EdgeInsets.all(AppSpacing.lg),
@@ -559,19 +659,21 @@ class _HistoryEntryCard extends StatelessWidget {
                     const SizedBox(height: 2),
                     Text(
                       '${DateFormatter.formatMini(entry.startDate, context)} — ${DateFormatter.formatMini(entry.endDate, context)}',
-                      style: AppTypography.bodySm
-                          .copyWith(color: AppColors.onSurfaceVariant),
+                      style: AppTypography.bodySm.copyWith(
+                        color: AppColors.onSurfaceVariant,
+                      ),
                     ),
                   ],
                 ),
               ),
               Container(
                 padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.sm, vertical: 3),
+                  horizontal: AppSpacing.sm,
+                  vertical: 3,
+                ),
                 decoration: BoxDecoration(
                   color: color.withValues(alpha: 0.15),
-                  borderRadius:
-                      BorderRadius.circular(AppSpacing.radiusSm),
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
                 ),
                 child: Text(
                   '%${entry.percentage.toStringAsFixed(0)}',
@@ -589,13 +691,16 @@ class _HistoryEntryCard extends StatelessWidget {
             children: [
               Text(
                 CurrencyFormatter.format(entry.spent),
-                style: AppTypography.bodyMd
-                    .copyWith(fontWeight: FontWeight.w600, color: color),
+                style: AppTypography.bodyMd.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: color,
+                ),
               ),
               Text(
                 ' / ${CurrencyFormatter.format(entry.amount)}',
-                style: AppTypography.bodySm
-                    .copyWith(color: AppColors.onSurfaceVariant),
+                style: AppTypography.bodySm.copyWith(
+                  color: AppColors.onSurfaceVariant,
+                ),
               ),
             ],
           ),
@@ -626,8 +731,8 @@ class _SummaryCard extends StatelessWidget {
     final color = pct >= 0.9
         ? AppColors.tertiary
         : pct >= 0.7
-            ? AppColors.tertiary.withValues(alpha: 0.7)
-            : AppColors.primary;
+        ? AppColors.tertiary.withValues(alpha: 0.7)
+        : AppColors.primary;
 
     return Container(
       padding: const EdgeInsets.all(AppSpacing.xl),
@@ -675,8 +780,7 @@ class _SummaryCard extends StatelessWidget {
                 ),
                 decoration: BoxDecoration(
                   color: color.withValues(alpha: 0.15),
-                  borderRadius:
-                      BorderRadius.circular(AppSpacing.radiusSm),
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
                 ),
                 child: Text(
                   '%${(pct * 100).toStringAsFixed(0)}',
@@ -692,15 +796,13 @@ class _SummaryCard extends StatelessWidget {
           const SizedBox(height: AppSpacing.lg),
           Text(
             CurrencyFormatter.format(budget.spent),
-            style: AppTypography.displayLg.copyWith(
-              fontSize: 36,
-              color: color,
-            ),
+            style: AppTypography.displayLg.copyWith(fontSize: 36, color: color),
           ),
           Text(
             '/ ${CurrencyFormatter.format(budget.amount)}',
-            style: AppTypography.bodyMd
-                .copyWith(color: AppColors.onSurfaceVariant),
+            style: AppTypography.bodyMd.copyWith(
+              color: AppColors.onSurfaceVariant,
+            ),
           ),
           const SizedBox(height: AppSpacing.md),
           ClipRRect(
@@ -728,8 +830,11 @@ class _DailyExpenseChart extends StatelessWidget {
     final now = DateTime.now();
     const days = 14;
     final buckets = List<double>.filled(days, 0);
-    final startDay = DateTime(now.year, now.month, now.day)
-        .subtract(const Duration(days: days - 1));
+    final startDay = DateTime(
+      now.year,
+      now.month,
+      now.day,
+    ).subtract(const Duration(days: days - 1));
 
     for (final e in expenses) {
       final local = e.transactionDate.toLocal();
@@ -767,15 +872,15 @@ class _DailyExpenseChart extends StatelessWidget {
                 barTouchData: BarTouchData(
                   enabled: true,
                   touchTooltipData: BarTouchTooltipData(
-                    getTooltipColor: (_) =>
-                        AppColors.surfaceContainerHighest,
+                    getTooltipColor: (_) => AppColors.surfaceContainerHighest,
                     getTooltipItem: (group, _, rod, idx) {
                       final date = startDay.add(Duration(days: group.x));
                       return BarTooltipItem(
                         '${DateFormatter.formatMini(date, context)}\n'
                         '${CurrencyFormatter.format(rod.toY)}',
-                        AppTypography.labelSm
-                            .copyWith(color: AppColors.onSurface),
+                        AppTypography.labelSm.copyWith(
+                          color: AppColors.onSurface,
+                        ),
                       );
                     },
                   ),
@@ -799,13 +904,10 @@ class _DailyExpenseChart extends StatelessWidget {
                       interval: 1,
                       getTitlesWidget: (value, _) {
                         final idx = value.toInt();
-                        if (idx % 3 != 0 ||
-                            idx < 0 ||
-                            idx >= days) {
+                        if (idx % 3 != 0 || idx < 0 || idx >= days) {
                           return const SizedBox.shrink();
                         }
-                        final date =
-                            startDay.add(Duration(days: idx));
+                        final date = startDay.add(Duration(days: idx));
                         return Padding(
                           padding: const EdgeInsets.only(top: 4),
                           child: Text(
@@ -828,8 +930,9 @@ class _DailyExpenseChart extends StatelessWidget {
                         BarChartRodData(
                           toY: buckets[i],
                           width: 10,
-                          borderRadius:
-                              BorderRadius.circular(AppSpacing.radiusSm),
+                          borderRadius: BorderRadius.circular(
+                            AppSpacing.radiusSm,
+                          ),
                           color: buckets[i] > 0
                               ? AppColors.primary
                               : AppColors.surfaceContainerHighest,
@@ -893,8 +996,9 @@ class _MemberBreakdown extends StatelessWidget {
                   alignment: Alignment.center,
                   child: Text(
                     e.name.isNotEmpty ? e.name[0].toUpperCase() : '?',
-                    style: AppTypography.labelSm
-                        .copyWith(color: AppColors.primary),
+                    style: AppTypography.labelSm.copyWith(
+                      color: AppColors.primary,
+                    ),
                   ),
                 ),
                 const SizedBox(width: AppSpacing.md),
@@ -909,10 +1013,10 @@ class _MemberBreakdown extends StatelessWidget {
                         child: LinearProgressIndicator(
                           value: (e.total / grand).clamp(0.0, 1.0),
                           minHeight: 4,
-                          backgroundColor:
-                              AppColors.surfaceContainerHighest,
+                          backgroundColor: AppColors.surfaceContainerHighest,
                           valueColor: const AlwaysStoppedAnimation(
-                              AppColors.primary),
+                            AppColors.primary,
+                          ),
                         ),
                       ),
                     ],
@@ -921,8 +1025,9 @@ class _MemberBreakdown extends StatelessWidget {
                 const SizedBox(width: AppSpacing.md),
                 Text(
                   CurrencyFormatter.format(e.total),
-                  style: AppTypography.bodyMd
-                      .copyWith(fontWeight: FontWeight.w600),
+                  style: AppTypography.bodyMd.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ],
             ),

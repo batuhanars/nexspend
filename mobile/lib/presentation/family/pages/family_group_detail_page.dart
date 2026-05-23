@@ -52,6 +52,7 @@ class _FamilyGroupDetailPageState extends State<FamilyGroupDetailPage> {
           );
         }
         if (state is FamilySharedBudgetCreated ||
+            state is FamilySharedBudgetUpdated ||
             state is FamilySharedBudgetDeleted) {
           context
               .read<FamilyBloc>()

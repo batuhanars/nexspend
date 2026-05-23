@@ -21,6 +21,7 @@ class FamilyBloc extends Bloc<FamilyEvent, FamilyState> {
     on<FamilyContributionsLoadRequested>(_onLoadContributions);
     on<FamilyMemberRemoveRequested>(_onRemoveMember);
     on<FamilyGroupDeleteRequested>(_onDeleteGroup);
+    on<FamilySharedBudgetUpdateRequested>(_onUpdateSharedBudget);
     on<FamilySharedBudgetDeleteRequested>(_onDeleteSharedBudget);
   }
 
@@ -200,6 +201,23 @@ class FamilyBloc extends Bloc<FamilyEvent, FamilyState> {
       emit(const FamilyGroupDeleted());
     } catch (e) {
       emit(FamilyGroupDeleteError(_parseError(e)));
+    }
+  }
+
+  Future<void> _onUpdateSharedBudget(
+    FamilySharedBudgetUpdateRequested event,
+    Emitter<FamilyState> emit,
+  ) async {
+    emit(const FamilySharedBudgetUpdating());
+    try {
+      final budget = await _repo.updateSharedBudget(
+        groupId: event.groupId,
+        budgetId: event.budgetId,
+        data: event.data,
+      );
+      emit(FamilySharedBudgetUpdated(budget: budget));
+    } catch (e) {
+      emit(FamilySharedBudgetUpdateError(_parseError(e)));
     }
   }
 

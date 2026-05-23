@@ -22,6 +22,8 @@ import '../bloc/budgets_event.dart';
 import '../bloc/budgets_state.dart';
 import '../widgets/edit_budget_sheet.dart';
 
+enum _BudgetMenuAction { edit, delete }
+
 class BudgetDetailPage extends StatefulWidget {
   const BudgetDetailPage({
     super.key,
@@ -65,8 +67,7 @@ class _BudgetDetailPageState extends State<BudgetDetailPage>
 
   Future<void> _fetchById() async {
     try {
-      final budget =
-          await getIt<BudgetRepository>().getById(widget.budgetId!);
+      final budget = await getIt<BudgetRepository>().getById(widget.budgetId!);
       if (!mounted) return;
       setState(() {
         _budget = budget;
@@ -143,18 +144,13 @@ class _BudgetDetailPageState extends State<BudgetDetailPage>
       case BudgetAddEntryChoice.expense:
         await context.push(
           RouteNames.addTransaction,
-          extra: {
-            'type': 'EXPENSE',
-            'categoryId': budget.category!.id,
-          },
+          extra: {'type': 'EXPENSE', 'categoryId': budget.category!.id},
         );
         break;
       case BudgetAddEntryChoice.receipt:
         await context.push(
           RouteNames.receiptScanner,
-          extra: <String, String?>{
-            'categoryId': budget.category!.id,
-          },
+          extra: <String, String?>{'categoryId': budget.category!.id},
         );
         break;
     }
@@ -177,8 +173,9 @@ class _BudgetDetailPageState extends State<BudgetDetailPage>
         title: Text(s.deleteBudgetTitle, style: AppTypography.titleSm),
         content: Text(
           s.deleteBudgetContent(budget.name),
-          style: AppTypography.bodyMd
-              .copyWith(color: AppColors.onSurfaceVariant),
+          style: AppTypography.bodyMd.copyWith(
+            color: AppColors.onSurfaceVariant,
+          ),
         ),
         actions: [
           TextButton(
@@ -200,10 +197,12 @@ class _BudgetDetailPageState extends State<BudgetDetailPage>
     );
     if (ok == true && mounted) {
       context.read<BudgetsBloc>().add(BudgetDeleteRequested(budget.id));
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text(AppStrings.of(context).budgetDeletedSuccess),
-        backgroundColor: AppColors.secondary,
-      ));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(AppStrings.of(context).budgetDeletedSuccess),
+          backgroundColor: AppColors.secondary,
+        ),
+      );
       context.pop();
     }
   }
@@ -236,8 +235,9 @@ class _BudgetDetailPageState extends State<BudgetDetailPage>
         body: Center(
           child: Text(
             s.serverError,
-            style: AppTypography.bodyMd
-                .copyWith(color: AppColors.onSurfaceVariant),
+            style: AppTypography.bodyMd.copyWith(
+              color: AppColors.onSurfaceVariant,
+            ),
           ),
         ),
       );
@@ -248,14 +248,15 @@ class _BudgetDetailPageState extends State<BudgetDetailPage>
           curr is BudgetsLoaded || curr is BudgetsUpdateError,
       listener: (context, state) {
         if (state is BudgetsLoaded) {
-          final match =
-              state.budgets.where((b) => b.id == budget.id).toList();
+          final match = state.budgets.where((b) => b.id == budget.id).toList();
           if (match.isNotEmpty) _refreshFromBloc(match.first);
         } else if (state is BudgetsUpdateError) {
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text(state.message),
-            backgroundColor: AppColors.error,
-          ));
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(state.message),
+              backgroundColor: AppColors.error,
+            ),
+          );
         }
       },
       child: Scaffold(
@@ -271,11 +272,12 @@ class _BudgetDetailPageState extends State<BudgetDetailPage>
                 const SizedBox(width: AppSpacing.sm),
                 Container(
                   padding: const EdgeInsets.symmetric(
-                      horizontal: AppSpacing.xs, vertical: 2),
+                    horizontal: AppSpacing.xs,
+                    vertical: 2,
+                  ),
                   decoration: BoxDecoration(
                     color: AppColors.onSurfaceVariant.withValues(alpha: 0.15),
-                    borderRadius:
-                        BorderRadius.circular(AppSpacing.radiusSm),
+                    borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
                   ),
                   child: Text(
                     s.budgetArchivedBadge,
@@ -289,21 +291,62 @@ class _BudgetDetailPageState extends State<BudgetDetailPage>
             ],
           ),
           actions: [
-            if (budget.isActive) ...[
+            if (budget.isActive)
               IconButton(
                 icon: const Icon(Icons.add_rounded, color: AppColors.primary),
                 tooltip: s.budgetAddTransaction,
                 onPressed: _openAddEntrySheet,
               ),
-              IconButton(
-                icon: const Icon(Icons.edit_outlined,
-                    color: AppColors.onSurfaceVariant),
-                onPressed: _openEdit,
+            PopupMenuButton<_BudgetMenuAction>(
+              icon: const Icon(Icons.more_vert, color: AppColors.onSurface),
+              color: AppColors.surfaceContainerHigh,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
               ),
-            ],
-            IconButton(
-              icon: const Icon(Icons.delete_outline, color: AppColors.error),
-              onPressed: _confirmDelete,
+              onSelected: (action) {
+                switch (action) {
+                  case _BudgetMenuAction.edit:
+                    _openEdit();
+                  case _BudgetMenuAction.delete:
+                    _confirmDelete();
+                }
+              },
+              itemBuilder: (context) => [
+                if (budget.isActive)
+                  PopupMenuItem(
+                    value: _BudgetMenuAction.edit,
+                    child: Row(
+                      children: [
+                        const Icon(
+                          Icons.edit_outlined,
+                          size: 20,
+                          color: AppColors.onSurfaceVariant,
+                        ),
+                        const SizedBox(width: AppSpacing.md),
+                        Text(s.edit, style: AppTypography.bodyMd),
+                      ],
+                    ),
+                  ),
+                PopupMenuItem(
+                  value: _BudgetMenuAction.delete,
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.delete_outline,
+                        size: 20,
+                        color: AppColors.error,
+                      ),
+                      const SizedBox(width: AppSpacing.md),
+                      Text(
+                        s.delete,
+                        style: AppTypography.bodyMd.copyWith(
+                          color: AppColors.error,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
           ],
           bottom: budget.isActive
@@ -328,9 +371,9 @@ class _BudgetDetailPageState extends State<BudgetDetailPage>
                     budget: budget,
                     txFuture: _txFuture,
                     onRefresh: () async {
-                      context
-                          .read<BudgetsBloc>()
-                          .add(const BudgetsRefreshRequested());
+                      context.read<BudgetsBloc>().add(
+                        const BudgetsRefreshRequested(),
+                      );
                       setState(() {
                         _txFuture = _loadTransactions();
                       });
@@ -344,9 +387,9 @@ class _BudgetDetailPageState extends State<BudgetDetailPage>
                 budget: budget,
                 txFuture: _txFuture,
                 onRefresh: () async {
-                  context
-                      .read<BudgetsBloc>()
-                      .add(const BudgetsRefreshRequested());
+                  context.read<BudgetsBloc>().add(
+                    const BudgetsRefreshRequested(),
+                  );
                   setState(() {
                     _txFuture = _loadTransactions();
                   });
@@ -382,8 +425,7 @@ class _CurrentPeriodView extends StatelessWidget {
         future: txFuture,
         builder: (context, snapshot) {
           final transactions = snapshot.data ?? const <TransactionModel>[];
-          final loading =
-              snapshot.connectionState == ConnectionState.waiting;
+          final loading = snapshot.connectionState == ConnectionState.waiting;
           return ListView(
             padding: const EdgeInsets.fromLTRB(
               AppSpacing.pagePadding,
@@ -401,24 +443,18 @@ class _CurrentPeriodView extends StatelessWidget {
                 ),
                 const SizedBox(height: AppSpacing.xl),
               ],
-              Text(
-                s.budgetTransactionsTitle,
-                style: AppTypography.labelSm,
-              ),
+              Text(s.budgetTransactionsTitle, style: AppTypography.labelSm),
               const SizedBox(height: AppSpacing.md),
               if (loading)
                 const Padding(
                   padding: EdgeInsets.symmetric(vertical: AppSpacing.xxl),
                   child: Center(
-                    child: CircularProgressIndicator(
-                      color: AppColors.primary,
-                    ),
+                    child: CircularProgressIndicator(color: AppColors.primary),
                   ),
                 )
               else if (transactions.isEmpty)
                 Padding(
-                  padding:
-                      const EdgeInsets.symmetric(vertical: AppSpacing.xxl),
+                  padding: const EdgeInsets.symmetric(vertical: AppSpacing.xxl),
                   child: Center(
                     child: Text(
                       s.budgetNoTransactions,
@@ -439,9 +475,10 @@ class _CurrentPeriodView extends StatelessWidget {
   }
 
   List<Widget> _buildGroupedTransactions(
-      List<TransactionModel> transactions, BuildContext context) {
-    final sorted = [...transactions]
-      ..sort((a, b) => b.date.compareTo(a.date));
+    List<TransactionModel> transactions,
+    BuildContext context,
+  ) {
+    final sorted = [...transactions]..sort((a, b) => b.date.compareTo(a.date));
     final groups = <String, List<TransactionModel>>{};
     for (final t in sorted) {
       final key = DateFormatter.formatGroupHeader(t.date, context);
@@ -449,15 +486,20 @@ class _CurrentPeriodView extends StatelessWidget {
     }
     final widgets = <Widget>[];
     groups.forEach((header, items) {
-      widgets.add(Padding(
-        padding:
-            const EdgeInsets.only(top: AppSpacing.md, bottom: AppSpacing.sm),
-        child: Text(
-          header,
-          style: AppTypography.labelSm
-              .copyWith(color: AppColors.onSurfaceVariant),
+      widgets.add(
+        Padding(
+          padding: const EdgeInsets.only(
+            top: AppSpacing.md,
+            bottom: AppSpacing.sm,
+          ),
+          child: Text(
+            header,
+            style: AppTypography.labelSm.copyWith(
+              color: AppColors.onSurfaceVariant,
+            ),
+          ),
         ),
-      ));
+      );
       for (final t in items) {
         widgets.add(_BudgetTransactionTile(transaction: t));
       }
@@ -501,7 +543,8 @@ class _HistoryViewState extends State<_HistoryView> {
           return Center(
             child: Padding(
               padding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.pagePadding),
+                horizontal: AppSpacing.pagePadding,
+              ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -513,8 +556,9 @@ class _HistoryViewState extends State<_HistoryView> {
                   const SizedBox(height: AppSpacing.md),
                   Text(
                     s.budgetHistoryEmpty,
-                    style: AppTypography.bodyMd
-                        .copyWith(color: AppColors.onSurfaceVariant),
+                    style: AppTypography.bodyMd.copyWith(
+                      color: AppColors.onSurfaceVariant,
+                    ),
                     textAlign: TextAlign.center,
                   ),
                 ],
@@ -584,8 +628,9 @@ class _HistoryBarChart extends StatelessWidget {
                         rodIdx == 0
                             ? CurrencyFormatter.format(e.amount)
                             : CurrencyFormatter.format(e.spent),
-                        AppTypography.labelSm
-                            .copyWith(color: AppColors.onSurface),
+                        AppTypography.labelSm.copyWith(
+                          color: AppColors.onSurface,
+                        ),
                       );
                     },
                   ),
@@ -594,11 +639,14 @@ class _HistoryBarChart extends StatelessWidget {
                 borderData: FlBorderData(show: false),
                 titlesData: FlTitlesData(
                   leftTitles: const AxisTitles(
-                      sideTitles: SideTitles(showTitles: false)),
+                    sideTitles: SideTitles(showTitles: false),
+                  ),
                   rightTitles: const AxisTitles(
-                      sideTitles: SideTitles(showTitles: false)),
+                    sideTitles: SideTitles(showTitles: false),
+                  ),
                   topTitles: const AxisTitles(
-                      sideTitles: SideTitles(showTitles: false)),
+                    sideTitles: SideTitles(showTitles: false),
+                  ),
                   bottomTitles: AxisTitles(
                     sideTitles: SideTitles(
                       showTitles: true,
@@ -665,10 +713,10 @@ class _HistoryEntryCard extends StatelessWidget {
     final color = pct >= 100
         ? AppColors.tertiary
         : pct >= 90
-            ? const Color(0xFFFF9800)
-            : pct >= 75
-                ? AppColors.tertiary.withValues(alpha: 0.7)
-                : AppColors.secondary;
+        ? const Color(0xFFFF9800)
+        : pct >= 75
+        ? AppColors.tertiary.withValues(alpha: 0.7)
+        : AppColors.secondary;
 
     return Container(
       padding: const EdgeInsets.all(AppSpacing.lg),
@@ -688,8 +736,9 @@ class _HistoryEntryCard extends StatelessWidget {
                     Text(
                       '${DateFormatter.formatMini(entry.startDate, context)}'
                       ' → ${DateFormatter.formatMini(entry.endDate, context)}',
-                      style: AppTypography.bodySm
-                          .copyWith(color: AppColors.onSurfaceVariant),
+                      style: AppTypography.bodySm.copyWith(
+                        color: AppColors.onSurfaceVariant,
+                      ),
                     ),
                     Text(entry.name, style: AppTypography.titleSm),
                   ],
@@ -697,7 +746,9 @@ class _HistoryEntryCard extends StatelessWidget {
               ),
               Container(
                 padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.sm, vertical: 3),
+                  horizontal: AppSpacing.sm,
+                  vertical: 3,
+                ),
                 decoration: BoxDecoration(
                   color: color.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
@@ -725,8 +776,9 @@ class _HistoryEntryCard extends StatelessWidget {
               ),
               Text(
                 ' / ${CurrencyFormatter.format(entry.amount)}',
-                style: AppTypography.bodyMd
-                    .copyWith(color: AppColors.onSurfaceVariant),
+                style: AppTypography.bodyMd.copyWith(
+                  color: AppColors.onSurfaceVariant,
+                ),
               ),
             ],
           ),
@@ -771,13 +823,13 @@ class _SummaryCard extends StatelessWidget {
                 width: 48,
                 height: 48,
                 decoration: BoxDecoration(
-                  color: category?.cardColor.withValues(alpha: 0.15) ??
+                  color:
+                      category?.cardColor.withValues(alpha: 0.15) ??
                       AppColors.surfaceContainerHighest,
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
-                  IconMapper.fromString(
-                      category?.icon ?? 'account_balance'),
+                  IconMapper.fromString(category?.icon ?? 'account_balance'),
                   color: category?.cardColor ?? AppColors.primary,
                   size: 24,
                 ),
@@ -794,8 +846,10 @@ class _SummaryCard extends StatelessWidget {
                           color: AppColors.onSurfaceVariant,
                         ),
                       ),
-                    Text(budget.periodLabel(AppStrings.of(context)),
-                        style: AppTypography.titleSm),
+                    Text(
+                      budget.periodLabel(AppStrings.of(context)),
+                      style: AppTypography.titleSm,
+                    ),
                   ],
                 ),
               ),
@@ -806,8 +860,7 @@ class _SummaryCard extends StatelessWidget {
                 ),
                 decoration: BoxDecoration(
                   color: budget.statusColor.withValues(alpha: 0.15),
-                  borderRadius:
-                      BorderRadius.circular(AppSpacing.radiusSm),
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
                 ),
                 child: Text(
                   '%${budget.percentage} · ${budget.statusLabel(AppStrings.of(context))}',
@@ -830,8 +883,9 @@ class _SummaryCard extends StatelessWidget {
           ),
           Text(
             '/ ${CurrencyFormatter.format(budget.amount)}',
-            style: AppTypography.bodyMd
-                .copyWith(color: AppColors.onSurfaceVariant),
+            style: AppTypography.bodyMd.copyWith(
+              color: AppColors.onSurfaceVariant,
+            ),
           ),
           const SizedBox(height: AppSpacing.md),
           ClipRRect(
@@ -850,15 +904,15 @@ class _SummaryCard extends StatelessWidget {
                 child: _StatColumn(
                   label: s.budgetStatRemaining,
                   value: CurrencyFormatter.format(
-                      budget.remaining < 0 ? 0 : budget.remaining),
+                    budget.remaining < 0 ? 0 : budget.remaining,
+                  ),
                   color: AppColors.onSurface,
                 ),
               ),
               Expanded(
                 child: _StatColumn(
                   label: s.budgetStatStart,
-                  value:
-                      DateFormatter.formatMini(budget.startDate, context),
+                  value: DateFormatter.formatMini(budget.startDate, context),
                   color: AppColors.onSurfaceVariant,
                 ),
               ),
@@ -895,14 +949,17 @@ class _StatColumn extends StatelessWidget {
       children: [
         Text(
           label,
-          style: AppTypography.labelSm
-              .copyWith(color: AppColors.onSurfaceVariant),
+          style: AppTypography.labelSm.copyWith(
+            color: AppColors.onSurfaceVariant,
+          ),
         ),
         const SizedBox(height: 2),
         Text(
           value,
-          style: AppTypography.bodyMd
-              .copyWith(color: color, fontWeight: FontWeight.w600),
+          style: AppTypography.bodyMd.copyWith(
+            color: color,
+            fontWeight: FontWeight.w600,
+          ),
         ),
       ],
     );
@@ -923,8 +980,11 @@ class _DailySpendChart extends StatelessWidget {
     final now = DateTime.now();
     const days = 14;
     final buckets = List<double>.filled(days, 0);
-    final startDay = DateTime(now.year, now.month, now.day)
-        .subtract(const Duration(days: days - 1));
+    final startDay = DateTime(
+      now.year,
+      now.month,
+      now.day,
+    ).subtract(const Duration(days: days - 1));
 
     for (final t in transactions) {
       final local = t.date.toLocal();
@@ -962,16 +1022,15 @@ class _DailySpendChart extends StatelessWidget {
                 barTouchData: BarTouchData(
                   enabled: true,
                   touchTooltipData: BarTouchTooltipData(
-                    getTooltipColor: (_) =>
-                        AppColors.surfaceContainerHighest,
+                    getTooltipColor: (_) => AppColors.surfaceContainerHighest,
                     getTooltipItem: (group, _, rod, idx) {
-                      final date =
-                          startDay.add(Duration(days: group.x));
+                      final date = startDay.add(Duration(days: group.x));
                       return BarTooltipItem(
                         '${DateFormatter.formatMini(date, context)}\n'
                         '${CurrencyFormatter.format(rod.toY)}',
-                        AppTypography.labelSm
-                            .copyWith(color: AppColors.onSurface),
+                        AppTypography.labelSm.copyWith(
+                          color: AppColors.onSurface,
+                        ),
                       );
                     },
                   ),
@@ -980,11 +1039,14 @@ class _DailySpendChart extends StatelessWidget {
                 borderData: FlBorderData(show: false),
                 titlesData: FlTitlesData(
                   leftTitles: const AxisTitles(
-                      sideTitles: SideTitles(showTitles: false)),
+                    sideTitles: SideTitles(showTitles: false),
+                  ),
                   rightTitles: const AxisTitles(
-                      sideTitles: SideTitles(showTitles: false)),
+                    sideTitles: SideTitles(showTitles: false),
+                  ),
                   topTitles: const AxisTitles(
-                      sideTitles: SideTitles(showTitles: false)),
+                    sideTitles: SideTitles(showTitles: false),
+                  ),
                   bottomTitles: AxisTitles(
                     sideTitles: SideTitles(
                       showTitles: true,
@@ -995,8 +1057,7 @@ class _DailySpendChart extends StatelessWidget {
                         if (idx % 3 != 0 || idx < 0 || idx >= days) {
                           return const SizedBox.shrink();
                         }
-                        final date =
-                            startDay.add(Duration(days: idx));
+                        final date = startDay.add(Duration(days: idx));
                         return Padding(
                           padding: const EdgeInsets.only(top: 4),
                           child: Text(
@@ -1019,8 +1080,9 @@ class _DailySpendChart extends StatelessWidget {
                         BarChartRodData(
                           toY: buckets[i],
                           width: 10,
-                          borderRadius:
-                              BorderRadius.circular(AppSpacing.radiusSm),
+                          borderRadius: BorderRadius.circular(
+                            AppSpacing.radiusSm,
+                          ),
                           color: buckets[i] > 0
                               ? statusColor
                               : AppColors.surfaceContainerHighest,
@@ -1073,8 +1135,9 @@ class _BudgetTransactionTile extends StatelessWidget {
                   transaction.description ??
                       transaction.category?.localizedName(context) ??
                       AppStrings.of(context).transactionFallback,
-                  style: AppTypography.bodyMd
-                      .copyWith(fontWeight: FontWeight.w500),
+                  style: AppTypography.bodyMd.copyWith(
+                    fontWeight: FontWeight.w500,
+                  ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -1082,8 +1145,9 @@ class _BudgetTransactionTile extends StatelessWidget {
                 Text(
                   '${transaction.account?.name ?? ''}  •  '
                   '${DateFormatter.formatTime(transaction.date)}',
-                  style: AppTypography.bodySm
-                      .copyWith(color: AppColors.onSurfaceVariant),
+                  style: AppTypography.bodySm.copyWith(
+                    color: AppColors.onSurfaceVariant,
+                  ),
                 ),
               ],
             ),

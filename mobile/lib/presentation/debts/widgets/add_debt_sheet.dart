@@ -33,12 +33,25 @@ class _AddDebtSheetState extends State<AddDebtSheet> {
     super.dispose();
   }
 
+  void _showError(String msg) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(msg), backgroundColor: AppColors.error),
+    );
+  }
+
   void _submit() {
+    final s = AppStrings.of(context);
     final name = _nameController.text.trim();
     final amount = _amount;
 
-    if (name.isEmpty) return;
-    if (amount == null || amount <= 0) return;
+    if (name.isEmpty) {
+      _showError(s.enterPersonName);
+      return;
+    }
+    if (amount == null || amount <= 0) {
+      _showError(s.enterValidAmount);
+      return;
+    }
 
     final data = <String, dynamic>{
       'type': _type.name,
@@ -51,16 +64,20 @@ class _AddDebtSheetState extends State<AddDebtSheet> {
       'hasInstallments': _hasInstallments,
       if (_hasInstallments) 'installmentCount': _installmentCount,
       if (_hasInstallments)
-        'firstInstallmentDate':
-            DateTime.now().toIso8601String().split('T').first,
+        'firstInstallmentDate': DateTime.now()
+            .toIso8601String()
+            .split('T')
+            .first,
     };
 
     context.read<DebtsBloc>().add(DebtCreated(data));
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(_type == DebtType.LENT
-            ? AppStrings.of(context).debtLentCreatedSuccess
-            : AppStrings.of(context).debtCreatedSuccess),
+        content: Text(
+          _type == DebtType.LENT
+              ? AppStrings.of(context).debtLentCreatedSuccess
+              : AppStrings.of(context).debtCreatedSuccess,
+        ),
         backgroundColor: AppColors.secondary,
       ),
     );
@@ -109,9 +126,17 @@ class _AddDebtSheetState extends State<AddDebtSheet> {
               ),
             ),
             const SizedBox(height: AppSpacing.xl),
-            _inputField(_nameController, s.personNameHint, Icons.person_outline),
+            _inputField(
+              _nameController,
+              s.personNameHint,
+              Icons.person_outline,
+            ),
             const SizedBox(height: AppSpacing.md),
-            _inputField(_descController, s.descriptionOptionalHint, Icons.notes_outlined),
+            _inputField(
+              _descController,
+              s.descriptionOptionalHint,
+              Icons.notes_outlined,
+            ),
             const SizedBox(height: AppSpacing.md),
             GestureDetector(
               onTap: () async {
@@ -124,9 +149,9 @@ class _AddDebtSheetState extends State<AddDebtSheet> {
                   builder: (ctx, child) => Theme(
                     data: Theme.of(ctx).copyWith(
                       colorScheme: Theme.of(ctx).colorScheme.copyWith(
-                            primary: AppColors.primary,
-                            surface: AppColors.surfaceContainerHigh,
-                          ),
+                        primary: AppColors.primary,
+                        surface: AppColors.surfaceContainerHigh,
+                      ),
                     ),
                     child: child!,
                   ),
@@ -144,8 +169,11 @@ class _AddDebtSheetState extends State<AddDebtSheet> {
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.calendar_today_outlined,
-                        size: 20, color: AppColors.onSurfaceVariant),
+                    const Icon(
+                      Icons.calendar_today_outlined,
+                      size: 20,
+                      color: AppColors.onSurfaceVariant,
+                    ),
                     const SizedBox(width: AppSpacing.md),
                     Text(
                       _dueDate == null
@@ -177,19 +205,26 @@ class _AddDebtSheetState extends State<AddDebtSheet> {
                     ),
                     child: Row(
                       children: [
-                        const Icon(Icons.receipt_long_outlined,
-                            size: 20, color: AppColors.onSurfaceVariant),
+                        const Icon(
+                          Icons.receipt_long_outlined,
+                          size: 20,
+                          color: AppColors.onSurfaceVariant,
+                        ),
                         const SizedBox(width: AppSpacing.md),
                         Expanded(
-                          child: Text(s.installment, style: AppTypography.bodyMd),
+                          child: Text(
+                            s.installment,
+                            style: AppTypography.bodyMd,
+                          ),
                         ),
                         Switch(
                           value: _hasInstallments,
                           onChanged: (v) =>
                               setState(() => _hasInstallments = v),
                           activeThumbColor: AppColors.primary,
-                          activeTrackColor:
-                              AppColors.primary.withValues(alpha: 0.4),
+                          activeTrackColor: AppColors.primary.withValues(
+                            alpha: 0.4,
+                          ),
                         ),
                       ],
                     ),
@@ -197,11 +232,17 @@ class _AddDebtSheetState extends State<AddDebtSheet> {
                   if (_hasInstallments)
                     Padding(
                       padding: const EdgeInsets.fromLTRB(
-                          AppSpacing.lg, 0, AppSpacing.lg, AppSpacing.md),
+                        AppSpacing.lg,
+                        0,
+                        AppSpacing.lg,
+                        AppSpacing.md,
+                      ),
                       child: Row(
                         children: [
-                          Text(s.installmentCountLabel,
-                              style: AppTypography.bodyMd),
+                          Text(
+                            s.installmentCountLabel,
+                            style: AppTypography.bodyMd,
+                          ),
                           const Spacer(),
                           IconButton(
                             onPressed: () {
@@ -212,8 +253,10 @@ class _AddDebtSheetState extends State<AddDebtSheet> {
                             icon: const Icon(Icons.remove_circle_outline),
                             color: AppColors.onSurfaceVariant,
                           ),
-                          Text('$_installmentCount',
-                              style: AppTypography.titleSm),
+                          Text(
+                            '$_installmentCount',
+                            style: AppTypography.titleSm,
+                          ),
                           IconButton(
                             onPressed: () =>
                                 setState(() => _installmentCount++),
@@ -243,17 +286,16 @@ class _AddDebtSheetState extends State<AddDebtSheet> {
     );
   }
 
-  Widget _inputField(
-    TextEditingController ctrl,
-    String hint,
-    IconData icon,
-  ) {
+  Widget _inputField(TextEditingController ctrl, String hint, IconData icon) {
     return TextField(
       controller: ctrl,
       style: const TextStyle(color: AppColors.onSurface, fontSize: 14),
       decoration: InputDecoration(
         hintText: hint,
-        hintStyle: const TextStyle(color: AppColors.onSurfaceVariant, fontSize: 14),
+        hintStyle: const TextStyle(
+          color: AppColors.onSurfaceVariant,
+          fontSize: 14,
+        ),
         prefixIcon: Icon(icon, size: 20, color: AppColors.onSurfaceVariant),
         filled: true,
         fillColor: AppColors.surfaceContainerHighest,

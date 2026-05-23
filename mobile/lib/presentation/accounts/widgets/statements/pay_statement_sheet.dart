@@ -46,23 +46,40 @@ class _PayStatementSheetState extends State<PayStatementSheet> {
   }
 
   double get _remainingMinimum =>
-      (widget.statement.minimumPayment - widget.statement.paidAmount)
-          .clamp(0, widget.statement.remainingAmount);
+      (widget.statement.minimumPayment - widget.statement.paidAmount).clamp(
+        0,
+        widget.statement.remainingAmount,
+      );
 
   double get _selectedAmount => _choice == _PayChoice.minimum
       ? _remainingMinimum
       : widget.statement.remainingAmount;
 
+  void _showError(String msg) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(msg), backgroundColor: AppColors.error),
+    );
+  }
+
   void _submit() {
+    final s = AppStrings.of(context);
     final amount = _selectedAmount;
-    if (amount <= 0) return;
+    if (amount <= 0) {
+      _showError(s.enterValidAmount);
+      return;
+    }
     final accountId = _selectedAccountId;
-    if (accountId == null) return;
-    context.read<StatementsBloc>().add(StatementPaymentRequested(
-          statementId: widget.statement.id,
-          amount: amount,
-          fromAccountId: accountId,
-        ));
+    if (accountId == null) {
+      _showError(s.selectAccount);
+      return;
+    }
+    context.read<StatementsBloc>().add(
+      StatementPaymentRequested(
+        statementId: widget.statement.id,
+        amount: amount,
+        fromAccountId: accountId,
+      ),
+    );
     Navigator.of(context).pop();
   }
 
@@ -109,8 +126,9 @@ class _PayStatementSheetState extends State<PayStatementSheet> {
             const SizedBox(height: AppSpacing.sm),
             Text(
               '${s.remainingLabel}: ${CurrencyFormatter.format(stmt.remainingAmount)}',
-              style: AppTypography.bodySm
-                  .copyWith(color: AppColors.onSurfaceVariant),
+              style: AppTypography.bodySm.copyWith(
+                color: AppColors.onSurfaceVariant,
+              ),
             ),
             const SizedBox(height: AppSpacing.lg),
             if (!hasPayable)
@@ -139,8 +157,10 @@ class _PayStatementSheetState extends State<PayStatementSheet> {
               DropdownButtonFormField<String>(
                 initialValue: _selectedAccountId,
                 dropdownColor: AppColors.surfaceContainerHigh,
-                style:
-                    const TextStyle(color: AppColors.onSurface, fontSize: 14),
+                style: const TextStyle(
+                  color: AppColors.onSurface,
+                  fontSize: 14,
+                ),
                 decoration: InputDecoration(
                   filled: true,
                   fillColor: AppColors.surfaceContainerHighest,
@@ -150,11 +170,14 @@ class _PayStatementSheetState extends State<PayStatementSheet> {
                   ),
                 ),
                 items: widget.payableAccounts
-                    .map((a) => DropdownMenuItem(
-                          value: a.id,
-                          child: Text(
-                              '${a.name} · ${CurrencyFormatter.format(a.balance)}'),
-                        ))
+                    .map(
+                      (a) => DropdownMenuItem(
+                        value: a.id,
+                        child: Text(
+                          '${a.name} · ${CurrencyFormatter.format(a.balance)}',
+                        ),
+                      ),
+                    )
                     .toList(),
                 onChanged: (v) => setState(() => _selectedAccountId = v),
               ),
@@ -166,8 +189,7 @@ class _PayStatementSheetState extends State<PayStatementSheet> {
                   onPressed: _selectedAmount > 0 ? _submit : null,
                   style: FilledButton.styleFrom(
                     shape: RoundedRectangleBorder(
-                      borderRadius:
-                          BorderRadius.circular(AppSpacing.radiusXl),
+                      borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
                     ),
                   ),
                   child: Text(
@@ -183,10 +205,9 @@ class _PayStatementSheetState extends State<PayStatementSheet> {
   }
 
   Widget _label(String text) => Text(
-        text,
-        style: AppTypography.labelSm
-            .copyWith(color: AppColors.onSurfaceVariant),
-      );
+    text,
+    style: AppTypography.labelSm.copyWith(color: AppColors.onSurfaceVariant),
+  );
 }
 
 class _PayChoiceTile extends StatelessWidget {
@@ -237,8 +258,9 @@ class _PayChoiceTile extends StatelessWidget {
                   child: Text(
                     label,
                     style: AppTypography.bodyMd.copyWith(
-                      color:
-                          selected ? AppColors.onSurface : AppColors.onSurface,
+                      color: selected
+                          ? AppColors.onSurface
+                          : AppColors.onSurface,
                       fontWeight: FontWeight.w500,
                     ),
                   ),

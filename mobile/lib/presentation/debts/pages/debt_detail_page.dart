@@ -337,11 +337,24 @@ class _DetailPaymentSheetState extends State<_DetailPaymentSheet> {
     super.dispose();
   }
 
+  void _showError(String msg) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(msg), backgroundColor: AppColors.error),
+    );
+  }
+
   void _submit() {
+    final s = AppStrings.of(context);
     final amountStr = _amountCtrl.text.trim().replaceAll(',', '.');
     final amount = double.tryParse(amountStr);
-    if (amount == null || amount <= 0) return;
-    if (_selectedAccountId == null) return;
+    if (amount == null || amount <= 0) {
+      _showError(s.enterValidAmount);
+      return;
+    }
+    if (_selectedAccountId == null) {
+      _showError(s.selectAccount);
+      return;
+    }
 
     context.read<DebtDetailBloc>().add(
       DebtDetailPaymentMade({

@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:wallet_app/core/l10n/app_strings.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:wallet_app/core/constants/app_colors.dart';
@@ -70,7 +70,9 @@ class _SubscriptionDetailPageState extends State<SubscriptionDetailPage> {
       isScrollControlled: true,
       backgroundColor: AppColors.surfaceContainerHigh,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(AppSpacing.radiusLg)),
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(AppSpacing.radiusLg),
+        ),
       ),
       builder: (sheetCtx) {
         return StatefulBuilder(
@@ -89,7 +91,10 @@ class _SubscriptionDetailPageState extends State<SubscriptionDetailPage> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text('Aboneliği Düzenle', style: AppTypography.headlineSm),
+                      Text(
+                        'Aboneliği Düzenle',
+                        style: AppTypography.headlineSm,
+                      ),
                       IconButton(
                         onPressed: () => Navigator.of(ctx).pop(),
                         icon: const Icon(Icons.close_rounded),
@@ -108,24 +113,43 @@ class _SubscriptionDetailPageState extends State<SubscriptionDetailPage> {
                   const SizedBox(height: AppSpacing.xl),
                   TextField(
                     controller: _editNameCtrl,
-                    style: const TextStyle(color: AppColors.onSurface, fontSize: 14),
+                    style: const TextStyle(
+                      color: AppColors.onSurface,
+                      fontSize: 14,
+                    ),
                     decoration: InputDecoration(
                       hintText: 'Abonelik adı',
-                      hintStyle: const TextStyle(color: AppColors.onSurfaceVariant, fontSize: 14),
-                      prefixIcon: const Icon(Icons.subscriptions_outlined, size: 20, color: AppColors.onSurfaceVariant),
+                      hintStyle: const TextStyle(
+                        color: AppColors.onSurfaceVariant,
+                        fontSize: 14,
+                      ),
+                      prefixIcon: const Icon(
+                        Icons.subscriptions_outlined,
+                        size: 20,
+                        color: AppColors.onSurfaceVariant,
+                      ),
                       filled: true,
                       fillColor: AppColors.surfaceContainerHighest,
                       border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                        borderRadius: BorderRadius.circular(
+                          AppSpacing.radiusMd,
+                        ),
                         borderSide: BorderSide.none,
                       ),
                       enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                        borderRadius: BorderRadius.circular(
+                          AppSpacing.radiusMd,
+                        ),
                         borderSide: BorderSide.none,
                       ),
                       focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-                        borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
+                        borderRadius: BorderRadius.circular(
+                          AppSpacing.radiusMd,
+                        ),
+                        borderSide: const BorderSide(
+                          color: AppColors.primary,
+                          width: 1.5,
+                        ),
                       ),
                     ),
                   ),
@@ -133,7 +157,26 @@ class _SubscriptionDetailPageState extends State<SubscriptionDetailPage> {
                   FilledButton(
                     onPressed: () {
                       final name = _editNameCtrl.text.trim();
-                      if (name.isEmpty || pendingAmount == null || pendingAmount! <= 0) return;
+                      if (name.isEmpty) {
+                        ScaffoldMessenger.of(ctx).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              AppStrings.of(ctx).enterSubscriptionName,
+                            ),
+                            backgroundColor: AppColors.error,
+                          ),
+                        );
+                        return;
+                      }
+                      if (pendingAmount == null || pendingAmount! <= 0) {
+                        ScaffoldMessenger.of(ctx).showSnackBar(
+                          SnackBar(
+                            content: Text(AppStrings.of(ctx).enterValidAmount),
+                            backgroundColor: AppColors.error,
+                          ),
+                        );
+                        return;
+                      }
                       savedName = name;
                       savedAmount = pendingAmount;
                       Navigator.of(ctx).pop();
@@ -141,7 +184,9 @@ class _SubscriptionDetailPageState extends State<SubscriptionDetailPage> {
                     style: FilledButton.styleFrom(
                       minimumSize: const Size.fromHeight(56),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
+                        borderRadius: BorderRadius.circular(
+                          AppSpacing.radiusXl,
+                        ),
                       ),
                     ),
                     child: Text(AppStrings.of(ctx).save),
@@ -179,11 +224,15 @@ class _SubscriptionDetailPageState extends State<SubscriptionDetailPage> {
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: AppColors.surfaceContainerHigh,
-        title: Text(AppStrings.of(context).deleteSubscriptionTitle, style: AppTypography.titleSm),
+        title: Text(
+          AppStrings.of(context).deleteSubscriptionTitle,
+          style: AppTypography.titleSm,
+        ),
         content: Text(
           '${_sub.name} aboneliği silinecek. Gelecek ödemeler durur.',
-          style: AppTypography.bodyMd
-              .copyWith(color: AppColors.onSurfaceVariant),
+          style: AppTypography.bodyMd.copyWith(
+            color: AppColors.onSurfaceVariant,
+          ),
         ),
         actions: [
           TextButton(
@@ -192,7 +241,10 @@ class _SubscriptionDetailPageState extends State<SubscriptionDetailPage> {
           ),
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(true),
-            child: Text(AppStrings.of(context).delete, style: TextStyle(color: AppColors.error)),
+            child: Text(
+              AppStrings.of(context).delete,
+              style: TextStyle(color: AppColors.error),
+            ),
           ),
         ],
       ),
@@ -203,10 +255,12 @@ class _SubscriptionDetailPageState extends State<SubscriptionDetailPage> {
       final messenger = ScaffoldMessenger.of(context);
       final deleteMsg = AppStrings.of(context).subscriptionDeletedSuccess;
       Navigator.of(context).pop();
-      messenger.showSnackBar(SnackBar(
-        content: Text(deleteMsg),
-        backgroundColor: AppColors.secondary,
-      ));
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(deleteMsg),
+          backgroundColor: AppColors.secondary,
+        ),
+      );
     }
   }
 

@@ -209,6 +209,8 @@ abstract class AppStrings {
   String get selectTargetAccount;
   String get selectCategory;
   String get enterBudgetName;
+  String get enterSubscriptionName;
+  String get enterPersonName;
   String get selectCategoryPrompt;
   String get accountsLoadFailed;
 
@@ -563,528 +565,1037 @@ abstract class AppStrings {
 class _Tr extends AppStrings {
   const _Tr();
 
-  @override String get navHome => 'Anasayfa';
-  @override String get navTransactions => 'İşlemler';
-  @override String get navBudgets => 'Bütçe';
-  @override String get navSubscriptions => 'Abonelik';
+  @override
+  String get navHome => 'Anasayfa';
+  @override
+  String get navTransactions => 'İşlemler';
+  @override
+  String get navBudgets => 'Bütçe';
+  @override
+  String get navSubscriptions => 'Abonelik';
 
-  @override String get income => 'Gelir';
-  @override String get expense => 'Gider';
-  @override String get transfer => 'Transfer';
-  @override String get scanReceipt => 'Fiş Tara';
+  @override
+  String get income => 'Gelir';
+  @override
+  String get expense => 'Gider';
+  @override
+  String get transfer => 'Transfer';
+  @override
+  String get scanReceipt => 'Fiş Tara';
 
-  @override String get settings => 'Ayarlar';
-  @override String get sectionAccount => 'Hesap';
-  @override String get sectionPreferences => 'Tercihler';
-  @override String get sectionTools => 'Araçlar';
-  @override String get sectionSecurity => 'Güvenlik';
-  @override String get sectionSession => 'Oturum';
+  @override
+  String get settings => 'Ayarlar';
+  @override
+  String get sectionAccount => 'Hesap';
+  @override
+  String get sectionPreferences => 'Tercihler';
+  @override
+  String get sectionTools => 'Araçlar';
+  @override
+  String get sectionSecurity => 'Güvenlik';
+  @override
+  String get sectionSession => 'Oturum';
 
-  @override String get editProfile => 'Profili Düzenle';
-  @override String get myAccounts => 'Hesaplarım';
-  @override String get archivedAccounts => 'Arşivlenmiş Hesaplar';
-  @override String get notifications => 'Bildirimler';
-  @override String get biometricLogin => 'Biyometrik Giriş';
-  @override String get currency => 'Para Birimi';
-  @override String get language => 'Dil';
-  @override String get receiptHistory => 'Fiş Geçmişi';
-  @override String get changePassword => 'Şifre Değiştir';
-  @override String get logout => 'Çıkış Yap';
+  @override
+  String get editProfile => 'Profili Düzenle';
+  @override
+  String get myAccounts => 'Hesaplarım';
+  @override
+  String get archivedAccounts => 'Arşivlenmiş Hesaplar';
+  @override
+  String get notifications => 'Bildirimler';
+  @override
+  String get biometricLogin => 'Biyometrik Giriş';
+  @override
+  String get currency => 'Para Birimi';
+  @override
+  String get language => 'Dil';
+  @override
+  String get receiptHistory => 'Fiş Geçmişi';
+  @override
+  String get changePassword => 'Şifre Değiştir';
+  @override
+  String get logout => 'Çıkış Yap';
 
-  @override String get selectCurrency => 'Para Birimi Seç';
-  @override String get selectLanguage => 'Dil Seç';
-  @override String get currencyTRY => 'Türk Lirası';
-  @override String get currencyUSD => 'Amerikan Doları';
-  @override String get currencyEUR => 'Euro';
-  @override String get currencyGBP => 'İngiliz Sterlini';
+  @override
+  String get selectCurrency => 'Para Birimi Seç';
+  @override
+  String get selectLanguage => 'Dil Seç';
+  @override
+  String get currencyTRY => 'Türk Lirası';
+  @override
+  String get currencyUSD => 'Amerikan Doları';
+  @override
+  String get currencyEUR => 'Euro';
+  @override
+  String get currencyGBP => 'İngiliz Sterlini';
 
-  @override String get cancel => 'İptal';
-  @override String get logoutConfirmTitle => 'Çıkış Yap';
-  @override String get logoutConfirmContent => 'Hesabınızdan çıkış yapmak istediğinize emin misiniz?';
-  @override String get retry => 'Tekrar Dene';
+  @override
+  String get cancel => 'İptal';
+  @override
+  String get logoutConfirmTitle => 'Çıkış Yap';
+  @override
+  String get logoutConfirmContent =>
+      'Hesabınızdan çıkış yapmak istediğinize emin misiniz?';
+  @override
+  String get retry => 'Tekrar Dene';
 
-  @override String get hello => 'Merhaba';
-  @override String helloName(String name) => 'Merhaba, $name';
-  @override String get myAccountsTitle => 'Hesaplarım';
-  @override String get addAccount => '+ Ekle';
-  @override String get myDebts => 'Borçlarım';
-  @override String get recentTransactions => 'Son İşlemler';
-  @override String get viewAll => 'Tümünü Gör';
-  @override String get totalAssets => 'TOPLAM VARLIK';
-  @override String get netAssets => 'Net Varlık';
-  @override String get creditCardDebt => 'CC Borcu';
-  @override String get noTransactionsYet => 'Henüz işlem yok';
-  @override String get addFirstTransaction => 'İlk işleminizi ekleyin';
+  @override
+  String get hello => 'Merhaba';
+  @override
+  String helloName(String name) => 'Merhaba, $name';
+  @override
+  String get myAccountsTitle => 'Hesaplarım';
+  @override
+  String get addAccount => '+ Ekle';
+  @override
+  String get myDebts => 'Borçlarım';
+  @override
+  String get recentTransactions => 'Son İşlemler';
+  @override
+  String get viewAll => 'Tümünü Gör';
+  @override
+  String get totalAssets => 'TOPLAM VARLIK';
+  @override
+  String get netAssets => 'Net Varlık';
+  @override
+  String get creditCardDebt => 'CC Borcu';
+  @override
+  String get noTransactionsYet => 'Henüz işlem yok';
+  @override
+  String get addFirstTransaction => 'İlk işleminizi ekleyin';
 
-  @override String get transactionsTitle => 'İşlemler';
-  @override String get filterAll => 'Hepsi';
-  @override String get summaryNet => 'Net';
-  @override String get noTransactions => 'Henüz işlem yok';
-  @override String get noTransactionsSubtitle => 'İlk işleminizi ekleyerek\ngelir ve giderlerinizi takip edin.';
-  @override String get addTransactionBtn => 'İşlem Ekle';
-  @override String get transactionFallback => 'İşlem';
+  @override
+  String get transactionsTitle => 'İşlemler';
+  @override
+  String get filterAll => 'Hepsi';
+  @override
+  String get summaryNet => 'Net';
+  @override
+  String get noTransactions => 'Henüz işlem yok';
+  @override
+  String get noTransactionsSubtitle =>
+      'İlk işleminizi ekleyerek\ngelir ve giderlerinizi takip edin.';
+  @override
+  String get addTransactionBtn => 'İşlem Ekle';
+  @override
+  String get transactionFallback => 'İşlem';
 
-  @override String get budgetsTitle => 'Bütçeler';
-  @override String get activeBudgets => 'Aktif Bütçeler';
-  @override String get totalBudget => 'Toplam Bütçe';
-  @override String get spent => 'Harcanan';
-  @override String get remaining => 'Kalan';
-  @override String get spentArc => 'harcandı';
-  @override String get noBudgets => 'Henüz bütçe yok';
-  @override String get noBudgetsSubtitle => 'Harcamalarını takip etmek için\nbir bütçe oluştur.';
-  @override String get createBudgetBtn => 'Bütçe Oluştur';
+  @override
+  String get budgetsTitle => 'Bütçeler';
+  @override
+  String get activeBudgets => 'Aktif Bütçeler';
+  @override
+  String get totalBudget => 'Toplam Bütçe';
+  @override
+  String get spent => 'Harcanan';
+  @override
+  String get remaining => 'Kalan';
+  @override
+  String get spentArc => 'harcandı';
+  @override
+  String get noBudgets => 'Henüz bütçe yok';
+  @override
+  String get noBudgetsSubtitle =>
+      'Harcamalarını takip etmek için\nbir bütçe oluştur.';
+  @override
+  String get createBudgetBtn => 'Bütçe Oluştur';
 
-  @override String get subscriptionsTitle => 'Abonelikler';
-  @override String get monthlyTotal => 'Aylık Toplam';
-  @override String get activeLabel => 'Aktif';
-  @override String get noSubscriptions => 'Abonelik yok';
-  @override String get noSubscriptionsSubtitle => 'Netflix, Spotify gibi aboneliklerinizi\nekleyerek otomatik takip edin.';
-  @override String get addSubscriptionBtn => 'Abonelik Ekle';
+  @override
+  String get subscriptionsTitle => 'Abonelikler';
+  @override
+  String get monthlyTotal => 'Aylık Toplam';
+  @override
+  String get activeLabel => 'Aktif';
+  @override
+  String get noSubscriptions => 'Abonelik yok';
+  @override
+  String get noSubscriptionsSubtitle =>
+      'Netflix, Spotify gibi aboneliklerinizi\nekleyerek otomatik takip edin.';
+  @override
+  String get addSubscriptionBtn => 'Abonelik Ekle';
 
-  @override String? translateCategory(String name) => null;
+  @override
+  String? translateCategory(String name) => null;
 
-  @override String get save => 'Kaydet';
-  @override String get saveAccount => 'Hesabı Kaydet';
-  @override String get saveChanges => 'Değişiklikleri Kaydet';
-  @override String get delete => 'Sil';
-  @override String get edit => 'Düzenle';
-  @override String get update => 'Güncelle';
-  @override String get ok => 'Tamam';
-  @override String get setAsDefault => 'Varsayılan Yap';
-  @override String get archive => 'Arşivle';
-  @override String get camera => 'Kamera';
-  @override String get gallery => 'Galeri';
-  @override String get loginAction => 'Giriş Yap';
-  @override String get installment => 'Taksitli';
-  @override String get scanAgain => 'Tekrar Tara';
-  @override String get goBack => 'Geri Dön';
-  @override String get registerAction => 'Kayıt Ol';
+  @override
+  String get save => 'Kaydet';
+  @override
+  String get saveAccount => 'Hesabı Kaydet';
+  @override
+  String get saveChanges => 'Değişiklikleri Kaydet';
+  @override
+  String get delete => 'Sil';
+  @override
+  String get edit => 'Düzenle';
+  @override
+  String get update => 'Güncelle';
+  @override
+  String get ok => 'Tamam';
+  @override
+  String get setAsDefault => 'Varsayılan Yap';
+  @override
+  String get archive => 'Arşivle';
+  @override
+  String get camera => 'Kamera';
+  @override
+  String get gallery => 'Galeri';
+  @override
+  String get loginAction => 'Giriş Yap';
+  @override
+  String get installment => 'Taksitli';
+  @override
+  String get scanAgain => 'Tekrar Tara';
+  @override
+  String get goBack => 'Geri Dön';
+  @override
+  String get registerAction => 'Kayıt Ol';
 
-  @override String get addAccountTitle => 'Hesap Ekle';
-  @override String get editAccountTitle => 'Hesabı Düzenle';
-  @override String get newBudgetTitle => 'Yeni Bütçe';
-  @override String get reportsTitle => 'Raporlar';
-  @override String get receiptPreviewTitle => 'Makbuz Önizleme';
-  @override String get debtsTitle => 'Borçlar';
-  @override String get smartTracking => 'Akıllı Takip';
+  @override
+  String get addAccountTitle => 'Hesap Ekle';
+  @override
+  String get editAccountTitle => 'Hesabı Düzenle';
+  @override
+  String get newBudgetTitle => 'Yeni Bütçe';
+  @override
+  String get reportsTitle => 'Raporlar';
+  @override
+  String get receiptPreviewTitle => 'Makbuz Önizleme';
+  @override
+  String get debtsTitle => 'Borçlar';
+  @override
+  String get smartTracking => 'Akıllı Takip';
 
-  @override String get deleteTransactionTitle => 'İşlemi Sil';
-  @override String get deleteTransactionContent => 'Bu işlem silinecek ve hesap bakiyesi güncellenecek.';
-  @override String get deleteBudgetTitle => 'Bütçeyi Sil';
-  @override String deleteBudgetContent(String name) => '"$name" bütçesi silinecek.';
-  @override String get editBudgetTitle => 'Bütçeyi Düzenle';
-  @override String get cancelSubscriptionTitle => 'Aboneliği İptal Et';
-  @override String get deleteSubscriptionTitle => 'Aboneliği Sil';
-  @override String deleteSubscriptionContent(String name) => '$name aboneliği silinecek. Gelecek ödemeler durur.';
-  @override String get deleteDebtTitle => 'Borcu Sil';
-  @override String deleteDebtContent(String name) => '$name ile olan borç kaydı silinecek.';
-  @override String get deleteReceiptTitle => 'Fişi Sil';
-  @override String get selectPhotoTitle => 'Fotoğraf Seç';
-  @override String get addDebtTitle => 'Borç Ekle';
-  @override String get addSubscriptionTitle => 'Abonelik Ekle';
-  @override String get archiveAccountTitle => 'Hesabı Arşivle';
-  @override String get archiveAccountContent => 'Hesap gizlenecek, işlem geçmişi korunacak. Arşivlenen hesapları ayarlardan geri getirebilirsiniz.';
-  @override String get archiveConfirm => 'Arşivle';
-  @override String get deleteAccountContent => 'Bu hesap kalıcı olarak silinecek. İşlem geçmişi olan hesaplar silinemez.';
+  @override
+  String get deleteTransactionTitle => 'İşlemi Sil';
+  @override
+  String get deleteTransactionContent =>
+      'Bu işlem silinecek ve hesap bakiyesi güncellenecek.';
+  @override
+  String get deleteBudgetTitle => 'Bütçeyi Sil';
+  @override
+  String deleteBudgetContent(String name) => '"$name" bütçesi silinecek.';
+  @override
+  String get editBudgetTitle => 'Bütçeyi Düzenle';
+  @override
+  String get cancelSubscriptionTitle => 'Aboneliği İptal Et';
+  @override
+  String get deleteSubscriptionTitle => 'Aboneliği Sil';
+  @override
+  String deleteSubscriptionContent(String name) =>
+      '$name aboneliği silinecek. Gelecek ödemeler durur.';
+  @override
+  String get deleteDebtTitle => 'Borcu Sil';
+  @override
+  String deleteDebtContent(String name) =>
+      '$name ile olan borç kaydı silinecek.';
+  @override
+  String get deleteReceiptTitle => 'Fişi Sil';
+  @override
+  String get selectPhotoTitle => 'Fotoğraf Seç';
+  @override
+  String get addDebtTitle => 'Borç Ekle';
+  @override
+  String get addSubscriptionTitle => 'Abonelik Ekle';
+  @override
+  String get archiveAccountTitle => 'Hesabı Arşivle';
+  @override
+  String get archiveAccountContent =>
+      'Hesap gizlenecek, işlem geçmişi korunacak. Arşivlenen hesapları ayarlardan geri getirebilirsiniz.';
+  @override
+  String get archiveConfirm => 'Arşivle';
+  @override
+  String get deleteAccountContent =>
+      'Bu hesap kalıcı olarak silinecek. İşlem geçmişi olan hesaplar silinemez.';
 
-  @override String get transactionHistory => 'İşlem Geçmişi';
-  @override String get categoryLabel => 'Kategori';
-  @override String get accountLabel => 'Hesap';
-  @override String get targetAccountLabel => 'Hedef Hesap';
-  @override String get addFirstAccount => 'İlk Hesabı Ekle';
-  @override String get noArchivedAccounts => 'Arşivlenmiş hesap yok';
-  @override String get periodLabel => 'Dönem';
-  @override String get startDateLabel => 'Başlangıç';
-  @override String get endDateLabel => 'Bitiş';
-  @override String get billingCycleLabel => 'Fatura Dönemi';
-  @override String get autoDeductLabel => 'Otomatik Kesinti';
-  @override String get installmentsSection => 'Taksitler';
-  @override String get paymentHistoryTitle => 'Ödeme Geçmişi';
-  @override String get amountLabel => 'Tutar';
-  @override String get merchantLabel => 'İşyeri';
-  @override String get dateLabel => 'Tarih';
+  @override
+  String get transactionHistory => 'İşlem Geçmişi';
+  @override
+  String get categoryLabel => 'Kategori';
+  @override
+  String get accountLabel => 'Hesap';
+  @override
+  String get targetAccountLabel => 'Hedef Hesap';
+  @override
+  String get addFirstAccount => 'İlk Hesabı Ekle';
+  @override
+  String get noArchivedAccounts => 'Arşivlenmiş hesap yok';
+  @override
+  String get periodLabel => 'Dönem';
+  @override
+  String get startDateLabel => 'Başlangıç';
+  @override
+  String get endDateLabel => 'Bitiş';
+  @override
+  String get billingCycleLabel => 'Fatura Dönemi';
+  @override
+  String get autoDeductLabel => 'Otomatik Kesinti';
+  @override
+  String get installmentsSection => 'Taksitler';
+  @override
+  String get paymentHistoryTitle => 'Ödeme Geçmişi';
+  @override
+  String get amountLabel => 'Tutar';
+  @override
+  String get merchantLabel => 'İşyeri';
+  @override
+  String get dateLabel => 'Tarih';
 
-  @override String get accountDeleted => 'Hesap silindi';
-  @override String get passwordMismatch => 'Yeni şifreler eşleşmiyor.';
-  @override String get passwordTooShort => 'Şifre en az 8 karakter olmalı.';
-  @override String get transactionCreatedSuccess => 'İşlem başarıyla oluşturuldu';
-  @override String get budgetCreatedSuccess => 'Bütçe başarıyla oluşturuldu';
-  @override String get budgetUpdatedSuccess => 'Bütçe başarıyla güncellendi';
-  @override String get debtCreatedSuccess => 'Borç başarıyla eklendi';
-  @override String get debtLentCreatedSuccess => 'Alacak başarıyla eklendi';
-  @override String get debtPaymentSuccess => 'Ödeme başarıyla kaydedildi';
-  @override String get debtCollectionSuccess => 'Tahsilat başarıyla kaydedildi';
-  @override String get subscriptionCreatedSuccess => 'Abonelik başarıyla eklendi';
-  @override String get accountCreatedSuccess => 'Hesap başarıyla oluşturuldu';
-  @override String get accountUpdatedSuccess => 'Hesap başarıyla güncellendi';
-  @override String get subscriptionUpdatedSuccess => 'Abonelik başarıyla güncellendi';
-  @override String get transactionDeletedSuccess => 'İşlem başarıyla silindi';
-  @override String get budgetDeletedSuccess => 'Bütçe başarıyla silindi';
-  @override String get budgetTransactionsTitle => 'İŞLEMLER';
-  @override String get budgetNoTransactions => 'Bu bütçeye ait işlem bulunamadı.';
-  @override String get budgetStatRemaining => 'Kalan';
-  @override String get budgetStatStart => 'Başlangıç';
-  @override String get budgetStatEnd => 'Bitiş';
-  @override String get budgetDailyChartTitle => 'SON 14 GÜN';
-  @override String get sharedBudgetExpensesTitle => 'HARCAMALAR';
-  @override String get sharedBudgetNoExpenses => 'Bu ortak bütçeye ait harcama bulunamadı.';
-  @override String get sharedBudgetMembersTotal => 'Toplam';
-  @override String get cancelInviteTitle => 'Daveti İptal Et';
-  @override String cancelInviteConfirm(String email) => '$email adresine gönderilen davet iptal edilecek.';
-  @override String get inviteCancelledSuccess => 'Davet iptal edildi';
-  @override String get budgetAddTransaction => 'Ekle';
-  @override String get budgetSheetAddExpense => 'Gider Ekle';
-  @override String get accountSheetAddTransaction => 'İşlem Ekle';
-  @override String get budgetCreateSheetBudget => 'Bütçe Oluştur';
-  @override String get budgetCreateSheetGroup => 'Grup Oluştur';
-  @override String get budgetScopeLabel => 'Bütçe Tipi';
-  @override String get budgetScopePersonal => 'Kişisel';
-  @override String get debtDeletedSuccess => 'Borç kaydı başarıyla silindi';
-  @override String get subscriptionDeletedSuccess => 'Abonelik başarıyla silindi';
-  @override String get groupDeletedSuccess => 'Grup başarıyla silindi';
-  @override String get sharedBudgetDeletedSuccess => 'Ortak bütçe başarıyla silindi';
-  @override String get enterValidAmount => 'Geçerli bir tutar girin.';
-  @override String get selectAccount => 'Bir hesap seçin.';
-  @override String get selectTargetAccount => 'Hedef hesap seçin.';
-  @override String get selectCategory => 'Bir kategori seçin.';
-  @override String get enterBudgetName => 'Bütçe adı girin.';
-  @override String get selectCategoryPrompt => 'Bir kategori seçin.';
-  @override String get accountsLoadFailed => 'Hesaplar yüklenemedi';
+  @override
+  String get accountDeleted => 'Hesap silindi';
+  @override
+  String get passwordMismatch => 'Yeni şifreler eşleşmiyor.';
+  @override
+  String get passwordTooShort => 'Şifre en az 8 karakter olmalı.';
+  @override
+  String get transactionCreatedSuccess => 'İşlem başarıyla oluşturuldu';
+  @override
+  String get budgetCreatedSuccess => 'Bütçe başarıyla oluşturuldu';
+  @override
+  String get budgetUpdatedSuccess => 'Bütçe başarıyla güncellendi';
+  @override
+  String get debtCreatedSuccess => 'Borç başarıyla eklendi';
+  @override
+  String get debtLentCreatedSuccess => 'Alacak başarıyla eklendi';
+  @override
+  String get debtPaymentSuccess => 'Ödeme başarıyla kaydedildi';
+  @override
+  String get debtCollectionSuccess => 'Tahsilat başarıyla kaydedildi';
+  @override
+  String get subscriptionCreatedSuccess => 'Abonelik başarıyla eklendi';
+  @override
+  String get accountCreatedSuccess => 'Hesap başarıyla oluşturuldu';
+  @override
+  String get accountUpdatedSuccess => 'Hesap başarıyla güncellendi';
+  @override
+  String get subscriptionUpdatedSuccess => 'Abonelik başarıyla güncellendi';
+  @override
+  String get transactionDeletedSuccess => 'İşlem başarıyla silindi';
+  @override
+  String get budgetDeletedSuccess => 'Bütçe başarıyla silindi';
+  @override
+  String get budgetTransactionsTitle => 'İŞLEMLER';
+  @override
+  String get budgetNoTransactions => 'Bu bütçeye ait işlem bulunamadı.';
+  @override
+  String get budgetStatRemaining => 'Kalan';
+  @override
+  String get budgetStatStart => 'Başlangıç';
+  @override
+  String get budgetStatEnd => 'Bitiş';
+  @override
+  String get budgetDailyChartTitle => 'SON 14 GÜN';
+  @override
+  String get sharedBudgetExpensesTitle => 'HARCAMALAR';
+  @override
+  String get sharedBudgetNoExpenses =>
+      'Bu ortak bütçeye ait harcama bulunamadı.';
+  @override
+  String get sharedBudgetMembersTotal => 'Toplam';
+  @override
+  String get cancelInviteTitle => 'Daveti İptal Et';
+  @override
+  String cancelInviteConfirm(String email) =>
+      '$email adresine gönderilen davet iptal edilecek.';
+  @override
+  String get inviteCancelledSuccess => 'Davet iptal edildi';
+  @override
+  String get budgetAddTransaction => 'Ekle';
+  @override
+  String get budgetSheetAddExpense => 'Gider Ekle';
+  @override
+  String get accountSheetAddTransaction => 'İşlem Ekle';
+  @override
+  String get budgetCreateSheetBudget => 'Bütçe Oluştur';
+  @override
+  String get budgetCreateSheetGroup => 'Grup Oluştur';
+  @override
+  String get budgetScopeLabel => 'Bütçe Tipi';
+  @override
+  String get budgetScopePersonal => 'Kişisel';
+  @override
+  String get debtDeletedSuccess => 'Borç kaydı başarıyla silindi';
+  @override
+  String get subscriptionDeletedSuccess => 'Abonelik başarıyla silindi';
+  @override
+  String get groupDeletedSuccess => 'Grup başarıyla silindi';
+  @override
+  String get sharedBudgetDeletedSuccess => 'Ortak bütçe başarıyla silindi';
+  @override
+  String get enterValidAmount => 'Geçerli bir tutar girin.';
+  @override
+  String get selectAccount => 'Bir hesap seçin.';
+  @override
+  String get selectTargetAccount => 'Hedef hesap seçin.';
+  @override
+  String get selectCategory => 'Bir kategori seçin.';
+  @override
+  String get enterBudgetName => 'Bütçe adı girin.';
+  @override
+  String get enterSubscriptionName => 'Abonelik adı girin.';
+  @override
+  String get enterPersonName => 'Kişi / kurum adı girin.';
+  @override
+  String get selectCategoryPrompt => 'Bir kategori seçin.';
+  @override
+  String get accountsLoadFailed => 'Hesaplar yüklenemedi';
 
-  @override String get deleteAccountTitle => 'Hesabı Sil';
-  @override String get noAccountsYet => 'Henüz hesap eklemediniz';
-  @override String get noAccountsSubtitle => 'Gelir ve giderlerinizi takip etmek için\nilk hesabınızı oluşturun.';
-  @override String get accountDetailTitle => 'Hesap Detayı';
-  @override String get noAccountsFound => 'Hesap bulunamadı';
-  @override String get refreshTooltip => 'Yenile';
+  @override
+  String get deleteAccountTitle => 'Hesabı Sil';
+  @override
+  String get noAccountsYet => 'Henüz hesap eklemediniz';
+  @override
+  String get noAccountsSubtitle =>
+      'Gelir ve giderlerinizi takip etmek için\nilk hesabınızı oluşturun.';
+  @override
+  String get accountDetailTitle => 'Hesap Detayı';
+  @override
+  String get noAccountsFound => 'Hesap bulunamadı';
+  @override
+  String get refreshTooltip => 'Yenile';
 
-  @override String get welcomeBack => 'NexSpend\'e Tekrar\nHoş Geldiniz';
-  @override String get signInSubtitle => 'Hesabınıza giriş yapın';
-  @override String get emailLabel => 'E-posta';
-  @override String get passwordLabel => 'Şifre';
-  @override String get forgotPasswordAction => 'Şifremi unuttum';
-  @override String get orDivider => 'veya';
-  @override String get continueWithGoogle => 'Google ile Devam Et';
-  @override String get biometricLoginBtn => 'Parmak İzi ile Giriş';
-  @override String get noAccount => 'Hesabın yok mu?';
-  @override String get createAccount => 'Hesap Oluştur';
-  @override String get createAccountSubtitle => 'Finansal özgürlüğünüze başlayın';
-  @override String get fullNameLabel => 'Ad Soyad';
-  @override String get fullNameHint => 'Adınızı girin';
-  @override String get passwordRepeatLabel => 'Şifre Tekrar';
-  @override String get hasAccount => 'Zaten hesabın var mı?';
-  @override String get forgotPasswordTitle => 'Şifremi Unuttum';
-  @override String get forgotPasswordSubtitle => 'E-posta adresinizi girin, şifre sıfırlama bağlantısı gönderelim.';
-  @override String get sendResetLink => 'Bağlantı Gönder';
-  @override String get resetLinkSentTitle => 'Bağlantı Gönderildi!';
-  @override String resetLinkSentContent(String email) => '$email adresine şifre sıfırlama bağlantısı gönderildi.';
-  @override String get resetPasswordTitle => 'Yeni Şifrenizi\nBelirleyin';
-  @override String get resetPasswordSubtitle => 'Güvenli bir şifre oluşturun.';
-  @override String get resetCodeLabel => 'Sıfırlama Kodu';
-  @override String get resetCodeRequired => 'Kodu girin';
-  @override String get resetCodeInvalid => 'Kod 6 haneli olmalı';
-  @override String get enterResetCode => 'Kodu Gir';
-  @override String get verifyCodeTitle => 'Kodu Doğrula';
-  @override String get verifyCodeSubtitle =>
+  @override
+  String get welcomeBack => 'NexSpend\'e Tekrar\nHoş Geldiniz';
+  @override
+  String get signInSubtitle => 'Hesabınıza giriş yapın';
+  @override
+  String get emailLabel => 'E-posta';
+  @override
+  String get passwordLabel => 'Şifre';
+  @override
+  String get forgotPasswordAction => 'Şifremi unuttum';
+  @override
+  String get orDivider => 'veya';
+  @override
+  String get continueWithGoogle => 'Google ile Devam Et';
+  @override
+  String get biometricLoginBtn => 'Parmak İzi ile Giriş';
+  @override
+  String get noAccount => 'Hesabın yok mu?';
+  @override
+  String get createAccount => 'Hesap Oluştur';
+  @override
+  String get createAccountSubtitle => 'Finansal özgürlüğünüze başlayın';
+  @override
+  String get fullNameLabel => 'Ad Soyad';
+  @override
+  String get fullNameHint => 'Adınızı girin';
+  @override
+  String get passwordRepeatLabel => 'Şifre Tekrar';
+  @override
+  String get hasAccount => 'Zaten hesabın var mı?';
+  @override
+  String get forgotPasswordTitle => 'Şifremi Unuttum';
+  @override
+  String get forgotPasswordSubtitle =>
+      'E-posta adresinizi girin, şifre sıfırlama bağlantısı gönderelim.';
+  @override
+  String get sendResetLink => 'Bağlantı Gönder';
+  @override
+  String get resetLinkSentTitle => 'Bağlantı Gönderildi!';
+  @override
+  String resetLinkSentContent(String email) =>
+      '$email adresine şifre sıfırlama bağlantısı gönderildi.';
+  @override
+  String get resetPasswordTitle => 'Yeni Şifrenizi\nBelirleyin';
+  @override
+  String get resetPasswordSubtitle => 'Güvenli bir şifre oluşturun.';
+  @override
+  String get resetCodeLabel => 'Sıfırlama Kodu';
+  @override
+  String get resetCodeRequired => 'Kodu girin';
+  @override
+  String get resetCodeInvalid => 'Kod 6 haneli olmalı';
+  @override
+  String get enterResetCode => 'Kodu Gir';
+  @override
+  String get verifyCodeTitle => 'Kodu Doğrula';
+  @override
+  String get verifyCodeSubtitle =>
       'E-postanıza gönderilen 6 haneli kodu girin.';
-  @override String get continueButton => 'Devam';
-  @override String get newPasswordLabel => 'Yeni Şifre';
-  @override String get updatePasswordBtn => 'Şifreyi Güncelle';
-  @override String get passwordRequirements => 'Şifre Gereksinimleri';
-  @override String get reqMinChars => 'En az 8 karakter';
-  @override String get reqUppercase => 'Büyük harf içeriyor';
-  @override String get reqNumber => 'Rakam içeriyor';
-  @override String get reqMinUppercase => 'En az 1 büyük harf';
-  @override String get reqMinNumber => 'En az 1 rakam';
-  @override String get passwordUpdatedTitle => 'Şifre Güncellendi!';
-  @override String get passwordUpdatedContent => 'Şifreniz başarıyla güncellendi. Yeni şifrenizle giriş yapabilirsiniz.';
+  @override
+  String get continueButton => 'Devam';
+  @override
+  String get newPasswordLabel => 'Yeni Şifre';
+  @override
+  String get updatePasswordBtn => 'Şifreyi Güncelle';
+  @override
+  String get passwordRequirements => 'Şifre Gereksinimleri';
+  @override
+  String get reqMinChars => 'En az 8 karakter';
+  @override
+  String get reqUppercase => 'Büyük harf içeriyor';
+  @override
+  String get reqNumber => 'Rakam içeriyor';
+  @override
+  String get reqMinUppercase => 'En az 1 büyük harf';
+  @override
+  String get reqMinNumber => 'En az 1 rakam';
+  @override
+  String get passwordUpdatedTitle => 'Şifre Güncellendi!';
+  @override
+  String get passwordUpdatedContent =>
+      'Şifreniz başarıyla güncellendi. Yeni şifrenizle giriş yapabilirsiniz.';
 
-  @override String get accountNameLabel => 'Hesap Adı';
-  @override String get accountNameRequired => 'Hesap adı gerekli';
-  @override String get currentDebt => 'Mevcut Borç (opsiyonel)';
-  @override String get startingBalance => 'Başlangıç Bakiyesi';
-  @override String get debtHint => 'Borcunuz yoksa boş bırakın';
-  @override String get invalidAmount => 'Geçersiz tutar';
-  @override String get creditCardDetailsLabel => 'Kredi Kartı Detayları';
-  @override String get creditLimitHint => 'Kredi limiti';
-  @override String get creditLimitRequired => 'Kredi limiti gerekli';
-  @override String get creditLimitInvalid => 'Geçerli bir limit girin';
-  @override String get statementDayLabel => 'Ekstre Günü';
-  @override String get paymentDueDayLabel => 'Son Ödeme Günü';
-  @override String get selectBankLabel => 'Banka Seç';
-  @override String get otherBankOption => 'Diğer';
-  @override String get bankNameLabel => 'Banka Adı';
-  @override String get bankNameHint => 'Banka adını girin';
+  @override
+  String get accountNameLabel => 'Hesap Adı';
+  @override
+  String get accountNameRequired => 'Hesap adı gerekli';
+  @override
+  String get currentDebt => 'Mevcut Borç (opsiyonel)';
+  @override
+  String get startingBalance => 'Başlangıç Bakiyesi';
+  @override
+  String get debtHint => 'Borcunuz yoksa boş bırakın';
+  @override
+  String get invalidAmount => 'Geçersiz tutar';
+  @override
+  String get creditCardDetailsLabel => 'Kredi Kartı Detayları';
+  @override
+  String get creditLimitHint => 'Kredi limiti';
+  @override
+  String get creditLimitRequired => 'Kredi limiti gerekli';
+  @override
+  String get creditLimitInvalid => 'Geçerli bir limit girin';
+  @override
+  String get statementDayLabel => 'Ekstre Günü';
+  @override
+  String get paymentDueDayLabel => 'Son Ödeme Günü';
+  @override
+  String get selectBankLabel => 'Banka Seç';
+  @override
+  String get otherBankOption => 'Diğer';
+  @override
+  String get bankNameLabel => 'Banka Adı';
+  @override
+  String get bankNameHint => 'Banka adını girin';
 
-  @override String get removePhoto => 'Fotoğrafı Kaldır';
-  @override String get emailNotEditable => 'E-posta adresi değiştirilemez';
-  @override String get currentPasswordHint => 'Mevcut şifre';
-  @override String get newPasswordHint => 'Yeni şifre';
-  @override String get confirmPasswordHint => 'Yeni şifre tekrar';
+  @override
+  String get removePhoto => 'Fotoğrafı Kaldır';
+  @override
+  String get emailNotEditable => 'E-posta adresi değiştirilemez';
+  @override
+  String get currentPasswordHint => 'Mevcut şifre';
+  @override
+  String get newPasswordHint => 'Yeni şifre';
+  @override
+  String get confirmPasswordHint => 'Yeni şifre tekrar';
 
-  @override String get budgetNameLabel => 'Bütçe Adı';
-  @override String get budgetNameHint => 'Örn. Market Bütçesi';
-  @override String get noCategoriesFound => 'Kategori bulunamadı.';
-  @override String get selectPlaceholder => 'Seç';
-  @override String get smartTrackingSubtitle => 'İşlemler otomatik hesaplanır';
-  @override String get noteOptionalLabel => 'Not (isteğe bağlı)';
-  @override String get addNoteHint => 'Açıklama ekle...';
+  @override
+  String get budgetNameLabel => 'Bütçe Adı';
+  @override
+  String get budgetNameHint => 'Örn. Market Bütçesi';
+  @override
+  String get noCategoriesFound => 'Kategori bulunamadı.';
+  @override
+  String get selectPlaceholder => 'Seç';
+  @override
+  String get smartTrackingSubtitle => 'İşlemler otomatik hesaplanır';
+  @override
+  String get noteOptionalLabel => 'Not (isteğe bağlı)';
+  @override
+  String get addNoteHint => 'Açıklama ekle...';
 
-  @override String budgetsExceeded(int count) => '$count bütçeniz limiti aştı';
-  @override String budgetsCritical(int count) => '$count bütçeniz kritik seviyeye yaklaştı';
+  @override
+  String budgetsExceeded(int count) => '$count bütçeniz limiti aştı';
+  @override
+  String budgetsCritical(int count) =>
+      '$count bütçeniz kritik seviyeye yaklaştı';
 
-  @override String installmentsPaid(String paid, String total) => '$paid/$total ödendi';
-  @override String paymentsCount(int count) => '$count işlem';
-  @override String get noPaymentsYet => 'Henüz ödeme yapılmadı.';
-  @override String get collectPaymentBtn => 'Tahsil Et';
-  @override String get makePaymentBtn => 'Borç Öde';
-  @override String get viewInstallmentsBtn => 'Taksitleri Gör';
-  @override String get receivedPaymentTitle => 'Ödeme Aldım';
-  @override String get payDebtTitle => 'Ödeme Yap';
-  @override String installmentPaymentTitle(int no) => '$no. Taksit Ödemesi';
-  @override String installmentAmountLabel(String amount) => 'Taksit tutarı: $amount';
-  @override String remainingAmountLabel(String amount) => 'Kalan: $amount';
-  @override String get amountHint => 'Tutar (₺)';
-  @override String get noteOptionalHint => 'Not (opsiyonel)';
-  @override String get remainingLabel => 'Kalan tutar';
-  @override String paidLabel(String amount) => '$amount ödendi';
-  @override String totalLabel(String amount) => 'Toplam: $amount';
-  @override String get dueDatePassed => 'Vadesi geçti';
-  @override String get dueDateToday => 'Bugün vadesi doluyor';
-  @override String get dueDateTomorrow => 'Yarın vadesi doluyor';
-  @override String get personNameHint => 'Kişi / Kurum Adı';
-  @override String get descriptionOptionalHint => 'Açıklama (opsiyonel)';
-  @override String get dueDateHint => 'Vade tarihi (opsiyonel)';
-  @override String get installmentCountLabel => 'Taksit Sayısı:';
+  @override
+  String installmentsPaid(String paid, String total) => '$paid/$total ödendi';
+  @override
+  String paymentsCount(int count) => '$count işlem';
+  @override
+  String get noPaymentsYet => 'Henüz ödeme yapılmadı.';
+  @override
+  String get collectPaymentBtn => 'Tahsil Et';
+  @override
+  String get makePaymentBtn => 'Borç Öde';
+  @override
+  String get viewInstallmentsBtn => 'Taksitleri Gör';
+  @override
+  String get receivedPaymentTitle => 'Ödeme Aldım';
+  @override
+  String get payDebtTitle => 'Ödeme Yap';
+  @override
+  String installmentPaymentTitle(int no) => '$no. Taksit Ödemesi';
+  @override
+  String installmentAmountLabel(String amount) => 'Taksit tutarı: $amount';
+  @override
+  String remainingAmountLabel(String amount) => 'Kalan: $amount';
+  @override
+  String get amountHint => 'Tutar (₺)';
+  @override
+  String get noteOptionalHint => 'Not (opsiyonel)';
+  @override
+  String get remainingLabel => 'Kalan tutar';
+  @override
+  String paidLabel(String amount) => '$amount ödendi';
+  @override
+  String totalLabel(String amount) => 'Toplam: $amount';
+  @override
+  String get dueDatePassed => 'Vadesi geçti';
+  @override
+  String get dueDateToday => 'Bugün vadesi doluyor';
+  @override
+  String get dueDateTomorrow => 'Yarın vadesi doluyor';
+  @override
+  String get personNameHint => 'Kişi / Kurum Adı';
+  @override
+  String get descriptionOptionalHint => 'Açıklama (opsiyonel)';
+  @override
+  String get dueDateHint => 'Vade tarihi (opsiyonel)';
+  @override
+  String get installmentCountLabel => 'Taksit Sayısı:';
 
-  @override String get billingCycleDaily => 'Günlük';
-  @override String get billingCycleWeekly => 'Haftalık';
-  @override String get billingCycleMonthly => 'Aylık';
-  @override String get billingCycleYearly => 'Yıllık';
-  @override String get subscriptionNameHint => 'Abonelik adı (Netflix, Spotify...)';
+  @override
+  String get billingCycleDaily => 'Günlük';
+  @override
+  String get billingCycleWeekly => 'Haftalık';
+  @override
+  String get billingCycleMonthly => 'Aylık';
+  @override
+  String get billingCycleYearly => 'Yıllık';
+  @override
+  String get subscriptionNameHint => 'Abonelik adı (Netflix, Spotify...)';
 
-  @override String get cameraNotFound => 'Kamera bulunamadı';
-  @override String get cameraStartFailed => 'Kamera başlatılamadı';
-  @override String get receiptAnalyzing => 'Makbuz analiz ediliyor...';
-  @override String get scanReceiptTitle => 'Makbuz Tara';
-  @override String get duplicateReceiptError => 'Bu fişi daha önce taradınız';
-  @override String get imageTooLarge => 'Görsel çok büyük (maks 10 MB)';
-  @override String get serverError => 'Sunucu hatası, tekrar deneyin';
+  @override
+  String get cameraNotFound => 'Kamera bulunamadı';
+  @override
+  String get cameraStartFailed => 'Kamera başlatılamadı';
+  @override
+  String get receiptAnalyzing => 'Makbuz analiz ediliyor...';
+  @override
+  String get scanReceiptTitle => 'Makbuz Tara';
+  @override
+  String get duplicateReceiptError => 'Bu fişi daha önce taradınız';
+  @override
+  String get imageTooLarge => 'Görsel çok büyük (maks 10 MB)';
+  @override
+  String get serverError => 'Sunucu hatası, tekrar deneyin';
 
-  @override String get noReceiptsYet => 'Henüz fiş taranmadı.';
-  @override String get receiptDeleteContent => 'Bu fiş kaydı kalıcı olarak silinecek.';
-  @override String get receiptStatusConfirmed => 'Onaylandı';
-  @override String get receiptStatusParsed => 'Tarandı';
-  @override String get receiptStatusProcessing => 'İşleniyor';
-  @override String get receiptStatusFailed => 'Başarısız';
-  @override String ocrConfidence(int pct) => 'OCR güven skoru: %$pct';
-  @override String get alignReceiptHint => 'Makbuzu çerçeve içine hizalayın';
-  @override String get selectAccountHint => 'Hesap seç';
-  @override String get selectCategoryHint => 'Kategori seç';
-  @override String get merchantNameHint => 'İşyeri adı';
-  @override String get productsLabel => 'ÜRÜNLER';
-  @override String get duplicateReceiptWarning => 'Bu makbuz daha önce işlenmiş olabilir';
-  @override String get unknownMerchant => 'Bilinmeyen Market';
-  @override String get unknownDate => 'Tarih bilinmiyor';
-  @override String photoCaptureError(String e) => 'Fotoğraf çekilemedi: $e';
-  @override String receiptProcessError(String e) => 'Fiş işlenemedi: $e';
-  @override String receiptDetectedBankAddPrompt(String bankName) =>
+  @override
+  String get noReceiptsYet => 'Henüz fiş taranmadı.';
+  @override
+  String get receiptDeleteContent => 'Bu fiş kaydı kalıcı olarak silinecek.';
+  @override
+  String get receiptStatusConfirmed => 'Onaylandı';
+  @override
+  String get receiptStatusParsed => 'Tarandı';
+  @override
+  String get receiptStatusProcessing => 'İşleniyor';
+  @override
+  String get receiptStatusFailed => 'Başarısız';
+  @override
+  String ocrConfidence(int pct) => 'OCR güven skoru: %$pct';
+  @override
+  String get alignReceiptHint => 'Makbuzu çerçeve içine hizalayın';
+  @override
+  String get selectAccountHint => 'Hesap seç';
+  @override
+  String get selectCategoryHint => 'Kategori seç';
+  @override
+  String get merchantNameHint => 'İşyeri adı';
+  @override
+  String get productsLabel => 'ÜRÜNLER';
+  @override
+  String get duplicateReceiptWarning => 'Bu makbuz daha önce işlenmiş olabilir';
+  @override
+  String get unknownMerchant => 'Bilinmeyen Market';
+  @override
+  String get unknownDate => 'Tarih bilinmiyor';
+  @override
+  String photoCaptureError(String e) => 'Fotoğraf çekilemedi: $e';
+  @override
+  String receiptProcessError(String e) => 'Fiş işlenemedi: $e';
+  @override
+  String receiptDetectedBankAddPrompt(String bankName) =>
       '$bankName tespit edildi · Hesap ekle';
-  @override String get receiptDetectedCashAddPrompt =>
+  @override
+  String get receiptDetectedCashAddPrompt =>
       'Nakit ödeme tespit edildi · Hesap ekle';
 
-  @override String get recurringTransaction => 'Tekrarlayan İşlem';
-  @override String get recurringFrequencyLabel => 'Sıklık';
-  @override String get endDateOptional => 'Bitiş tarihi (opsiyonel)';
-  @override String get descriptionOptional => 'Açıklama (opsiyonel)';
-  @override String get noteOptional => 'Not (opsiyonel)';
-  @override String get todayLabel => 'Bugün';
-  @override String monthName(int m) => const ['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'][m - 1];
-  @override String monthAbbr(int m) => const ['Oca','Şub','Mar','Nis','May','Haz','Tem','Ağu','Eyl','Eki','Kas','Ara'][m - 1];
+  @override
+  String get recurringTransaction => 'Tekrarlayan İşlem';
+  @override
+  String get recurringFrequencyLabel => 'Sıklık';
+  @override
+  String get endDateOptional => 'Bitiş tarihi (opsiyonel)';
+  @override
+  String get descriptionOptional => 'Açıklama (opsiyonel)';
+  @override
+  String get noteOptional => 'Not (opsiyonel)';
+  @override
+  String get todayLabel => 'Bugün';
+  @override
+  String monthName(int m) => const [
+    'Ocak',
+    'Şubat',
+    'Mart',
+    'Nisan',
+    'Mayıs',
+    'Haziran',
+    'Temmuz',
+    'Ağustos',
+    'Eylül',
+    'Ekim',
+    'Kasım',
+    'Aralık',
+  ][m - 1];
+  @override
+  String monthAbbr(int m) => const [
+    'Oca',
+    'Şub',
+    'Mar',
+    'Nis',
+    'May',
+    'Haz',
+    'Tem',
+    'Ağu',
+    'Eyl',
+    'Eki',
+    'Kas',
+    'Ara',
+  ][m - 1];
 
-  @override String get cashFlowTitle => 'Nakit Akışı';
-  @override String get expenseDistributionTitle => 'Harcama Dağılımı';
-  @override String get categoryTrendsTitle => 'Kategori Trendleri';
-  @override String get periodThisMonth => 'Bu Ay';
-  @override String get period3Months => '3 Ay';
-  @override String get periodThisYear => 'Bu Yıl';
-  @override String get previousLabel => 'önceki';
+  @override
+  String get cashFlowTitle => 'Nakit Akışı';
+  @override
+  String get expenseDistributionTitle => 'Harcama Dağılımı';
+  @override
+  String get categoryTrendsTitle => 'Kategori Trendleri';
+  @override
+  String get periodThisMonth => 'Bu Ay';
+  @override
+  String get period3Months => '3 Ay';
+  @override
+  String get periodThisYear => 'Bu Yıl';
+  @override
+  String get previousLabel => 'önceki';
 
-  @override String get debtTypeBorrowed => 'Borç';
-  @override String get debtTypeLent => 'Alacak';
-  @override String get summaryLent => 'Alacaklarım';
-  @override String get summaryBorrowed => 'Borçlarım';
-  @override String get paymentCollection => 'Tahsilat';
-  @override String get paymentLabel => 'Ödeme';
-  @override String installmentNo(int no) => '$no. Taksit';
-  @override String partiallyPaid(String amount) => '$amount ödendi';
-  @override String get allOption => 'Tümü';
-  @override String get noDebtsTitle => 'Borç kaydı yok';
-  @override String get noDebtsSubtitle => 'Borç ve alacaklarınızı takip etmek\niçin ilk kaydı oluşturun.';
-  @override String get addDebtBtn => 'Borç Ekle';
-  @override String get collectBtn => 'Tahsil Et';
-  @override String get payBtn => 'Öde';
+  @override
+  String get debtTypeBorrowed => 'Borç';
+  @override
+  String get debtTypeLent => 'Alacak';
+  @override
+  String get summaryLent => 'Alacaklarım';
+  @override
+  String get summaryBorrowed => 'Borçlarım';
+  @override
+  String get paymentCollection => 'Tahsilat';
+  @override
+  String get paymentLabel => 'Ödeme';
+  @override
+  String installmentNo(int no) => '$no. Taksit';
+  @override
+  String partiallyPaid(String amount) => '$amount ödendi';
+  @override
+  String get allOption => 'Tümü';
+  @override
+  String get noDebtsTitle => 'Borç kaydı yok';
+  @override
+  String get noDebtsSubtitle =>
+      'Borç ve alacaklarınızı takip etmek\niçin ilk kaydı oluşturun.';
+  @override
+  String get addDebtBtn => 'Borç Ekle';
+  @override
+  String get collectBtn => 'Tahsil Et';
+  @override
+  String get payBtn => 'Öde';
 
-  @override String get periodCustom => 'Özel';
-  @override String get budgetAmountLabel => 'BÜTÇE TUTARI';
-  @override String get budgetEndDate => 'Bitiş Tarihi';
-  @override String get budgetEndDateUnset => 'Belirsiz';
-  @override String get amountTRY => 'Tutar (₺)';
+  @override
+  String get periodCustom => 'Özel';
+  @override
+  String get budgetAmountLabel => 'BÜTÇE TUTARI';
+  @override
+  String get budgetEndDate => 'Bitiş Tarihi';
+  @override
+  String get budgetEndDateUnset => 'Belirsiz';
+  @override
+  String get amountTRY => 'Tutar (₺)';
 
-  @override String get accountTypeBank => 'Banka';
-  @override String get accountTypeCash => 'Nakit';
-  @override String get accountTypeCreditCard => 'Kredi Kartı';
-  @override String get accountTypeInvestment => 'Yatırım';
+  @override
+  String get accountTypeBank => 'Banka';
+  @override
+  String get accountTypeCash => 'Nakit';
+  @override
+  String get accountTypeCreditCard => 'Kredi Kartı';
+  @override
+  String get accountTypeInvestment => 'Yatırım';
 
-  @override String get defaultBadge => 'Varsayılan';
-  @override String get defaultAccountLabel => 'Varsayılan hesap';
-  @override String get defaultAccountSubtitle => 'Yeni işlemlerde otomatik seçilir';
-  @override String get usedLabel => 'KULLANILAN';
-  @override String get balanceLabel => 'BAKİYE';
-  @override String get usedSlashLimit => 'Kullanılan / Limit';
-  @override String usedAmount(String amount) => 'Kullanılan: $amount';
-  @override String limitAmount(String amount) => 'Limit: $amount';
-  @override String get lastSixMonths => 'Son 6 Ay';
-  @override String get topCategoriesThisMonth => 'Bu Ay En Çok Harcanan';
-  @override String get incomeChartLabel => 'Gelir';
-  @override String get expenseChartLabel => 'Gider';
-  @override String get spendChartLabel => 'Harcama';
-  @override String get restoreBtn => 'Geri Yükle';
-  @override String get loadFailed => 'Yüklenemedi';
-  @override String get archiveHint => 'Hesap detayından arşivleyebilirsiniz';
+  @override
+  String get defaultBadge => 'Varsayılan';
+  @override
+  String get defaultAccountLabel => 'Varsayılan hesap';
+  @override
+  String get defaultAccountSubtitle => 'Yeni işlemlerde otomatik seçilir';
+  @override
+  String get usedLabel => 'KULLANILAN';
+  @override
+  String get balanceLabel => 'BAKİYE';
+  @override
+  String get usedSlashLimit => 'Kullanılan / Limit';
+  @override
+  String usedAmount(String amount) => 'Kullanılan: $amount';
+  @override
+  String limitAmount(String amount) => 'Limit: $amount';
+  @override
+  String get lastSixMonths => 'Son 6 Ay';
+  @override
+  String get topCategoriesThisMonth => 'Bu Ay En Çok Harcanan';
+  @override
+  String get incomeChartLabel => 'Gelir';
+  @override
+  String get expenseChartLabel => 'Gider';
+  @override
+  String get spendChartLabel => 'Harcama';
+  @override
+  String get restoreBtn => 'Geri Yükle';
+  @override
+  String get loadFailed => 'Yüklenemedi';
+  @override
+  String get archiveHint => 'Hesap detayından arşivleyebilirsiniz';
 
-  @override String upcomingRenewals(int count) => '$count abonelik önümüzdeki 7 günde yenileniyor';
+  @override
+  String upcomingRenewals(int count) =>
+      '$count abonelik önümüzdeki 7 günde yenileniyor';
 
-  @override String get transactionDetailTitle => 'İşlem Detayı';
-  @override String get typeLabel => 'Tür';
-  @override String get sourceLabel => 'Kaynak';
-  @override String get descriptionLabel => 'Açıklama';
-  @override String get noteLabel => 'Not';
-  @override String get transactionIdLabel => 'İşlem No';
-  @override String get timeLabel => 'Saat';
-  @override String get sourceManual => 'Manuel';
-  @override String get sourceRecurring => 'Tekrarlayan';
-  @override String get sourceDebtPayment => 'Borç Ödemesi';
-  @override String get sourceDebtCollection => 'Borç Tahsilatı';
-  @override String get sourceSubscription => 'Abonelik';
+  @override
+  String get transactionDetailTitle => 'İşlem Detayı';
+  @override
+  String get typeLabel => 'Tür';
+  @override
+  String get sourceLabel => 'Kaynak';
+  @override
+  String get descriptionLabel => 'Açıklama';
+  @override
+  String get noteLabel => 'Not';
+  @override
+  String get transactionIdLabel => 'İşlem No';
+  @override
+  String get timeLabel => 'Saat';
+  @override
+  String get sourceManual => 'Manuel';
+  @override
+  String get sourceRecurring => 'Tekrarlayan';
+  @override
+  String get sourceDebtPayment => 'Borç Ödemesi';
+  @override
+  String get sourceDebtCollection => 'Borç Tahsilatı';
+  @override
+  String get sourceSubscription => 'Abonelik';
 
-  @override String get currentPeriodTitle => 'Mevcut Dönem';
-  @override String get openStatementsTitle => 'Açık Ekstreler';
-  @override String get statementHistoryTitle => 'Geçmiş Ekstreler';
-  @override String get spentThisPeriod => 'Bu dönem harcanan';
-  @override String txCountLabel(int n) => '$n işlem';
-  @override String get totalAmountShortLabel => 'Toplam';
-  @override String get minimumPaymentLabel => 'Asgari';
-  @override String get dueDateLabel => 'Vade';
-  @override String get payButton => 'Öde';
-  @override String get statementStatusDue => 'Beklemede';
-  @override String get statementStatusPartiallyPaid => 'Kısmi Ödendi';
-  @override String get statementStatusPaid => 'Ödendi';
-  @override String get statementStatusOverdue => 'Vadesi Geçti';
-  @override String get noStatementsYet => 'Henüz kapatılmış ekstre yok';
-  @override String get payStatementTitle => 'Ekstre Öde';
-  @override String get paymentAmountLabel => 'Ödeme Tutarı';
-  @override String get fromAccountLabel => 'Kaynak Hesap';
-  @override String get paymentSuccessSnackbar => 'Ödeme alındı';
-  @override String get noPayableAccountWarning =>
+  @override
+  String get currentPeriodTitle => 'Mevcut Dönem';
+  @override
+  String get openStatementsTitle => 'Açık Ekstreler';
+  @override
+  String get statementHistoryTitle => 'Geçmiş Ekstreler';
+  @override
+  String get spentThisPeriod => 'Bu dönem harcanan';
+  @override
+  String txCountLabel(int n) => '$n işlem';
+  @override
+  String get totalAmountShortLabel => 'Toplam';
+  @override
+  String get minimumPaymentLabel => 'Asgari';
+  @override
+  String get dueDateLabel => 'Vade';
+  @override
+  String get payButton => 'Öde';
+  @override
+  String get statementStatusDue => 'Beklemede';
+  @override
+  String get statementStatusPartiallyPaid => 'Kısmi Ödendi';
+  @override
+  String get statementStatusPaid => 'Ödendi';
+  @override
+  String get statementStatusOverdue => 'Vadesi Geçti';
+  @override
+  String get noStatementsYet => 'Henüz kapatılmış ekstre yok';
+  @override
+  String get payStatementTitle => 'Ekstre Öde';
+  @override
+  String get paymentAmountLabel => 'Ödeme Tutarı';
+  @override
+  String get fromAccountLabel => 'Kaynak Hesap';
+  @override
+  String get paymentSuccessSnackbar => 'Ödeme alındı';
+  @override
+  String get noPayableAccountWarning =>
       'Ödeme yapılabilecek hesap yok. Önce nakit/banka hesabı ekleyin.';
-  @override String get payFullButton => 'Tamamını Öde';
-  @override String get payMinimumButton => 'Asgariyi Öde';
-  @override String get statementPeriodFmt => 'Dönem';
+  @override
+  String get payFullButton => 'Tamamını Öde';
+  @override
+  String get payMinimumButton => 'Asgariyi Öde';
+  @override
+  String get statementPeriodFmt => 'Dönem';
 
   // Family module
-  @override String get familyBudgetTitle => 'Ortak Bütçe';
-  @override String get createNewGroupTitle => 'Yeni Grup Oluştur';
-  @override String get groupNameHint => 'Grup adı (örn. Ev Bütçesi)';
-  @override String get createGroupBtn => 'Oluştur';
-  @override String get deleteGroupTitle => 'Grubu Sil';
-  @override String deleteGroupContent(String name) =>
+  @override
+  String get familyBudgetTitle => 'Ortak Bütçe';
+  @override
+  String get createNewGroupTitle => 'Yeni Grup Oluştur';
+  @override
+  String get groupNameHint => 'Grup adı (örn. Ev Bütçesi)';
+  @override
+  String get createGroupBtn => 'Oluştur';
+  @override
+  String get deleteGroupTitle => 'Grubu Sil';
+  @override
+  String deleteGroupContent(String name) =>
       '"$name" grubu ve tüm ortak bütçeleri silinecek. Bu işlem geri alınamaz.';
-  @override String get inviteMemberTitle => 'Üye Davet Et';
-  @override String get emailAddressHint => 'E-posta adresi';
-  @override String get sendInviteBtn => 'Davet Et';
-  @override String get inviteSentSuccess => 'Davet bildirimi gönderildi.';
-  @override String get membersSection => 'ÜYELER';
-  @override String get sharedBudgetsSection => 'ORTAK BÜTÇELER';
-  @override String get pendingInvitesSection => 'BEKLEYEN DAVETLER';
-  @override String get addSharedBudgetBtn => 'Bütçe Ekle';
-  @override String get deleteSharedBudgetTitle => 'Bütçeyi Sil';
-  @override String get addSharedBudgetTitle => 'Ortak Bütçe Ekle';
-  @override String get addSharedBudgetPrompt => 'Ortak bütçe ekle';
-  @override String get sharedBudgetNameHint => 'Bütçe adı';
-  @override String get amountTRYHint => 'Tutar (₺)';
-  @override String get addBtn => 'Ekle';
-  @override String get removeMemberTitle => 'Üyeyi Çıkar';
-  @override String removeMemberContent(String name) =>
+  @override
+  String get inviteMemberTitle => 'Üye Davet Et';
+  @override
+  String get emailAddressHint => 'E-posta adresi';
+  @override
+  String get sendInviteBtn => 'Davet Et';
+  @override
+  String get inviteSentSuccess => 'Davet bildirimi gönderildi.';
+  @override
+  String get membersSection => 'ÜYELER';
+  @override
+  String get sharedBudgetsSection => 'ORTAK BÜTÇELER';
+  @override
+  String get pendingInvitesSection => 'BEKLEYEN DAVETLER';
+  @override
+  String get addSharedBudgetBtn => 'Bütçe Ekle';
+  @override
+  String get deleteSharedBudgetTitle => 'Bütçeyi Sil';
+  @override
+  String get addSharedBudgetTitle => 'Ortak Bütçe Ekle';
+  @override
+  String get addSharedBudgetPrompt => 'Ortak bütçe ekle';
+  @override
+  String get sharedBudgetNameHint => 'Bütçe adı';
+  @override
+  String get amountTRYHint => 'Tutar (₺)';
+  @override
+  String get addBtn => 'Ekle';
+  @override
+  String get removeMemberTitle => 'Üyeyi Çıkar';
+  @override
+  String removeMemberContent(String name) =>
       '$name grubu üyelikten çıkarılsın mı?';
-  @override String get removeMemberBtn => 'Çıkar';
-  @override String removeMemberAction(String name) => '$name\'ı çıkar';
-  @override String memberCountRole(int count, bool isOwner) =>
+  @override
+  String get removeMemberBtn => 'Çıkar';
+  @override
+  String removeMemberAction(String name) => '$name\'ı çıkar';
+  @override
+  String memberCountRole(int count, bool isOwner) =>
       '$count üye · ${isOwner ? 'Sahip' : 'Üye'}';
-  @override String familyMemberCount(int count) => '$count üye';
-  @override String get noGroupsTitle => 'Ortak bütçe oluştur';
-  @override String get noGroupsSubtitle =>
+  @override
+  String familyMemberCount(int count) => '$count üye';
+  @override
+  String get noGroupsTitle => 'Ortak bütçe oluştur';
+  @override
+  String get noGroupsSubtitle =>
       'Grubunla ortak bütçe takibi yap. Ev arkadaşları, çiftler, küçük takımlar için ideal — her üyenin katkısı otomatik hesaplanır.';
-  @override String get createGroupLargeBtn => 'Grup Oluştur';
-  @override String get createGroupError => 'Grup oluşturulamadı';
-  @override String get familyGroupsSection => 'GRUPLAR';
-  @override String get createFamilyGroupPrompt => 'Grup oluştur';
+  @override
+  String get createGroupLargeBtn => 'Grup Oluştur';
+  @override
+  String get createGroupError => 'Grup oluşturulamadı';
+  @override
+  String get familyGroupsSection => 'GRUPLAR';
+  @override
+  String get createFamilyGroupPrompt => 'Grup oluştur';
 
   // v2 — Subscription detail
-  @override String get inactiveLabel => 'Pasif';
-  @override String get detailsCardTitle => 'Detaylar';
-  @override String get onValue => 'Açık';
-  @override String get offValue => 'Kapalı';
-  @override String get nextRenewalLabel => 'Sonraki Yenilenme';
-  @override String get stopSubscriptionBtn => 'Aboneliği Durdur';
-  @override String get activateSubscriptionBtn => 'Aboneliği Etkinleştir';
+  @override
+  String get inactiveLabel => 'Pasif';
+  @override
+  String get detailsCardTitle => 'Detaylar';
+  @override
+  String get onValue => 'Açık';
+  @override
+  String get offValue => 'Kapalı';
+  @override
+  String get nextRenewalLabel => 'Sonraki Yenilenme';
+  @override
+  String get stopSubscriptionBtn => 'Aboneliği Durdur';
+  @override
+  String get activateSubscriptionBtn => 'Aboneliği Etkinleştir';
 
   // v2 — Period extended
-  @override String get budgetPeriodCustom => 'Özel';
+  @override
+  String get budgetPeriodCustom => 'Özel';
 
   // v2 — Budget status
-  @override String get budgetStatusOk => 'Normal';
-  @override String get budgetStatusWarning => 'Uyarı';
-  @override String get budgetStatusCritical => 'Kritik';
-  @override String get budgetStatusExceeded => 'Aşıldı';
+  @override
+  String get budgetStatusOk => 'Normal';
+  @override
+  String get budgetStatusWarning => 'Uyarı';
+  @override
+  String get budgetStatusCritical => 'Kritik';
+  @override
+  String get budgetStatusExceeded => 'Aşıldı';
 
   // v2 — Family role
-  @override String get roleOwner => 'Sahip';
-  @override String get roleMember => 'Üye';
+  @override
+  String get roleOwner => 'Sahip';
+  @override
+  String get roleMember => 'Üye';
 
   // v2 — Insights
-  @override String get smartSuggestionsSection => 'AKILLI ÖNERİLER';
-  @override String get noSuggestionsEmpty => 'Harika! Hiç öneriniz yok 🎉';
-  @override String get tabLastMonth => 'Geçen Ay';
+  @override
+  String get smartSuggestionsSection => 'AKILLI ÖNERİLER';
+  @override
+  String get noSuggestionsEmpty => 'Harika! Hiç öneriniz yok 🎉';
+  @override
+  String get tabLastMonth => 'Geçen Ay';
 
   // v2 — Legal / settings
-  @override String get sectionLegal => 'Yasal';
-  @override String get privacyPolicyTitle => 'Gizlilik Politikası';
-  @override String get termsOfServiceTitle => 'Kullanım Şartları';
-  @override String get deleteUserAccountContent =>
+  @override
+  String get sectionLegal => 'Yasal';
+  @override
+  String get privacyPolicyTitle => 'Gizlilik Politikası';
+  @override
+  String get termsOfServiceTitle => 'Kullanım Şartları';
+  @override
+  String get deleteUserAccountContent =>
       'Hesabınız ve tüm verileriniz (işlemler, bütçeler, borçlar, abonelikler) kalıcı olarak silinecek. Bu işlem geri alınamaz.';
-  @override String get legalAcceptPrefix => 'Okudum ve kabul ediyorum: ';
-  @override String get legalAcceptAnd => ' ve ';
+  @override
+  String get legalAcceptPrefix => 'Okudum ve kabul ediyorum: ';
+  @override
+  String get legalAcceptAnd => ' ve ';
 
   // v2 — Quick actions
-  @override String get scanAction => 'Tara';
+  @override
+  String get scanAction => 'Tara';
 
   // Sprint 12 — Bütçe dönem geçmişi
-  @override String get budgetTabCurrentPeriod => 'Bu Dönem';
-  @override String get budgetTabHistory => 'Geçmiş';
-  @override String budgetEndsOn(String date) => 'Bu dönem $date kapanacak';
-  @override String get openNewPeriodBtn => 'Yeni Dönem Aç';
-  @override String get budgetHistoryEmpty => 'Bu kategoride başka dönem yok';
-  @override String get budgetHistoryChartTitle => 'DÖNEM GEÇMİŞİ';
-  @override String get budgetArchivedBadge => 'Arşiv';
-  @override String get budgetArchivedEditError => 'Geçmiş döneme ait bütçe düzenlenemez';
-  @override String get budgetClosedPersonalSnackbar => 'Bütçe dönemi kapandı';
-  @override String get budgetClosedSharedSnackbar => 'Ortak bütçe dönemi kapandı';
-  @override String get openNewPeriodAction => 'Yenisini Aç';
-  @override String get archivedBudgetsTitle => 'Arşivlenmiş Bütçeler';
-  @override String get archivedBudgetsTabPersonal => 'Kişisel';
-  @override String get archivedBudgetsTabShared => 'Ortak';
-  @override String get archivedBudgetsEmpty => 'Arşivlenmiş bütçe bulunamadı';
+  @override
+  String get budgetTabCurrentPeriod => 'Bu Dönem';
+  @override
+  String get budgetTabHistory => 'Geçmiş';
+  @override
+  String budgetEndsOn(String date) => 'Bu dönem $date kapanacak';
+  @override
+  String get openNewPeriodBtn => 'Yeni Dönem Aç';
+  @override
+  String get budgetHistoryEmpty => 'Bu kategoride başka dönem yok';
+  @override
+  String get budgetHistoryChartTitle => 'DÖNEM GEÇMİŞİ';
+  @override
+  String get budgetArchivedBadge => 'Arşiv';
+  @override
+  String get budgetArchivedEditError => 'Geçmiş döneme ait bütçe düzenlenemez';
+  @override
+  String get budgetClosedPersonalSnackbar => 'Bütçe dönemi kapandı';
+  @override
+  String get budgetClosedSharedSnackbar => 'Ortak bütçe dönemi kapandı';
+  @override
+  String get openNewPeriodAction => 'Yenisini Aç';
+  @override
+  String get archivedBudgetsTitle => 'Arşivlenmiş Bütçeler';
+  @override
+  String get archivedBudgetsTabPersonal => 'Kişisel';
+  @override
+  String get archivedBudgetsTabShared => 'Ortak';
+  @override
+  String get archivedBudgetsEmpty => 'Arşivlenmiş bütçe bulunamadı';
 }
 
 // ─── English ─────────────────────────────────────────────────────────────────
@@ -1092,434 +1603,872 @@ class _Tr extends AppStrings {
 class _En extends AppStrings {
   const _En();
 
-  @override String get navHome => 'Home';
-  @override String get navTransactions => 'Transactions';
-  @override String get navBudgets => 'Budgets';
-  @override String get navSubscriptions => 'Subscriptions';
+  @override
+  String get navHome => 'Home';
+  @override
+  String get navTransactions => 'Transactions';
+  @override
+  String get navBudgets => 'Budgets';
+  @override
+  String get navSubscriptions => 'Subscriptions';
 
-  @override String get income => 'Income';
-  @override String get expense => 'Expense';
-  @override String get transfer => 'Transfer';
-  @override String get scanReceipt => 'Scan Receipt';
+  @override
+  String get income => 'Income';
+  @override
+  String get expense => 'Expense';
+  @override
+  String get transfer => 'Transfer';
+  @override
+  String get scanReceipt => 'Scan Receipt';
 
-  @override String get settings => 'Settings';
-  @override String get sectionAccount => 'Account';
-  @override String get sectionPreferences => 'Preferences';
-  @override String get sectionTools => 'Tools';
-  @override String get sectionSecurity => 'Security';
-  @override String get sectionSession => 'Session';
+  @override
+  String get settings => 'Settings';
+  @override
+  String get sectionAccount => 'Account';
+  @override
+  String get sectionPreferences => 'Preferences';
+  @override
+  String get sectionTools => 'Tools';
+  @override
+  String get sectionSecurity => 'Security';
+  @override
+  String get sectionSession => 'Session';
 
-  @override String get editProfile => 'Edit Profile';
-  @override String get myAccounts => 'My Accounts';
-  @override String get archivedAccounts => 'Archived Accounts';
-  @override String get notifications => 'Notifications';
-  @override String get biometricLogin => 'Biometric Login';
-  @override String get currency => 'Currency';
-  @override String get language => 'Language';
-  @override String get receiptHistory => 'Receipt History';
-  @override String get changePassword => 'Change Password';
-  @override String get logout => 'Logout';
+  @override
+  String get editProfile => 'Edit Profile';
+  @override
+  String get myAccounts => 'My Accounts';
+  @override
+  String get archivedAccounts => 'Archived Accounts';
+  @override
+  String get notifications => 'Notifications';
+  @override
+  String get biometricLogin => 'Biometric Login';
+  @override
+  String get currency => 'Currency';
+  @override
+  String get language => 'Language';
+  @override
+  String get receiptHistory => 'Receipt History';
+  @override
+  String get changePassword => 'Change Password';
+  @override
+  String get logout => 'Logout';
 
-  @override String get selectCurrency => 'Select Currency';
-  @override String get selectLanguage => 'Select Language';
-  @override String get currencyTRY => 'Turkish Lira';
-  @override String get currencyUSD => 'US Dollar';
-  @override String get currencyEUR => 'Euro';
-  @override String get currencyGBP => 'British Pound';
+  @override
+  String get selectCurrency => 'Select Currency';
+  @override
+  String get selectLanguage => 'Select Language';
+  @override
+  String get currencyTRY => 'Turkish Lira';
+  @override
+  String get currencyUSD => 'US Dollar';
+  @override
+  String get currencyEUR => 'Euro';
+  @override
+  String get currencyGBP => 'British Pound';
 
-  @override String get cancel => 'Cancel';
-  @override String get logoutConfirmTitle => 'Logout';
-  @override String get logoutConfirmContent => 'Are you sure you want to logout?';
-  @override String get retry => 'Try Again';
+  @override
+  String get cancel => 'Cancel';
+  @override
+  String get logoutConfirmTitle => 'Logout';
+  @override
+  String get logoutConfirmContent => 'Are you sure you want to logout?';
+  @override
+  String get retry => 'Try Again';
 
-  @override String get hello => 'Hello';
-  @override String helloName(String name) => 'Hello, $name';
-  @override String get myAccountsTitle => 'My Accounts';
-  @override String get addAccount => '+ Add';
-  @override String get myDebts => 'My Debts';
-  @override String get recentTransactions => 'Recent Transactions';
-  @override String get viewAll => 'View All';
-  @override String get totalAssets => 'TOTAL ASSETS';
-  @override String get netAssets => 'Net Assets';
-  @override String get creditCardDebt => 'CC Debt';
-  @override String get noTransactionsYet => 'No transactions yet';
-  @override String get addFirstTransaction => 'Add your first transaction';
+  @override
+  String get hello => 'Hello';
+  @override
+  String helloName(String name) => 'Hello, $name';
+  @override
+  String get myAccountsTitle => 'My Accounts';
+  @override
+  String get addAccount => '+ Add';
+  @override
+  String get myDebts => 'My Debts';
+  @override
+  String get recentTransactions => 'Recent Transactions';
+  @override
+  String get viewAll => 'View All';
+  @override
+  String get totalAssets => 'TOTAL ASSETS';
+  @override
+  String get netAssets => 'Net Assets';
+  @override
+  String get creditCardDebt => 'CC Debt';
+  @override
+  String get noTransactionsYet => 'No transactions yet';
+  @override
+  String get addFirstTransaction => 'Add your first transaction';
 
-  @override String get transactionsTitle => 'Transactions';
-  @override String get filterAll => 'All';
-  @override String get summaryNet => 'Net';
-  @override String get noTransactions => 'No transactions yet';
-  @override String get noTransactionsSubtitle => 'Add your first transaction\nto track income and expenses.';
-  @override String get addTransactionBtn => 'Add Transaction';
-  @override String get transactionFallback => 'Transaction';
+  @override
+  String get transactionsTitle => 'Transactions';
+  @override
+  String get filterAll => 'All';
+  @override
+  String get summaryNet => 'Net';
+  @override
+  String get noTransactions => 'No transactions yet';
+  @override
+  String get noTransactionsSubtitle =>
+      'Add your first transaction\nto track income and expenses.';
+  @override
+  String get addTransactionBtn => 'Add Transaction';
+  @override
+  String get transactionFallback => 'Transaction';
 
-  @override String get budgetsTitle => 'Budgets';
-  @override String get activeBudgets => 'Active Budgets';
-  @override String get totalBudget => 'Total Budget';
-  @override String get spent => 'Spent';
-  @override String get remaining => 'Remaining';
-  @override String get spentArc => 'spent';
-  @override String get noBudgets => 'No budgets yet';
-  @override String get noBudgetsSubtitle => 'Create a budget\nto track your spending.';
-  @override String get createBudgetBtn => 'Create Budget';
+  @override
+  String get budgetsTitle => 'Budgets';
+  @override
+  String get activeBudgets => 'Active Budgets';
+  @override
+  String get totalBudget => 'Total Budget';
+  @override
+  String get spent => 'Spent';
+  @override
+  String get remaining => 'Remaining';
+  @override
+  String get spentArc => 'spent';
+  @override
+  String get noBudgets => 'No budgets yet';
+  @override
+  String get noBudgetsSubtitle => 'Create a budget\nto track your spending.';
+  @override
+  String get createBudgetBtn => 'Create Budget';
 
-  @override String get subscriptionsTitle => 'Subscriptions';
-  @override String get monthlyTotal => 'Monthly Total';
-  @override String get activeLabel => 'Active';
-  @override String get noSubscriptions => 'No subscriptions';
-  @override String get noSubscriptionsSubtitle => 'Track subscriptions like\nNetflix and Spotify automatically.';
-  @override String get addSubscriptionBtn => 'Add Subscription';
+  @override
+  String get subscriptionsTitle => 'Subscriptions';
+  @override
+  String get monthlyTotal => 'Monthly Total';
+  @override
+  String get activeLabel => 'Active';
+  @override
+  String get noSubscriptions => 'No subscriptions';
+  @override
+  String get noSubscriptionsSubtitle =>
+      'Track subscriptions like\nNetflix and Spotify automatically.';
+  @override
+  String get addSubscriptionBtn => 'Add Subscription';
 
-  @override String? translateCategory(String name) => _categoryMap[name];
+  @override
+  String? translateCategory(String name) => _categoryMap[name];
 
-  @override String get save => 'Save';
-  @override String get saveAccount => 'Save Account';
-  @override String get saveChanges => 'Save Changes';
-  @override String get delete => 'Delete';
-  @override String get edit => 'Edit';
-  @override String get update => 'Update';
-  @override String get ok => 'OK';
-  @override String get setAsDefault => 'Set as Default';
-  @override String get archive => 'Archive';
-  @override String get camera => 'Camera';
-  @override String get gallery => 'Gallery';
-  @override String get loginAction => 'Log In';
-  @override String get installment => 'Installment';
-  @override String get scanAgain => 'Scan Again';
-  @override String get goBack => 'Go Back';
-  @override String get registerAction => 'Sign Up';
+  @override
+  String get save => 'Save';
+  @override
+  String get saveAccount => 'Save Account';
+  @override
+  String get saveChanges => 'Save Changes';
+  @override
+  String get delete => 'Delete';
+  @override
+  String get edit => 'Edit';
+  @override
+  String get update => 'Update';
+  @override
+  String get ok => 'OK';
+  @override
+  String get setAsDefault => 'Set as Default';
+  @override
+  String get archive => 'Archive';
+  @override
+  String get camera => 'Camera';
+  @override
+  String get gallery => 'Gallery';
+  @override
+  String get loginAction => 'Log In';
+  @override
+  String get installment => 'Installment';
+  @override
+  String get scanAgain => 'Scan Again';
+  @override
+  String get goBack => 'Go Back';
+  @override
+  String get registerAction => 'Sign Up';
 
-  @override String get addAccountTitle => 'Add Account';
-  @override String get editAccountTitle => 'Edit Account';
-  @override String get newBudgetTitle => 'New Budget';
-  @override String get reportsTitle => 'Reports';
-  @override String get receiptPreviewTitle => 'Receipt Preview';
-  @override String get debtsTitle => 'Debts';
-  @override String get smartTracking => 'Smart Tracking';
+  @override
+  String get addAccountTitle => 'Add Account';
+  @override
+  String get editAccountTitle => 'Edit Account';
+  @override
+  String get newBudgetTitle => 'New Budget';
+  @override
+  String get reportsTitle => 'Reports';
+  @override
+  String get receiptPreviewTitle => 'Receipt Preview';
+  @override
+  String get debtsTitle => 'Debts';
+  @override
+  String get smartTracking => 'Smart Tracking';
 
-  @override String get deleteTransactionTitle => 'Delete Transaction';
-  @override String get deleteTransactionContent => 'This transaction will be deleted and the account balance will be updated.';
-  @override String get deleteBudgetTitle => 'Delete Budget';
-  @override String deleteBudgetContent(String name) => '"$name" budget will be deleted.';
-  @override String get editBudgetTitle => 'Edit Budget';
-  @override String get cancelSubscriptionTitle => 'Cancel Subscription';
-  @override String get deleteSubscriptionTitle => 'Delete Subscription';
-  @override String deleteSubscriptionContent(String name) => '$name subscription will be deleted. Future payments will stop.';
-  @override String get deleteDebtTitle => 'Delete Debt';
-  @override String deleteDebtContent(String name) => 'The debt record with $name will be deleted.';
-  @override String get deleteReceiptTitle => 'Delete Receipt';
-  @override String get selectPhotoTitle => 'Select Photo';
-  @override String get addDebtTitle => 'Add Debt';
-  @override String get addSubscriptionTitle => 'Add Subscription';
-  @override String get archiveAccountTitle => 'Archive Account';
-  @override String get archiveAccountContent => 'The account will be hidden but transaction history will be preserved. You can restore archived accounts from settings.';
-  @override String get archiveConfirm => 'Archive';
-  @override String get deleteAccountContent => 'This account will be permanently deleted. Accounts with transaction history cannot be deleted.';
+  @override
+  String get deleteTransactionTitle => 'Delete Transaction';
+  @override
+  String get deleteTransactionContent =>
+      'This transaction will be deleted and the account balance will be updated.';
+  @override
+  String get deleteBudgetTitle => 'Delete Budget';
+  @override
+  String deleteBudgetContent(String name) => '"$name" budget will be deleted.';
+  @override
+  String get editBudgetTitle => 'Edit Budget';
+  @override
+  String get cancelSubscriptionTitle => 'Cancel Subscription';
+  @override
+  String get deleteSubscriptionTitle => 'Delete Subscription';
+  @override
+  String deleteSubscriptionContent(String name) =>
+      '$name subscription will be deleted. Future payments will stop.';
+  @override
+  String get deleteDebtTitle => 'Delete Debt';
+  @override
+  String deleteDebtContent(String name) =>
+      'The debt record with $name will be deleted.';
+  @override
+  String get deleteReceiptTitle => 'Delete Receipt';
+  @override
+  String get selectPhotoTitle => 'Select Photo';
+  @override
+  String get addDebtTitle => 'Add Debt';
+  @override
+  String get addSubscriptionTitle => 'Add Subscription';
+  @override
+  String get archiveAccountTitle => 'Archive Account';
+  @override
+  String get archiveAccountContent =>
+      'The account will be hidden but transaction history will be preserved. You can restore archived accounts from settings.';
+  @override
+  String get archiveConfirm => 'Archive';
+  @override
+  String get deleteAccountContent =>
+      'This account will be permanently deleted. Accounts with transaction history cannot be deleted.';
 
-  @override String get transactionHistory => 'Transaction History';
-  @override String get categoryLabel => 'Category';
-  @override String get accountLabel => 'Account';
-  @override String get targetAccountLabel => 'Target Account';
-  @override String get addFirstAccount => 'Add First Account';
-  @override String get noArchivedAccounts => 'No archived accounts';
-  @override String get periodLabel => 'Period';
-  @override String get startDateLabel => 'Start';
-  @override String get endDateLabel => 'End';
-  @override String get billingCycleLabel => 'Billing Cycle';
-  @override String get autoDeductLabel => 'Auto Deduction';
-  @override String get installmentsSection => 'Installments';
-  @override String get paymentHistoryTitle => 'Payment History';
-  @override String get amountLabel => 'Amount';
-  @override String get merchantLabel => 'Merchant';
-  @override String get dateLabel => 'Date';
+  @override
+  String get transactionHistory => 'Transaction History';
+  @override
+  String get categoryLabel => 'Category';
+  @override
+  String get accountLabel => 'Account';
+  @override
+  String get targetAccountLabel => 'Target Account';
+  @override
+  String get addFirstAccount => 'Add First Account';
+  @override
+  String get noArchivedAccounts => 'No archived accounts';
+  @override
+  String get periodLabel => 'Period';
+  @override
+  String get startDateLabel => 'Start';
+  @override
+  String get endDateLabel => 'End';
+  @override
+  String get billingCycleLabel => 'Billing Cycle';
+  @override
+  String get autoDeductLabel => 'Auto Deduction';
+  @override
+  String get installmentsSection => 'Installments';
+  @override
+  String get paymentHistoryTitle => 'Payment History';
+  @override
+  String get amountLabel => 'Amount';
+  @override
+  String get merchantLabel => 'Merchant';
+  @override
+  String get dateLabel => 'Date';
 
-  @override String get accountDeleted => 'Account deleted';
-  @override String get passwordMismatch => 'New passwords do not match.';
-  @override String get passwordTooShort => 'Password must be at least 8 characters.';
-  @override String get transactionCreatedSuccess => 'Transaction created successfully';
-  @override String get budgetCreatedSuccess => 'Budget created successfully';
-  @override String get budgetUpdatedSuccess => 'Budget updated successfully';
-  @override String get debtCreatedSuccess => 'Debt added successfully';
-  @override String get debtLentCreatedSuccess => 'Receivable added successfully';
-  @override String get debtPaymentSuccess => 'Payment recorded successfully';
-  @override String get debtCollectionSuccess => 'Collection recorded successfully';
-  @override String get subscriptionCreatedSuccess => 'Subscription added successfully';
-  @override String get accountCreatedSuccess => 'Account created successfully';
-  @override String get accountUpdatedSuccess => 'Account updated successfully';
-  @override String get subscriptionUpdatedSuccess => 'Subscription updated successfully';
-  @override String get transactionDeletedSuccess => 'Transaction deleted successfully';
-  @override String get budgetDeletedSuccess => 'Budget deleted successfully';
-  @override String get budgetTransactionsTitle => 'TRANSACTIONS';
-  @override String get budgetNoTransactions => 'No transactions found for this budget.';
-  @override String get budgetStatRemaining => 'Remaining';
-  @override String get budgetStatStart => 'Start';
-  @override String get budgetStatEnd => 'End';
-  @override String get budgetDailyChartTitle => 'LAST 14 DAYS';
-  @override String get sharedBudgetExpensesTitle => 'EXPENSES';
-  @override String get sharedBudgetNoExpenses => 'No expenses found for this shared budget.';
-  @override String get sharedBudgetMembersTotal => 'Total';
-  @override String get cancelInviteTitle => 'Cancel Invite';
-  @override String cancelInviteConfirm(String email) => 'The invite sent to $email will be cancelled.';
-  @override String get inviteCancelledSuccess => 'Invite cancelled';
-  @override String get budgetAddTransaction => 'Add';
-  @override String get budgetSheetAddExpense => 'Add Expense';
-  @override String get accountSheetAddTransaction => 'Add Transaction';
-  @override String get budgetCreateSheetBudget => 'Create Budget';
-  @override String get budgetCreateSheetGroup => 'Create Group';
-  @override String get budgetScopeLabel => 'Budget Type';
-  @override String get budgetScopePersonal => 'Personal';
-  @override String get debtDeletedSuccess => 'Debt record deleted successfully';
-  @override String get subscriptionDeletedSuccess => 'Subscription deleted successfully';
-  @override String get groupDeletedSuccess => 'Group deleted successfully';
-  @override String get sharedBudgetDeletedSuccess => 'Shared budget deleted successfully';
-  @override String get enterValidAmount => 'Enter a valid amount.';
-  @override String get selectAccount => 'Select an account.';
-  @override String get selectTargetAccount => 'Select a target account.';
-  @override String get selectCategory => 'Select a category.';
-  @override String get enterBudgetName => 'Enter a budget name.';
-  @override String get selectCategoryPrompt => 'Please select a category.';
-  @override String get accountsLoadFailed => 'Failed to load accounts';
+  @override
+  String get accountDeleted => 'Account deleted';
+  @override
+  String get passwordMismatch => 'New passwords do not match.';
+  @override
+  String get passwordTooShort => 'Password must be at least 8 characters.';
+  @override
+  String get transactionCreatedSuccess => 'Transaction created successfully';
+  @override
+  String get budgetCreatedSuccess => 'Budget created successfully';
+  @override
+  String get budgetUpdatedSuccess => 'Budget updated successfully';
+  @override
+  String get debtCreatedSuccess => 'Debt added successfully';
+  @override
+  String get debtLentCreatedSuccess => 'Receivable added successfully';
+  @override
+  String get debtPaymentSuccess => 'Payment recorded successfully';
+  @override
+  String get debtCollectionSuccess => 'Collection recorded successfully';
+  @override
+  String get subscriptionCreatedSuccess => 'Subscription added successfully';
+  @override
+  String get accountCreatedSuccess => 'Account created successfully';
+  @override
+  String get accountUpdatedSuccess => 'Account updated successfully';
+  @override
+  String get subscriptionUpdatedSuccess => 'Subscription updated successfully';
+  @override
+  String get transactionDeletedSuccess => 'Transaction deleted successfully';
+  @override
+  String get budgetDeletedSuccess => 'Budget deleted successfully';
+  @override
+  String get budgetTransactionsTitle => 'TRANSACTIONS';
+  @override
+  String get budgetNoTransactions => 'No transactions found for this budget.';
+  @override
+  String get budgetStatRemaining => 'Remaining';
+  @override
+  String get budgetStatStart => 'Start';
+  @override
+  String get budgetStatEnd => 'End';
+  @override
+  String get budgetDailyChartTitle => 'LAST 14 DAYS';
+  @override
+  String get sharedBudgetExpensesTitle => 'EXPENSES';
+  @override
+  String get sharedBudgetNoExpenses =>
+      'No expenses found for this shared budget.';
+  @override
+  String get sharedBudgetMembersTotal => 'Total';
+  @override
+  String get cancelInviteTitle => 'Cancel Invite';
+  @override
+  String cancelInviteConfirm(String email) =>
+      'The invite sent to $email will be cancelled.';
+  @override
+  String get inviteCancelledSuccess => 'Invite cancelled';
+  @override
+  String get budgetAddTransaction => 'Add';
+  @override
+  String get budgetSheetAddExpense => 'Add Expense';
+  @override
+  String get accountSheetAddTransaction => 'Add Transaction';
+  @override
+  String get budgetCreateSheetBudget => 'Create Budget';
+  @override
+  String get budgetCreateSheetGroup => 'Create Group';
+  @override
+  String get budgetScopeLabel => 'Budget Type';
+  @override
+  String get budgetScopePersonal => 'Personal';
+  @override
+  String get debtDeletedSuccess => 'Debt record deleted successfully';
+  @override
+  String get subscriptionDeletedSuccess => 'Subscription deleted successfully';
+  @override
+  String get groupDeletedSuccess => 'Group deleted successfully';
+  @override
+  String get sharedBudgetDeletedSuccess => 'Shared budget deleted successfully';
+  @override
+  String get enterValidAmount => 'Enter a valid amount.';
+  @override
+  String get selectAccount => 'Select an account.';
+  @override
+  String get selectTargetAccount => 'Select a target account.';
+  @override
+  String get selectCategory => 'Select a category.';
+  @override
+  String get enterBudgetName => 'Enter a budget name.';
+  @override
+  String get enterSubscriptionName => 'Enter a subscription name.';
+  @override
+  String get enterPersonName => 'Enter a person / organization name.';
+  @override
+  String get selectCategoryPrompt => 'Please select a category.';
+  @override
+  String get accountsLoadFailed => 'Failed to load accounts';
 
-  @override String get deleteAccountTitle => 'Delete Account';
-  @override String get noAccountsYet => 'No accounts yet';
-  @override String get noAccountsSubtitle => 'Create your first account\nto track income and expenses.';
-  @override String get accountDetailTitle => 'Account Detail';
-  @override String get noAccountsFound => 'No accounts found';
-  @override String get refreshTooltip => 'Refresh';
+  @override
+  String get deleteAccountTitle => 'Delete Account';
+  @override
+  String get noAccountsYet => 'No accounts yet';
+  @override
+  String get noAccountsSubtitle =>
+      'Create your first account\nto track income and expenses.';
+  @override
+  String get accountDetailTitle => 'Account Detail';
+  @override
+  String get noAccountsFound => 'No accounts found';
+  @override
+  String get refreshTooltip => 'Refresh';
 
-  @override String get welcomeBack => 'Welcome Back\nto Wallet';
-  @override String get signInSubtitle => 'Sign in to your account';
-  @override String get emailLabel => 'Email';
-  @override String get passwordLabel => 'Password';
-  @override String get forgotPasswordAction => 'Forgot password';
-  @override String get orDivider => 'or';
-  @override String get continueWithGoogle => 'Continue with Google';
-  @override String get biometricLoginBtn => 'Login with Fingerprint';
-  @override String get noAccount => 'Don\'t have an account?';
-  @override String get createAccount => 'Create Account';
-  @override String get createAccountSubtitle => 'Start your financial freedom';
-  @override String get fullNameLabel => 'Full Name';
-  @override String get fullNameHint => 'Enter your name';
-  @override String get passwordRepeatLabel => 'Repeat Password';
-  @override String get hasAccount => 'Already have an account?';
-  @override String get forgotPasswordTitle => 'Forgot Password';
-  @override String get forgotPasswordSubtitle => 'Enter your email and we\'ll send you a reset link.';
-  @override String get sendResetLink => 'Send Link';
-  @override String get resetLinkSentTitle => 'Link Sent!';
-  @override String resetLinkSentContent(String email) => 'A password reset link has been sent to $email.';
-  @override String get resetPasswordTitle => 'Set Your\nNew Password';
-  @override String get resetPasswordSubtitle => 'Create a secure password.';
-  @override String get resetCodeLabel => 'Reset Code';
-  @override String get resetCodeRequired => 'Enter the code';
-  @override String get resetCodeInvalid => 'Code must be 6 digits';
-  @override String get enterResetCode => 'Enter Code';
-  @override String get verifyCodeTitle => 'Verify Code';
-  @override String get verifyCodeSubtitle =>
-      'Enter the 6-digit code sent to your email.';
-  @override String get continueButton => 'Continue';
-  @override String get newPasswordLabel => 'New Password';
-  @override String get updatePasswordBtn => 'Update Password';
-  @override String get passwordRequirements => 'Password Requirements';
-  @override String get reqMinChars => 'At least 8 characters';
-  @override String get reqUppercase => 'Contains uppercase letter';
-  @override String get reqNumber => 'Contains a number';
-  @override String get reqMinUppercase => 'At least 1 uppercase letter';
-  @override String get reqMinNumber => 'At least 1 number';
-  @override String get passwordUpdatedTitle => 'Password Updated!';
-  @override String get passwordUpdatedContent => 'Your password has been updated. You can now log in with your new password.';
+  @override
+  String get welcomeBack => 'Welcome Back\nto Wallet';
+  @override
+  String get signInSubtitle => 'Sign in to your account';
+  @override
+  String get emailLabel => 'Email';
+  @override
+  String get passwordLabel => 'Password';
+  @override
+  String get forgotPasswordAction => 'Forgot password';
+  @override
+  String get orDivider => 'or';
+  @override
+  String get continueWithGoogle => 'Continue with Google';
+  @override
+  String get biometricLoginBtn => 'Login with Fingerprint';
+  @override
+  String get noAccount => 'Don\'t have an account?';
+  @override
+  String get createAccount => 'Create Account';
+  @override
+  String get createAccountSubtitle => 'Start your financial freedom';
+  @override
+  String get fullNameLabel => 'Full Name';
+  @override
+  String get fullNameHint => 'Enter your name';
+  @override
+  String get passwordRepeatLabel => 'Repeat Password';
+  @override
+  String get hasAccount => 'Already have an account?';
+  @override
+  String get forgotPasswordTitle => 'Forgot Password';
+  @override
+  String get forgotPasswordSubtitle =>
+      'Enter your email and we\'ll send you a reset link.';
+  @override
+  String get sendResetLink => 'Send Link';
+  @override
+  String get resetLinkSentTitle => 'Link Sent!';
+  @override
+  String resetLinkSentContent(String email) =>
+      'A password reset link has been sent to $email.';
+  @override
+  String get resetPasswordTitle => 'Set Your\nNew Password';
+  @override
+  String get resetPasswordSubtitle => 'Create a secure password.';
+  @override
+  String get resetCodeLabel => 'Reset Code';
+  @override
+  String get resetCodeRequired => 'Enter the code';
+  @override
+  String get resetCodeInvalid => 'Code must be 6 digits';
+  @override
+  String get enterResetCode => 'Enter Code';
+  @override
+  String get verifyCodeTitle => 'Verify Code';
+  @override
+  String get verifyCodeSubtitle => 'Enter the 6-digit code sent to your email.';
+  @override
+  String get continueButton => 'Continue';
+  @override
+  String get newPasswordLabel => 'New Password';
+  @override
+  String get updatePasswordBtn => 'Update Password';
+  @override
+  String get passwordRequirements => 'Password Requirements';
+  @override
+  String get reqMinChars => 'At least 8 characters';
+  @override
+  String get reqUppercase => 'Contains uppercase letter';
+  @override
+  String get reqNumber => 'Contains a number';
+  @override
+  String get reqMinUppercase => 'At least 1 uppercase letter';
+  @override
+  String get reqMinNumber => 'At least 1 number';
+  @override
+  String get passwordUpdatedTitle => 'Password Updated!';
+  @override
+  String get passwordUpdatedContent =>
+      'Your password has been updated. You can now log in with your new password.';
 
-  @override String get accountNameLabel => 'Account Name';
-  @override String get accountNameRequired => 'Account name is required';
-  @override String get currentDebt => 'Current Debt (optional)';
-  @override String get startingBalance => 'Starting Balance';
-  @override String get debtHint => 'Leave empty if no debt';
-  @override String get invalidAmount => 'Invalid amount';
-  @override String get creditCardDetailsLabel => 'Credit Card Details';
-  @override String get creditLimitHint => 'Credit limit';
-  @override String get creditLimitRequired => 'Credit limit is required';
-  @override String get creditLimitInvalid => 'Enter a valid limit';
-  @override String get statementDayLabel => 'Statement Day';
-  @override String get paymentDueDayLabel => 'Payment Due Day';
-  @override String get selectBankLabel => 'Select Bank';
-  @override String get otherBankOption => 'Other';
-  @override String get bankNameLabel => 'Bank Name';
-  @override String get bankNameHint => 'Enter bank name';
+  @override
+  String get accountNameLabel => 'Account Name';
+  @override
+  String get accountNameRequired => 'Account name is required';
+  @override
+  String get currentDebt => 'Current Debt (optional)';
+  @override
+  String get startingBalance => 'Starting Balance';
+  @override
+  String get debtHint => 'Leave empty if no debt';
+  @override
+  String get invalidAmount => 'Invalid amount';
+  @override
+  String get creditCardDetailsLabel => 'Credit Card Details';
+  @override
+  String get creditLimitHint => 'Credit limit';
+  @override
+  String get creditLimitRequired => 'Credit limit is required';
+  @override
+  String get creditLimitInvalid => 'Enter a valid limit';
+  @override
+  String get statementDayLabel => 'Statement Day';
+  @override
+  String get paymentDueDayLabel => 'Payment Due Day';
+  @override
+  String get selectBankLabel => 'Select Bank';
+  @override
+  String get otherBankOption => 'Other';
+  @override
+  String get bankNameLabel => 'Bank Name';
+  @override
+  String get bankNameHint => 'Enter bank name';
 
-  @override String get removePhoto => 'Remove Photo';
-  @override String get emailNotEditable => 'Email address cannot be changed';
-  @override String get currentPasswordHint => 'Current password';
-  @override String get newPasswordHint => 'New password';
-  @override String get confirmPasswordHint => 'Repeat new password';
+  @override
+  String get removePhoto => 'Remove Photo';
+  @override
+  String get emailNotEditable => 'Email address cannot be changed';
+  @override
+  String get currentPasswordHint => 'Current password';
+  @override
+  String get newPasswordHint => 'New password';
+  @override
+  String get confirmPasswordHint => 'Repeat new password';
 
-  @override String get budgetNameLabel => 'Budget Name';
-  @override String get budgetNameHint => 'e.g. Grocery Budget';
-  @override String get noCategoriesFound => 'No categories found.';
-  @override String get selectPlaceholder => 'Select';
-  @override String get smartTrackingSubtitle => 'Transactions are auto-calculated';
-  @override String get noteOptionalLabel => 'Note (optional)';
-  @override String get addNoteHint => 'Add a description...';
+  @override
+  String get budgetNameLabel => 'Budget Name';
+  @override
+  String get budgetNameHint => 'e.g. Grocery Budget';
+  @override
+  String get noCategoriesFound => 'No categories found.';
+  @override
+  String get selectPlaceholder => 'Select';
+  @override
+  String get smartTrackingSubtitle => 'Transactions are auto-calculated';
+  @override
+  String get noteOptionalLabel => 'Note (optional)';
+  @override
+  String get addNoteHint => 'Add a description...';
 
-  @override String budgetsExceeded(int count) => '$count of your budgets exceeded the limit';
-  @override String budgetsCritical(int count) => '$count of your budgets are near the limit';
+  @override
+  String budgetsExceeded(int count) =>
+      '$count of your budgets exceeded the limit';
+  @override
+  String budgetsCritical(int count) =>
+      '$count of your budgets are near the limit';
 
-  @override String installmentsPaid(String paid, String total) => '$paid/$total paid';
-  @override String paymentsCount(int count) => '$count transactions';
-  @override String get noPaymentsYet => 'No payments made yet.';
-  @override String get collectPaymentBtn => 'Collect';
-  @override String get makePaymentBtn => 'Pay Debt';
-  @override String get viewInstallmentsBtn => 'View Installments';
-  @override String get receivedPaymentTitle => 'I Received Payment';
-  @override String get payDebtTitle => 'Make Payment';
-  @override String installmentPaymentTitle(int no) => 'Installment $no Payment';
-  @override String installmentAmountLabel(String amount) => 'Installment amount: $amount';
-  @override String remainingAmountLabel(String amount) => 'Remaining: $amount';
-  @override String get amountHint => 'Amount (₺)';
-  @override String get noteOptionalHint => 'Note (optional)';
-  @override String get remainingLabel => 'Remaining amount';
-  @override String paidLabel(String amount) => '$amount paid';
-  @override String totalLabel(String amount) => 'Total: $amount';
-  @override String get dueDatePassed => 'Past due';
-  @override String get dueDateToday => 'Due today';
-  @override String get dueDateTomorrow => 'Due tomorrow';
-  @override String get personNameHint => 'Person / Organization Name';
-  @override String get descriptionOptionalHint => 'Description (optional)';
-  @override String get dueDateHint => 'Due date (optional)';
-  @override String get installmentCountLabel => 'Installment Count:';
+  @override
+  String installmentsPaid(String paid, String total) => '$paid/$total paid';
+  @override
+  String paymentsCount(int count) => '$count transactions';
+  @override
+  String get noPaymentsYet => 'No payments made yet.';
+  @override
+  String get collectPaymentBtn => 'Collect';
+  @override
+  String get makePaymentBtn => 'Pay Debt';
+  @override
+  String get viewInstallmentsBtn => 'View Installments';
+  @override
+  String get receivedPaymentTitle => 'I Received Payment';
+  @override
+  String get payDebtTitle => 'Make Payment';
+  @override
+  String installmentPaymentTitle(int no) => 'Installment $no Payment';
+  @override
+  String installmentAmountLabel(String amount) => 'Installment amount: $amount';
+  @override
+  String remainingAmountLabel(String amount) => 'Remaining: $amount';
+  @override
+  String get amountHint => 'Amount (₺)';
+  @override
+  String get noteOptionalHint => 'Note (optional)';
+  @override
+  String get remainingLabel => 'Remaining amount';
+  @override
+  String paidLabel(String amount) => '$amount paid';
+  @override
+  String totalLabel(String amount) => 'Total: $amount';
+  @override
+  String get dueDatePassed => 'Past due';
+  @override
+  String get dueDateToday => 'Due today';
+  @override
+  String get dueDateTomorrow => 'Due tomorrow';
+  @override
+  String get personNameHint => 'Person / Organization Name';
+  @override
+  String get descriptionOptionalHint => 'Description (optional)';
+  @override
+  String get dueDateHint => 'Due date (optional)';
+  @override
+  String get installmentCountLabel => 'Installment Count:';
 
-  @override String get billingCycleDaily => 'Daily';
-  @override String get billingCycleWeekly => 'Weekly';
-  @override String get billingCycleMonthly => 'Monthly';
-  @override String get billingCycleYearly => 'Yearly';
-  @override String get subscriptionNameHint => 'Subscription name (Netflix, Spotify...)';
+  @override
+  String get billingCycleDaily => 'Daily';
+  @override
+  String get billingCycleWeekly => 'Weekly';
+  @override
+  String get billingCycleMonthly => 'Monthly';
+  @override
+  String get billingCycleYearly => 'Yearly';
+  @override
+  String get subscriptionNameHint => 'Subscription name (Netflix, Spotify...)';
 
-  @override String get cameraNotFound => 'Camera not found';
-  @override String get cameraStartFailed => 'Camera could not be started';
-  @override String get receiptAnalyzing => 'Analyzing receipt...';
-  @override String get scanReceiptTitle => 'Scan Receipt';
-  @override String get duplicateReceiptError => 'You have already scanned this receipt';
-  @override String get imageTooLarge => 'Image too large (max 10 MB)';
-  @override String get serverError => 'Server error, please try again';
+  @override
+  String get cameraNotFound => 'Camera not found';
+  @override
+  String get cameraStartFailed => 'Camera could not be started';
+  @override
+  String get receiptAnalyzing => 'Analyzing receipt...';
+  @override
+  String get scanReceiptTitle => 'Scan Receipt';
+  @override
+  String get duplicateReceiptError => 'You have already scanned this receipt';
+  @override
+  String get imageTooLarge => 'Image too large (max 10 MB)';
+  @override
+  String get serverError => 'Server error, please try again';
 
-  @override String get noReceiptsYet => 'No receipts scanned yet.';
-  @override String get receiptDeleteContent => 'This receipt will be permanently deleted.';
-  @override String get receiptStatusConfirmed => 'Confirmed';
-  @override String get receiptStatusParsed => 'Scanned';
-  @override String get receiptStatusProcessing => 'Processing';
-  @override String get receiptStatusFailed => 'Failed';
-  @override String ocrConfidence(int pct) => 'OCR confidence: $pct%';
-  @override String get alignReceiptHint => 'Align receipt within the frame';
-  @override String get selectAccountHint => 'Select account';
-  @override String get selectCategoryHint => 'Select category';
-  @override String get merchantNameHint => 'Merchant name';
-  @override String get productsLabel => 'PRODUCTS';
-  @override String get duplicateReceiptWarning => 'This receipt may have been processed before';
-  @override String get unknownMerchant => 'Unknown Merchant';
-  @override String get unknownDate => 'Unknown date';
-  @override String photoCaptureError(String e) => 'Photo capture failed: $e';
-  @override String receiptProcessError(String e) => 'Receipt processing failed: $e';
-  @override String receiptDetectedBankAddPrompt(String bankName) =>
+  @override
+  String get noReceiptsYet => 'No receipts scanned yet.';
+  @override
+  String get receiptDeleteContent =>
+      'This receipt will be permanently deleted.';
+  @override
+  String get receiptStatusConfirmed => 'Confirmed';
+  @override
+  String get receiptStatusParsed => 'Scanned';
+  @override
+  String get receiptStatusProcessing => 'Processing';
+  @override
+  String get receiptStatusFailed => 'Failed';
+  @override
+  String ocrConfidence(int pct) => 'OCR confidence: $pct%';
+  @override
+  String get alignReceiptHint => 'Align receipt within the frame';
+  @override
+  String get selectAccountHint => 'Select account';
+  @override
+  String get selectCategoryHint => 'Select category';
+  @override
+  String get merchantNameHint => 'Merchant name';
+  @override
+  String get productsLabel => 'PRODUCTS';
+  @override
+  String get duplicateReceiptWarning =>
+      'This receipt may have been processed before';
+  @override
+  String get unknownMerchant => 'Unknown Merchant';
+  @override
+  String get unknownDate => 'Unknown date';
+  @override
+  String photoCaptureError(String e) => 'Photo capture failed: $e';
+  @override
+  String receiptProcessError(String e) => 'Receipt processing failed: $e';
+  @override
+  String receiptDetectedBankAddPrompt(String bankName) =>
       'Detected $bankName · Add account';
-  @override String get receiptDetectedCashAddPrompt =>
+  @override
+  String get receiptDetectedCashAddPrompt =>
       'Cash payment detected · Add account';
 
-  @override String get recurringTransaction => 'Recurring Transaction';
-  @override String get recurringFrequencyLabel => 'Frequency';
-  @override String get endDateOptional => 'End date (optional)';
-  @override String get descriptionOptional => 'Description (optional)';
-  @override String get noteOptional => 'Note (optional)';
-  @override String get todayLabel => 'Today';
-  @override String monthName(int m) => const ['January','February','March','April','May','June','July','August','September','October','November','December'][m - 1];
-  @override String monthAbbr(int m) => const ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][m - 1];
+  @override
+  String get recurringTransaction => 'Recurring Transaction';
+  @override
+  String get recurringFrequencyLabel => 'Frequency';
+  @override
+  String get endDateOptional => 'End date (optional)';
+  @override
+  String get descriptionOptional => 'Description (optional)';
+  @override
+  String get noteOptional => 'Note (optional)';
+  @override
+  String get todayLabel => 'Today';
+  @override
+  String monthName(int m) => const [
+    'January',
+    'February',
+    'March',
+    'April',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December',
+  ][m - 1];
+  @override
+  String monthAbbr(int m) => const [
+    'Jan',
+    'Feb',
+    'Mar',
+    'Apr',
+    'May',
+    'Jun',
+    'Jul',
+    'Aug',
+    'Sep',
+    'Oct',
+    'Nov',
+    'Dec',
+  ][m - 1];
 
-  @override String get cashFlowTitle => 'Cash Flow';
-  @override String get expenseDistributionTitle => 'Expense Distribution';
-  @override String get categoryTrendsTitle => 'Category Trends';
-  @override String get periodThisMonth => 'This Month';
-  @override String get period3Months => '3 Months';
-  @override String get periodThisYear => 'This Year';
-  @override String get previousLabel => 'prev';
+  @override
+  String get cashFlowTitle => 'Cash Flow';
+  @override
+  String get expenseDistributionTitle => 'Expense Distribution';
+  @override
+  String get categoryTrendsTitle => 'Category Trends';
+  @override
+  String get periodThisMonth => 'This Month';
+  @override
+  String get period3Months => '3 Months';
+  @override
+  String get periodThisYear => 'This Year';
+  @override
+  String get previousLabel => 'prev';
 
-  @override String get debtTypeBorrowed => 'Borrowed';
-  @override String get debtTypeLent => 'Lent';
-  @override String get summaryLent => 'My Receivables';
-  @override String get summaryBorrowed => 'My Debts';
-  @override String get paymentCollection => 'Collection';
-  @override String get paymentLabel => 'Payment';
-  @override String installmentNo(int no) => 'Installment $no';
-  @override String partiallyPaid(String amount) => '$amount paid';
-  @override String get allOption => 'All';
-  @override String get noDebtsTitle => 'No debt records';
-  @override String get noDebtsSubtitle => 'Create your first record\nto track debts and receivables.';
-  @override String get addDebtBtn => 'Add Debt';
-  @override String get collectBtn => 'Collect';
-  @override String get payBtn => 'Pay';
+  @override
+  String get debtTypeBorrowed => 'Borrowed';
+  @override
+  String get debtTypeLent => 'Lent';
+  @override
+  String get summaryLent => 'My Receivables';
+  @override
+  String get summaryBorrowed => 'My Debts';
+  @override
+  String get paymentCollection => 'Collection';
+  @override
+  String get paymentLabel => 'Payment';
+  @override
+  String installmentNo(int no) => 'Installment $no';
+  @override
+  String partiallyPaid(String amount) => '$amount paid';
+  @override
+  String get allOption => 'All';
+  @override
+  String get noDebtsTitle => 'No debt records';
+  @override
+  String get noDebtsSubtitle =>
+      'Create your first record\nto track debts and receivables.';
+  @override
+  String get addDebtBtn => 'Add Debt';
+  @override
+  String get collectBtn => 'Collect';
+  @override
+  String get payBtn => 'Pay';
 
-  @override String get periodCustom => 'Custom';
-  @override String get budgetAmountLabel => 'BUDGET AMOUNT';
-  @override String get budgetEndDate => 'End Date';
-  @override String get budgetEndDateUnset => 'Unlimited';
-  @override String get amountTRY => 'Amount (₺)';
+  @override
+  String get periodCustom => 'Custom';
+  @override
+  String get budgetAmountLabel => 'BUDGET AMOUNT';
+  @override
+  String get budgetEndDate => 'End Date';
+  @override
+  String get budgetEndDateUnset => 'Unlimited';
+  @override
+  String get amountTRY => 'Amount (₺)';
 
-  @override String get accountTypeBank => 'Bank';
-  @override String get accountTypeCash => 'Cash';
-  @override String get accountTypeCreditCard => 'Credit Card';
-  @override String get accountTypeInvestment => 'Investment';
+  @override
+  String get accountTypeBank => 'Bank';
+  @override
+  String get accountTypeCash => 'Cash';
+  @override
+  String get accountTypeCreditCard => 'Credit Card';
+  @override
+  String get accountTypeInvestment => 'Investment';
 
-  @override String get defaultBadge => 'Default';
-  @override String get defaultAccountLabel => 'Default account';
-  @override String get defaultAccountSubtitle => 'Auto-selected for new transactions';
-  @override String get usedLabel => 'USED';
-  @override String get balanceLabel => 'BALANCE';
-  @override String get usedSlashLimit => 'Used / Limit';
-  @override String usedAmount(String amount) => 'Used: $amount';
-  @override String limitAmount(String amount) => 'Limit: $amount';
-  @override String get lastSixMonths => 'Last 6 Months';
-  @override String get topCategoriesThisMonth => 'Top Spending This Month';
-  @override String get incomeChartLabel => 'Income';
-  @override String get expenseChartLabel => 'Expense';
-  @override String get spendChartLabel => 'Spend';
-  @override String get restoreBtn => 'Restore';
-  @override String get loadFailed => 'Failed to load';
-  @override String get archiveHint => 'You can archive from account details';
+  @override
+  String get defaultBadge => 'Default';
+  @override
+  String get defaultAccountLabel => 'Default account';
+  @override
+  String get defaultAccountSubtitle => 'Auto-selected for new transactions';
+  @override
+  String get usedLabel => 'USED';
+  @override
+  String get balanceLabel => 'BALANCE';
+  @override
+  String get usedSlashLimit => 'Used / Limit';
+  @override
+  String usedAmount(String amount) => 'Used: $amount';
+  @override
+  String limitAmount(String amount) => 'Limit: $amount';
+  @override
+  String get lastSixMonths => 'Last 6 Months';
+  @override
+  String get topCategoriesThisMonth => 'Top Spending This Month';
+  @override
+  String get incomeChartLabel => 'Income';
+  @override
+  String get expenseChartLabel => 'Expense';
+  @override
+  String get spendChartLabel => 'Spend';
+  @override
+  String get restoreBtn => 'Restore';
+  @override
+  String get loadFailed => 'Failed to load';
+  @override
+  String get archiveHint => 'You can archive from account details';
 
-  @override String upcomingRenewals(int count) => '$count subscription(s) renewing in the next 7 days';
+  @override
+  String upcomingRenewals(int count) =>
+      '$count subscription(s) renewing in the next 7 days';
 
-  @override String get transactionDetailTitle => 'Transaction Detail';
-  @override String get typeLabel => 'Type';
-  @override String get sourceLabel => 'Source';
-  @override String get descriptionLabel => 'Description';
-  @override String get noteLabel => 'Note';
-  @override String get transactionIdLabel => 'Tx ID';
-  @override String get timeLabel => 'Time';
-  @override String get sourceManual => 'Manual';
-  @override String get sourceRecurring => 'Recurring';
-  @override String get sourceDebtPayment => 'Debt Payment';
-  @override String get sourceDebtCollection => 'Debt Collection';
-  @override String get sourceSubscription => 'Subscription';
+  @override
+  String get transactionDetailTitle => 'Transaction Detail';
+  @override
+  String get typeLabel => 'Type';
+  @override
+  String get sourceLabel => 'Source';
+  @override
+  String get descriptionLabel => 'Description';
+  @override
+  String get noteLabel => 'Note';
+  @override
+  String get transactionIdLabel => 'Tx ID';
+  @override
+  String get timeLabel => 'Time';
+  @override
+  String get sourceManual => 'Manual';
+  @override
+  String get sourceRecurring => 'Recurring';
+  @override
+  String get sourceDebtPayment => 'Debt Payment';
+  @override
+  String get sourceDebtCollection => 'Debt Collection';
+  @override
+  String get sourceSubscription => 'Subscription';
 
-  @override String get currentPeriodTitle => 'Current Period';
-  @override String get openStatementsTitle => 'Open Statements';
-  @override String get statementHistoryTitle => 'Past Statements';
-  @override String get spentThisPeriod => 'Spent this period';
-  @override String txCountLabel(int n) => n == 1 ? '1 transaction' : '$n transactions';
-  @override String get totalAmountShortLabel => 'Total';
-  @override String get minimumPaymentLabel => 'Minimum';
-  @override String get dueDateLabel => 'Due';
-  @override String get payButton => 'Pay';
-  @override String get statementStatusDue => 'Due';
-  @override String get statementStatusPartiallyPaid => 'Partial';
-  @override String get statementStatusPaid => 'Paid';
-  @override String get statementStatusOverdue => 'Overdue';
-  @override String get noStatementsYet => 'No closed statements yet';
-  @override String get payStatementTitle => 'Pay Statement';
-  @override String get paymentAmountLabel => 'Payment Amount';
-  @override String get fromAccountLabel => 'From Account';
-  @override String get paymentSuccessSnackbar => 'Payment recorded';
-  @override String get noPayableAccountWarning =>
+  @override
+  String get currentPeriodTitle => 'Current Period';
+  @override
+  String get openStatementsTitle => 'Open Statements';
+  @override
+  String get statementHistoryTitle => 'Past Statements';
+  @override
+  String get spentThisPeriod => 'Spent this period';
+  @override
+  String txCountLabel(int n) => n == 1 ? '1 transaction' : '$n transactions';
+  @override
+  String get totalAmountShortLabel => 'Total';
+  @override
+  String get minimumPaymentLabel => 'Minimum';
+  @override
+  String get dueDateLabel => 'Due';
+  @override
+  String get payButton => 'Pay';
+  @override
+  String get statementStatusDue => 'Due';
+  @override
+  String get statementStatusPartiallyPaid => 'Partial';
+  @override
+  String get statementStatusPaid => 'Paid';
+  @override
+  String get statementStatusOverdue => 'Overdue';
+  @override
+  String get noStatementsYet => 'No closed statements yet';
+  @override
+  String get payStatementTitle => 'Pay Statement';
+  @override
+  String get paymentAmountLabel => 'Payment Amount';
+  @override
+  String get fromAccountLabel => 'From Account';
+  @override
+  String get paymentSuccessSnackbar => 'Payment recorded';
+  @override
+  String get noPayableAccountWarning =>
       'No account available to pay from. Add a cash or bank account first.';
-  @override String get payFullButton => 'Pay Full';
-  @override String get payMinimumButton => 'Pay Minimum';
-  @override String get statementPeriodFmt => 'Period';
+  @override
+  String get payFullButton => 'Pay Full';
+  @override
+  String get payMinimumButton => 'Pay Minimum';
+  @override
+  String get statementPeriodFmt => 'Period';
 
   static const _categoryMap = <String, String>{
     'Market': 'Groceries',
@@ -1615,97 +2564,167 @@ class _En extends AppStrings {
   };
 
   // Family module
-  @override String get familyBudgetTitle => 'Shared Budget';
-  @override String get createNewGroupTitle => 'Create New Group';
-  @override String get groupNameHint => 'Group name (e.g. Home Budget)';
-  @override String get createGroupBtn => 'Create';
-  @override String get deleteGroupTitle => 'Delete Group';
-  @override String deleteGroupContent(String name) =>
+  @override
+  String get familyBudgetTitle => 'Shared Budget';
+  @override
+  String get createNewGroupTitle => 'Create New Group';
+  @override
+  String get groupNameHint => 'Group name (e.g. Home Budget)';
+  @override
+  String get createGroupBtn => 'Create';
+  @override
+  String get deleteGroupTitle => 'Delete Group';
+  @override
+  String deleteGroupContent(String name) =>
       '"$name" group and all shared budgets will be deleted. This cannot be undone.';
-  @override String get inviteMemberTitle => 'Invite Member';
-  @override String get emailAddressHint => 'Email address';
-  @override String get sendInviteBtn => 'Invite';
-  @override String get inviteSentSuccess => 'Invite notification sent.';
-  @override String get membersSection => 'MEMBERS';
-  @override String get sharedBudgetsSection => 'SHARED BUDGETS';
-  @override String get pendingInvitesSection => 'PENDING INVITES';
-  @override String get addSharedBudgetBtn => 'Add Budget';
-  @override String get deleteSharedBudgetTitle => 'Delete Budget';
-  @override String get addSharedBudgetTitle => 'Add Shared Budget';
-  @override String get addSharedBudgetPrompt => 'Add shared budget';
-  @override String get sharedBudgetNameHint => 'Budget name';
-  @override String get amountTRYHint => 'Amount (₺)';
-  @override String get addBtn => 'Add';
-  @override String get removeMemberTitle => 'Remove Member';
-  @override String removeMemberContent(String name) =>
-      'Remove $name from the group?';
-  @override String get removeMemberBtn => 'Remove';
-  @override String removeMemberAction(String name) => 'Remove $name';
-  @override String memberCountRole(int count, bool isOwner) =>
+  @override
+  String get inviteMemberTitle => 'Invite Member';
+  @override
+  String get emailAddressHint => 'Email address';
+  @override
+  String get sendInviteBtn => 'Invite';
+  @override
+  String get inviteSentSuccess => 'Invite notification sent.';
+  @override
+  String get membersSection => 'MEMBERS';
+  @override
+  String get sharedBudgetsSection => 'SHARED BUDGETS';
+  @override
+  String get pendingInvitesSection => 'PENDING INVITES';
+  @override
+  String get addSharedBudgetBtn => 'Add Budget';
+  @override
+  String get deleteSharedBudgetTitle => 'Delete Budget';
+  @override
+  String get addSharedBudgetTitle => 'Add Shared Budget';
+  @override
+  String get addSharedBudgetPrompt => 'Add shared budget';
+  @override
+  String get sharedBudgetNameHint => 'Budget name';
+  @override
+  String get amountTRYHint => 'Amount (₺)';
+  @override
+  String get addBtn => 'Add';
+  @override
+  String get removeMemberTitle => 'Remove Member';
+  @override
+  String removeMemberContent(String name) => 'Remove $name from the group?';
+  @override
+  String get removeMemberBtn => 'Remove';
+  @override
+  String removeMemberAction(String name) => 'Remove $name';
+  @override
+  String memberCountRole(int count, bool isOwner) =>
       '$count member${count == 1 ? '' : 's'} · ${isOwner ? 'Owner' : 'Member'}';
-  @override String familyMemberCount(int count) =>
+  @override
+  String familyMemberCount(int count) =>
       '$count member${count == 1 ? '' : 's'}';
-  @override String get noGroupsTitle => 'Create Shared Budget';
-  @override String get noGroupsSubtitle =>
+  @override
+  String get noGroupsTitle => 'Create Shared Budget';
+  @override
+  String get noGroupsSubtitle =>
       'Track shared budgets with your group. Ideal for housemates, couples, and small teams — each member\'s contribution is calculated automatically.';
-  @override String get createGroupLargeBtn => 'Create Group';
-  @override String get createGroupError => 'Could not create group';
-  @override String get familyGroupsSection => 'GROUPS';
-  @override String get createFamilyGroupPrompt => 'Create group';
+  @override
+  String get createGroupLargeBtn => 'Create Group';
+  @override
+  String get createGroupError => 'Could not create group';
+  @override
+  String get familyGroupsSection => 'GROUPS';
+  @override
+  String get createFamilyGroupPrompt => 'Create group';
 
   // v2 — Subscription detail
-  @override String get inactiveLabel => 'Inactive';
-  @override String get detailsCardTitle => 'Details';
-  @override String get onValue => 'On';
-  @override String get offValue => 'Off';
-  @override String get nextRenewalLabel => 'Next Renewal';
-  @override String get stopSubscriptionBtn => 'Cancel Subscription';
-  @override String get activateSubscriptionBtn => 'Reactivate Subscription';
+  @override
+  String get inactiveLabel => 'Inactive';
+  @override
+  String get detailsCardTitle => 'Details';
+  @override
+  String get onValue => 'On';
+  @override
+  String get offValue => 'Off';
+  @override
+  String get nextRenewalLabel => 'Next Renewal';
+  @override
+  String get stopSubscriptionBtn => 'Cancel Subscription';
+  @override
+  String get activateSubscriptionBtn => 'Reactivate Subscription';
 
   // v2 — Period extended
-  @override String get budgetPeriodCustom => 'Custom';
+  @override
+  String get budgetPeriodCustom => 'Custom';
 
   // v2 — Budget status
-  @override String get budgetStatusOk => 'On Track';
-  @override String get budgetStatusWarning => 'Warning';
-  @override String get budgetStatusCritical => 'Critical';
-  @override String get budgetStatusExceeded => 'Exceeded';
+  @override
+  String get budgetStatusOk => 'On Track';
+  @override
+  String get budgetStatusWarning => 'Warning';
+  @override
+  String get budgetStatusCritical => 'Critical';
+  @override
+  String get budgetStatusExceeded => 'Exceeded';
 
   // v2 — Family role
-  @override String get roleOwner => 'Owner';
-  @override String get roleMember => 'Member';
+  @override
+  String get roleOwner => 'Owner';
+  @override
+  String get roleMember => 'Member';
 
   // v2 — Insights
-  @override String get smartSuggestionsSection => 'SMART SUGGESTIONS';
-  @override String get noSuggestionsEmpty => 'Awesome! No suggestions 🎉';
-  @override String get tabLastMonth => 'Last Month';
+  @override
+  String get smartSuggestionsSection => 'SMART SUGGESTIONS';
+  @override
+  String get noSuggestionsEmpty => 'Awesome! No suggestions 🎉';
+  @override
+  String get tabLastMonth => 'Last Month';
 
   // v2 — Legal / settings
-  @override String get sectionLegal => 'Legal';
-  @override String get privacyPolicyTitle => 'Privacy Policy';
-  @override String get termsOfServiceTitle => 'Terms of Service';
-  @override String get deleteUserAccountContent =>
+  @override
+  String get sectionLegal => 'Legal';
+  @override
+  String get privacyPolicyTitle => 'Privacy Policy';
+  @override
+  String get termsOfServiceTitle => 'Terms of Service';
+  @override
+  String get deleteUserAccountContent =>
       'Your account and all data (transactions, budgets, debts, subscriptions) will be permanently deleted. This cannot be undone.';
-  @override String get legalAcceptPrefix => 'I have read and accept: ';
-  @override String get legalAcceptAnd => ' and ';
+  @override
+  String get legalAcceptPrefix => 'I have read and accept: ';
+  @override
+  String get legalAcceptAnd => ' and ';
 
   // v2 — Quick actions
-  @override String get scanAction => 'Scan';
+  @override
+  String get scanAction => 'Scan';
 
   // Sprint 12 — Bütçe dönem geçmişi
-  @override String get budgetTabCurrentPeriod => 'This Period';
-  @override String get budgetTabHistory => 'History';
-  @override String budgetEndsOn(String date) => 'This period closes on $date';
-  @override String get openNewPeriodBtn => 'Open New Period';
-  @override String get budgetHistoryEmpty => 'No other periods for this category';
-  @override String get budgetHistoryChartTitle => 'PERIOD HISTORY';
-  @override String get budgetArchivedBadge => 'Archived';
-  @override String get budgetArchivedEditError => 'Cannot edit an archived budget';
-  @override String get budgetClosedPersonalSnackbar => 'Budget period closed';
-  @override String get budgetClosedSharedSnackbar => 'Shared budget period closed';
-  @override String get openNewPeriodAction => 'Open New';
-  @override String get archivedBudgetsTitle => 'Archived Budgets';
-  @override String get archivedBudgetsTabPersonal => 'Personal';
-  @override String get archivedBudgetsTabShared => 'Shared';
-  @override String get archivedBudgetsEmpty => 'No archived budgets found';
+  @override
+  String get budgetTabCurrentPeriod => 'This Period';
+  @override
+  String get budgetTabHistory => 'History';
+  @override
+  String budgetEndsOn(String date) => 'This period closes on $date';
+  @override
+  String get openNewPeriodBtn => 'Open New Period';
+  @override
+  String get budgetHistoryEmpty => 'No other periods for this category';
+  @override
+  String get budgetHistoryChartTitle => 'PERIOD HISTORY';
+  @override
+  String get budgetArchivedBadge => 'Archived';
+  @override
+  String get budgetArchivedEditError => 'Cannot edit an archived budget';
+  @override
+  String get budgetClosedPersonalSnackbar => 'Budget period closed';
+  @override
+  String get budgetClosedSharedSnackbar => 'Shared budget period closed';
+  @override
+  String get openNewPeriodAction => 'Open New';
+  @override
+  String get archivedBudgetsTitle => 'Archived Budgets';
+  @override
+  String get archivedBudgetsTabPersonal => 'Personal';
+  @override
+  String get archivedBudgetsTabShared => 'Shared';
+  @override
+  String get archivedBudgetsEmpty => 'No archived budgets found';
 }

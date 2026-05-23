@@ -40,11 +40,24 @@ class _PaymentSheetState extends State<PaymentSheet> {
     super.dispose();
   }
 
+  void _showError(String msg) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(msg), backgroundColor: AppColors.error),
+    );
+  }
+
   void _submit() {
+    final s = AppStrings.of(context);
     final amountStr = _amountController.text.trim().replaceAll(',', '.');
     final amount = double.tryParse(amountStr);
-    if (amount == null || amount <= 0) return;
-    if (_selectedAccountId == null) return;
+    if (amount == null || amount <= 0) {
+      _showError(s.enterValidAmount);
+      return;
+    }
+    if (_selectedAccountId == null) {
+      _showError(s.selectAccount);
+      return;
+    }
 
     final isLent = widget.debt.type == DebtType.LENT;
     context.read<DebtsBloc>().add(
@@ -60,9 +73,11 @@ class _PaymentSheetState extends State<PaymentSheet> {
     );
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(isLent
-            ? AppStrings.of(context).debtCollectionSuccess
-            : AppStrings.of(context).debtPaymentSuccess),
+        content: Text(
+          isLent
+              ? AppStrings.of(context).debtCollectionSuccess
+              : AppStrings.of(context).debtPaymentSuccess,
+        ),
         backgroundColor: AppColors.secondary,
       ),
     );
@@ -87,7 +102,9 @@ class _PaymentSheetState extends State<PaymentSheet> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                isLent ? AppStrings.of(context).receivedPaymentTitle : AppStrings.of(context).payDebtTitle,
+                isLent
+                    ? AppStrings.of(context).receivedPaymentTitle
+                    : AppStrings.of(context).payDebtTitle,
                 style: AppTypography.headlineSm,
               ),
               IconButton(
@@ -156,13 +173,15 @@ class _PaymentSheetState extends State<PaymentSheet> {
                   ),
                 );
               }
-              final accounts =
-                  snapshot.data!.where((a) => !a.isArchived).toList();
+              final accounts = snapshot.data!
+                  .where((a) => !a.isArchived)
+                  .toList();
               if (accounts.isEmpty) {
                 return Text(
                   AppStrings.of(context).noAccountsFound,
-                  style: AppTypography.bodySm
-                      .copyWith(color: AppColors.onSurfaceVariant),
+                  style: AppTypography.bodySm.copyWith(
+                    color: AppColors.onSurfaceVariant,
+                  ),
                 );
               }
               if (_selectedAccountId == null) {
@@ -192,11 +211,11 @@ class _PaymentSheetState extends State<PaymentSheet> {
                           color: isSelected
                               ? AppColors.primary.withValues(alpha: 0.15)
                               : AppColors.surfaceContainerHighest,
-                          borderRadius:
-                              BorderRadius.circular(AppSpacing.radiusMd),
+                          borderRadius: BorderRadius.circular(
+                            AppSpacing.radiusMd,
+                          ),
                           border: isSelected
-                              ? Border.all(
-                                  color: AppColors.primary, width: 1.5)
+                              ? Border.all(color: AppColors.primary, width: 1.5)
                               : null,
                         ),
                         child: Text(
@@ -250,7 +269,11 @@ class _PaymentSheetState extends State<PaymentSheet> {
                 borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
               ),
             ),
-            child: Text(isLent ? AppStrings.of(context).collectPaymentBtn : AppStrings.of(context).makePaymentBtn),
+            child: Text(
+              isLent
+                  ? AppStrings.of(context).collectPaymentBtn
+                  : AppStrings.of(context).makePaymentBtn,
+            ),
           ),
         ],
       ),

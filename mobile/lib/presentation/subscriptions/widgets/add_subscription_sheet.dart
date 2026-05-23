@@ -67,11 +67,28 @@ class _AddSubscriptionSheetState extends State<AddSubscriptionSheet> {
     return _isoDate(next);
   }
 
+  void _showError(String msg) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(msg), backgroundColor: AppColors.error),
+    );
+  }
+
   void _submit() {
+    final s = AppStrings.of(context);
     final name = _nameController.text.trim();
     final amount = _amount;
-    if (name.isEmpty || amount == null || amount <= 0) return;
-    if (_selectedAccountId == null) return;
+    if (name.isEmpty) {
+      _showError(s.enterSubscriptionName);
+      return;
+    }
+    if (amount == null || amount <= 0) {
+      _showError(s.enterValidAmount);
+      return;
+    }
+    if (_selectedAccountId == null) {
+      _showError(s.selectAccount);
+      return;
+    }
 
     final now = DateTime.now();
     context.read<SubscriptionsBloc>().add(
@@ -127,11 +144,17 @@ class _AddSubscriptionSheetState extends State<AddSubscriptionSheet> {
             ),
           ),
           const SizedBox(height: AppSpacing.xl),
-          _field(_nameController, s.subscriptionNameHint, Icons.subscriptions_outlined),
+          _field(
+            _nameController,
+            s.subscriptionNameHint,
+            Icons.subscriptions_outlined,
+          ),
           const SizedBox(height: AppSpacing.lg),
           Text(
             s.accountLabel,
-            style: AppTypography.labelSm.copyWith(color: AppColors.onSurfaceVariant),
+            style: AppTypography.labelSm.copyWith(
+              color: AppColors.onSurfaceVariant,
+            ),
           ),
           const SizedBox(height: AppSpacing.sm),
           FutureBuilder<List<AccountModel>>(
@@ -152,11 +175,15 @@ class _AddSubscriptionSheetState extends State<AddSubscriptionSheet> {
                   ),
                 );
               }
-              final accounts = snapshot.data!.where((a) => !a.isArchived).toList();
+              final accounts = snapshot.data!
+                  .where((a) => !a.isArchived)
+                  .toList();
               if (accounts.isEmpty) {
                 return Text(
                   s.noAccountsFound,
-                  style: AppTypography.bodySm.copyWith(color: AppColors.onSurfaceVariant),
+                  style: AppTypography.bodySm.copyWith(
+                    color: AppColors.onSurfaceVariant,
+                  ),
                 );
               }
               if (_selectedAccountId == null) {
@@ -186,7 +213,9 @@ class _AddSubscriptionSheetState extends State<AddSubscriptionSheet> {
                           color: isSelected
                               ? AppColors.primary.withValues(alpha: 0.15)
                               : AppColors.surfaceContainerHighest,
-                          borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                          borderRadius: BorderRadius.circular(
+                            AppSpacing.radiusMd,
+                          ),
                           border: isSelected
                               ? Border.all(color: AppColors.primary, width: 1.5)
                               : null,
@@ -212,7 +241,9 @@ class _AddSubscriptionSheetState extends State<AddSubscriptionSheet> {
           const SizedBox(height: AppSpacing.lg),
           Text(
             s.billingCycleLabel,
-            style: AppTypography.labelSm.copyWith(color: AppColors.onSurfaceVariant),
+            style: AppTypography.labelSm.copyWith(
+              color: AppColors.onSurfaceVariant,
+            ),
           ),
           const SizedBox(height: AppSpacing.sm),
           Row(
@@ -232,7 +263,9 @@ class _AddSubscriptionSheetState extends State<AddSubscriptionSheet> {
                         color: isActive
                             ? AppColors.primary.withValues(alpha: 0.15)
                             : AppColors.surfaceContainerHighest,
-                        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                        borderRadius: BorderRadius.circular(
+                          AppSpacing.radiusMd,
+                        ),
                         border: isActive
                             ? Border.all(color: AppColors.primary, width: 1.5)
                             : null,
@@ -240,7 +273,9 @@ class _AddSubscriptionSheetState extends State<AddSubscriptionSheet> {
                       child: Text(
                         c.label,
                         style: AppTypography.labelSm.copyWith(
-                          fontWeight: isActive ? FontWeight.w600 : FontWeight.w400,
+                          fontWeight: isActive
+                              ? FontWeight.w600
+                              : FontWeight.w400,
                           color: isActive
                               ? AppColors.primary
                               : AppColors.onSurfaceVariant,
@@ -266,8 +301,11 @@ class _AddSubscriptionSheetState extends State<AddSubscriptionSheet> {
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.autorenew_rounded,
-                      size: 20, color: AppColors.onSurfaceVariant),
+                  const Icon(
+                    Icons.autorenew_rounded,
+                    size: 20,
+                    color: AppColors.onSurfaceVariant,
+                  ),
                   const SizedBox(width: AppSpacing.md),
                   Expanded(
                     child: Text(s.autoDeductLabel, style: AppTypography.bodyMd),
@@ -304,7 +342,10 @@ class _AddSubscriptionSheetState extends State<AddSubscriptionSheet> {
       style: const TextStyle(color: AppColors.onSurface, fontSize: 14),
       decoration: InputDecoration(
         hintText: hint,
-        hintStyle: const TextStyle(color: AppColors.onSurfaceVariant, fontSize: 14),
+        hintStyle: const TextStyle(
+          color: AppColors.onSurfaceVariant,
+          fontSize: 14,
+        ),
         prefixIcon: Icon(icon, size: 20, color: AppColors.onSurfaceVariant),
         filled: true,
         fillColor: AppColors.surfaceContainerHighest,

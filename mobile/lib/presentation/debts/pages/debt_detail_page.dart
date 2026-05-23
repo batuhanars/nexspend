@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:wallet_app/core/l10n/app_strings.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:wallet_app/core/constants/app_colors.dart';
@@ -29,16 +29,27 @@ class _DebtDetailView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<DebtDetailBloc, DebtDetailState>(
+    return BlocConsumer<DebtDetailBloc, DebtDetailState>(
+      listener: (context, state) {
+        if (state is DebtDetailDeleted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(AppStrings.of(context).debtDeletedSuccess),
+              backgroundColor: AppColors.secondary,
+            ),
+          );
+          Navigator.of(context).pop();
+        }
+      },
       builder: (context, state) {
         final debt = state is DebtDetailLoaded
             ? state.debt
             : state is DebtDetailLoading
-                ? null
-                : (context.read<DebtDetailBloc>().state is DebtDetailLoaded
-                    ? (context.read<DebtDetailBloc>().state as DebtDetailLoaded)
+            ? null
+            : (context.read<DebtDetailBloc>().state is DebtDetailLoaded
+                  ? (context.read<DebtDetailBloc>().state as DebtDetailLoaded)
                         .debt
-                    : null);
+                  : null);
 
         return Scaffold(
           backgroundColor: AppColors.surface,
@@ -53,34 +64,52 @@ class _DebtDetailView extends StatelessWidget {
                 ? Text(debt.personName, style: AppTypography.headlineSm)
                 : null,
             centerTitle: false,
+            actions: [
+              if (debt != null)
+                IconButton(
+                  icon: const Icon(
+                    Icons.delete_outline_rounded,
+                    color: AppColors.error,
+                  ),
+                  tooltip: AppStrings.of(context).delete,
+                  onPressed: () => _confirmDelete(context, debt),
+                ),
+            ],
           ),
           body: switch (state) {
             DebtDetailLoading() => const Center(
-                child: CircularProgressIndicator(color: AppColors.primary),
-              ),
+              child: CircularProgressIndicator(color: AppColors.primary),
+            ),
             DebtDetailError(:final message) => Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(message,
-                        style: AppTypography.bodyMd
-                            .copyWith(color: AppColors.onSurfaceVariant)),
-                    const SizedBox(height: AppSpacing.lg),
-                    FilledButton.tonal(
-                      onPressed: () => context
-                          .read<DebtDetailBloc>()
-                          .add(DebtDetailRefreshRequested()),
-                      child: Text(AppStrings.of(context).retry),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    message,
+                    style: AppTypography.bodyMd.copyWith(
+                      color: AppColors.onSurfaceVariant,
                     ),
-                  ],
-                ),
+                  ),
+                  const SizedBox(height: AppSpacing.lg),
+                  FilledButton.tonal(
+                    onPressed: () => context.read<DebtDetailBloc>().add(
+                      DebtDetailRefreshRequested(),
+                    ),
+                    child: Text(AppStrings.of(context).retry),
+                  ),
+                ],
               ),
-            DebtDetailLoaded(:final debt, :final installments, :final payments) =>
+            ),
+            DebtDetailLoaded(
+              :final debt,
+              :final installments,
+              :final payments,
+            ) =>
               RefreshIndicator(
                 color: AppColors.primary,
-                onRefresh: () async => context
-                    .read<DebtDetailBloc>()
-                    .add(DebtDetailRefreshRequested()),
+                onRefresh: () async => context.read<DebtDetailBloc>().add(
+                  DebtDetailRefreshRequested(),
+                ),
                 child: ListView(
                   padding: const EdgeInsets.all(AppSpacing.pagePadding),
                   children: [
@@ -90,17 +119,28 @@ class _DebtDetailView extends StatelessWidget {
                       _SectionCard(
                         title: AppStrings.of(context).installmentsSection,
                         subtitle: AppStrings.of(context).installmentsPaid(
-                          installments.where((i) => i.status == DebtStatus.PAID).length.toString(),
+                          installments
+                              .where((i) => i.status == DebtStatus.PAID)
+                              .length
+                              .toString(),
                           installments.length.toString(),
                         ),
                         children: installments
-                            .map((i) => InstallmentRow(
-                                  installment: i,
-                                  isLent: debt.type == DebtType.LENT,
-                                  onPay: i.status != DebtStatus.PAID && debt.status != DebtStatus.PAID
-                                      ? () => _showInstallmentPayment(context, i, debt)
-                                      : null,
-                                ))
+                            .map(
+                              (i) => InstallmentRow(
+                                installment: i,
+                                isLent: debt.type == DebtType.LENT,
+                                onPay:
+                                    i.status != DebtStatus.PAID &&
+                                        debt.status != DebtStatus.PAID
+                                    ? () => _showInstallmentPayment(
+                                        context,
+                                        i,
+                                        debt,
+                                      )
+                                    : null,
+                              ),
+                            )
                             .toList(),
                       ),
                       const SizedBox(height: AppSpacing.lg),
@@ -108,19 +148,24 @@ class _DebtDetailView extends StatelessWidget {
                     if (payments.isNotEmpty)
                       _SectionCard(
                         title: AppStrings.of(context).paymentHistoryTitle,
-                        subtitle: AppStrings.of(context).paymentsCount(payments.length),
+                        subtitle: AppStrings.of(
+                          context,
+                        ).paymentsCount(payments.length),
                         children: payments
-                            .map((p) => PaymentRow(
-                                  payment: p,
-                                  isLent: debt.type == DebtType.LENT,
-                                ))
+                            .map(
+                              (p) => PaymentRow(
+                                payment: p,
+                                isLent: debt.type == DebtType.LENT,
+                              ),
+                            )
                             .toList(),
                       )
                     else
                       Center(
                         child: Padding(
-                          padding:
-                              const EdgeInsets.symmetric(vertical: AppSpacing.xl),
+                          padding: const EdgeInsets.symmetric(
+                            vertical: AppSpacing.xl,
+                          ),
                           child: Text(
                             AppStrings.of(context).noPaymentsYet,
                             style: AppTypography.bodyMd.copyWith(
@@ -135,7 +180,8 @@ class _DebtDetailView extends StatelessWidget {
               ),
             _ => const SizedBox.shrink(),
           },
-          bottomNavigationBar: state is DebtDetailLoaded &&
+          bottomNavigationBar:
+              state is DebtDetailLoaded &&
                   state.debt.status != DebtStatus.PAID &&
                   (!state.debt.hasInstallments || state.installments.isEmpty)
               ? Container(
@@ -149,23 +195,24 @@ class _DebtDetailView extends StatelessWidget {
                         AppSpacing.lg,
                       ),
                       child: FilledButton(
-                        onPressed: () =>
-                            _showPaymentSheet(context, state.debt),
+                        onPressed: () => _showPaymentSheet(context, state.debt),
                         style: FilledButton.styleFrom(
                           minimumSize: const Size.fromHeight(56),
                           backgroundColor: AppColors.primaryContainer,
                           foregroundColor: AppColors.onPrimaryContainer,
                           shape: RoundedRectangleBorder(
-                            borderRadius:
-                                BorderRadius.circular(AppSpacing.radiusXl),
+                            borderRadius: BorderRadius.circular(
+                              AppSpacing.radiusXl,
+                            ),
                           ),
                         ),
                         child: Text(
                           state.debt.type == DebtType.LENT
                               ? AppStrings.of(context).collectPaymentBtn
                               : AppStrings.of(context).makePaymentBtn,
-                          style: AppTypography.bodyMd
-                              .copyWith(fontWeight: FontWeight.w600),
+                          style: AppTypography.bodyMd.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                       ),
                     ),
@@ -175,6 +222,41 @@ class _DebtDetailView extends StatelessWidget {
         );
       },
     );
+  }
+
+  Future<void> _confirmDelete(BuildContext context, DebtModel debt) async {
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppColors.surfaceContainerHigh,
+        title: Text(
+          AppStrings.of(context).deleteDebtTitle,
+          style: AppTypography.titleSm,
+        ),
+        content: Text(
+          '${debt.personName} ile olan borç kaydı silinecek.',
+          style: AppTypography.bodyMd.copyWith(
+            color: AppColors.onSurfaceVariant,
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: Text(AppStrings.of(context).cancel),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: Text(
+              AppStrings.of(context).delete,
+              style: const TextStyle(color: AppColors.error),
+            ),
+          ),
+        ],
+      ),
+    );
+    if (ok == true && context.mounted) {
+      context.read<DebtDetailBloc>().add(DebtDetailDeleteRequested());
+    }
   }
 
   void _showPaymentSheet(BuildContext context, DebtModel debt) {
@@ -220,7 +302,8 @@ class _DebtDetailView extends StatelessWidget {
 class _DetailPaymentSheet extends StatefulWidget {
   const _DetailPaymentSheet({required this.debt, this.installment});
   final DebtModel debt;
-  final DebtInstallmentModel? installment; // null = free-form, non-null = specific installment
+  final DebtInstallmentModel?
+  installment; // null = free-form, non-null = specific installment
 
   @override
   State<_DetailPaymentSheet> createState() => _DetailPaymentSheetState();
@@ -260,13 +343,14 @@ class _DetailPaymentSheetState extends State<_DetailPaymentSheet> {
     if (amount == null || amount <= 0) return;
     if (_selectedAccountId == null) return;
 
-    context.read<DebtDetailBloc>().add(DebtDetailPaymentMade({
-      'amount': amount,
-      'accountId': _selectedAccountId!,
-      if (widget.installment != null)
-        'installmentId': widget.installment!.id,
-      if (_noteCtrl.text.trim().isNotEmpty) 'note': _noteCtrl.text.trim(),
-    }));
+    context.read<DebtDetailBloc>().add(
+      DebtDetailPaymentMade({
+        'amount': amount,
+        'accountId': _selectedAccountId!,
+        if (widget.installment != null) 'installmentId': widget.installment!.id,
+        if (_noteCtrl.text.trim().isNotEmpty) 'note': _noteCtrl.text.trim(),
+      }),
+    );
     Navigator.of(context).pop();
   }
 
@@ -289,8 +373,12 @@ class _DetailPaymentSheetState extends State<_DetailPaymentSheet> {
             children: [
               Text(
                 widget.installment != null
-                    ? AppStrings.of(context).installmentPaymentTitle(widget.installment!.installmentNo)
-                    : (isLent ? AppStrings.of(context).receivedPaymentTitle : AppStrings.of(context).payDebtTitle),
+                    ? AppStrings.of(context).installmentPaymentTitle(
+                        widget.installment!.installmentNo,
+                      )
+                    : (isLent
+                          ? AppStrings.of(context).receivedPaymentTitle
+                          : AppStrings.of(context).payDebtTitle),
                 style: AppTypography.headlineSm,
               ),
               IconButton(
@@ -303,8 +391,12 @@ class _DetailPaymentSheetState extends State<_DetailPaymentSheet> {
           const SizedBox(height: AppSpacing.sm),
           Text(
             widget.installment != null
-                ? AppStrings.of(context).installmentAmountLabel(CurrencyFormatter.format(widget.installment!.amount))
-                : AppStrings.of(context).remainingAmountLabel(CurrencyFormatter.format(widget.debt.remainingAmount)),
+                ? AppStrings.of(context).installmentAmountLabel(
+                    CurrencyFormatter.format(widget.installment!.amount),
+                  )
+                : AppStrings.of(context).remainingAmountLabel(
+                    CurrencyFormatter.format(widget.debt.remainingAmount),
+                  ),
             style: AppTypography.bodySm,
           ),
           const SizedBox(height: AppSpacing.lg),
@@ -347,8 +439,9 @@ class _DetailPaymentSheetState extends State<_DetailPaymentSheet> {
               if (accounts.isEmpty) {
                 return Text(
                   AppStrings.of(context).noAccountsFound,
-                  style: AppTypography.bodySm
-                      .copyWith(color: AppColors.onSurfaceVariant),
+                  style: AppTypography.bodySm.copyWith(
+                    color: AppColors.onSurfaceVariant,
+                  ),
                 );
               }
               if (_selectedAccountId == null) {
@@ -378,11 +471,11 @@ class _DetailPaymentSheetState extends State<_DetailPaymentSheet> {
                           color: isSelected
                               ? AppColors.primary.withValues(alpha: 0.15)
                               : AppColors.surfaceContainerHighest,
-                          borderRadius:
-                              BorderRadius.circular(AppSpacing.radiusMd),
+                          borderRadius: BorderRadius.circular(
+                            AppSpacing.radiusMd,
+                          ),
                           border: isSelected
-                              ? Border.all(
-                                  color: AppColors.primary, width: 1.5)
+                              ? Border.all(color: AppColors.primary, width: 1.5)
                               : null,
                         ),
                         child: Text(
@@ -404,7 +497,11 @@ class _DetailPaymentSheetState extends State<_DetailPaymentSheet> {
             },
           ),
           const SizedBox(height: AppSpacing.md),
-          _inputField(_noteCtrl, AppStrings.of(context).noteOptionalHint, Icons.notes_outlined),
+          _inputField(
+            _noteCtrl,
+            AppStrings.of(context).noteOptionalHint,
+            Icons.notes_outlined,
+          ),
           const SizedBox(height: AppSpacing.xl),
           FilledButton(
             onPressed: _submit,
@@ -430,16 +527,18 @@ class _DetailPaymentSheetState extends State<_DetailPaymentSheet> {
   }) {
     return TextField(
       controller: ctrl,
-      keyboardType:
-          numeric ? const TextInputType.numberWithOptions(decimal: true) : null,
+      keyboardType: numeric
+          ? const TextInputType.numberWithOptions(decimal: true)
+          : null,
       readOnly: readOnly,
       style: const TextStyle(color: AppColors.onSurface, fontSize: 14),
       decoration: InputDecoration(
         hintText: hint,
         hintStyle: const TextStyle(
-            color: AppColors.onSurfaceVariant, fontSize: 14),
-        prefixIcon:
-            Icon(icon, size: 20, color: AppColors.onSurfaceVariant),
+          color: AppColors.onSurfaceVariant,
+          fontSize: 14,
+        ),
+        prefixIcon: Icon(icon, size: 20, color: AppColors.onSurfaceVariant),
         filled: true,
         fillColor: AppColors.surfaceContainerHighest,
         border: OutlineInputBorder(
@@ -483,24 +582,29 @@ class _HeaderCard extends StatelessWidget {
             children: [
               Container(
                 padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.sm, vertical: 3),
+                  horizontal: AppSpacing.sm,
+                  vertical: 3,
+                ),
                 decoration: BoxDecoration(
                   color: color.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
                 ),
                 child: Text(
                   debt.type.label,
-                  style: AppTypography.labelSm
-                      .copyWith(color: color, fontWeight: FontWeight.w600),
+                  style: AppTypography.labelSm.copyWith(
+                    color: color,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
               const SizedBox(width: AppSpacing.sm),
               Container(
                 padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.sm, vertical: 3),
+                  horizontal: AppSpacing.sm,
+                  vertical: 3,
+                ),
                 decoration: BoxDecoration(
-                  color:
-                      debt.status.color.withValues(alpha: 0.12),
+                  color: debt.status.color.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
                 ),
                 child: Text(
@@ -537,11 +641,15 @@ class _HeaderCard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                AppStrings.of(context).paidLabel(CurrencyFormatter.formatCompact(debt.paidAmount)),
+                AppStrings.of(
+                  context,
+                ).paidLabel(CurrencyFormatter.formatCompact(debt.paidAmount)),
                 style: AppTypography.bodySm,
               ),
               Text(
-                AppStrings.of(context).totalLabel(CurrencyFormatter.format(debt.totalAmount)),
+                AppStrings.of(
+                  context,
+                ).totalLabel(CurrencyFormatter.format(debt.totalAmount)),
                 style: AppTypography.bodySm,
               ),
             ],
@@ -586,7 +694,15 @@ class _SectionCard extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.md),
           ...children
-              .expand((w) => [w, const Divider(color: AppColors.surfaceContainerHighest, height: 1)])
+              .expand(
+                (w) => [
+                  w,
+                  const Divider(
+                    color: AppColors.surfaceContainerHighest,
+                    height: 1,
+                  ),
+                ],
+              )
               .take(children.length * 2 - 1),
         ],
       ),

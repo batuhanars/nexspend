@@ -22,3 +22,5 @@ class DebtDetailError extends DebtDetailState {
   DebtDetailError(this.message);
   final String message;
 }
+
+class DebtDetailDeleted extends DebtDetailState {}

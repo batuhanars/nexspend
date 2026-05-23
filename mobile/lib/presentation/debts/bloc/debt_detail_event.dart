@@ -13,3 +13,5 @@ class DebtDetailPaymentMade extends DebtDetailEvent {
   DebtDetailPaymentMade(this.data);
   final Map<String, dynamic> data;
 }
+
+class DebtDetailDeleteRequested extends DebtDetailEvent {}

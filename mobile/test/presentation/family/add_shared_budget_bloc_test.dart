@@ -48,14 +48,14 @@ void main() {
         .thenAnswer((_) async => [_category]);
   });
 
-  AddSharedBudgetBloc _bloc() => AddSharedBudgetBloc(
+  AddSharedBudgetBloc buildBloc() => AddSharedBudgetBloc(
         familyRepository: familyRepo,
         categoryRepository: categoryRepo,
       );
 
   blocTest<AddSharedBudgetBloc, AddSharedBudgetState>(
     'AddSharedBudgetInitialized başarılı → CategoriesLoading → Ready (kategoriler yüklendi)',
-    build: _bloc,
+    build: buildBloc,
     act: (bloc) => bloc.add(const AddSharedBudgetInitialized()),
     expect: () => [
       isA<AddSharedBudgetCategoriesLoading>(),
@@ -66,7 +66,7 @@ void main() {
 
   blocTest<AddSharedBudgetBloc, AddSharedBudgetState>(
     'AddSharedBudgetSubmitted başarılı → Submitting → Success',
-    build: _bloc,
+    build: buildBloc,
     seed: () => AddSharedBudgetReady([_category]),
     setUp: () {
       when(() => familyRepo.createSharedBudget(
@@ -94,7 +94,7 @@ void main() {
 
   blocTest<AddSharedBudgetBloc, AddSharedBudgetState>(
     'AddSharedBudgetSubmitted API hatası → Submitting → Failure',
-    build: _bloc,
+    build: buildBloc,
     seed: () => AddSharedBudgetReady([_category]),
     setUp: () {
       when(() => familyRepo.createSharedBudget(

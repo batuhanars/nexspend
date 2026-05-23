@@ -51,7 +51,7 @@ class TransactionList extends StatelessWidget {
       if (!b.isActive) continue;
       if (b.category?.id != catId) continue;
       if (tx.date.isBefore(b.startDate)) continue;
-      if (b.endDate != null && tx.date.isAfter(b.endDate!)) continue;
+      if (tx.date.isAfter(b.endDate)) continue;
       return b.name;
     }
     return null;

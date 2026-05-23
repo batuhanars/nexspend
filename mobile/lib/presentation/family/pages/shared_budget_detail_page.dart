@@ -179,11 +179,17 @@ class _SharedBudgetDetailPageState extends State<SharedBudgetDetailPage>
           ],
         ),
         actions: [
-          if (!isArchived)
+          if (!isArchived) ...[
+            IconButton(
+              icon: const Icon(Icons.add_rounded, color: AppColors.primary),
+              tooltip: s.budgetAddTransaction,
+              onPressed: _openAddEntrySheet,
+            ),
             IconButton(
               icon: const Icon(Icons.delete_outline, color: AppColors.error),
               onPressed: _confirmDelete,
             ),
+          ],
         ],
         bottom: isArchived
             ? null
@@ -206,7 +212,6 @@ class _SharedBudgetDetailPageState extends State<SharedBudgetDetailPage>
               groupId: widget.groupId,
               budget: _budget,
               future: _future,
-              onAddEntry: () {},
               onRefresh: () {
                 setState(() => _future = _load());
               },
@@ -218,7 +223,6 @@ class _SharedBudgetDetailPageState extends State<SharedBudgetDetailPage>
                   groupId: widget.groupId,
                   budget: _budget,
                   future: _future,
-                  onAddEntry: _openAddEntrySheet,
                   onRefresh: () {
                     setState(() => _future = _load());
                   },
@@ -238,14 +242,12 @@ class _CurrentPeriodView extends StatelessWidget {
     required this.groupId,
     required this.budget,
     required this.future,
-    required this.onAddEntry,
     required this.onRefresh,
   });
 
   final String groupId;
   final SharedBudgetModel budget;
   final Future<SharedBudgetDetailModel> future;
-  final VoidCallback onAddEntry;
   final VoidCallback onRefresh;
 
   List<Widget> _buildGrouped(
@@ -313,21 +315,8 @@ class _CurrentPeriodView extends StatelessWidget {
                 _MemberBreakdown(expenses: expenses),
                 const SizedBox(height: AppSpacing.xl),
               ],
-              if (currentBudget.isActive)
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        s.sharedBudgetExpensesTitle,
-                        style: AppTypography.labelSm,
-                      ),
-                    ),
-                    _AddTransactionInlineAction(onTap: onAddEntry),
-                  ],
-                )
-              else
-                Text(s.sharedBudgetExpensesTitle,
-                    style: AppTypography.labelSm),
+              Text(s.sharedBudgetExpensesTitle,
+                  style: AppTypography.labelSm),
               const SizedBox(height: AppSpacing.md),
               if (loading)
                 const Padding(
@@ -621,38 +610,6 @@ class _HistoryEntryCard extends StatelessWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _AddTransactionInlineAction extends StatelessWidget {
-  const _AddTransactionInlineAction({required this.onTap});
-
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.xs,
-          vertical: AppSpacing.xs,
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              AppStrings.of(context).budgetAddTransaction,
-              style:
-                  AppTypography.labelSm.copyWith(color: AppColors.primary),
-            ),
-            const SizedBox(width: 4),
-            const Icon(Icons.add_rounded, size: 14, color: AppColors.primary),
-          ],
-        ),
       ),
     );
   }

@@ -94,6 +94,10 @@ class _BudgetDetailPageState extends State<BudgetDetailPage>
       limit: 200,
       type: 'EXPENSE',
       categoryId: budget.category!.id,
+      // Kişisel bütçe detayı: ortak bütçeye atanmış işlemleri dışla. Aksi halde
+      // aynı kategorideki ortak-işlemler hem ortak hem kişisel detayda görünür
+      // (spent rakamı doğru ama liste yanıltıyordu).
+      sharedBudgetId: 'null',
       startDate: budget.startDate.toIso8601String(),
       endDate: budget.endDate.toIso8601String(),
     );
@@ -287,6 +291,11 @@ class _BudgetDetailPageState extends State<BudgetDetailPage>
           actions: [
             if (budget.isActive) ...[
               IconButton(
+                icon: const Icon(Icons.add_rounded, color: AppColors.primary),
+                tooltip: s.budgetAddTransaction,
+                onPressed: _openAddEntrySheet,
+              ),
+              IconButton(
                 icon: const Icon(Icons.edit_outlined,
                     color: AppColors.onSurfaceVariant),
                 onPressed: _openEdit,
@@ -327,7 +336,6 @@ class _BudgetDetailPageState extends State<BudgetDetailPage>
                       });
                       await _txFuture;
                     },
-                    onAddEntry: _openAddEntrySheet,
                   ),
                   _HistoryView(budgetId: _budgetId),
                 ],
@@ -344,7 +352,6 @@ class _BudgetDetailPageState extends State<BudgetDetailPage>
                   });
                   await _txFuture;
                 },
-                onAddEntry: null,
               ),
       ),
     );
@@ -358,13 +365,11 @@ class _CurrentPeriodView extends StatelessWidget {
     required this.budget,
     required this.txFuture,
     required this.onRefresh,
-    this.onAddEntry,
   });
 
   final BudgetModel budget;
   final Future<List<TransactionModel>> txFuture;
   final Future<void> Function() onRefresh;
-  final VoidCallback? onAddEntry;
 
   @override
   Widget build(BuildContext context) {
@@ -396,17 +401,9 @@ class _CurrentPeriodView extends StatelessWidget {
                 ),
                 const SizedBox(height: AppSpacing.xl),
               ],
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      s.budgetTransactionsTitle,
-                      style: AppTypography.labelSm,
-                    ),
-                  ),
-                  if (onAddEntry != null && budget.category != null)
-                    _AddTransactionInlineAction(onTap: onAddEntry!),
-                ],
+              Text(
+                s.budgetTransactionsTitle,
+                style: AppTypography.labelSm,
               ),
               const SizedBox(height: AppSpacing.md),
               if (loading)
@@ -744,39 +741,6 @@ class _HistoryEntryCard extends StatelessWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-// ─── Shared widgets ───────────────────────────────────────────────────────────
-
-class _AddTransactionInlineAction extends StatelessWidget {
-  const _AddTransactionInlineAction({required this.onTap});
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.xs,
-          vertical: AppSpacing.xs,
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              AppStrings.of(context).budgetAddTransaction,
-              style:
-                  AppTypography.labelSm.copyWith(color: AppColors.primary),
-            ),
-            const SizedBox(width: 4),
-            const Icon(Icons.add_rounded, size: 14, color: AppColors.primary),
-          ],
-        ),
       ),
     );
   }

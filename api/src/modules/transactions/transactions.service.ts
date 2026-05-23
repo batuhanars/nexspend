@@ -33,6 +33,7 @@ export class TransactionsService {
       type,
       accountId,
       categoryId,
+      sharedBudgetId,
       startDate,
       endDate,
       search,
@@ -43,6 +44,11 @@ export class TransactionsService {
     if (type) where.type = type;
     if (accountId) where.accountId = accountId;
     if (categoryId) where.categoryId = categoryId;
+    // 'null' string'i = sharedBudgetId IS NULL (kişisel-only liste).
+    // Boş gelirse filtre uygulanmaz, ortak+kişisel hepsi gelir.
+    if (sharedBudgetId !== undefined) {
+      where.sharedBudgetId = sharedBudgetId === 'null' ? null : sharedBudgetId;
+    }
     if (startDate || endDate) {
       where.transactionDate = {};
       if (startDate) where.transactionDate.gte = new Date(startDate);

@@ -31,6 +31,12 @@ export class QueryTransactionDto {
   @IsOptional()
   categoryId?: string;
 
+  // Ortak bütçe filtresi. UUID gelirse o ortak bütçeye atanmış işlemler,
+  // 'null' string'i gelirse sharedBudgetId IS NULL (yani sadece kişisel).
+  @IsString()
+  @IsOptional()
+  sharedBudgetId?: string;
+
   @IsDateString()
   @IsOptional()
   startDate?: string;

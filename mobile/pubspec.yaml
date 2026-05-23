@@ -1,7 +1,7 @@
 name: wallet_app
 description: "The Digital Private Vault — Kişisel Finans Yönetim Uygulaması"
 publish_to: 'none'
-version: 1.0.0+7
+version: 1.0.0+8
 
 environment:
   sdk: ^3.11.5

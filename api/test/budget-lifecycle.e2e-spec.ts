@@ -14,6 +14,7 @@ import { AuthModule } from '../src/modules/auth/auth.module';
 import { PrismaModule } from '../src/prisma/prisma.module';
 import { PrismaService } from '../src/prisma/prisma.service';
 import { MailService } from '../src/modules/mail/mail.service';
+import { NotificationsModule } from '../src/modules/notifications/notifications.module';
 import { NotificationsService } from '../src/modules/notifications/notifications.service';
 
 // ──────────────────────────────────────────────────────────────────────────────
@@ -133,7 +134,26 @@ function setupDefaultMocks(userId: string) {
 async function buildApp(): Promise<INestApplication> {
   const moduleFixture: TestingModule = await Test.createTestingModule({
     imports: [
-      ConfigModule.forRoot({ isGlobal: true }),
+      ConfigModule.forRoot({
+        isGlobal: true,
+        load: [
+          () => ({
+            jwt: {
+              secret: 'test-secret',
+              refreshSecret: 'e2e-budget-jwt-refresh-secret',
+              accessExpiresIn: '1h',
+              refreshExpiresIn: '7d',
+            },
+            mail: { host: 'localhost', port: 1025, from: 'test@test.com' },
+            frontend: { url: 'http://localhost:3001' },
+            google: {
+              clientId: 'test-client-id',
+              clientSecret: 'test-client-secret',
+              callbackUrl: 'http://localhost:3000/api/auth/google/callback',
+            },
+          }),
+        ],
+      }),
       EventEmitterModule.forRoot(),
       ScheduleModule.forRoot(),
       JwtModule.register({
@@ -142,6 +162,7 @@ async function buildApp(): Promise<INestApplication> {
         signOptions: { expiresIn: '1d' },
       }),
       PrismaModule,
+      NotificationsModule,
       AuthModule,
       BudgetsModule,
     ],

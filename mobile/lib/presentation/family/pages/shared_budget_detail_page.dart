@@ -976,27 +976,48 @@ class _ExpenseTile extends StatelessWidget {
                   expense.description ??
                       expense.note ??
                       AppStrings.of(context).transactionFallback,
-                  style: AppTypography.bodyMd
-                      .copyWith(fontWeight: FontWeight.w500),
+                  style: AppTypography.bodyMd.copyWith(
+                    fontWeight: FontWeight.w500,
+                  ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  '${expense.userName}  •  '
-                  '${DateFormatter.formatTime(expense.transactionDate)}',
-                  style: AppTypography.bodySm
-                      .copyWith(color: AppColors.onSurfaceVariant),
+                  [
+                    expense.userName,
+                    if (expense.accountName != null &&
+                        expense.accountName!.isNotEmpty)
+                      expense.accountName!,
+                  ].join('  •  '),
+                  style: AppTypography.bodySm.copyWith(
+                    color: AppColors.onSurfaceVariant,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ],
             ),
           ),
-          Text(
-            '-${CurrencyFormatter.format(expense.amount)}',
-            style: AppTypography.bodyMd.copyWith(
-              color: AppColors.tertiary,
-              fontWeight: FontWeight.w600,
-            ),
+          const SizedBox(width: AppSpacing.md),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                '-${CurrencyFormatter.format(expense.amount)}',
+                style: AppTypography.bodyMd.copyWith(
+                  color: AppColors.tertiary,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                DateFormatter.formatTime(expense.transactionDate),
+                style: AppTypography.bodySm.copyWith(
+                  color: AppColors.onSurfaceVariant,
+                ),
+              ),
+            ],
           ),
         ],
       ),

@@ -215,6 +215,7 @@ class SharedBudgetExpenseModel {
     required this.transactionId,
     required this.userId,
     required this.userName,
+    this.accountName,
     required this.amount,
     this.description,
     this.note,
@@ -226,6 +227,7 @@ class SharedBudgetExpenseModel {
   final String transactionId;
   final String userId;
   final String userName;
+  final String? accountName;
   final double amount;
   final String? description;
   final String? note;
@@ -238,6 +240,7 @@ class SharedBudgetExpenseModel {
         transactionId: json['transactionId'] as String,
         userId: json['userId'] as String,
         userName: json['userName'] as String,
+        accountName: json['accountName'] as String?,
         amount: (json['amount'] as num).toDouble(),
         description: json['description'] as String?,
         note: json['note'] as String?,

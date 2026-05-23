@@ -628,6 +628,7 @@ export class FamilyService {
         note: true,
         transactionDate: true,
         createdAt: true,
+        account: { select: { name: true } },
       },
       orderBy: { transactionDate: 'desc' },
     });
@@ -649,6 +650,7 @@ export class FamilyService {
       transactionId: t.id,
       userId: t.userId,
       userName: userMap.get(t.userId) ?? 'Bilinmeyen üye',
+      accountName: t.account?.name ?? null,
       amount: Number(t.amount),
       description: t.title,
       note: t.note,

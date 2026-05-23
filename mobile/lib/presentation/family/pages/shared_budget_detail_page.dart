@@ -234,27 +234,28 @@ class _SharedBudgetDetailPageState extends State<SharedBudgetDetailPage>
             ],
           ),
           actions: [
-            if (!isArchived) ...[
+            if (!isArchived)
               IconButton(
                 icon: const Icon(Icons.add_rounded, color: AppColors.primary),
                 tooltip: s.budgetAddTransaction,
                 onPressed: _openAddEntrySheet,
               ),
-              PopupMenuButton<_BudgetMenuAction>(
-                icon: const Icon(Icons.more_vert, color: AppColors.onSurface),
-                color: AppColors.surfaceContainerHigh,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-                ),
-                onSelected: (action) {
-                  switch (action) {
-                    case _BudgetMenuAction.edit:
-                      _openEdit();
-                    case _BudgetMenuAction.delete:
-                      _confirmDelete();
-                  }
-                },
-                itemBuilder: (context) => [
+            PopupMenuButton<_BudgetMenuAction>(
+              icon: const Icon(Icons.more_vert, color: AppColors.onSurface),
+              color: AppColors.surfaceContainerHigh,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+              ),
+              onSelected: (action) {
+                switch (action) {
+                  case _BudgetMenuAction.edit:
+                    _openEdit();
+                  case _BudgetMenuAction.delete:
+                    _confirmDelete();
+                }
+              },
+              itemBuilder: (context) => [
+                if (!isArchived)
                   PopupMenuItem(
                     value: _BudgetMenuAction.edit,
                     child: Row(
@@ -269,28 +270,27 @@ class _SharedBudgetDetailPageState extends State<SharedBudgetDetailPage>
                       ],
                     ),
                   ),
-                  PopupMenuItem(
-                    value: _BudgetMenuAction.delete,
-                    child: Row(
-                      children: [
-                        const Icon(
-                          Icons.delete_outline,
-                          size: 20,
+                PopupMenuItem(
+                  value: _BudgetMenuAction.delete,
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.delete_outline,
+                        size: 20,
+                        color: AppColors.error,
+                      ),
+                      const SizedBox(width: AppSpacing.md),
+                      Text(
+                        s.delete,
+                        style: AppTypography.bodyMd.copyWith(
                           color: AppColors.error,
                         ),
-                        const SizedBox(width: AppSpacing.md),
-                        Text(
-                          s.delete,
-                          style: AppTypography.bodyMd.copyWith(
-                            color: AppColors.error,
-                          ),
-                        ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
-            ],
+                ),
+              ],
+            ),
           ],
           bottom: isArchived
               ? null
@@ -727,6 +727,7 @@ class _SummaryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final s = AppStrings.of(context);
     final pct = budget.spentPercent;
     final color = pct >= 0.9
         ? AppColors.tertiary
@@ -814,8 +815,74 @@ class _SummaryCard extends StatelessWidget {
               valueColor: AlwaysStoppedAnimation(color),
             ),
           ),
+          const SizedBox(height: AppSpacing.lg),
+          Row(
+            children: [
+              Expanded(
+                child: _StatColumn(
+                  label: s.budgetStatRemaining,
+                  value: CurrencyFormatter.format(
+                    (budget.amount - budget.spent).clamp(0, double.infinity),
+                  ),
+                  color: AppColors.onSurface,
+                ),
+              ),
+              Expanded(
+                child: _StatColumn(
+                  label: s.budgetStatStart,
+                  value: DateFormatter.formatMini(
+                    DateTime.tryParse(budget.startDate) ?? budget.endDate,
+                    context,
+                  ),
+                  color: AppColors.onSurfaceVariant,
+                ),
+              ),
+              Expanded(
+                child: _StatColumn(
+                  label: s.budgetStatEnd,
+                  value: DateFormatter.formatMini(budget.endDate, context),
+                  color: AppColors.onSurfaceVariant,
+                ),
+              ),
+            ],
+          ),
         ],
       ),
+    );
+  }
+}
+
+class _StatColumn extends StatelessWidget {
+  const _StatColumn({
+    required this.label,
+    required this.value,
+    required this.color,
+  });
+
+  final String label;
+  final String value;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: AppTypography.labelSm.copyWith(
+            color: AppColors.onSurfaceVariant,
+          ),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          value,
+          style: AppTypography.bodyMd.copyWith(
+            color: color,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ],
     );
   }
 }

@@ -19,8 +19,12 @@ class ExpenseDistributionItem {
       ExpenseDistributionItem(
         categoryId: json['categoryId'] as String? ?? '',
         categoryName: json['categoryName'] as String? ?? 'Diğer',
-        categoryIcon: json['categoryIcon'] as String? ?? 'category',
-        categoryColor: json['categoryColor'] as String?,
+        // Backend `icon`/`color` gönderiyor; eski `categoryIcon`/`categoryColor`
+        // anahtarlarına da geriye dönük düşebilsin diye ikisini de okuyoruz.
+        categoryIcon:
+            json['icon'] as String? ?? json['categoryIcon'] as String? ?? 'category',
+        categoryColor:
+            (json['color'] ?? json['categoryColor']) as String?,
         amount: (json['amount'] as num).toDouble(),
         percentage: (json['percentage'] as num).toDouble(),
       );
@@ -49,13 +53,28 @@ class CashFlowItem {
     return months[month - 1];
   }
 
-  factory CashFlowItem.fromJson(Map<String, dynamic> json) => CashFlowItem(
-        month: json['month'] as int,
-        year: json['year'] as int,
-        income: (json['income'] as num).toDouble(),
-        expense: (json['expense'] as num).toDouble(),
-        net: (json['net'] as num).toDouble(),
-      );
+  factory CashFlowItem.fromJson(Map<String, dynamic> json) {
+    // Backend `month`'u "YYYY-MM" string olarak gönderiyor, ayrı `year` alanı yok.
+    // Eski int formatına da düşebilsin diye iki şekli de tolere ediyoruz.
+    final raw = json['month'];
+    int month;
+    int year;
+    if (raw is String && raw.contains('-')) {
+      final parts = raw.split('-');
+      year = int.tryParse(parts[0]) ?? 0;
+      month = int.tryParse(parts[1]) ?? 1;
+    } else {
+      month = (raw as num?)?.toInt() ?? 1;
+      year = (json['year'] as num?)?.toInt() ?? 0;
+    }
+    return CashFlowItem(
+      month: month,
+      year: year,
+      income: (json['income'] as num).toDouble(),
+      expense: (json['expense'] as num).toDouble(),
+      net: (json['net'] as num).toDouble(),
+    );
+  }
 }
 
 class TrendItem {

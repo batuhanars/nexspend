@@ -15,6 +15,10 @@ class TransactionsBloc extends Bloc<TransactionsEvent, TransactionsState> {
     on<TransactionsLoadMoreRequested>(_onLoadMore);
     on<TransactionsFilterChanged>(_onFilterChanged);
     on<TransactionDeleteRequested>(_onDelete);
+    on<SelectionModeEntered>(_onSelectionModeEntered);
+    on<SelectionToggled>(_onSelectionToggled);
+    on<SelectionCleared>(_onSelectionCleared);
+    on<BulkDeleteRequested>(_onBulkDelete);
   }
 
   final TransactionRepository _repo;
@@ -106,6 +110,87 @@ class TransactionsBloc extends Bloc<TransactionsEvent, TransactionsState> {
       await _fetch(emit);
     } catch (_) {
       // Başarısız olursa önceki state'e dön
+      emit(current);
+    }
+  }
+
+  void _onSelectionModeEntered(
+    SelectionModeEntered event,
+    Emitter<TransactionsState> emit,
+  ) {
+    final current = state;
+    if (current is! TransactionsLoaded) return;
+
+    final ids = <String>{};
+    if (event.initialId != null) {
+      // Yalnız MANUAL işlemler seçilebilir
+      final tx = current.transactions
+          .where((t) => t.id == event.initialId)
+          .firstOrNull;
+      if (tx != null && tx.source == TransactionSource.MANUAL) {
+        ids.add(event.initialId!);
+      }
+    }
+    emit(current.copyWith(selectionMode: true, selectedIds: ids));
+  }
+
+  void _onSelectionToggled(
+    SelectionToggled event,
+    Emitter<TransactionsState> emit,
+  ) {
+    final current = state;
+    if (current is! TransactionsLoaded || !current.selectionMode) return;
+
+    // Guard: yalnız MANUAL işlemler
+    final tx = current.transactions
+        .where((t) => t.id == event.id)
+        .firstOrNull;
+    if (tx == null || tx.source != TransactionSource.MANUAL) return;
+
+    final updated = Set<String>.from(current.selectedIds);
+    if (updated.contains(event.id)) {
+      updated.remove(event.id);
+    } else {
+      updated.add(event.id);
+    }
+    emit(current.copyWith(selectedIds: updated));
+  }
+
+  void _onSelectionCleared(
+    SelectionCleared event,
+    Emitter<TransactionsState> emit,
+  ) {
+    final current = state;
+    if (current is! TransactionsLoaded) return;
+    emit(current.copyWith(selectionMode: false, selectedIds: {}));
+  }
+
+  Future<void> _onBulkDelete(
+    BulkDeleteRequested event,
+    Emitter<TransactionsState> emit,
+  ) async {
+    final current = state;
+    if (current is! TransactionsLoaded) return;
+    if (current.selectedIds.isEmpty) return;
+
+    final ids = List<String>.from(current.selectedIds);
+
+    // Optimistic: seçilenleri listeden çıkar + seçim modunu kapat
+    final optimisticTxs = current.transactions
+        .where((t) => !current.selectedIds.contains(t.id))
+        .toList();
+    emit(current.copyWith(
+      transactions: optimisticTxs,
+      selectionMode: false,
+      selectedIds: {},
+    ));
+
+    try {
+      await _repo.bulkDelete(ids);
+      // Özet ve listeyi yenile
+      await _fetch(emit);
+    } catch (_) {
+      // Hata: eski state'e geri dön
       emit(current);
     }
   }

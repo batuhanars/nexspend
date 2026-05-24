@@ -84,6 +84,15 @@ class TransactionRepository {
     await _dio.delete(ApiEndpoints.transactionById(id));
   }
 
+  Future<int> bulkDelete(List<String> ids) async {
+    final response = await _dio.post(
+      ApiEndpoints.transactionsBulkDelete,
+      data: {'ids': ids},
+    );
+    final d = response.data['data'] as Map<String, dynamic>;
+    return d['deleted'] as int;
+  }
+
   Future<void> createRecurringTransaction(Map<String, dynamic> data) async {
     await _dio.post(ApiEndpoints.recurringTransactions, data: data);
   }

@@ -556,6 +556,13 @@ abstract class AppStrings {
   String get customRangeLabel;
   String get nonManualEditError;
 
+  // Bulk delete — toplu silme
+  String selectionCount(int n);
+  String get clearSelectionLabel;
+  String get bulkDeleteTitle;
+  String bulkDeleteContent(int n);
+  String get nonManualSelectError;
+
   // Sprint 12 — Bütçe dönem geçmişi
   String get budgetTabCurrentPeriod;
   String get budgetTabHistory;
@@ -1605,6 +1612,20 @@ class _Tr extends AppStrings {
   @override
   String get nonManualEditError =>
       'Otomatik oluşturulan işlemler düzenlenemez.';
+
+  // Bulk delete — toplu silme
+  @override
+  String selectionCount(int n) => '$n seçili';
+  @override
+  String get clearSelectionLabel => 'Seçimi temizle';
+  @override
+  String get bulkDeleteTitle => 'İşlemleri Sil';
+  @override
+  String bulkDeleteContent(int n) =>
+      '$n işlem silinsin mi? Bu işlem geri alınamaz.';
+  @override
+  String get nonManualSelectError =>
+      'Otomatik oluşturulan işlemler seçilemez.';
 
   // Sprint 12 — Bütçe dönem geçmişi
   @override
@@ -2763,6 +2784,20 @@ class _En extends AppStrings {
   @override
   String get nonManualEditError =>
       'Automatic transactions cannot be edited.';
+
+  // Bulk delete — selection
+  @override
+  String selectionCount(int n) => '$n selected';
+  @override
+  String get clearSelectionLabel => 'Clear selection';
+  @override
+  String get bulkDeleteTitle => 'Delete Transactions';
+  @override
+  String bulkDeleteContent(int n) =>
+      'Delete $n transaction${n == 1 ? '' : 's'}? This cannot be undone.';
+  @override
+  String get nonManualSelectError =>
+      'Auto-generated transactions can\'t be selected.';
 
   // Sprint 12 — Bütçe dönem geçmişi
   @override

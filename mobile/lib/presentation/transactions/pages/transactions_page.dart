@@ -166,6 +166,39 @@ class _TransactionsViewState extends State<_TransactionsView> {
     context.read<TransactionsBloc>().add(TransactionsFilterChanged(newFilter));
   }
 
+  Future<void> _confirmBulkDelete(
+    BuildContext context,
+    int count,
+    AppStrings s,
+  ) async {
+    final bloc = context.read<TransactionsBloc>();
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppColors.surfaceContainerHigh,
+        title: Text(s.bulkDeleteTitle, style: AppTypography.titleSm),
+        content: Text(
+          s.bulkDeleteContent(count),
+          style: AppTypography.bodyMd.copyWith(color: AppColors.onSurfaceVariant),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: Text(s.cancel),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: Text(s.delete,
+                style: const TextStyle(color: AppColors.error)),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true && mounted) {
+      bloc.add(BulkDeleteRequested());
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final s = AppStrings.of(context);
@@ -184,109 +217,145 @@ class _TransactionsViewState extends State<_TransactionsView> {
         child: BlocBuilder<TransactionsBloc, TransactionsState>(
           builder: (context, state) {
             final filter = _currentFilter(state);
+            final selectionMode =
+                state is TransactionsLoaded && state.selectionMode;
+            final selectedIds =
+                state is TransactionsLoaded ? state.selectedIds : <String>{};
+            final selectedCount = selectedIds.length;
+
             return CustomScrollView(
               controller: _scrollController,
               physics: const AlwaysScrollableScrollPhysics(),
               slivers: [
-                SliverAppBar(
-                  floating: true,
-                  backgroundColor: AppColors.surface,
-                  surfaceTintColor: Colors.transparent,
-                  title: _searchActive
-                      ? TextField(
-                          controller: _searchController,
-                          autofocus: true,
-                          style: AppTypography.bodyMd,
-                          decoration: InputDecoration(
-                            hintText: s.searchLabel,
-                            hintStyle: AppTypography.bodyMd
-                                .copyWith(color: AppColors.onSurfaceVariant),
-                            border: InputBorder.none,
-                            isDense: true,
-                            contentPadding: EdgeInsets.zero,
-                          ),
-                          onChanged: (q) => _onSearchChanged(q, filter),
-                        )
-                      : Text(s.transactionsTitle,
-                          style: AppTypography.headlineSm),
-                  centerTitle: false,
-                  actions: [
-                    // Arama aç/kapat
-                    IconButton(
-                      icon: Icon(
-                        _searchActive
-                            ? Icons.close_rounded
-                            : Icons.search_rounded,
-                        color: _searchActive
-                            ? AppColors.primary
-                            : AppColors.onSurface,
-                      ),
-                      onPressed: () {
-                        setState(() => _searchActive = !_searchActive);
-                        if (!_searchActive) {
-                          _searchController.clear();
-                          _searchDebounce?.cancel();
-                          // Arama filtresi kaldır
-                          final newFilter = filter.copyWith(search: null);
-                          context
-                              .read<TransactionsBloc>()
-                              .add(TransactionsFilterChanged(newFilter));
-                        }
-                      },
+                if (selectionMode)
+                  // Contextual AppBar — seçim modu
+                  SliverAppBar(
+                    floating: true,
+                    backgroundColor: AppColors.surfaceContainerHigh,
+                    surfaceTintColor: Colors.transparent,
+                    leading: IconButton(
+                      icon: const Icon(Icons.close_rounded,
+                          color: AppColors.onSurface),
+                      onPressed: () => context
+                          .read<TransactionsBloc>()
+                          .add(SelectionCleared()),
                     ),
-                    // Filtre butonu + rozet
-                    Stack(
-                      children: [
-                        IconButton(
-                          icon: Icon(
-                            Icons.tune_rounded,
-                            color: filter.activeCount > 0
-                                ? AppColors.primary
-                                : AppColors.onSurface,
-                          ),
-                          onPressed: () => _openFilterSheet(filter),
+                    title: Text(
+                      s.selectionCount(selectedCount),
+                      style: AppTypography.headlineSm,
+                    ),
+                    centerTitle: false,
+                    actions: [
+                      IconButton(
+                        icon: const Icon(Icons.delete_outline_rounded,
+                            color: AppColors.error),
+                        onPressed: selectedCount == 0
+                            ? null
+                            : () => _confirmBulkDelete(context, selectedCount, s),
+                      ),
+                    ],
+                  )
+                else
+                  // Normal AppBar
+                  SliverAppBar(
+                    floating: true,
+                    backgroundColor: AppColors.surface,
+                    surfaceTintColor: Colors.transparent,
+                    title: _searchActive
+                        ? TextField(
+                            controller: _searchController,
+                            autofocus: true,
+                            style: AppTypography.bodyMd,
+                            decoration: InputDecoration(
+                              hintText: s.searchLabel,
+                              hintStyle: AppTypography.bodyMd
+                                  .copyWith(color: AppColors.onSurfaceVariant),
+                              border: InputBorder.none,
+                              isDense: true,
+                              contentPadding: EdgeInsets.zero,
+                            ),
+                            onChanged: (q) => _onSearchChanged(q, filter),
+                          )
+                        : Text(s.transactionsTitle,
+                            style: AppTypography.headlineSm),
+                    centerTitle: false,
+                    actions: [
+                      // Arama aç/kapat
+                      IconButton(
+                        icon: Icon(
+                          _searchActive
+                              ? Icons.close_rounded
+                              : Icons.search_rounded,
+                          color: _searchActive
+                              ? AppColors.primary
+                              : AppColors.onSurface,
                         ),
-                        if (filter.activeCount > 0)
-                          Positioned(
-                            right: 6,
-                            top: 6,
-                            child: Container(
-                              width: 16,
-                              height: 16,
-                              decoration: const BoxDecoration(
-                                color: AppColors.primary,
-                                shape: BoxShape.circle,
-                              ),
-                              alignment: Alignment.center,
-                              child: Text(
-                                '${filter.activeCount}',
-                                style: const TextStyle(
-                                  fontFamily: 'Inter',
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.w700,
-                                  color: AppColors.onPrimary,
-                                  height: 1.0,
+                        onPressed: () {
+                          setState(() => _searchActive = !_searchActive);
+                          if (!_searchActive) {
+                            _searchController.clear();
+                            _searchDebounce?.cancel();
+                            // Arama filtresi kaldır
+                            final newFilter = filter.copyWith(search: null);
+                            context
+                                .read<TransactionsBloc>()
+                                .add(TransactionsFilterChanged(newFilter));
+                          }
+                        },
+                      ),
+                      // Filtre butonu + rozet
+                      Stack(
+                        children: [
+                          IconButton(
+                            icon: Icon(
+                              Icons.tune_rounded,
+                              color: filter.activeCount > 0
+                                  ? AppColors.primary
+                                  : AppColors.onSurface,
+                            ),
+                            onPressed: () => _openFilterSheet(filter),
+                          ),
+                          if (filter.activeCount > 0)
+                            Positioned(
+                              right: 6,
+                              top: 6,
+                              child: Container(
+                                width: 16,
+                                height: 16,
+                                decoration: const BoxDecoration(
+                                  color: AppColors.primary,
+                                  shape: BoxShape.circle,
+                                ),
+                                alignment: Alignment.center,
+                                child: Text(
+                                  '${filter.activeCount}',
+                                  style: const TextStyle(
+                                    fontFamily: 'Inter',
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.w700,
+                                    color: AppColors.onPrimary,
+                                    height: 1.0,
+                                  ),
                                 ),
                               ),
                             ),
-                          ),
-                      ],
-                    ),
-                    // İşlem ekle
-                    IconButton(
-                      icon: const Icon(Icons.add_rounded,
-                          color: AppColors.primary),
-                      onPressed: () async {
-                        final bloc = context.read<TransactionsBloc>();
-                        final added =
-                            await context.push(RouteNames.addTransaction);
-                        if (added == true && mounted) {
-                          bloc.add(TransactionsRefreshRequested());
-                        }
-                      },
-                    ),
-                  ],
-                ),
+                        ],
+                      ),
+                      // İşlem ekle
+                      IconButton(
+                        icon: const Icon(Icons.add_rounded,
+                            color: AppColors.primary),
+                        onPressed: () async {
+                          final bloc = context.read<TransactionsBloc>();
+                          final added =
+                              await context.push(RouteNames.addTransaction);
+                          if (added == true && mounted) {
+                            bloc.add(TransactionsRefreshRequested());
+                          }
+                        },
+                      ),
+                    ],
+                  ),
                 if (state is TransactionsLoading)
                   const SliverFillRemaining(
                     hasScrollBody: false,
@@ -302,32 +371,34 @@ class _TransactionsViewState extends State<_TransactionsView> {
                     ),
                   )
                 else if (state is TransactionsLoaded) ...[
-                  SliverToBoxAdapter(child: SummaryRow(state: state)),
-                  // Tip chip bar + filtre ikonu
-                  SliverToBoxAdapter(
-                    child: FilterChipBar(
-                      filters: [
-                        (label: s.filterAll, value: null),
-                        (label: s.income, value: 'INCOME'),
-                        (label: s.expense, value: 'EXPENSE'),
-                        (label: s.transfer, value: 'TRANSFER'),
-                      ],
-                      activeFilter: filter.type,
-                      onChanged: (v) => _onTypeChipChanged(v, filter),
-                    ),
-                  ),
-                  // Aktif filtre özet chip'leri
-                  if (filter.activeCount > 0)
+                  if (!selectionMode) ...[
+                    SliverToBoxAdapter(child: SummaryRow(state: state)),
+                    // Tip chip bar + filtre ikonu
                     SliverToBoxAdapter(
-                      child: _ActiveFilterChips(
-                        filter: filter,
-                        categories: _categories,
-                        accounts: _accounts,
-                        onRemove: (key) =>
-                            _removeActiveFilterChip(key, filter),
-                        s: s,
+                      child: FilterChipBar(
+                        filters: [
+                          (label: s.filterAll, value: null),
+                          (label: s.income, value: 'INCOME'),
+                          (label: s.expense, value: 'EXPENSE'),
+                          (label: s.transfer, value: 'TRANSFER'),
+                        ],
+                        activeFilter: filter.type,
+                        onChanged: (v) => _onTypeChipChanged(v, filter),
                       ),
                     ),
+                    // Aktif filtre özet chip'leri
+                    if (filter.activeCount > 0)
+                      SliverToBoxAdapter(
+                        child: _ActiveFilterChips(
+                          filter: filter,
+                          categories: _categories,
+                          accounts: _accounts,
+                          onRemove: (key) =>
+                              _removeActiveFilterChip(key, filter),
+                          s: s,
+                        ),
+                      ),
+                  ],
                   if (state.transactions.isEmpty)
                     SliverFillRemaining(
                       child: EmptyStateView(
@@ -350,6 +421,8 @@ class _TransactionsViewState extends State<_TransactionsView> {
                       transactions: state.transactions,
                       personalBudgets: _personalBudgets,
                       sharedBudgets: _sharedBudgets,
+                      selectionMode: selectionMode,
+                      selectedIds: selectedIds,
                     ),
                     if (state.isLoadingMore)
                       const SliverToBoxAdapter(

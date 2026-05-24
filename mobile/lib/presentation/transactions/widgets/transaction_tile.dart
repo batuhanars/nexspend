@@ -18,9 +18,19 @@ class TransactionTile extends StatelessWidget {
     super.key,
     required this.transaction,
     this.budgetLabel,
+    this.selectionMode = false,
+    this.isSelected = false,
+    this.onLongPress,
+    this.onTapInSelection,
   });
   final TransactionModel transaction;
   final String? budgetLabel;
+  final bool selectionMode;
+  final bool isSelected;
+  final VoidCallback? onLongPress;
+  final VoidCallback? onTapInSelection;
+
+  bool get _isManual => transaction.source == TransactionSource.MANUAL;
 
   @override
   Widget build(BuildContext context) {
@@ -46,47 +56,70 @@ class TransactionTile extends StatelessWidget {
                 ? Icons.swap_horiz_rounded
                 : Icons.arrow_upward_rounded;
 
-    return Dismissible(
-      key: ValueKey(transaction.id),
-      direction: DismissDirection.endToStart,
-      background: Container(
-        alignment: Alignment.centerRight,
-        padding: const EdgeInsets.only(right: AppSpacing.xl),
-        color: AppColors.errorContainer,
-        child: const Icon(Icons.delete_outline_rounded, color: AppColors.error),
-      ),
-      confirmDismiss: (_) => _confirmDelete(context),
-      onDismissed: (_) {
-        context.read<TransactionsBloc>().add(TransactionDeleteRequested(transaction.id));
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(AppStrings.of(context).transactionDeletedSuccess),
-          backgroundColor: AppColors.secondary,
-        ));
+    // Seçim modundayken seçili tile'lara tonal vurgu uygula (1px border yok)
+    final tileBackground = selectionMode && isSelected && _isManual
+        ? AppColors.primary.withValues(alpha: 0.10)
+        : Colors.transparent;
+
+    Widget tile = InkWell(
+      onTap: () {
+        if (selectionMode) {
+          if (_isManual) {
+            onTapInSelection?.call();
+          } else {
+            // Otomatik işlem seçilemez — snackbar
+            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+              content: Text(AppStrings.of(context).nonManualSelectError),
+              backgroundColor: AppColors.surfaceContainerHighest,
+              duration: const Duration(seconds: 2),
+            ));
+          }
+        } else {
+          context.push(
+            RouteNames.transactionDetail(transaction.id),
+            extra: {
+              'transaction': transaction,
+              'bloc': context.read<TransactionsBloc>(),
+            },
+          );
+        }
       },
-      child: InkWell(
-        onTap: () => context.push(
-          RouteNames.transactionDetail(transaction.id),
-          extra: {
-            'transaction': transaction,
-            'bloc': context.read<TransactionsBloc>(),
-          },
+      onLongPress: selectionMode ? null : onLongPress,
+      child: Container(
+        color: tileBackground,
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.pagePadding,
+          vertical: AppSpacing.sm,
         ),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.pagePadding,
-            vertical: AppSpacing.sm,
-          ),
-          child: Row(
+        child: Row(
           children: [
-            Container(
-              width: 44,
-              height: 44,
-              decoration: BoxDecoration(
-                color: categoryColor.withValues(alpha: 0.12),
-                shape: BoxShape.circle,
+            // Seçim modunda: check veya kategori ikonu
+            if (selectionMode && _isManual)
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: isSelected
+                      ? AppColors.primary.withValues(alpha: 0.20)
+                      : AppColors.primary.withValues(alpha: 0.08),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  isSelected ? Icons.check_rounded : iconData,
+                  color: isSelected ? AppColors.primary : categoryColor,
+                  size: 20,
+                ),
+              )
+            else
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: categoryColor.withValues(alpha: 0.12),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(iconData, color: categoryColor, size: 20),
               ),
-              child: Icon(iconData, color: categoryColor, size: 20),
-            ),
             const SizedBox(width: AppSpacing.md),
             Expanded(
               child: Column(
@@ -95,7 +128,9 @@ class TransactionTile extends StatelessWidget {
                   Text(
                     transaction.description ??
                         transaction.category?.localizedName(context) ??
-                        (isTransfer ? AppStrings.of(context).transfer : AppStrings.of(context).transactionFallback),
+                        (isTransfer
+                            ? AppStrings.of(context).transfer
+                            : AppStrings.of(context).transactionFallback),
                     style: AppTypography.bodyMd
                         .copyWith(fontWeight: FontWeight.w500),
                     maxLines: 1,
@@ -140,9 +175,33 @@ class TransactionTile extends StatelessWidget {
               ),
             ),
           ],
-          ),
         ),
       ),
+    );
+
+    // Seçim modunda swipe-to-delete devre dışı
+    if (selectionMode) return tile;
+
+    return Dismissible(
+      key: ValueKey(transaction.id),
+      direction: DismissDirection.endToStart,
+      background: Container(
+        alignment: Alignment.centerRight,
+        padding: const EdgeInsets.only(right: AppSpacing.xl),
+        color: AppColors.errorContainer,
+        child: const Icon(Icons.delete_outline_rounded, color: AppColors.error),
+      ),
+      confirmDismiss: (_) => _confirmDelete(context),
+      onDismissed: (_) {
+        context
+            .read<TransactionsBloc>()
+            .add(TransactionDeleteRequested(transaction.id));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(AppStrings.of(context).transactionDeletedSuccess),
+          backgroundColor: AppColors.secondary,
+        ));
+      },
+      child: tile,
     );
   }
 

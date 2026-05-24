@@ -15,7 +15,9 @@ class TransactionsLoaded extends TransactionsState {
     required this.filter,
     this.hasMore = false,
     this.isLoadingMore = false,
-  });
+    this.selectionMode = false,
+    Set<String>? selectedIds,
+  }) : selectedIds = selectedIds ?? const {};
 
   final List<TransactionModel> transactions;
   final double income;
@@ -24,6 +26,8 @@ class TransactionsLoaded extends TransactionsState {
   final TransactionFilter filter;
   final bool hasMore;
   final bool isLoadingMore;
+  final bool selectionMode;
+  final Set<String> selectedIds;
 
   TransactionsLoaded copyWith({
     List<TransactionModel>? transactions,
@@ -33,6 +37,8 @@ class TransactionsLoaded extends TransactionsState {
     TransactionFilter? filter,
     bool? hasMore,
     bool? isLoadingMore,
+    bool? selectionMode,
+    Set<String>? selectedIds,
   }) {
     return TransactionsLoaded(
       transactions: transactions ?? this.transactions,
@@ -42,6 +48,8 @@ class TransactionsLoaded extends TransactionsState {
       filter: filter ?? this.filter,
       hasMore: hasMore ?? this.hasMore,
       isLoadingMore: isLoadingMore ?? this.isLoadingMore,
+      selectionMode: selectionMode ?? this.selectionMode,
+      selectedIds: selectedIds ?? this.selectedIds,
     );
   }
 }

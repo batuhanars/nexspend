@@ -46,6 +46,7 @@ class ApiEndpoints {
   // Transactions
   static const String transactions = '/api/transactions';
   static const String transactionsSummary = '/api/transactions/summary';
+  static const String transactionsBulkDelete = '/api/transactions/bulk-delete';
   static String transactionById(String id) => '/api/transactions/$id';
 
   // Budgets

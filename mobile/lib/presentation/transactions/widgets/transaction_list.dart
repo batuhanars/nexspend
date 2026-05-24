@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
@@ -6,6 +7,7 @@ import '../../../core/utils/date_formatter.dart';
 import '../../../data/models/budget_model.dart';
 import '../../../data/models/family_model.dart';
 import '../../../data/models/transaction_model.dart';
+import '../bloc/transactions_bloc.dart';
 import 'transaction_tile.dart';
 
 class TransactionList extends StatelessWidget {
@@ -14,11 +16,15 @@ class TransactionList extends StatelessWidget {
     required this.transactions,
     this.personalBudgets = const [],
     this.sharedBudgets = const [],
+    this.selectionMode = false,
+    this.selectedIds = const {},
   });
 
   final List<TransactionModel> transactions;
   final List<BudgetModel> personalBudgets;
   final List<MySharedBudgetModel> sharedBudgets;
+  final bool selectionMode;
+  final Set<String> selectedIds;
 
   Map<String, List<TransactionModel>> _group(BuildContext context) {
     final sorted = [...transactions]..sort((a, b) => b.date.compareTo(a.date));
@@ -88,6 +94,18 @@ class TransactionList extends StatelessWidget {
                 (t) => TransactionTile(
                   transaction: t,
                   budgetLabel: _budgetLabel(t),
+                  selectionMode: selectionMode,
+                  isSelected: selectedIds.contains(t.id),
+                  onLongPress: () {
+                    context
+                        .read<TransactionsBloc>()
+                        .add(SelectionModeEntered(initialId: t.id));
+                  },
+                  onTapInSelection: () {
+                    context
+                        .read<TransactionsBloc>()
+                        .add(SelectionToggled(t.id));
+                  },
                 ),
               ),
             ],

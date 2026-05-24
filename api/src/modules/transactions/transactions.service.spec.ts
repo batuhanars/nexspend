@@ -1,7 +1,7 @@
 /* eslint-disable */
 import { Test, TestingModule } from '@nestjs/testing';
 import { NotFoundException, BadRequestException } from '@nestjs/common';
-import { TransactionType } from '@prisma/client';
+import { TransactionSource, TransactionType } from '@prisma/client';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { TransactionsService } from './transactions.service';
 import { BalanceService } from '../../common/services/balance.service';
@@ -49,6 +49,8 @@ const baseTx = {
   categoryId: 'cat-1',
   transactionDate: new Date('2026-01-15'),
   transferToAccountId: null,
+  sharedBudgetId: null,
+  source: TransactionSource.MANUAL,
   tags: [],
   category: { id: 'cat-1', name: 'Market' },
   account: {
@@ -110,14 +112,29 @@ describe('TransactionsService', () => {
       expect(whereArg.transactionDate).toBeDefined();
     });
 
-    it('arama metni filtresiyle sorgu yapar', async () => {
+    it('arama metni filtresiyle başlık + açıklama OR sorgusu yapar', async () => {
       mockPrisma.transaction.findMany.mockResolvedValue([]);
       mockPrisma.transaction.count.mockResolvedValue(0);
 
       await service.findAll(USER_ID, { search: 'market' });
 
       const whereArg = mockPrisma.transaction.findMany.mock.calls[0][0].where;
-      expect(whereArg.title).toEqual({ contains: 'market' });
+      expect(whereArg.OR).toEqual([
+        { title: { contains: 'market' } },
+        { description: { contains: 'market' } },
+      ]);
+    });
+
+    it('arama metni description eşleşmesiyle OR dalını içerir', async () => {
+      const txWithDesc = { ...baseTx, description: 'market alışveriş notu' };
+      mockPrisma.transaction.findMany.mockResolvedValue([txWithDesc]);
+      mockPrisma.transaction.count.mockResolvedValue(1);
+
+      await service.findAll(USER_ID, { search: 'alışveriş' });
+
+      const whereArg = mockPrisma.transaction.findMany.mock.calls[0][0].where;
+      expect(whereArg.OR).toBeDefined();
+      expect(whereArg.OR).toContainEqual({ description: { contains: 'alışveriş' } });
     });
   });
 
@@ -328,15 +345,20 @@ describe('TransactionsService', () => {
   // ─── update ──────────────────────────────────────────────────────────────────
 
   describe('update()', () => {
-    it('işlemi günceller ve event emit eder', async () => {
-      mockPrisma.transaction.findFirst.mockResolvedValue(baseTx);
+    it('MANUAL işlemi günceller, bakiye revert+apply ve event emit eder (regresyon)', async () => {
+      const manualTx = { ...baseTx, source: TransactionSource.MANUAL };
+      mockPrisma.transaction.findFirst.mockResolvedValue(manualTx);
       mockPrisma.$transaction.mockImplementation(async (fn: any) =>
         fn({
           account: { update: jest.fn().mockResolvedValue({}) },
           transaction: {
             update: jest
               .fn()
-              .mockResolvedValue({ ...baseTx, title: 'Güncellendi', tags: [] }),
+              .mockResolvedValue({ ...manualTx, title: 'Güncellendi', tags: [] }),
+          },
+          transactionTag: {
+            deleteMany: jest.fn().mockResolvedValue({}),
+            createMany: jest.fn().mockResolvedValue({}),
           },
         }),
       );
@@ -345,10 +367,48 @@ describe('TransactionsService', () => {
         title: 'Güncellendi',
       });
 
+      // BalanceService revert + apply çağrıldı
+      expect(mockBalanceService.revert).toHaveBeenCalled();
+      expect(mockBalanceService.apply).toHaveBeenCalled();
+
+      // transaction.updated event emit edildi
       expect(mockEventEmitter.emit).toHaveBeenCalledWith(
         'transaction.updated',
         expect.any(Object),
       );
+    });
+
+    it('source=DEBT_PAYMENT ise BadRequestException fırlatır', async () => {
+      const debtPaymentTx = { ...baseTx, source: TransactionSource.DEBT_PAYMENT };
+      mockPrisma.transaction.findFirst.mockResolvedValue(debtPaymentTx);
+
+      await expect(
+        service.update(USER_ID, 'tx-1', { title: 'Değiştirme' }),
+      ).rejects.toThrow(BadRequestException);
+
+      await expect(
+        service.update(USER_ID, 'tx-1', { title: 'Değiştirme' }),
+      ).rejects.toThrow(
+        'Otomatik oluşturulan işlemler düzenlenemez. Bağlı borç/abonelik kaydından yönetin.',
+      );
+    });
+
+    it('source=SUBSCRIPTION ise BadRequestException fırlatır', async () => {
+      const subTx = { ...baseTx, source: TransactionSource.SUBSCRIPTION };
+      mockPrisma.transaction.findFirst.mockResolvedValue(subTx);
+
+      await expect(
+        service.update(USER_ID, 'tx-1', { title: 'Değiştirme' }),
+      ).rejects.toThrow(BadRequestException);
+    });
+
+    it('source=RECURRING ise BadRequestException fırlatır', async () => {
+      const recurringTx = { ...baseTx, source: TransactionSource.RECURRING };
+      mockPrisma.transaction.findFirst.mockResolvedValue(recurringTx);
+
+      await expect(
+        service.update(USER_ID, 'tx-1', { title: 'Değiştirme' }),
+      ).rejects.toThrow(BadRequestException);
     });
 
     it('bulunamazsa NotFoundException fırlatır', async () => {

@@ -7,7 +7,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { ScheduleModule } from '@nestjs/schedule';
 import request from 'supertest';
 import { App } from 'supertest/types';
-import { TransactionType } from '@prisma/client';
+import { TransactionSource, TransactionType } from '@prisma/client';
 import { GlobalExceptionFilter } from '../src/common/filters/http-exception.filter';
 import { TransformInterceptor } from '../src/common/interceptors/transform.interceptor';
 import { TransactionsModule } from '../src/modules/transactions/transactions.module';
@@ -147,7 +147,19 @@ function resetMocks(userId: string) {
             store.transactions[tx.id] = tx;
             return tx;
           }),
-          update: jest.fn(),
+          update: jest.fn().mockImplementation(async ({ where, data }: any) => {
+            const tx = store.transactions[where.id];
+            if (tx) {
+              Object.assign(tx, data);
+            }
+            return {
+              ...(tx ?? {}),
+              tags: [],
+              category: null,
+              account: store.accounts[(tx ?? {}).accountId] ?? null,
+              transferToAccount: null,
+            };
+          }),
           delete: jest.fn().mockImplementation(async ({ where }: any) => {
             const tx = store.transactions[where.id];
             delete store.transactions[where.id];
@@ -163,6 +175,10 @@ function resetMocks(userId: string) {
             }
             return acc;
           }),
+        },
+        transactionTag: {
+          deleteMany: jest.fn().mockResolvedValue({}),
+          createMany: jest.fn().mockResolvedValue({}),
         },
       };
       return fn(txClient);
@@ -474,6 +490,128 @@ describe('Transactions (e2e)', () => {
         .set('Authorization', `Bearer ${accessToken}`);
 
       expect(res.status).toBe(404);
+    });
+  });
+
+  // ─── PATCH /api/transactions/:id ────────────────────────────────────────────
+
+  describe('PATCH /api/transactions/:id', () => {
+    it('MANUAL işlem başarıyla güncellenir', async () => {
+      const manualTx = {
+        id: 'patch-tx-1',
+        userId,
+        accountId: 'acc-1',
+        type: TransactionType.EXPENSE,
+        amount: 100,
+        title: 'Orijinal Başlık',
+        transactionDate: new Date(),
+        source: TransactionSource.MANUAL,
+        transferToAccountId: null,
+        sharedBudgetId: null,
+        categoryId: null,
+      };
+      store.transactions['patch-tx-1'] = manualTx;
+
+      mockPrisma.transaction.findFirst.mockResolvedValueOnce({
+        ...manualTx,
+        tags: [],
+        category: null,
+        account: store.accounts['acc-1'],
+        transferToAccount: null,
+      });
+
+      const res = await request(app.getHttpServer())
+        .patch('/api/transactions/patch-tx-1')
+        .set('Authorization', `Bearer ${accessToken}`)
+        .send({ title: 'Güncellenmiş Başlık' });
+
+      expect(res.status).toBe(200);
+      expect(res.body.success).toBe(true);
+    });
+
+    it('source=DEBT_PAYMENT olan işlem 400 döner', async () => {
+      const debtPaymentTx = {
+        id: 'patch-tx-2',
+        userId,
+        accountId: 'acc-1',
+        type: TransactionType.EXPENSE,
+        amount: 200,
+        title: 'Borç Ödemesi',
+        transactionDate: new Date(),
+        source: TransactionSource.DEBT_PAYMENT,
+        transferToAccountId: null,
+        sharedBudgetId: null,
+        categoryId: null,
+      };
+      store.transactions['patch-tx-2'] = debtPaymentTx;
+
+      mockPrisma.transaction.findFirst.mockResolvedValueOnce({
+        ...debtPaymentTx,
+        tags: [],
+        category: null,
+        account: store.accounts['acc-1'],
+        transferToAccount: null,
+      });
+
+      const res = await request(app.getHttpServer())
+        .patch('/api/transactions/patch-tx-2')
+        .set('Authorization', `Bearer ${accessToken}`)
+        .send({ title: 'Değiştirme' });
+
+      expect(res.status).toBe(400);
+      expect(res.body.success).toBe(false);
+    });
+
+    it('source=SUBSCRIPTION olan işlem 400 döner', async () => {
+      const subTx = {
+        id: 'patch-tx-3',
+        userId,
+        accountId: 'acc-1',
+        type: TransactionType.EXPENSE,
+        amount: 50,
+        title: 'Abonelik',
+        transactionDate: new Date(),
+        source: TransactionSource.SUBSCRIPTION,
+        transferToAccountId: null,
+        sharedBudgetId: null,
+        categoryId: null,
+      };
+      store.transactions['patch-tx-3'] = subTx;
+
+      mockPrisma.transaction.findFirst.mockResolvedValueOnce({
+        ...subTx,
+        tags: [],
+        category: null,
+        account: store.accounts['acc-1'],
+        transferToAccount: null,
+      });
+
+      const res = await request(app.getHttpServer())
+        .patch('/api/transactions/patch-tx-3')
+        .set('Authorization', `Bearer ${accessToken}`)
+        .send({ title: 'Değiştirme' });
+
+      expect(res.status).toBe(400);
+      expect(res.body.success).toBe(false);
+    });
+
+    it('olmayan işlem 404 döner', async () => {
+      mockPrisma.transaction.findFirst.mockResolvedValueOnce(null);
+
+      const res = await request(app.getHttpServer())
+        .patch('/api/transactions/nonexistent')
+        .set('Authorization', `Bearer ${accessToken}`)
+        .send({ title: 'Test' });
+
+      expect(res.status).toBe(404);
+    });
+
+    it('token olmadan 401 döner', async () => {
+      const res = await request(app.getHttpServer())
+        .patch('/api/transactions/some-id')
+        .send({ title: 'Test' });
+
+      expect(res.status).toBe(401);
     });
   });
 });

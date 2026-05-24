@@ -5,7 +5,11 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { AccountType, TransactionType } from '@prisma/client';
+import {
+  AccountType,
+  TransactionSource,
+  TransactionType,
+} from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import { BalanceService } from '../../common/services/balance.service';
 import {
@@ -55,7 +59,10 @@ export class TransactionsService {
       if (endDate) where.transactionDate.lte = new Date(endDate);
     }
     if (search) {
-      where.title = { contains: search };
+      where.OR = [
+        { title: { contains: search } },
+        { description: { contains: search } },
+      ];
     }
 
     const [transactions, total] = await Promise.all([
@@ -240,6 +247,12 @@ export class TransactionsService {
       where: { id, userId },
     });
     if (!existing) throw new NotFoundException('İşlem bulunamadı');
+
+    if (existing.source !== TransactionSource.MANUAL) {
+      throw new BadRequestException(
+        'Otomatik oluşturulan işlemler düzenlenemez. Bağlı borç/abonelik kaydından yönetin.',
+      );
+    }
 
     const newAmount = dto.amount ?? Number(existing.amount);
     const newType = dto.type ?? existing.type;

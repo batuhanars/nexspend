@@ -7,6 +7,7 @@ import {
   StreamableFile,
 } from '@nestjs/common';
 import type { Response } from 'express';
+import { Prisma, TransactionType } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
@@ -209,6 +210,92 @@ export class UsersService {
     await this.prisma.user.delete({ where: { id: userId } });
 
     return { message: 'Hesap silindi' };
+  }
+
+  async resetData(userId: string) {
+    await this.findUser(userId);
+
+    // 1) Fiş görsel URL'lerini silme öncesi topla
+    const receipts = await this.prisma.receipt.findMany({
+      where: { userId },
+      select: { imageUrl: true },
+    });
+    const imageUrls = receipts.map((r) => r.imageUrl);
+
+    // 2) Etkilenen SharedBudget ID'lerini topla (kullanıcının EXPENSE transaction'ları)
+    const sharedTxs = await this.prisma.transaction.findMany({
+      where: {
+        userId,
+        sharedBudgetId: { not: null },
+        type: TransactionType.EXPENSE,
+      },
+      select: { sharedBudgetId: true },
+    });
+    const affectedBudgetIds = [
+      ...new Set(
+        sharedTxs
+          .map((t) => t.sharedBudgetId)
+          .filter((id): id is string => id !== null),
+      ),
+    ];
+
+    // 3) Tek $transaction içinde FK-güvenli sırada sil
+    await this.prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+      // Receipt önce — Receipt.transactionId FK'sı Transaction'a NO ACTION
+      await tx.receipt.deleteMany({ where: { userId } });
+
+      // Transaction (TransactionTag cascade ile birlikte)
+      await tx.transaction.deleteMany({ where: { userId } });
+
+      // Budget
+      await tx.budget.deleteMany({ where: { userId } });
+
+      // RecurringTransaction — accountId FK (NO ACTION), Account'tan önce
+      await tx.recurringTransaction.deleteMany({ where: { userId } });
+
+      // Subscription — accountId FK (NO ACTION), Account'tan önce
+      await tx.subscription.deleteMany({ where: { userId } });
+
+      // Insight
+      await tx.insight.deleteMany({ where: { userId } });
+
+      // Debt — cascades DebtInstallment + DebtPayment
+      await tx.debt.deleteMany({ where: { userId } });
+
+      // Tag (kullanıcıya ait; TransactionTag zaten cascade ile silindi)
+      await tx.tag.deleteMany({ where: { userId } });
+
+      // MerchantCategoryMap (userId not null — global'leri atla)
+      await tx.merchantCategoryMap.deleteMany({
+        where: { userId },
+      });
+
+      // Account (en son — cascades CreditCardStatement + PortfolioAsset)
+      await tx.account.deleteMany({ where: { userId } });
+
+      // SharedBudget.spent yeniden hesapla (sıfırla)
+      for (const budgetId of affectedBudgetIds) {
+        const agg = await tx.transaction.aggregate({
+          where: {
+            sharedBudgetId: budgetId,
+            type: TransactionType.EXPENSE,
+          },
+          _sum: { amount: true },
+        });
+        const newSpent = Number(agg._sum.amount ?? 0);
+        await tx.sharedBudget.update({
+          where: { id: budgetId },
+          data: { spent: newSpent },
+        });
+      }
+    });
+
+    // 4) Commit sonrası fiş görsellerini disk'ten sil (sessiz)
+    for (const imageUrl of imageUrls) {
+      this.deleteLocalFile(imageUrl);
+    }
+
+    return { message: 'Verileriniz sıfırlandı.' };
   }
 
   private async findUser(userId: string) {

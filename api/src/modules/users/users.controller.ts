@@ -101,6 +101,12 @@ export class UsersController {
     return this.usersService.changePassword(user.id, dto);
   }
 
+  @Post('me/reset')
+  @HttpCode(HttpStatus.OK)
+  resetData(@CurrentUser() user: { id: string }) {
+    return this.usersService.resetData(user.id);
+  }
+
   @Delete('me')
   @HttpCode(HttpStatus.OK)
   deleteAccount(@CurrentUser() user: { id: string }) {

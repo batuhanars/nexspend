@@ -1,21 +1,30 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
 import '../../../core/di/injection.dart';
 import '../../../core/l10n/app_strings.dart';
 import '../../../core/services/app_events.dart';
+import '../../../data/models/account_model.dart';
 import '../../../data/models/budget_model.dart';
+import '../../../data/models/category_model.dart';
 import '../../../data/models/family_model.dart';
+import '../../../data/repositories/account_repository.dart';
 import '../../../data/repositories/budget_repository.dart';
+import '../../../data/repositories/category_repository.dart';
 import '../../../data/repositories/family_repository.dart';
 import '../../../navigation/route_names.dart';
+import '../bloc/transaction_filter.dart';
 import '../bloc/transactions_bloc.dart';
 import '../widgets/summary_row.dart';
 import '../../shared/widgets/empty_state_view.dart';
 import '../../shared/widgets/error_view.dart';
 import '../../shared/widgets/filter_chip_bar.dart';
+import '../widgets/transaction_filter_sheet.dart';
 import '../widgets/transaction_list.dart';
 import '../widgets/transactions_shimmer.dart';
 
@@ -40,42 +49,55 @@ class _TransactionsViewState extends State<_TransactionsView> {
   final _scrollController = ScrollController();
   List<BudgetModel> _personalBudgets = const [];
   List<MySharedBudgetModel> _sharedBudgets = const [];
+  List<CategoryModel> _categories = const [];
+  List<AccountModel> _accounts = const [];
+
+  // Arama
+  bool _searchActive = false;
+  final _searchController = TextEditingController();
+  Timer? _searchDebounce;
 
   @override
   void initState() {
     super.initState();
     _scrollController.addListener(_onScroll);
     getIt<AppEvents>().addListener(_onTransactionAdded);
-    _loadBudgets();
+    _loadSupportData();
   }
 
   @override
   void dispose() {
     getIt<AppEvents>().removeListener(_onTransactionAdded);
     _scrollController.dispose();
+    _searchController.dispose();
+    _searchDebounce?.cancel();
     super.dispose();
   }
 
-  Future<void> _loadBudgets() async {
+  Future<void> _loadSupportData() async {
     try {
       final results = await Future.wait([
         getIt<BudgetRepository>().getAll(),
         getIt<FamilyRepository>().getMySharedBudgets(),
+        getIt<CategoryRepository>().getCategories(),
+        getIt<AccountRepository>().getAccounts(),
       ]);
       if (!mounted) return;
       setState(() {
         _personalBudgets = results[0] as List<BudgetModel>;
         _sharedBudgets = results[1] as List<MySharedBudgetModel>;
+        _categories = results[2] as List<CategoryModel>;
+        _accounts = results[3] as List<AccountModel>;
       });
     } catch (_) {
-      // Bütçe etiketleri gösterilmesin diye sessizce yutalım — liste yine çalışır.
+      // Bütçe/kategori/hesap yüklenemezse sessizce devam et
     }
   }
 
   void _onTransactionAdded() {
     if (mounted) {
       context.read<TransactionsBloc>().add(TransactionsRefreshRequested());
-      _loadBudgets();
+      _loadSupportData();
     }
   }
 
@@ -84,6 +106,64 @@ class _TransactionsViewState extends State<_TransactionsView> {
         _scrollController.position.maxScrollExtent - 200) {
       context.read<TransactionsBloc>().add(TransactionsLoadMoreRequested());
     }
+  }
+
+  TransactionFilter _currentFilter(TransactionsState state) {
+    if (state is TransactionsLoaded) return state.filter;
+    return TransactionFilter.empty;
+  }
+
+  void _onTypeChipChanged(String? type, TransactionFilter current) {
+    final newFilter = current.copyWith(type: type);
+    context.read<TransactionsBloc>().add(TransactionsFilterChanged(newFilter));
+  }
+
+  void _openFilterSheet(TransactionFilter current) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => TransactionFilterSheet(
+        initialFilter: current,
+        categories: _categories,
+        accounts: _accounts,
+        onApply: (newFilter) {
+          context
+              .read<TransactionsBloc>()
+              .add(TransactionsFilterChanged(newFilter));
+        },
+      ),
+    );
+  }
+
+  void _onSearchChanged(String q, TransactionFilter current) {
+    _searchDebounce?.cancel();
+    _searchDebounce = Timer(const Duration(milliseconds: 350), () {
+      if (!mounted) return;
+      final search = q.trim().isEmpty ? null : q.trim();
+      final newFilter = current.copyWith(search: search);
+      context
+          .read<TransactionsBloc>()
+          .add(TransactionsFilterChanged(newFilter));
+    });
+  }
+
+  void _removeActiveFilterChip(String key, TransactionFilter current) {
+    TransactionFilter newFilter;
+    switch (key) {
+      case 'category':
+        newFilter = current.copyWith(categoryId: null);
+      case 'account':
+        newFilter = current.copyWith(accountId: null);
+      case 'date':
+        newFilter = current.copyWith(startDate: null, endDate: null);
+      case 'search':
+        newFilter = current.copyWith(search: null);
+        _searchController.clear();
+      default:
+        return;
+    }
+    context.read<TransactionsBloc>().add(TransactionsFilterChanged(newFilter));
   }
 
   @override
@@ -103,22 +183,103 @@ class _TransactionsViewState extends State<_TransactionsView> {
         },
         child: BlocBuilder<TransactionsBloc, TransactionsState>(
           builder: (context, state) {
+            final filter = _currentFilter(state);
             return CustomScrollView(
               controller: _scrollController,
               physics: const AlwaysScrollableScrollPhysics(),
               slivers: [
                 SliverAppBar(
                   floating: true,
-                  title: Text(s.transactionsTitle, style: AppTypography.headlineSm),
-                  centerTitle: false,
                   backgroundColor: AppColors.surface,
                   surfaceTintColor: Colors.transparent,
+                  title: _searchActive
+                      ? TextField(
+                          controller: _searchController,
+                          autofocus: true,
+                          style: AppTypography.bodyMd,
+                          decoration: InputDecoration(
+                            hintText: s.searchLabel,
+                            hintStyle: AppTypography.bodyMd
+                                .copyWith(color: AppColors.onSurfaceVariant),
+                            border: InputBorder.none,
+                            isDense: true,
+                            contentPadding: EdgeInsets.zero,
+                          ),
+                          onChanged: (q) => _onSearchChanged(q, filter),
+                        )
+                      : Text(s.transactionsTitle,
+                          style: AppTypography.headlineSm),
+                  centerTitle: false,
                   actions: [
+                    // Arama aç/kapat
                     IconButton(
-                      icon: const Icon(Icons.add_rounded, color: AppColors.primary),
+                      icon: Icon(
+                        _searchActive
+                            ? Icons.close_rounded
+                            : Icons.search_rounded,
+                        color: _searchActive
+                            ? AppColors.primary
+                            : AppColors.onSurface,
+                      ),
+                      onPressed: () {
+                        setState(() => _searchActive = !_searchActive);
+                        if (!_searchActive) {
+                          _searchController.clear();
+                          _searchDebounce?.cancel();
+                          // Arama filtresi kaldır
+                          final newFilter = filter.copyWith(search: null);
+                          context
+                              .read<TransactionsBloc>()
+                              .add(TransactionsFilterChanged(newFilter));
+                        }
+                      },
+                    ),
+                    // Filtre butonu + rozet
+                    Stack(
+                      children: [
+                        IconButton(
+                          icon: Icon(
+                            Icons.tune_rounded,
+                            color: filter.activeCount > 0
+                                ? AppColors.primary
+                                : AppColors.onSurface,
+                          ),
+                          onPressed: () => _openFilterSheet(filter),
+                        ),
+                        if (filter.activeCount > 0)
+                          Positioned(
+                            right: 6,
+                            top: 6,
+                            child: Container(
+                              width: 16,
+                              height: 16,
+                              decoration: const BoxDecoration(
+                                color: AppColors.primary,
+                                shape: BoxShape.circle,
+                              ),
+                              alignment: Alignment.center,
+                              child: Text(
+                                '${filter.activeCount}',
+                                style: const TextStyle(
+                                  fontFamily: 'Inter',
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w700,
+                                  color: AppColors.onPrimary,
+                                  height: 1.0,
+                                ),
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                    // İşlem ekle
+                    IconButton(
+                      icon: const Icon(Icons.add_rounded,
+                          color: AppColors.primary),
                       onPressed: () async {
                         final bloc = context.read<TransactionsBloc>();
-                        final added = await context.push(RouteNames.addTransaction);
+                        final added =
+                            await context.push(RouteNames.addTransaction);
                         if (added == true && mounted) {
                           bloc.add(TransactionsRefreshRequested());
                         }
@@ -142,6 +303,7 @@ class _TransactionsViewState extends State<_TransactionsView> {
                   )
                 else if (state is TransactionsLoaded) ...[
                   SliverToBoxAdapter(child: SummaryRow(state: state)),
+                  // Tip chip bar + filtre ikonu
                   SliverToBoxAdapter(
                     child: FilterChipBar(
                       filters: [
@@ -150,12 +312,22 @@ class _TransactionsViewState extends State<_TransactionsView> {
                         (label: s.expense, value: 'EXPENSE'),
                         (label: s.transfer, value: 'TRANSFER'),
                       ],
-                      activeFilter: state.filter,
-                      onChanged: (v) => context
-                          .read<TransactionsBloc>()
-                          .add(TransactionsFilterChanged(v)),
+                      activeFilter: filter.type,
+                      onChanged: (v) => _onTypeChipChanged(v, filter),
                     ),
                   ),
+                  // Aktif filtre özet chip'leri
+                  if (filter.activeCount > 0)
+                    SliverToBoxAdapter(
+                      child: _ActiveFilterChips(
+                        filter: filter,
+                        categories: _categories,
+                        accounts: _accounts,
+                        onRemove: (key) =>
+                            _removeActiveFilterChip(key, filter),
+                        s: s,
+                      ),
+                    ),
                   if (state.transactions.isEmpty)
                     SliverFillRemaining(
                       child: EmptyStateView(
@@ -201,6 +373,113 @@ class _TransactionsViewState extends State<_TransactionsView> {
             );
           },
         ),
+      ),
+    );
+  }
+}
+
+/// Aktif filtre boyutlarını kaldırılabilir chip olarak gösterir.
+class _ActiveFilterChips extends StatelessWidget {
+  const _ActiveFilterChips({
+    required this.filter,
+    required this.categories,
+    required this.accounts,
+    required this.onRemove,
+    required this.s,
+  });
+
+  final TransactionFilter filter;
+  final List<CategoryModel> categories;
+  final List<AccountModel> accounts;
+  final ValueChanged<String> onRemove;
+  final AppStrings s;
+
+  @override
+  Widget build(BuildContext context) {
+    final chips = <({String key, String label})>[];
+
+    if (filter.categoryId != null) {
+      final cat = categories.where((c) => c.id == filter.categoryId).firstOrNull;
+      chips.add((key: 'category', label: cat?.name ?? s.categoryLabel));
+    }
+    if (filter.accountId != null) {
+      final acc = accounts.where((a) => a.id == filter.accountId).firstOrNull;
+      chips.add((key: 'account', label: acc?.name ?? s.accountLabel));
+    }
+    if (filter.startDate != null || filter.endDate != null) {
+      final start = filter.startDate;
+      final end = filter.endDate;
+      String label;
+      if (start != null && end != null) {
+        label =
+            '${start.day}.${start.month} – ${end.day}.${end.month}';
+      } else if (start != null) {
+        label = '≥ ${start.day}.${start.month}.${start.year}';
+      } else {
+        label = '≤ ${end!.day}.${end.month}.${end.year}';
+      }
+      chips.add((key: 'date', label: label));
+    }
+    if (filter.search != null && filter.search!.isNotEmpty) {
+      chips.add((key: 'search', label: '"${filter.search}"'));
+    }
+
+    if (chips.isEmpty) return const SizedBox.shrink();
+
+    return SizedBox(
+      height: 40,
+      child: ListView(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.pagePadding),
+        children: chips
+            .map(
+              (c) => Padding(
+                padding: const EdgeInsets.only(right: AppSpacing.sm),
+                child: _RemovableChip(
+                  label: c.label,
+                  onRemove: () => onRemove(c.key),
+                ),
+              ),
+            )
+            .toList(),
+      ),
+    );
+  }
+}
+
+class _RemovableChip extends StatelessWidget {
+  const _RemovableChip({required this.label, required this.onRemove});
+  final String label;
+  final VoidCallback onRemove;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.only(left: 12, right: 4),
+      decoration: BoxDecoration(
+        color: AppColors.primary.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            label,
+            style: AppTypography.labelMd.copyWith(
+              color: AppColors.primary,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          const SizedBox(width: 2),
+          GestureDetector(
+            onTap: onRemove,
+            child: const Icon(
+              Icons.close_rounded,
+              size: 16,
+              color: AppColors.primary,
+            ),
+          ),
+        ],
       ),
     );
   }

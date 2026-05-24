@@ -4,13 +4,20 @@ import 'package:go_router/go_router.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
+import '../../../core/di/injection.dart';
 import '../../../core/l10n/app_strings.dart';
 import '../../../core/utils/category_extensions.dart';
 import '../../../core/utils/currency_formatter.dart';
 import '../../../core/utils/date_formatter.dart';
 import '../../../core/utils/icon_mapper.dart';
 import '../../../data/models/transaction_model.dart';
+import '../../../data/repositories/account_repository.dart';
+import '../../../data/repositories/category_repository.dart';
+import '../../../data/repositories/tag_repository.dart';
+import '../../../data/repositories/transaction_repository.dart';
+import '../bloc/add_transaction_bloc.dart';
 import '../bloc/transactions_bloc.dart';
+import 'add_transaction_page.dart';
 
 class TransactionDetailPage extends StatelessWidget {
   const TransactionDetailPage({super.key, required this.transaction});
@@ -59,6 +66,11 @@ class TransactionDetailPage extends StatelessWidget {
         title: Text(s.transactionDetailTitle, style: AppTypography.titleSm),
         centerTitle: true,
         actions: [
+          if (transaction.source == TransactionSource.MANUAL)
+            IconButton(
+              icon: const Icon(Icons.edit_outlined),
+              onPressed: () => _openEdit(context),
+            ),
           IconButton(
             icon: const Icon(Icons.delete_outline_rounded, color: AppColors.error),
             onPressed: () => _confirmDelete(context, s),
@@ -84,6 +96,27 @@ class TransactionDetailPage extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Future<void> _openEdit(BuildContext context) async {
+    final edited = await Navigator.of(context).push<bool>(
+      MaterialPageRoute(
+        fullscreenDialog: true,
+        builder: (_) => BlocProvider(
+          create: (_) => AddTransactionBloc(
+            transactionRepository: getIt<TransactionRepository>(),
+            categoryRepository: getIt<CategoryRepository>(),
+            accountRepository: getIt<AccountRepository>(),
+            tagRepository: getIt<TagRepository>(),
+          ),
+          child: AddTransactionPage(editing: transaction),
+        ),
+      ),
+    );
+    if (edited == true && context.mounted) {
+      // Detay sayfasını kapat, liste refresh eventi AppEvents üzerinden zaten tetiklendi
+      context.pop(true);
+    }
   }
 
   Future<void> _confirmDelete(BuildContext context, AppStrings s) async {

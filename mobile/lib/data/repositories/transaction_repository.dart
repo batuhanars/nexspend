@@ -72,6 +72,14 @@ class TransactionRepository {
         response.data['data'] as Map<String, dynamic>);
   }
 
+  Future<TransactionModel> updateTransaction(
+      String id, Map<String, dynamic> data) async {
+    final response =
+        await _dio.patch(ApiEndpoints.transactionById(id), data: data);
+    return TransactionModel.fromJson(
+        response.data['data'] as Map<String, dynamic>);
+  }
+
   Future<void> deleteTransaction(String id) async {
     await _dio.delete(ApiEndpoints.transactionById(id));
   }

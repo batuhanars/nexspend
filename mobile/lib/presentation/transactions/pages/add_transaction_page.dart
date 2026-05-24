@@ -10,6 +10,7 @@ import '../../../core/services/app_events.dart';
 import '../../../data/models/account_model.dart';
 import '../../../data/models/category_model.dart';
 import '../../../data/models/family_model.dart';
+import '../../../data/models/transaction_model.dart';
 import '../../../data/repositories/family_repository.dart';
 import '../bloc/add_transaction_bloc.dart';
 import '../widgets/account_chips.dart';
@@ -27,6 +28,7 @@ class AddTransactionPage extends StatefulWidget {
     this.initialType,
     this.initialCategoryId,
     this.initialSharedBudgetId,
+    this.editing,
   });
 
   final String? initialAccountId;
@@ -36,6 +38,9 @@ class AddTransactionPage extends StatefulWidget {
   /// Ortak bütçe detayından açıldığında o ortak bütçenin id'si.
   /// Kapsam chip'lerini kilitler (sadece o chip görünür).
   final String? initialSharedBudgetId;
+
+  /// Doluysa edit modu — formu prefill eder.
+  final TransactionModel? editing;
 
   @override
   State<AddTransactionPage> createState() => _AddTransactionPageState();
@@ -59,7 +64,6 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
   String? _selectedSharedBudgetId;
 
   /// Form bir bütçe detayından açıldıysa true: kapsam chip'leri kilitli
-  /// (tek chip gösterilir). Kullanıcı kategoriyi değiştirirse kilit kırılır.
   late bool _isBudgetLocked;
   bool _sharedBudgetInitialized = false;
 
@@ -67,13 +71,30 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
   String _recurringFrequency = 'MONTHLY';
   DateTime? _recurringEndDate;
 
+  bool get _isEditMode => widget.editing != null;
+
   @override
   void initState() {
     super.initState();
-    _type = widget.initialType ?? 'EXPENSE';
-    _isBudgetLocked = widget.initialCategoryId != null;
-    context.read<AddTransactionBloc>().add(AddTransactionInitialized());
-    _loadMySharedBudgets();
+    final editing = widget.editing;
+    if (editing != null) {
+      // Edit modu: prefill
+      _type = editing.type.name;
+      _amount = editing.amount;
+      _titleController.text = editing.description ?? '';
+      _noteController.text = editing.note ?? '';
+      _date = editing.date;
+      _isBudgetLocked = false;
+    } else {
+      _type = widget.initialType ?? 'EXPENSE';
+      _isBudgetLocked = widget.initialCategoryId != null;
+    }
+    context
+        .read<AddTransactionBloc>()
+        .add(AddTransactionInitialized(editingId: editing?.id));
+    if (!_isEditMode) {
+      _loadMySharedBudgets();
+    }
   }
 
   Future<void> _loadMySharedBudgets() async {
@@ -82,7 +103,6 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
       if (!mounted) return;
       setState(() {
         _mySharedBudgets = list;
-        // İlk yükte ön-seçili ortak bütçeyi listeden doğrula.
         if (!_sharedBudgetInitialized &&
             widget.initialSharedBudgetId != null &&
             list.any((b) => b.id == widget.initialSharedBudgetId)) {
@@ -91,7 +111,6 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
         _sharedBudgetInitialized = true;
       });
     } catch (_) {
-      // Sessizce yutalım — chip group olmasa da form çalışmaya devam etsin.
       _sharedBudgetInitialized = true;
     }
   }
@@ -123,11 +142,11 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
       _showError(s.selectAccount);
       return;
     }
-    if (_type == 'TRANSFER' && _transferToAccount == null) {
+    if (_type == 'TRANSFER' && _transferToAccount == null && !_isEditMode) {
       _showError(s.selectTargetAccount);
       return;
     }
-    if (_type != 'TRANSFER' && _selectedCategory == null) {
+    if (_type != 'TRANSFER' && _selectedCategory == null && !_isEditMode) {
       _showError(s.selectCategory);
       return;
     }
@@ -142,26 +161,42 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
         _date.day == now.day;
     final submitDate = isToday ? now : _date;
 
-    final data = <String, dynamic>{
-      'type': _type,
-      'amount': amount,
-      'title': title,
-      'accountId': _selectedAccount!.id,
-      'transactionDate': submitDate.toUtc().toIso8601String(),
-      if (_selectedCategory != null) 'categoryId': _selectedCategory!.id,
-      if (_selectedSharedBudgetId != null)
-        'sharedBudgetId': _selectedSharedBudgetId,
-      if (_noteController.text.trim().isNotEmpty)
-        'note': _noteController.text.trim(),
-      if (_type == 'TRANSFER' && _transferToAccount != null)
-        'transferToAccountId': _transferToAccount!.id,
-      'isRecurring': _isRecurring,
-      if (_isRecurring) 'frequency': _recurringFrequency,
-      if (_isRecurring && _recurringEndDate != null)
-        'endDate': _recurringEndDate!.toUtc().toIso8601String(),
-    };
-
-    context.read<AddTransactionBloc>().add(AddTransactionSubmitted(data));
+    if (_isEditMode) {
+      // Edit mode: hanya kirim field yang diizinkan PATCH
+      final data = <String, dynamic>{
+        'type': _type,
+        'amount': amount,
+        'title': title,
+        'accountId': _selectedAccount!.id,
+        'transactionDate': submitDate.toUtc().toIso8601String(),
+        if (_selectedCategory != null) 'categoryId': _selectedCategory!.id,
+        if (_noteController.text.trim().isNotEmpty)
+          'note': _noteController.text.trim(),
+        if (_type == 'TRANSFER' && _transferToAccount != null)
+          'transferToAccountId': _transferToAccount!.id,
+      };
+      context.read<AddTransactionBloc>().add(AddTransactionSubmitted(data));
+    } else {
+      final data = <String, dynamic>{
+        'type': _type,
+        'amount': amount,
+        'title': title,
+        'accountId': _selectedAccount!.id,
+        'transactionDate': submitDate.toUtc().toIso8601String(),
+        if (_selectedCategory != null) 'categoryId': _selectedCategory!.id,
+        if (_selectedSharedBudgetId != null)
+          'sharedBudgetId': _selectedSharedBudgetId,
+        if (_noteController.text.trim().isNotEmpty)
+          'note': _noteController.text.trim(),
+        if (_type == 'TRANSFER' && _transferToAccount != null)
+          'transferToAccountId': _transferToAccount!.id,
+        'isRecurring': _isRecurring,
+        if (_isRecurring) 'frequency': _recurringFrequency,
+        if (_isRecurring && _recurringEndDate != null)
+          'endDate': _recurringEndDate!.toUtc().toIso8601String(),
+      };
+      context.read<AddTransactionBloc>().add(AddTransactionSubmitted(data));
+    }
   }
 
   void _showError(String msg) {
@@ -186,16 +221,28 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
 
   @override
   Widget build(BuildContext context) {
+    final s = AppStrings.of(context);
     return BlocListener<AddTransactionBloc, AddTransactionState>(
       listener: (context, state) {
         if (state is AddTransactionSuccess) {
-          getIt<AppEvents>().transactionAdded();
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(AppStrings.of(context).transactionCreatedSuccess),
-              backgroundColor: AppColors.secondary,
-            ),
-          );
+          if (state.isEditMode) {
+            // Edit: liste refresh için aynı event yeterli
+            getIt<AppEvents>().transactionAdded();
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(s.transactionUpdatedSuccess),
+                backgroundColor: AppColors.secondary,
+              ),
+            );
+          } else {
+            getIt<AppEvents>().transactionAdded();
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(s.transactionCreatedSuccess),
+                backgroundColor: AppColors.secondary,
+              ),
+            );
+          }
           context.pop(true);
         } else if (state is AddTransactionFailure) {
           _showError(state.message);
@@ -203,7 +250,7 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
       },
       child: Scaffold(
         appBar: AppBar(
-          title: Text(AppStrings.of(context).addTransactionBtn),
+          title: Text(_isEditMode ? s.editTransactionTitle : s.addTransactionBtn),
           leading: IconButton(
             icon: const Icon(Icons.close_rounded),
             onPressed: () => context.pop(),
@@ -222,32 +269,57 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
             final accounts = _accountsFrom(state);
 
             if (!_accountsInitialized && accounts.isNotEmpty) {
-              final preselect = widget.initialAccountId;
-              _selectedAccount = preselect != null
-                  ? accounts.firstWhere(
-                      (a) => a.id == preselect,
-                      orElse: () => accounts.firstWhere(
+              final editing = widget.editing;
+              if (editing != null && !_accountsInitialized) {
+                // Edit modunda mevcut hesabı prefill et
+                final match = accounts
+                    .where((a) => a.id == editing.account?.id)
+                    .toList();
+                _selectedAccount = match.isNotEmpty
+                    ? match.first
+                    : accounts.firstWhere(
                         (a) => a.isDefault,
                         orElse: () => accounts.first,
-                      ),
-                    )
-                  : accounts.firstWhere(
-                      (a) => a.isDefault,
-                      orElse: () => accounts.first,
-                    );
+                      );
+              } else {
+                final preselect = widget.initialAccountId;
+                _selectedAccount = preselect != null
+                    ? accounts.firstWhere(
+                        (a) => a.id == preselect,
+                        orElse: () => accounts.firstWhere(
+                          (a) => a.isDefault,
+                          orElse: () => accounts.first,
+                        ),
+                      )
+                    : accounts.firstWhere(
+                        (a) => a.isDefault,
+                        orElse: () => accounts.first,
+                      );
+              }
               _accountsInitialized = true;
             }
 
             final filtered = _filteredCategories(categories);
 
-            if (!_categoryInitialized && widget.initialCategoryId != null) {
-              final preselectId = widget.initialCategoryId;
-              final match = categories
-                  .where((c) => c.id == preselectId)
-                  .toList();
-              if (match.isNotEmpty) {
-                _selectedCategory = match.first;
-                _categoryInitialized = true;
+            if (!_categoryInitialized) {
+              final editing = widget.editing;
+              if (editing != null && editing.category != null) {
+                final match = categories
+                    .where((c) => c.id == editing.category!.id)
+                    .toList();
+                if (match.isNotEmpty) {
+                  _selectedCategory = match.first;
+                  _categoryInitialized = true;
+                }
+              } else if (widget.initialCategoryId != null) {
+                final preselectId = widget.initialCategoryId;
+                final match = categories
+                    .where((c) => c.id == preselectId)
+                    .toList();
+                if (match.isNotEmpty) {
+                  _selectedCategory = match.first;
+                  _categoryInitialized = true;
+                }
               }
             }
 
@@ -264,8 +336,6 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                     _selectedCategory = null;
                     _selectedSharedBudgetId = null;
                     _isBudgetLocked = false;
-                    // INCOME'a geçilince kredi kartı seçimi mantıksız —
-                    // hesap seçimini sıfırla, kullanıcı banka/nakit seçer.
                     if (t == 'INCOME' &&
                         _selectedAccount?.type == AccountType.CREDIT_CARD) {
                       _selectedAccount = null;
@@ -274,11 +344,13 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                 ),
                 const SizedBox(height: AppSpacing.xl),
                 TransactionAmountField(
-                    onChanged: (v) => setState(() => _amount = v),
-                    type: _type),
+                  onChanged: (v) => setState(() => _amount = v),
+                  type: _type,
+                  initialValue: widget.editing?.amount,
+                ),
                 if (_type != 'TRANSFER' && filtered.isNotEmpty) ...[
                   const SizedBox(height: AppSpacing.xl),
-                  _sectionLabel(AppStrings.of(context).categoryLabel),
+                  _sectionLabel(s.categoryLabel),
                   const SizedBox(height: AppSpacing.sm),
                   TransactionCategoryGrid(
                     categories: filtered,
@@ -286,23 +358,24 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                     onSelected: (c) => setState(() {
                       final changed = c.id != _selectedCategory?.id;
                       _selectedCategory = c;
-                      if (changed) {
+                      if (changed && !_isEditMode) {
                         _selectedSharedBudgetId = null;
                         _isBudgetLocked = false;
                       }
                     }),
                   ),
                 ],
-                if (_type == 'EXPENSE' &&
+                if (!_isEditMode &&
+                    _type == 'EXPENSE' &&
                     (_isBudgetLocked ||
                         _sharedBudgetsForCategory().isNotEmpty)) ...[
                   const SizedBox(height: AppSpacing.lg),
-                  _sectionLabel(AppStrings.of(context).budgetScopeLabel),
+                  _sectionLabel(s.budgetScopeLabel),
                   const SizedBox(height: AppSpacing.sm),
                   _BudgetScopeChips(
                     budgets: _sharedBudgetsForCategory(),
                     selectedId: _selectedSharedBudgetId,
-                    personalLabel: AppStrings.of(context).budgetScopePersonal,
+                    personalLabel: s.budgetScopePersonal,
                     isLocked: _isBudgetLocked,
                     lockedSharedBudget: _isBudgetLocked &&
                             _selectedSharedBudgetId != null
@@ -315,11 +388,9 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                   ),
                 ],
                 const SizedBox(height: AppSpacing.xl),
-                _sectionLabel(AppStrings.of(context).accountLabel),
+                _sectionLabel(s.accountLabel),
                 const SizedBox(height: AppSpacing.sm),
                 AccountChips(
-                  // INCOME için kredi kartı listede gözükmez (mantıksız — kart
-                  // borç hesabı, gelir akmaz). Backend validation güvenlik ağı.
                   accounts: _type == 'INCOME'
                       ? accounts
                           .where((a) => a.type != AccountType.CREDIT_CARD)
@@ -330,7 +401,7 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                 ),
                 if (_type == 'TRANSFER') ...[
                   const SizedBox(height: AppSpacing.lg),
-                  _sectionLabel(AppStrings.of(context).targetAccountLabel),
+                  _sectionLabel(s.targetAccountLabel),
                   const SizedBox(height: AppSpacing.sm),
                   AccountChips(
                     accounts: accounts
@@ -353,17 +424,20 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                 ),
                 const SizedBox(height: AppSpacing.md),
                 TransactionNoteField(controller: _noteController),
-                const SizedBox(height: AppSpacing.xl),
-                RecurringSection(
-                  isRecurring: _isRecurring,
-                  frequency: _recurringFrequency,
-                  endDate: _recurringEndDate,
-                  onToggle: (val) => setState(() => _isRecurring = val),
-                  onFrequencyChanged: (f) =>
-                      setState(() => _recurringFrequency = f),
-                  onEndDateChanged: (d) =>
-                      setState(() => _recurringEndDate = d),
-                ),
+                // Tekrarlayan toggle: yalnız create modunda göster
+                if (!_isEditMode) ...[
+                  const SizedBox(height: AppSpacing.xl),
+                  RecurringSection(
+                    isRecurring: _isRecurring,
+                    frequency: _recurringFrequency,
+                    endDate: _recurringEndDate,
+                    onToggle: (val) => setState(() => _isRecurring = val),
+                    onFrequencyChanged: (f) =>
+                        setState(() => _recurringFrequency = f),
+                    onEndDateChanged: (d) =>
+                        setState(() => _recurringEndDate = d),
+                  ),
+                ],
                 const SizedBox(height: AppSpacing.xxxl),
               ],
             );
@@ -395,7 +469,7 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                           height: 24,
                           child: CircularProgressIndicator(strokeWidth: 2.5),
                         )
-                      : Text(AppStrings.of(context).save),
+                      : Text(_isEditMode ? s.save : s.save),
                 );
               },
             ),
@@ -420,12 +494,6 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
   }
 }
 
-/// İşlem ekleme formunda kategori seçildikten sonra çıkar:
-/// "Kişisel" + kullanıcının üye olduğu o kategori için ortak bütçeler.
-/// null = Kişisel, doluysa ortak bütçeye atanır.
-///
-/// Kilitli modda (bir bütçe detayından açıldığında): kullanıcının nereden
-/// geldiğine göre tek bir chip ("Kişisel" veya o ortak bütçe) gösterilir.
 class _BudgetScopeChips extends StatelessWidget {
   const _BudgetScopeChips({
     required this.budgets,

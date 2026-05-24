@@ -33,10 +33,14 @@ class AddTransactionBloc
   final AccountRepository _accRepo;
   final TagRepository _tagRepo;
 
+  /// Düzenleme modunda doldurulur; null ise create modu.
+  String? _editingId;
+
   Future<void> _onInit(
     AddTransactionInitialized event,
     Emitter<AddTransactionState> emit,
   ) async {
+    _editingId = event.editingId;
     emit(AddTransactionDataLoading());
     try {
       final results = await Future.wait([
@@ -48,6 +52,7 @@ class AddTransactionBloc
         categories: results[0] as List<CategoryModel>,
         accounts: results[1] as List<AccountModel>,
         tags: results[2] as List<TagModel>,
+        isEditMode: _editingId != null,
       ));
     } catch (e) {
       emit(AddTransactionFailure(
@@ -55,6 +60,7 @@ class AddTransactionBloc
         categories: const [],
         accounts: const [],
         tags: const [],
+        isEditMode: _editingId != null,
       ));
     }
   }
@@ -70,36 +76,54 @@ class AddTransactionBloc
         current is AddTransactionReady ? current.accounts : <AccountModel>[];
     final tgs =
         current is AddTransactionReady ? current.tags : <TagModel>[];
+    final editMode = _editingId != null;
 
-    emit(AddTransactionSubmitting(categories: cats, accounts: accs, tags: tgs));
+    emit(AddTransactionSubmitting(
+        categories: cats, accounts: accs, tags: tgs, isEditMode: editMode));
     try {
-      final data = Map<String, dynamic>.from(event.data);
-      final isRecurring = data.remove('isRecurring') as bool? ?? false;
-
-      if (isRecurring) {
-        data.remove('transactionDate');
-        data.remove('transferToAccountId');
-        await _txRepo.createRecurringTransaction(data);
-        emit(AddTransactionSuccess(TransactionModel(
-          id: '',
-          amount: (data['amount'] as num).toDouble(),
-          type: TransactionType.values.firstWhere(
-            (e) => e.name == data['type'],
-            orElse: () => TransactionType.EXPENSE,
-          ),
-          source: TransactionSource.RECURRING,
-          date: DateTime.now(),
-        )));
+      if (editMode) {
+        // Edit mode: PATCH /transactions/:id
+        final data = Map<String, dynamic>.from(event.data);
+        // Tekrarlayan alanları PATCH'te gönderme
+        data.remove('isRecurring');
+        data.remove('frequency');
+        data.remove('endDate');
+        final tx = await _txRepo.updateTransaction(_editingId!, data);
+        emit(AddTransactionSuccess(tx, isEditMode: true));
       } else {
-        final tx = await _txRepo.createTransaction(data);
-        emit(AddTransactionSuccess(tx));
+        // Create mode
+        final data = Map<String, dynamic>.from(event.data);
+        final isRecurring = data.remove('isRecurring') as bool? ?? false;
+
+        if (isRecurring) {
+          data.remove('transactionDate');
+          data.remove('transferToAccountId');
+          await _txRepo.createRecurringTransaction(data);
+          emit(AddTransactionSuccess(
+            TransactionModel(
+              id: '',
+              amount: (data['amount'] as num).toDouble(),
+              type: TransactionType.values.firstWhere(
+                (e) => e.name == data['type'],
+                orElse: () => TransactionType.EXPENSE,
+              ),
+              source: TransactionSource.RECURRING,
+              date: DateTime.now(),
+            ),
+            isEditMode: false,
+          ));
+        } else {
+          final tx = await _txRepo.createTransaction(data);
+          emit(AddTransactionSuccess(tx, isEditMode: false));
+        }
       }
     } catch (e) {
       emit(AddTransactionFailure(
-        message: _parseError(e),
+        message: _parseError(e, editMode),
         categories: cats,
         accounts: accs,
         tags: tgs,
+        isEditMode: editMode,
       ));
     }
   }
@@ -116,14 +140,16 @@ class AddTransactionBloc
         categories: current.categories,
         accounts: current.accounts,
         tags: [...current.tags, tag],
+        isEditMode: current.isEditMode,
       ));
     } catch (_) {}
   }
 
-  String _parseError(Object e) {
+  String _parseError(Object e, bool isEdit) {
     final msg = e.toString();
     if (msg.contains('SocketException')) return 'İnternet bağlantınızı kontrol edin.';
     if (msg.contains('400')) return 'Geçersiz işlem bilgileri.';
+    if (isEdit) return 'İşlem güncellenemedi. Tekrar deneyin.';
     return 'İşlem oluşturulamadı. Tekrar deneyin.';
   }
 }

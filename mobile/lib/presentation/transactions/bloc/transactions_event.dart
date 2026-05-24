@@ -10,7 +10,7 @@ class TransactionsLoadMoreRequested extends TransactionsEvent {}
 
 class TransactionsFilterChanged extends TransactionsEvent {
   TransactionsFilterChanged(this.filter);
-  final String? filter; // null = hepsi
+  final TransactionFilter filter;
 }
 
 class TransactionDeleteRequested extends TransactionsEvent {

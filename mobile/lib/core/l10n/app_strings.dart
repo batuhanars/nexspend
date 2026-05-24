@@ -542,6 +542,20 @@ abstract class AppStrings {
   // v2 — Quick actions
   String get scanAction;
 
+  // Transactions v2 — düzenleme + filtre + arama
+  String get editTransactionTitle;
+  String get transactionUpdatedSuccess;
+  String get filterLabel;
+  String get dateRangeLabel;
+  String get clearLabel;
+  String get applyLabel;
+  String get searchLabel;
+  String get thisYearLabel;
+  String get thisMonthLabel;
+  String get last3MonthsLabel;
+  String get customRangeLabel;
+  String get nonManualEditError;
+
   // Sprint 12 — Bütçe dönem geçmişi
   String get budgetTabCurrentPeriod;
   String get budgetTabHistory;
@@ -1564,6 +1578,33 @@ class _Tr extends AppStrings {
   // v2 — Quick actions
   @override
   String get scanAction => 'Tara';
+
+  // Transactions v2 — düzenleme + filtre + arama
+  @override
+  String get editTransactionTitle => 'İşlemi Düzenle';
+  @override
+  String get transactionUpdatedSuccess => 'İşlem başarıyla güncellendi';
+  @override
+  String get filterLabel => 'Filtrele';
+  @override
+  String get dateRangeLabel => 'Tarih Aralığı';
+  @override
+  String get clearLabel => 'Temizle';
+  @override
+  String get applyLabel => 'Uygula';
+  @override
+  String get searchLabel => 'Ara';
+  @override
+  String get thisYearLabel => 'Bu Yıl';
+  @override
+  String get thisMonthLabel => 'Bu Ay';
+  @override
+  String get last3MonthsLabel => 'Son 3 Ay';
+  @override
+  String get customRangeLabel => 'Özel';
+  @override
+  String get nonManualEditError =>
+      'Otomatik oluşturulan işlemler düzenlenemez.';
 
   // Sprint 12 — Bütçe dönem geçmişi
   @override
@@ -2695,6 +2736,33 @@ class _En extends AppStrings {
   // v2 — Quick actions
   @override
   String get scanAction => 'Scan';
+
+  // Transactions v2 — edit + filter + search
+  @override
+  String get editTransactionTitle => 'Edit Transaction';
+  @override
+  String get transactionUpdatedSuccess => 'Transaction updated successfully';
+  @override
+  String get filterLabel => 'Filter';
+  @override
+  String get dateRangeLabel => 'Date Range';
+  @override
+  String get clearLabel => 'Clear';
+  @override
+  String get applyLabel => 'Apply';
+  @override
+  String get searchLabel => 'Search';
+  @override
+  String get thisYearLabel => 'This Year';
+  @override
+  String get thisMonthLabel => 'This Month';
+  @override
+  String get last3MonthsLabel => 'Last 3 Months';
+  @override
+  String get customRangeLabel => 'Custom';
+  @override
+  String get nonManualEditError =>
+      'Automatic transactions cannot be edited.';
 
   // Sprint 12 — Bütçe dönem geçmişi
   @override

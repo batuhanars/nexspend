@@ -7,9 +7,11 @@ class TransactionAmountField extends StatelessWidget {
     super.key,
     required this.onChanged,
     required this.type,
+    this.initialValue,
   });
   final ValueChanged<double?> onChanged;
   final String type;
+  final double? initialValue;
 
   Color get _color => type == 'INCOME'
       ? AppColors.secondary
@@ -19,6 +21,10 @@ class TransactionAmountField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SplitAmountField(onChanged: onChanged, color: _color);
+    return SplitAmountField(
+      onChanged: onChanged,
+      color: _color,
+      initialValue: initialValue,
+    );
   }
 }

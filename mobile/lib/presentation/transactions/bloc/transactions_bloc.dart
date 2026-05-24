@@ -1,6 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../data/models/transaction_model.dart';
 import '../../../data/repositories/transaction_repository.dart';
+import 'transaction_filter.dart';
 
 part 'transactions_event.dart';
 part 'transactions_state.dart';
@@ -17,7 +18,7 @@ class TransactionsBloc extends Bloc<TransactionsEvent, TransactionsState> {
   }
 
   final TransactionRepository _repo;
-  String? _currentFilter;
+  TransactionFilter _currentFilter = TransactionFilter.empty;
   int _currentPage = 1;
   static const int _pageSize = 20;
 
@@ -51,7 +52,12 @@ class TransactionsBloc extends Bloc<TransactionsEvent, TransactionsState> {
     try {
       final nextPage = _currentPage + 1;
       final txResult = await _repo.getTransactions(
-        type: _currentFilter,
+        type: _currentFilter.type,
+        categoryId: _currentFilter.categoryId,
+        accountId: _currentFilter.accountId,
+        startDate: _currentFilter.startDate?.toIso8601String().substring(0, 10),
+        endDate: _currentFilter.endDate?.toIso8601String().substring(0, 10),
+        search: _currentFilter.search,
         page: nextPage,
         limit: _pageSize,
       );
@@ -108,7 +114,12 @@ class TransactionsBloc extends Bloc<TransactionsEvent, TransactionsState> {
     try {
       final results = await Future.wait([
         _repo.getTransactions(
-          type: _currentFilter,
+          type: _currentFilter.type,
+          categoryId: _currentFilter.categoryId,
+          accountId: _currentFilter.accountId,
+          startDate: _currentFilter.startDate?.toIso8601String().substring(0, 10),
+          endDate: _currentFilter.endDate?.toIso8601String().substring(0, 10),
+          search: _currentFilter.search,
           page: 1,
           limit: _pageSize,
         ),

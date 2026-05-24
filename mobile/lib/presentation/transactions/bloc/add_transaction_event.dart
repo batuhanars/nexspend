@@ -2,7 +2,11 @@ part of 'add_transaction_bloc.dart';
 
 sealed class AddTransactionEvent {}
 
-class AddTransactionInitialized extends AddTransactionEvent {}
+/// [editingId] doluysa edit modu; init'te prefill verisi hazırlanır.
+class AddTransactionInitialized extends AddTransactionEvent {
+  AddTransactionInitialized({this.editingId});
+  final String? editingId;
+}
 
 class AddTransactionSubmitted extends AddTransactionEvent {
   AddTransactionSubmitted(this.data);

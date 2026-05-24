@@ -11,10 +11,12 @@ class AddTransactionReady extends AddTransactionState {
     required this.categories,
     required this.accounts,
     required this.tags,
+    this.isEditMode = false,
   });
   final List<CategoryModel> categories;
   final List<AccountModel> accounts;
   final List<TagModel> tags;
+  final bool isEditMode;
 }
 
 class AddTransactionSubmitting extends AddTransactionState {
@@ -22,15 +24,18 @@ class AddTransactionSubmitting extends AddTransactionState {
     required this.categories,
     required this.accounts,
     required this.tags,
+    this.isEditMode = false,
   });
   final List<CategoryModel> categories;
   final List<AccountModel> accounts;
   final List<TagModel> tags;
+  final bool isEditMode;
 }
 
 class AddTransactionSuccess extends AddTransactionState {
-  AddTransactionSuccess(this.transaction);
+  AddTransactionSuccess(this.transaction, {this.isEditMode = false});
   final TransactionModel transaction;
+  final bool isEditMode;
 }
 
 class AddTransactionFailure extends AddTransactionState {
@@ -39,9 +44,11 @@ class AddTransactionFailure extends AddTransactionState {
     required this.categories,
     required this.accounts,
     required this.tags,
+    this.isEditMode = false,
   });
   final String message;
   final List<CategoryModel> categories;
   final List<AccountModel> accounts;
   final List<TagModel> tags;
+  final bool isEditMode;
 }

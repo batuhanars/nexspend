@@ -21,7 +21,7 @@ class TransactionsLoaded extends TransactionsState {
   final double income;
   final double expense;
   final double net;
-  final String? filter;
+  final TransactionFilter filter;
   final bool hasMore;
   final bool isLoadingMore;
 
@@ -30,7 +30,7 @@ class TransactionsLoaded extends TransactionsState {
     double? income,
     double? expense,
     double? net,
-    String? filter,
+    TransactionFilter? filter,
     bool? hasMore,
     bool? isLoadingMore,
   }) {
@@ -44,7 +44,6 @@ class TransactionsLoaded extends TransactionsState {
       isLoadingMore: isLoadingMore ?? this.isLoadingMore,
     );
   }
-
 }
 
 class TransactionsError extends TransactionsState {

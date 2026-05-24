@@ -9,6 +9,8 @@
 - `DEVELOPMENT_PLAN_V1.md` — Temel özellikler mimarisi (Sprint 0-8)
 - `DEVELOPMENT_PLAN_V2.md` — İleri özellikler mimarisi (Sprint 9-12)
 - `BUDGET_ROLLOVER_CONTRACT.md` — Bütçe dönem sonu arşivleme + geçmiş raporlama sözleşmesi (planlandı 20 May 2026)
+- `TRANSACTIONS_V2_CONTRACT.md` — İşlem düzenleme + gelişmiş filtre & arama sözleşmesi (planlandı 24 May 2026)
+- `TRANSACTIONS_BULK_DELETE_CONTRACT.md` — İşlemlerde toplu silme sözleşmesi (planlandı 24 May 2026)
 - `STITCH_PROMPTS.md` — UI tasarım promptları
 
 ---
@@ -648,24 +650,73 @@
 >
 > **Neden:** Sprint 12 smoke test sonunda fark edildi — kredi kartı hesap detayında "Gelir" istatistiği gösteriliyordu. Kredi kartı bir borç hesabı, gelir kavramı anlamsız. Kavramsal model netleştirildi (21 May 2026): kredi kartı için **Harcama (EXPENSE)** + **Ödeme (TRANSFER gelen)**; "Gelir" yok.
 
-### Backend
-- [ ] `AccountsService.getAnalytics` kredi kartı için şartlı dal: months `{ payment, spend }` döner; standart için mevcut `{ income, expense }` korunur
-- [ ] Response top-level `isCreditCard: boolean` alanı eklenir
-- [ ] `TransactionsService.create` + `update` — `type=INCOME` + `account.type=CREDIT_CARD` reject (400 + Türkçe mesaj)
-- [ ] Unit + e2e test güncellemeleri
+### Backend ✅ (commit 73e1395)
+- [x] `AccountsService.getAnalytics` kredi kartı için şartlı dal: months `{ payment, spend }` döner; standart için mevcut `{ income, expense }` korunur
+- [x] Response top-level `isCreditCard: boolean` alanı eklenir
+- [x] `TransactionsService.create` + `update` — `type=INCOME` + `account.type=CREDIT_CARD` reject (400 + Türkçe mesaj)
+- [x] Unit + e2e test güncellemeleri
 
-### Frontend
-- [ ] `AccountAnalyticsModel` `isCreditCard` flag + `payment`/`spend` opsiyonel alanları
-- [ ] `ThisMonthSection` şartlı render: kredi kartı için "Ödeme / Harcama"
-- [ ] `MonthlyChartSection` şartlı render: kredi kartı için payment + spend bar
-- [ ] l10n stringler (TR + EN): "Ödeme", "Harcama"
-- [ ] (Opsiyonel) `AddTransactionPage` INCOME tipinde kredi kartı seçimini disable et / tooltip
-- [ ] BLoC + widget testleri
+### Frontend ✅ (commit b0af189 + 433c328)
+- [x] `AccountAnalyticsModel` `isCreditCard` flag + `payment`/`spend` opsiyonel alanları
+- [x] `ThisMonthSection` şartlı render: kredi kartı için "Ödeme / Harcama"
+- [x] `MonthlyChartSection` şartlı render: kredi kartı için payment + spend bar
+- [x] l10n stringler (TR + EN): "Ödeme" / "Payment", "Harcama" / "Spend"
+- [x] `AddTransactionPage` INCOME tipinde kredi kartı seçimini hesap listesinden gizle (commit 433c328)
+- [x] BLoC + widget testleri (`account_analytics_model_test`, `this_month_section_test`)
+
+### PM / Deploy ✅
+- [x] PM: backend + frontend dev session brief'leri ilet (sözleşme commit 40d191a)
+- [x] PM: integration smoke test (kart harcama + TRANSFER ödeme → analytics doğru çiziyor)
+- [x] Railway deploy + verify
+
+---
+
+## Sprint 13 — İşlemler v2: Düzenleme + Gelişmiş Filtre & Arama
+> 📖 Contract: `TRANSACTIONS_V2_CONTRACT.md` (planlandı 24 May 2026)
+>
+> **Neden:** İşlemler CRUD'u eksik (düzenleme yok — yalnız ekle/sil/gör) ve backend'in hazır filtre/arama gücü (categoryId/accountId/tarih/search) frontend'de açılmamış. Backend ~%90 hazır; ağırlık frontend.
+
+### Backend ✅ (commit c9eb377)
+- [x] `TransactionsService.update` — `source != MANUAL` ise 400 reject (savunma amaçlı guard)
+- [x] `findAll` search dalını `title` + `description` OR'a genişlet
+- [x] Unit + e2e test (MANUAL düzenle başarı, otomatik 400, description araması) — 155 test ✓
+
+### Frontend ✅ (commit c12efd6)
+- [x] `TransactionFilter` nesnesi + `TransactionsBloc` refactor (`String? filter` → nesne, her değişim page 1 reset)
+- [x] Detay → "Düzenle" butonu (yalnız MANUAL görünür)
+- [x] `AddTransactionPage` edit modu (prefill + PATCH, tekrarlayan toggle gizli)
+- [x] Filtre bottom sheet (tarih aralığı preset + özel, kategori tek-seçim, hesap tek-seçim) + aktif filtre rozeti
+- [x] Arama alanı (AppBar, debounce 350ms)
+- [x] l10n (TR + EN) + BLoC/widget testleri — 120 test ✓ (analyze temiz)
 
 ### PM / Deploy
-- [ ] PM: backend + frontend dev session brief'leri ilet
-- [ ] PM: integration smoke test (kart harcama + TRANSFER ödeme → analytics doğru çiziyor)
-- [ ] Railway deploy + verify
+- [x] PM: backend + frontend dev session başlatıldı (PM Opus arka plan agent'ları) + denetim (kırık testler PM tarafından düzeltildi)
+- [x] Railway deploy (backend push `25dc642..c12efd6`, 24 May 2026)
+- [ ] Cihazda runtime smoke (düzenle → bakiye/bütçe canlı, filtre kombinasyonları, otomatik salt-okunur) — kullanıcı testi
+- [ ] Tasarım kararı: filtre sheet seçili chip border'ı (1.5px) — cihazda görülüp karara bağlanacak
+
+---
+
+## Mini Sprint 13.1 — İşlemlerde Toplu Silme
+> 📖 Contract: `TRANSACTIONS_BULK_DELETE_CONTRACT.md` (planlandı 24 May 2026)
+>
+> **Neden:** Silme şu an yalnız tekli (swipe + detay). Çoklu seçim + atomik toplu silme eklenir. **Karar:** yalnız MANUAL işlemler seçilebilir (otomatik kayıtlar desync riski → seçim dışı).
+
+### Backend (~0.25 gün)
+- [ ] `POST /api/transactions/bulk-delete` + `BulkDeleteTransactionDto` (ids[], ArrayNotEmpty, max 100)
+- [ ] `TransactionsService.bulkDelete` — atomik `$transaction`: bakiye revert + delete + her biri `transaction.deleted` event; non-MANUAL/eksik id → 400
+- [ ] Unit + e2e test
+
+### Frontend (~0.75 gün)
+- [ ] `TransactionsRepository.bulkDelete(ids)`
+- [ ] `TransactionsBloc` seçim modu (selectionMode + selectedIds + event'ler; optimistic delete + revert)
+- [ ] UI: long-press → seçim modu, contextual AppBar ({n} seçili + Sil + kapat), otomatik tile seçilemez, onay dialog
+- [ ] l10n (TR + EN) + BLoC/widget testleri
+
+### PM / Deploy
+- [ ] PM: dev session'ları başlat + denetle
+- [ ] PM: entegrasyon smoke (çoklu seç → sil → bakiye/bütçe doğru; otomatik seçilemez; tekli silme regresyon)
+- [ ] Railway deploy + build verify
 
 ---
 

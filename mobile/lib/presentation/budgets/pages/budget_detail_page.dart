@@ -291,28 +291,36 @@ class _BudgetDetailPageState extends State<BudgetDetailPage>
             ],
           ),
           actions: [
-            if (budget.isActive)
+            if (!budget.isActive)
+              IconButton(
+                icon: const Icon(
+                  Icons.delete_outline,
+                  color: AppColors.error,
+                ),
+                tooltip: s.delete,
+                onPressed: _confirmDelete,
+              )
+            else ...[
               IconButton(
                 icon: const Icon(Icons.add_rounded, color: AppColors.primary),
                 tooltip: s.budgetAddTransaction,
                 onPressed: _openAddEntrySheet,
               ),
-            PopupMenuButton<_BudgetMenuAction>(
-              icon: const Icon(Icons.more_vert, color: AppColors.onSurface),
-              color: AppColors.surfaceContainerHigh,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-              ),
-              onSelected: (action) {
-                switch (action) {
-                  case _BudgetMenuAction.edit:
-                    _openEdit();
-                  case _BudgetMenuAction.delete:
-                    _confirmDelete();
-                }
-              },
-              itemBuilder: (context) => [
-                if (budget.isActive)
+              PopupMenuButton<_BudgetMenuAction>(
+                icon: const Icon(Icons.more_vert, color: AppColors.onSurface),
+                color: AppColors.surfaceContainerHigh,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                ),
+                onSelected: (action) {
+                  switch (action) {
+                    case _BudgetMenuAction.edit:
+                      _openEdit();
+                    case _BudgetMenuAction.delete:
+                      _confirmDelete();
+                  }
+                },
+                itemBuilder: (context) => [
                   PopupMenuItem(
                     value: _BudgetMenuAction.edit,
                     child: Row(
@@ -327,27 +335,28 @@ class _BudgetDetailPageState extends State<BudgetDetailPage>
                       ],
                     ),
                   ),
-                PopupMenuItem(
-                  value: _BudgetMenuAction.delete,
-                  child: Row(
-                    children: [
-                      const Icon(
-                        Icons.delete_outline,
-                        size: 20,
-                        color: AppColors.error,
-                      ),
-                      const SizedBox(width: AppSpacing.md),
-                      Text(
-                        s.delete,
-                        style: AppTypography.bodyMd.copyWith(
+                  PopupMenuItem(
+                    value: _BudgetMenuAction.delete,
+                    child: Row(
+                      children: [
+                        const Icon(
+                          Icons.delete_outline,
+                          size: 20,
                           color: AppColors.error,
                         ),
-                      ),
-                    ],
+                        const SizedBox(width: AppSpacing.md),
+                        Text(
+                          s.delete,
+                          style: AppTypography.bodyMd.copyWith(
+                            color: AppColors.error,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-              ],
-            ),
+                ],
+              ),
+            ],
           ],
           bottom: budget.isActive
               ? TabBar(

@@ -52,6 +52,9 @@ const mockPrisma = {
     delete: jest.fn(),
     aggregate: jest.fn(),
   },
+  transactionTag: {
+    deleteMany: jest.fn(),
+  },
   recurringTransaction: {
     create: jest.fn(),
     findMany: jest.fn(),
@@ -181,7 +184,8 @@ function resetMocks(userId: string) {
           createMany: jest.fn().mockResolvedValue({}),
         },
       };
-      return fn(txClient);
+      const result = await fn(txClient);
+      return result;
     }
     return Promise.all(fn.map(() => ({})));
   });
@@ -612,6 +616,78 @@ describe('Transactions (e2e)', () => {
         .send({ title: 'Test' });
 
       expect(res.status).toBe(401);
+    });
+  });
+
+  // ─── POST /api/transactions/bulk-delete ─────────────────────────────────────
+
+  describe('POST /api/transactions/bulk-delete', () => {
+    const makeStoreTx = (id: string, source: string = 'MANUAL') => ({
+      id,
+      userId,
+      accountId: 'acc-1',
+      type: TransactionType.EXPENSE,
+      amount: 100,
+      title: `İşlem ${id}`,
+      transactionDate: new Date(),
+      source,
+      transferToAccountId: null,
+      sharedBudgetId: null,
+      categoryId: null,
+    });
+
+    it('token olmadan 401 döner', async () => {
+      const res = await request(app.getHttpServer())
+        .post('/api/transactions/bulk-delete')
+        .send({ ids: ['tx-1'] });
+
+      expect(res.status).toBe(401);
+    });
+
+    it('boş ids 400 döner (ArrayNotEmpty)', async () => {
+      const res = await request(app.getHttpServer())
+        .post('/api/transactions/bulk-delete')
+        .set('Authorization', `Bearer ${accessToken}`)
+        .send({ ids: [] });
+
+      expect(res.status).toBe(400);
+    });
+
+    it('3 MANUAL işlem başarıyla silinir → 200 { deleted: 3 }', async () => {
+      const txA = makeStoreTx('bulk-tx-a');
+      const txB = makeStoreTx('bulk-tx-b');
+      const txC = makeStoreTx('bulk-tx-c');
+      store.transactions['bulk-tx-a'] = txA;
+      store.transactions['bulk-tx-b'] = txB;
+      store.transactions['bulk-tx-c'] = txC;
+
+      mockPrisma.transaction.findMany.mockResolvedValueOnce([txA, txB, txC]);
+
+      const res = await request(app.getHttpServer())
+        .post('/api/transactions/bulk-delete')
+        .set('Authorization', `Bearer ${accessToken}`)
+        .send({ ids: ['bulk-tx-a', 'bulk-tx-b', 'bulk-tx-c'] });
+
+      expect(res.status).toBe(200);
+      expect(res.body.success).toBe(true);
+      expect(res.body.data.deleted).toBe(3);
+    });
+
+    it('non-MANUAL içerince 400 döner', async () => {
+      const txManual = makeStoreTx('bulk-tx-m');
+      const txDebt = makeStoreTx('bulk-tx-d', 'DEBT_PAYMENT');
+      store.transactions['bulk-tx-m'] = txManual;
+      store.transactions['bulk-tx-d'] = txDebt;
+
+      mockPrisma.transaction.findMany.mockResolvedValueOnce([txManual, txDebt]);
+
+      const res = await request(app.getHttpServer())
+        .post('/api/transactions/bulk-delete')
+        .set('Authorization', `Bearer ${accessToken}`)
+        .send({ ids: ['bulk-tx-m', 'bulk-tx-d'] });
+
+      expect(res.status).toBe(400);
+      expect(res.body.success).toBe(false);
     });
   });
 });

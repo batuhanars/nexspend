@@ -21,6 +21,7 @@ import { advanceByFrequency } from '../../common/utils/frequency.utils';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { UpdateTransactionDto } from './dto/update-transaction.dto';
 import { QueryTransactionDto } from './dto/query-transaction.dto';
+import { BulkDeleteTransactionDto } from './dto/bulk-delete-transaction.dto';
 
 @Injectable()
 export class TransactionsService {
@@ -386,6 +387,64 @@ export class TransactionsService {
     );
 
     return { message: 'İşlem silindi' };
+  }
+
+  async bulkDelete(userId: string, dto: BulkDeleteTransactionDto) {
+    const { ids } = dto;
+
+    // Yalnızca bu kullanıcıya ait işlemleri çek
+    const found = await this.prisma.transaction.findMany({
+      where: { id: { in: ids }, userId },
+    });
+
+    // Eksik ya da başka kullanıcıya ait id var
+    if (found.length < ids.length) {
+      throw new BadRequestException('Bazı işlemler bulunamadı.');
+    }
+
+    // Otomatik kayıt içeriyor mu?
+    const hasNonManual = found.some(
+      (t) => t.source !== TransactionSource.MANUAL,
+    );
+    if (hasNonManual) {
+      throw new BadRequestException(
+        'Yalnızca manuel işlemler toplu silinebilir.',
+      );
+    }
+
+    // Tek $transaction içinde tüm bakiye geri alımları + silimleri
+    await this.prisma.$transaction(async (tx) => {
+      for (const t of found) {
+        const amount = Number(t.amount);
+        await this.balanceService.revert(
+          tx,
+          t.accountId,
+          t.type,
+          amount,
+          t.transferToAccountId ?? undefined,
+        );
+        await tx.transactionTag.deleteMany({ where: { transactionId: t.id } });
+        await tx.transaction.delete({ where: { id: t.id } });
+      }
+    });
+
+    // Commit sonrası her silinen için event emit et
+    for (const t of found) {
+      this.eventEmitter.emit(
+        'transaction.deleted',
+        new TransactionDeletedEvent(
+          t.id,
+          userId,
+          t.categoryId,
+          t.type,
+          Number(t.amount),
+          t.transactionDate,
+          t.sharedBudgetId,
+        ),
+      );
+    }
+
+    return { deleted: found.length };
   }
 
   private async createRecurringTemplate(

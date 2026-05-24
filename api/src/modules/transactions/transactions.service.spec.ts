@@ -23,6 +23,9 @@ const mockPrisma = {
   recurringTransaction: {
     create: jest.fn(),
   },
+  transactionTag: {
+    deleteMany: jest.fn(),
+  },
   $transaction: jest.fn(),
 };
 
@@ -417,6 +420,79 @@ describe('TransactionsService', () => {
       await expect(service.update(USER_ID, 'nonexistent', {})).rejects.toThrow(
         NotFoundException,
       );
+    });
+  });
+
+  // ─── bulkDelete ───────────────────────────────────────────────────────────────
+
+  describe('bulkDelete()', () => {
+    const makeTx = (id: string, overrides: any = {}) => ({
+      id,
+      userId: USER_ID,
+      accountId: ACCOUNT_ID,
+      type: TransactionType.EXPENSE,
+      amount: 100,
+      title: `İşlem ${id}`,
+      note: null,
+      categoryId: 'cat-1',
+      transactionDate: new Date('2026-01-15'),
+      transferToAccountId: null,
+      sharedBudgetId: null,
+      source: TransactionSource.MANUAL,
+      ...overrides,
+    });
+
+    it('3 MANUAL işlemi siler, revert 3x çağrılır, event 3x emit edilir', async () => {
+      const txList = [makeTx('tx-a'), makeTx('tx-b'), makeTx('tx-c')];
+      mockPrisma.transaction.findMany.mockResolvedValue(txList);
+
+      mockPrisma.$transaction.mockImplementation(async (fn: any) =>
+        fn({
+          transactionTag: { deleteMany: jest.fn().mockResolvedValue({}) },
+          transaction: { delete: jest.fn().mockResolvedValue({}) },
+        }),
+      );
+
+      const result = await service.bulkDelete(USER_ID, { ids: ['tx-a', 'tx-b', 'tx-c'] });
+
+      expect(result).toEqual({ deleted: 3 });
+      expect(mockBalanceService.revert).toHaveBeenCalledTimes(3);
+      expect(mockEventEmitter.emit).toHaveBeenCalledTimes(3);
+      expect(mockEventEmitter.emit).toHaveBeenCalledWith(
+        'transaction.deleted',
+        expect.any(Object),
+      );
+    });
+
+    it('non-MANUAL işlem içerince 400 fırlatır, $transaction çağrılmaz', async () => {
+      const txList = [
+        makeTx('tx-a'),
+        makeTx('tx-b', { source: TransactionSource.DEBT_PAYMENT }),
+      ];
+      mockPrisma.transaction.findMany.mockResolvedValue(txList);
+
+      await expect(
+        service.bulkDelete(USER_ID, { ids: ['tx-a', 'tx-b'] }),
+      ).rejects.toThrow(BadRequestException);
+
+      await expect(
+        service.bulkDelete(USER_ID, { ids: ['tx-a', 'tx-b'] }),
+      ).rejects.toThrow('Yalnızca manuel işlemler toplu silinebilir.');
+
+      expect(mockPrisma.$transaction).not.toHaveBeenCalled();
+    });
+
+    it('eksik/başkasına ait id varsa 400 fırlatır', async () => {
+      // Sadece 1 tane geri döndü, 2 istendi
+      mockPrisma.transaction.findMany.mockResolvedValue([makeTx('tx-a')]);
+
+      await expect(
+        service.bulkDelete(USER_ID, { ids: ['tx-a', 'tx-missing'] }),
+      ).rejects.toThrow(BadRequestException);
+
+      await expect(
+        service.bulkDelete(USER_ID, { ids: ['tx-a', 'tx-missing'] }),
+      ).rejects.toThrow('Bazı işlemler bulunamadı.');
     });
   });
 });

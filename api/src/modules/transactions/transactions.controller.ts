@@ -15,6 +15,7 @@ import { TransactionsService } from './transactions.service';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { UpdateTransactionDto } from './dto/update-transaction.dto';
 import { QueryTransactionDto } from './dto/query-transaction.dto';
+import { BulkDeleteTransactionDto } from './dto/bulk-delete-transaction.dto';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 
@@ -71,5 +72,14 @@ export class TransactionsController {
   @HttpCode(HttpStatus.OK)
   remove(@CurrentUser() user: { id: string }, @Param('id') id: string) {
     return this.transactionsService.remove(user.id, id);
+  }
+
+  @Post('bulk-delete')
+  @HttpCode(HttpStatus.OK)
+  bulkDelete(
+    @CurrentUser() user: { id: string },
+    @Body() dto: BulkDeleteTransactionDto,
+  ) {
+    return this.transactionsService.bulkDelete(user.id, dto);
   }
 }

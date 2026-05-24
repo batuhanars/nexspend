@@ -11,6 +11,7 @@
 - `BUDGET_ROLLOVER_CONTRACT.md` — Bütçe dönem sonu arşivleme + geçmiş raporlama sözleşmesi (planlandı 20 May 2026)
 - `TRANSACTIONS_V2_CONTRACT.md` — İşlem düzenleme + gelişmiş filtre & arama sözleşmesi (planlandı 24 May 2026)
 - `TRANSACTIONS_BULK_DELETE_CONTRACT.md` — İşlemlerde toplu silme sözleşmesi (planlandı 24 May 2026)
+- `DATA_RESET_CONTRACT.md` — Tüm kişisel verileri sıfırlama sözleşmesi (planlandı 24 May 2026)
 - `STITCH_PROMPTS.md` — UI tasarım promptları
 
 ---
@@ -702,20 +703,44 @@
 >
 > **Neden:** Silme şu an yalnız tekli (swipe + detay). Çoklu seçim + atomik toplu silme eklenir. **Karar:** yalnız MANUAL işlemler seçilebilir (otomatik kayıtlar desync riski → seçim dışı).
 
-### Backend (~0.25 gün)
-- [ ] `POST /api/transactions/bulk-delete` + `BulkDeleteTransactionDto` (ids[], ArrayNotEmpty, max 100)
-- [ ] `TransactionsService.bulkDelete` — atomik `$transaction`: bakiye revert + delete + her biri `transaction.deleted` event; non-MANUAL/eksik id → 400
+### Backend ✅ (commit b94f9ce)
+- [x] `POST /api/transactions/bulk-delete` + `BulkDeleteTransactionDto` (ids[], ArrayNotEmpty, max 100)
+- [x] `TransactionsService.bulkDelete` — atomik `$transaction`: bakiye revert + delete + her biri `transaction.deleted` event; non-MANUAL/eksik id → 400
+- [x] Unit + e2e test (158 unit + 40 e2e ✓)
+
+### Frontend ✅ (commit acf37f6)
+- [x] `TransactionsRepository.bulkDelete(ids)`
+- [x] `TransactionsBloc` seçim modu (selectionMode + selectedIds + event'ler; optimistic delete + revert)
+- [x] UI: long-press → seçim modu, contextual AppBar ({n} seçili + Sil + kapat), otomatik tile seçilemez, onay dialog
+- [x] l10n (TR + EN) + BLoC/widget testleri (134 test ✓)
+
+### PM / Deploy
+- [x] PM: dev session'ları başlat + denetle (kırık testler PM tarafından düzeltildi: mocktail fallback, build-context, supportedLocales)
+- [x] Railway deploy (push `c12efd6..acf37f6`, 24 May 2026)
+- [ ] Cihazda runtime smoke (çoklu seç → sil → bakiye/bütçe; otomatik seçilemez) — kullanıcı testi
+
+---
+
+## Mini Sprint 13.2 — Tüm Kişisel Verileri Sıfırla
+> 📖 Contract: `DATA_RESET_CONTRACT.md` (planlandı 24 May 2026)
+>
+> **Neden:** Kullanıcı deneysel veri girip sıfırdan tutarlı veriyle başlamak istiyor. **Karar:** kişisel veri silinir, hesap+profil+tercihler+kategoriler+aile KORUNUR; onay = yazarak "SIFIRLA".
+
+### Backend (~0.5 gün)
+- [ ] `POST /api/users/me/reset` + `UsersService.resetData` — atomik `$transaction`, FK-güvenli silme (account/transaction/budget/debt/subscription/receipt/insight/tag+merchantMap[user])
+- [ ] Kategoriler + aile (member/group/sharedBudget) korunur; kullanıcının SharedExpense'leri silinir + SharedBudget.spent recompute
+- [ ] Fiş görselleri disk'ten silinir; user satırı + profil + tercihler korunur
 - [ ] Unit + e2e test
 
-### Frontend (~0.75 gün)
-- [ ] `TransactionsRepository.bulkDelete(ids)`
-- [ ] `TransactionsBloc` seçim modu (selectionMode + selectedIds + event'ler; optimistic delete + revert)
-- [ ] UI: long-press → seçim modu, contextual AppBar ({n} seçili + Sil + kapat), otomatik tile seçilemez, onay dialog
-- [ ] l10n (TR + EN) + BLoC/widget testleri
+### Frontend (~0.5 gün)
+- [ ] `UsersRepository.resetData()`
+- [ ] Ayarlar en altına "Tehlikeli Bölge" + "Tüm Verileri Sıfırla" (kırmızı)
+- [ ] Yazarak onay sheet ("SIFIRLA"/"RESET" yazılmadan buton disabled)
+- [ ] Başarı → `/home` boş durum + refresh; l10n (TR + EN) + test
 
 ### PM / Deploy
 - [ ] PM: dev session'ları başlat + denetle
-- [ ] PM: entegrasyon smoke (çoklu seç → sil → bakiye/bütçe doğru; otomatik seçilemez; tekli silme regresyon)
+- [ ] PM: entegrasyon smoke (veri gir → reset → boş, profil/tercih/aile duruyor)
 - [ ] Railway deploy + build verify
 
 ---

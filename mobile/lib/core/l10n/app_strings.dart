@@ -579,6 +579,18 @@ abstract class AppStrings {
   String get archivedBudgetsTabPersonal;
   String get archivedBudgetsTabShared;
   String get archivedBudgetsEmpty;
+
+  // Data reset — Tehlikeli Bölge
+  String get sectionDangerZone;
+  String get resetAllDataTitle;
+  String get resetAllDataSubtitle;
+  String get resetConfirmTitle;
+  String get resetConfirmBody;
+  String get resetConfirmInputHint;
+  String get resetConfirmWord;
+  String get resetConfirmBtn;
+  String get resetSuccessMessage;
+  String get resetErrorMessage;
 }
 
 // ─── Turkish ────────────────────────────────────────────────────────────────
@@ -1658,6 +1670,30 @@ class _Tr extends AppStrings {
   String get archivedBudgetsTabShared => 'Ortak';
   @override
   String get archivedBudgetsEmpty => 'Arşivlenmiş bütçe bulunamadı';
+
+  // Data reset — Tehlikeli Bölge
+  @override
+  String get sectionDangerZone => 'Tehlikeli Bölge';
+  @override
+  String get resetAllDataTitle => 'Tüm Verileri Sıfırla';
+  @override
+  String get resetAllDataSubtitle =>
+      'Hesaplar, işlemler, bütçeler, borçlar, abonelikler ve fişler kalıcı olarak silinir. Profil ve ayarların korunur.';
+  @override
+  String get resetConfirmTitle => 'Tüm Verileri Sıfırla';
+  @override
+  String get resetConfirmBody =>
+      'Bu işlem geri alınamaz. Hesapların, işlemlerin, bütçelerin, borçların, aboneliklerinin ve fişlerinin tamamı silinecek.\n\nProfil bilgilerin ve uygulama ayarların korunacak.\n\nDevam etmek için aşağıya "SIFIRLA" yazın.';
+  @override
+  String get resetConfirmInputHint => '"SIFIRLA" yazın';
+  @override
+  String get resetConfirmWord => 'SIFIRLA';
+  @override
+  String get resetConfirmBtn => 'Sıfırla';
+  @override
+  String get resetSuccessMessage => 'Verileriniz sıfırlandı.';
+  @override
+  String get resetErrorMessage => 'Veriler sıfırlanamadı. Lütfen tekrar deneyin.';
 }
 
 // ─── English ─────────────────────────────────────────────────────────────────
@@ -2830,4 +2866,28 @@ class _En extends AppStrings {
   String get archivedBudgetsTabShared => 'Shared';
   @override
   String get archivedBudgetsEmpty => 'No archived budgets found';
+
+  // Data reset — Danger Zone
+  @override
+  String get sectionDangerZone => 'Danger Zone';
+  @override
+  String get resetAllDataTitle => 'Reset All Data';
+  @override
+  String get resetAllDataSubtitle =>
+      'Accounts, transactions, budgets, debts, subscriptions and receipts will be permanently deleted. Your profile and settings are preserved.';
+  @override
+  String get resetConfirmTitle => 'Reset All Data';
+  @override
+  String get resetConfirmBody =>
+      'This action cannot be undone. All your accounts, transactions, budgets, debts, subscriptions and receipts will be deleted.\n\nYour profile information and app settings will be preserved.\n\nType "RESET" below to continue.';
+  @override
+  String get resetConfirmInputHint => 'Type "RESET"';
+  @override
+  String get resetConfirmWord => 'RESET';
+  @override
+  String get resetConfirmBtn => 'Reset';
+  @override
+  String get resetSuccessMessage => 'Your data has been reset.';
+  @override
+  String get resetErrorMessage => 'Could not reset data. Please try again.';
 }

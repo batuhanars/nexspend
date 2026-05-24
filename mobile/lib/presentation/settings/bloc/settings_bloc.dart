@@ -19,6 +19,7 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
     on<SettingsAvatarUploaded>(_onAvatarUploaded);
     on<SettingsAvatarDeleted>(_onAvatarDeleted);
     on<SettingsToggleChanged>(_onToggleChanged);
+    on<SettingsResetRequested>(_onResetRequested);
   }
 
   final UserRepository _repo;
@@ -131,6 +132,22 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
       ));
     } catch (_) {
       emit(SettingsLoaded(user: current.user));
+    }
+  }
+
+  Future<void> _onResetRequested(
+      SettingsResetRequested event, Emitter<SettingsState> emit) async {
+    final current = state;
+    if (current is! SettingsLoaded) return;
+    emit(SettingsResetting(user: current.user));
+    try {
+      await _repo.resetData();
+      emit(SettingsResetSuccess());
+    } catch (e) {
+      emit(SettingsResetFailure(
+        user: current.user,
+        message: _parseError(e),
+      ));
     }
   }
 

@@ -19,6 +19,7 @@ import 'package:wallet_app/presentation/settings/widgets/switch_tile.dart';
 import '../../../data/repositories/user_repository.dart';
 import '../../../navigation/route_names.dart';
 import '../bloc/settings_bloc.dart';
+import '../widgets/reset_data_sheet.dart';
 
 class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
@@ -62,6 +63,22 @@ class _SettingsView extends StatelessWidget {
             SnackBar(content: Text(state.successMessage!)),
           );
         }
+        if (state is SettingsResetSuccess) {
+          final messenger = ScaffoldMessenger.of(context);
+          final s = AppStrings.of(context);
+          messenger.showSnackBar(
+            SnackBar(content: Text(s.resetSuccessMessage)),
+          );
+          context.go(RouteNames.home);
+        }
+        if (state is SettingsResetFailure) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(state.message),
+              backgroundColor: AppColors.error,
+            ),
+          );
+        }
       },
       child: Scaffold(
         appBar: AppBar(
@@ -76,7 +93,9 @@ class _SettingsView extends StatelessWidget {
         ),
         body: BlocBuilder<SettingsBloc, SettingsState>(
           builder: (context, state) {
-            if (state is SettingsLoading || state is SettingsInitial) {
+            if (state is SettingsLoading ||
+                state is SettingsInitial ||
+                state is SettingsResetSuccess) {
               return const Center(
                 child: CircularProgressIndicator(color: AppColors.primary),
               );
@@ -106,8 +125,13 @@ class _SettingsView extends StatelessWidget {
 
             final user = state is SettingsLoaded
                 ? state.user
-                : (state as SettingsSaving).user;
+                : state is SettingsSaving
+                    ? state.user
+                    : state is SettingsResetting
+                        ? state.user
+                        : (state as SettingsResetFailure).user;
             final isSaving = state is SettingsSaving;
+            final isResetting = state is SettingsResetting;
 
             Future<void> openEditProfile() async {
               await context.push(RouteNames.editProfile);
@@ -228,6 +252,8 @@ class _SettingsView extends StatelessWidget {
                   showChevron: false,
                   onTap: () => _confirmDeleteAccount(context),
                 ),
+                const SizedBox(height: AppSpacing.xl),
+                _DangerZoneSection(isResetting: isResetting),
                 const SizedBox(height: AppSpacing.xxxl),
               ],
             );
@@ -400,5 +426,122 @@ class _SettingsView extends StatelessWidget {
         if (context.mounted) context.go(RouteNames.login);
       }
     });
+  }
+}
+
+class _DangerZoneSection extends StatelessWidget {
+  const _DangerZoneSection({required this.isResetting});
+
+  final bool isResetting;
+
+  @override
+  Widget build(BuildContext context) {
+    final s = AppStrings.of(context);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          margin: const EdgeInsets.symmetric(horizontal: AppSpacing.pagePadding),
+          padding: const EdgeInsets.all(AppSpacing.md),
+          decoration: BoxDecoration(
+            color: AppColors.error.withAlpha(20),
+            borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(
+                  left: AppSpacing.xs,
+                  bottom: AppSpacing.sm,
+                ),
+                child: Text(
+                  s.sectionDangerZone.toUpperCase(),
+                  style: AppTypography.labelSm.copyWith(
+                    color: AppColors.error,
+                    letterSpacing: 1.0,
+                  ),
+                ),
+              ),
+              Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                  onTap: isResetting
+                      ? null
+                      : () => _showResetDataSheet(context),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      vertical: AppSpacing.sm,
+                      horizontal: AppSpacing.xs,
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.delete_forever_outlined,
+                          color: AppColors.error,
+                          size: 22,
+                        ),
+                        const SizedBox(width: AppSpacing.md),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                s.resetAllDataTitle,
+                                style: AppTypography.bodyMd.copyWith(
+                                  color: AppColors.error,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              const SizedBox(height: AppSpacing.xs),
+                              Text(
+                                s.resetAllDataSubtitle,
+                                style: AppTypography.bodyMd.copyWith(
+                                  color: AppColors.error.withAlpha(180),
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        if (isResetting)
+                          const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              color: AppColors.error,
+                              strokeWidth: 2,
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  void _showResetDataSheet(BuildContext context) {
+    final bloc = context.read<SettingsBloc>();
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: AppColors.surfaceContainerHigh,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(AppSpacing.radiusXl),
+        ),
+      ),
+      builder: (_) => BlocProvider.value(
+        value: bloc,
+        child: const ResetDataSheet(),
+      ),
+    );
   }
 }

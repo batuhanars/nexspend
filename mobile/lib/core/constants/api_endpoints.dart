@@ -27,6 +27,7 @@ class ApiEndpoints {
   static const String meAvatar = '/api/users/me/avatar';
   static const String mePassword = '/api/users/me/change-password';
   static const String meFcmToken = '/api/users/me/fcm-token';
+  static const String meReset = '/api/users/me/reset';
 
   // Dashboard
   static const String dashboard = '/api/dashboard';

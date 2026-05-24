@@ -39,4 +39,8 @@ class UserRepository {
   Future<void> deleteAvatar() async {
     await _dio.delete(ApiEndpoints.meAvatar);
   }
+
+  Future<void> resetData() async {
+    await _dio.post(ApiEndpoints.meReset);
+  }
 }

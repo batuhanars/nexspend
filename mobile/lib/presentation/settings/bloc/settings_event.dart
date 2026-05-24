@@ -36,3 +36,7 @@ class SettingsToggleChanged extends SettingsEvent {
   final String field;
   final bool value;
 }
+
+class SettingsResetRequested extends SettingsEvent {
+  const SettingsResetRequested();
+}

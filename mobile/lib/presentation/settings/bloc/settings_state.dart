@@ -27,3 +27,16 @@ class SettingsError extends SettingsState {
   SettingsError(this.message);
   final String message;
 }
+
+class SettingsResetting extends SettingsState {
+  SettingsResetting({required this.user});
+  final UserModel user;
+}
+
+class SettingsResetSuccess extends SettingsState {}
+
+class SettingsResetFailure extends SettingsState {
+  SettingsResetFailure({required this.user, required this.message});
+  final UserModel user;
+  final String message;
+}

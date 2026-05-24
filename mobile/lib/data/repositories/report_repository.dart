@@ -49,11 +49,15 @@ class ReportRepository {
   Future<List<TrendItem>> getTrends({
     String? period,
   }) async {
-    // GEÇİCİ: backend /reports/trends kategori-bazlı trend listesi değil, toplam
-    // özet + top kategoriler içeren tek bir NESNE döndürüyor (sözleşme uyuşmazlığı).
-    // Per-kategori trend backend'e eklenene dek (Option A) bu bölümü gizli tutmak
-    // için boş liste dönüyoruz; aksi halde `as List?` cast'i TypeError fırlatıp tüm
-    // rapor ekranını "yüklenemedi" durumuna düşürüyordu.
-    return const <TrendItem>[];
+    final response = await _dio.get(
+      ApiEndpoints.reportsTrends,
+      queryParameters: {
+        'period': ?period,
+      },
+    );
+    final list = response.data['data'] as List? ?? [];
+    return list
+        .map((e) => TrendItem.fromJson(e as Map<String, dynamic>))
+        .toList();
   }
 }

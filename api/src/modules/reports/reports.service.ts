@@ -92,45 +92,68 @@ export class ReportsService {
       }));
   }
 
+  /**
+   * Kategori bazında harcama trendi: her kategori için bu dönem vs bir önceki
+   * eşit uzunluktaki dönemin toplamı ve yüzde değişimi. Frontend `TrendItem`
+   * sözleşmesiyle birebir (categoryName / currentAmount / previousAmount /
+   * changePercent), en çok harcanan kategori başta olacak şekilde sıralı.
+   */
   async getTrends(userId: string, query: QueryReportDto) {
     const { startDate, endDate } = this.resolvePeriod(query);
     const periodMs = endDate.getTime() - startDate.getTime();
     const prevEnd = new Date(startDate.getTime() - 1);
     const prevStart = new Date(prevEnd.getTime() - periodMs);
 
-    const [current, previous] = await Promise.all([
-      this.getPeriodSummary(userId, startDate, endDate, query.accountId),
-      this.getPeriodSummary(userId, prevStart, prevEnd, query.accountId),
+    const [currentRows, previousRows] = await Promise.all([
+      this.groupExpenseByCategory(userId, startDate, endDate, query.accountId),
+      this.groupExpenseByCategory(userId, prevStart, prevEnd, query.accountId),
     ]);
 
-    const expenseChange =
-      previous.expense > 0
-        ? Math.round(
-            ((current.expense - previous.expense) / previous.expense) * 100,
-          )
-        : null;
-    const incomeChange =
-      previous.income > 0
-        ? Math.round(
-            ((current.income - previous.income) / previous.income) * 100,
-          )
-        : null;
-
-    // Dönem içi en çok harcama kategorileri
-    const topCategories = await this.getTopCategories(
-      userId,
-      startDate,
-      endDate,
-      query.accountId,
+    const UNCATEGORIZED = '__uncategorized__';
+    const keyOf = (id: string | null) => id ?? UNCATEGORIZED;
+    const currentMap = new Map(
+      currentRows.map((r) => [keyOf(r.categoryId), r.amount]),
+    );
+    const previousMap = new Map(
+      previousRows.map((r) => [keyOf(r.categoryId), r.amount]),
     );
 
-    return {
-      current,
-      previous,
-      expenseChange,
-      incomeChange,
-      topCategories,
-    };
+    const keys = new Set<string>([...currentMap.keys(), ...previousMap.keys()]);
+    const categoryIds = [...keys].filter((k) => k !== UNCATEGORIZED);
+    const categories = await this.prisma.category.findMany({
+      where: { id: { in: categoryIds } },
+    });
+    const catMap = new Map(categories.map((c) => [c.id, c]));
+
+    const round2 = (n: number) => Math.round(n * 100) / 100;
+
+    const items = [...keys].map((key) => {
+      const currentAmount = currentMap.get(key) ?? 0;
+      const previousAmount = previousMap.get(key) ?? 0;
+      // previous yoksa: yeni harcama → +%100; cari yoksa: tamamen kesilmiş → -%100
+      const changePercent =
+        previousAmount > 0
+          ? Math.round(
+              ((currentAmount - previousAmount) / previousAmount) * 100 * 10,
+            ) / 10
+          : currentAmount > 0
+            ? 100
+            : 0;
+      return {
+        categoryId: key === UNCATEGORIZED ? null : key,
+        categoryName:
+          key === UNCATEGORIZED
+            ? 'Kategorisiz'
+            : (catMap.get(key)?.name ?? 'Kategorisiz'),
+        currentAmount: round2(currentAmount),
+        previousAmount: round2(previousAmount),
+        changePercent,
+      };
+    });
+
+    // En çok harcanan kategoriler başta
+    items.sort((a, b) => b.currentAmount - a.currentAmount);
+    return items;
   }
 
   async getInflationComparison(userId: string, period?: string) {
@@ -308,45 +331,13 @@ export class ReportsService {
     return { startDate: start, endDate: now };
   }
 
-  private async getPeriodSummary(
+  /** Bir dönemdeki EXPENSE işlemlerini kategoriye göre toplar. */
+  private async groupExpenseByCategory(
     userId: string,
     startDate: Date,
     endDate: Date,
     accountId?: string,
-  ) {
-    const where: Prisma.TransactionWhereInput = {
-      userId,
-      transactionDate: { gte: startDate, lte: endDate },
-    };
-    if (accountId) where.accountId = accountId;
-
-    const [incomeAgg, expenseAgg] = await Promise.all([
-      this.prisma.transaction.aggregate({
-        where: {
-          ...where,
-          type: TransactionType.INCOME,
-          source: { not: TransactionSource.DEBT_COLLECTION },
-        },
-        _sum: { amount: true },
-      }),
-      this.prisma.transaction.aggregate({
-        where: { ...where, type: TransactionType.EXPENSE },
-        _sum: { amount: true },
-      }),
-    ]);
-
-    const income = Number(incomeAgg._sum.amount ?? 0);
-    const expense = Number(expenseAgg._sum.amount ?? 0);
-    return { income, expense, net: income - expense };
-  }
-
-  private async getTopCategories(
-    userId: string,
-    startDate: Date,
-    endDate: Date,
-    accountId?: string,
-    limit = 5,
-  ) {
+  ): Promise<Array<{ categoryId: string | null; amount: number }>> {
     const where: Prisma.TransactionWhereInput = {
       userId,
       type: TransactionType.EXPENSE,
@@ -358,22 +349,10 @@ export class ReportsService {
       by: ['categoryId'],
       where,
       _sum: { amount: true },
-      orderBy: { _sum: { amount: 'desc' } },
-      take: limit,
     });
-
-    const ids = rows.map((r) => r.categoryId).filter(Boolean) as string[];
-    const cats = await this.prisma.category.findMany({
-      where: { id: { in: ids } },
-    });
-    const catMap = new Map(cats.map((c) => [c.id, c]));
 
     return rows.map((r) => ({
       categoryId: r.categoryId,
-      categoryName: r.categoryId
-        ? (catMap.get(r.categoryId)?.name ?? 'Kategorisiz')
-        : 'Kategorisiz',
-      icon: r.categoryId ? (catMap.get(r.categoryId)?.icon ?? null) : null,
       amount: Number(r._sum.amount ?? 0),
     }));
   }

@@ -134,6 +134,11 @@ class _DashboardViewState extends State<_DashboardView> {
       title: Text(greeting, style: AppTypography.headlineSm),
       actions: [
         IconButton(
+          icon: const Icon(Icons.analytics_outlined, color: AppColors.onSurface),
+          tooltip: s.reportsTitle,
+          onPressed: () => context.push(RouteNames.reports),
+        ),
+        IconButton(
           key: CoachMarkKeys.settings,
           icon: const Icon(Icons.settings_outlined, color: AppColors.onSurface),
           onPressed: () => context.push(RouteNames.settings),

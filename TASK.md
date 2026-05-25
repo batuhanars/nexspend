@@ -1,6 +1,6 @@
 # Stitch Wallet App — Görev Takip Dosyası
 
-> Son güncelleme: 25 Mayıs 2026 (Mini Sprint 13.2 tamamlandı — `DATA_RESET_CONTRACT.md` — tüm kişisel verileri sıfırla; backend+frontend kod ✅, Railway deploy ✅, cihaz smoke bekliyor)  
+> Son güncelleme: 25 Mayıs 2026 (Post-Sprint 13 cila — tekli silme MANUAL-only + raporlar boş durum + arama çubuğu/filtre chip; commit `5513c8f`/`fc6232e`/`8559261`/`2186016`, `origin/main`'e push edildi, CI yeşil)  
 > ✅ = Tamamlandı | 🔧 = Kısmen yapıldı | ❌ = Henüz başlanmadı  
 > ☑ = Kodda mevcut ancak migration henüz çalıştırılmadı
 
@@ -742,6 +742,24 @@
 - [x] PM: dev session'ları başlat + denetle
 - [x] Railway deploy + build verify — endpoint canlı doğrulandı (auth'suz POST → 401, 25 May 2026)
 - [ ] Cihazda entegrasyon smoke (veri gir → reset → boş, profil/tercih/aile duruyor; dashboard stale kalmıyor mu — contract §3.3) — kullanıcı testi
+
+---
+
+## Post-Sprint 13 Cila — Tekli Silme + Raporlar Boş Durum + İşlemler UI
+> Sprint 13 hattı (İşlemler v2 + Raporlar) üstüne küçük tutarlılık/UX düzeltmeleri. `origin/main`'e push edildi (`dc7b9a3..2186016`, 25 May 2026), API + Mobile CI yeşil.
+
+### Frontend ✅
+- [x] **Tekli silme yalnız MANUAL** (commit `5513c8f`) — otomatik işlemler (tekrarlayan/abonelik/borç/tahsilat) artık tekli de silinemez; düzenleme + toplu silmedeki MANUAL-only kuralıyla simetrik
+  - `transaction_tile`: otomatik işlemde `Dismissible` yok (swipe kapalı)
+  - `transaction_detail_page`: Sil butonu `source == MANUAL` şartıyla gizli (Düzenle deseniyle simetrik)
+  - Testler: detay MANUAL→var/otomatik→yok; tile swipe MANUAL→Dismissible/otomatik→yok
+- [x] **Raporlar boş durum** (commit `fc6232e`) — Genel sekmede nakit akışı + harcama dağılımı + trend üçlüsü de boşsa `PeriodFilter` altında `EmptyStateView`; öncesinde alt alan bomboş kalıyordu
+  - `EmptyStateView`: `buttonLabel`/`onAction` opsiyonel (salt-okunur ekranlar için CTA'sız boş durum)
+  - `reportsEmptyTitle` / `reportsEmptySubtitle` l10n anahtarları (TR + EN)
+- [x] **İşlemler arama çubuğu + filtre chip** (commit `8559261`) — AppBar TextField artık `surfaceContainerHighest` arka plan + `radiusMd` köşe + iç dolgu ile render ediliyor (metin border'a yapışması düzeldi); filtre özet chip'i tarihte preset adını gösteriyor (Bu Ay / Son 3 Ay / Bu Yıl), yalnız Özel'de ham tarih aralığını basıyor
+
+### Backend / Docs
+- [x] **Toplu silme contract §7.3 çözüldü** (commit `2186016`) — tekli silme MANUAL-only frontend çözümü kayda geçti; backend `remove()` guard'ının neden bilinçli ertelendiği notlandı (sahiplik zaten korunuyor, cascade'den çağrılmıyor, etki self-inflicted veri bütünlüğü)
 
 ---
 

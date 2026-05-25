@@ -71,10 +71,11 @@ class TransactionDetailPage extends StatelessWidget {
               icon: const Icon(Icons.edit_outlined),
               onPressed: () => _openEdit(context),
             ),
-          IconButton(
-            icon: const Icon(Icons.delete_outline_rounded, color: AppColors.error),
-            onPressed: () => _confirmDelete(context, s),
-          ),
+          if (transaction.source == TransactionSource.MANUAL)
+            IconButton(
+              icon: const Icon(Icons.delete_outline_rounded, color: AppColors.error),
+              onPressed: () => _confirmDelete(context, s),
+            ),
         ],
       ),
       body: SingleChildScrollView(

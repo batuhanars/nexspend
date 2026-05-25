@@ -181,6 +181,9 @@ class TransactionTile extends StatelessWidget {
 
     // Seçim modunda swipe-to-delete devre dışı
     if (selectionMode) return tile;
+    // Otomatik işlemler (tekrarlayan/abonelik/borç/tahsilat) salt-okunur:
+    // swipe ile silinemez — düzenleme ve toplu silmedeki MANUAL-only kuralıyla tutarlı.
+    if (transaction.source != TransactionSource.MANUAL) return tile;
 
     return Dismissible(
       key: ValueKey(transaction.id),

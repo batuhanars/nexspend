@@ -105,6 +105,27 @@ void main() {
 
       expect(captured?.initialId, equals('m1'));
     });
+
+    testWidgets('MANUAL tile swipe-to-delete (Dismissible) ile sarılır',
+        (tester) async {
+      await tester.pumpWidget(_buildTile(
+        transaction: _manual('m1'),
+        bloc: bloc,
+      ));
+
+      expect(find.byType(Dismissible), findsOneWidget);
+    });
+
+    testWidgets(
+        'Otomatik tile swipe ile silinemez (Dismissible yok)',
+        (tester) async {
+      await tester.pumpWidget(_buildTile(
+        transaction: _recurring('a1'),
+        bloc: bloc,
+      ));
+
+      expect(find.byType(Dismissible), findsNothing);
+    });
   });
 
   group('TransactionTile — seçim modu', () {

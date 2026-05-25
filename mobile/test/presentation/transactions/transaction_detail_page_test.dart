@@ -117,7 +117,7 @@ void main() {
     await GetIt.instance.reset();
   });
 
-  group('TransactionDetailPage — Düzenle ikonu görünürlüğü', () {
+  group('TransactionDetailPage — Düzenle/Sil ikonu görünürlüğü', () {
     testWidgets(
         'MANUAL işlemde Düzenle (edit_outlined) ikonu görünür',
         (tester) async {
@@ -146,12 +146,30 @@ void main() {
     });
 
     testWidgets(
-        'Sil (delete_outline_rounded) ikonu her zaman görünür',
+        'MANUAL işlemde Sil (delete_outline_rounded) ikonu görünür',
+        (tester) async {
+      await tester.pumpWidget(_wrap(_manualTx, bloc));
+      await tester.pump();
+
+      expect(find.byIcon(Icons.delete_outline_rounded), findsOneWidget);
+    });
+
+    testWidgets(
+        'RECURRING işlemde Sil ikonu görünmez (salt-okunur)',
         (tester) async {
       await tester.pumpWidget(_wrap(_recurringTx, bloc));
       await tester.pump();
 
-      expect(find.byIcon(Icons.delete_outline_rounded), findsOneWidget);
+      expect(find.byIcon(Icons.delete_outline_rounded), findsNothing);
+    });
+
+    testWidgets(
+        'DEBT_PAYMENT işlemde Sil ikonu görünmez (salt-okunur)',
+        (tester) async {
+      await tester.pumpWidget(_wrap(_debtPaymentTx, bloc));
+      await tester.pump();
+
+      expect(find.byIcon(Icons.delete_outline_rounded), findsNothing);
     });
   });
 }

@@ -1,6 +1,6 @@
 # Stitch Wallet App — Görev Takip Dosyası
 
-> Son güncelleme: 20 Mayıs 2026 (Bütçe lifecycle sprint'i planlandı — `BUDGET_ROLLOVER_CONTRACT.md` — arşivle + geçmiş + manuel yeni dönem)  
+> Son güncelleme: 25 Mayıs 2026 (Mini Sprint 13.2 tamamlandı — `DATA_RESET_CONTRACT.md` — tüm kişisel verileri sıfırla; backend+frontend kod ✅, Railway deploy ✅, cihaz smoke bekliyor)  
 > ✅ = Tamamlandı | 🔧 = Kısmen yapıldı | ❌ = Henüz başlanmadı  
 > ☑ = Kodda mevcut ancak migration henüz çalıştırılmadı
 
@@ -726,22 +726,22 @@
 >
 > **Neden:** Kullanıcı deneysel veri girip sıfırdan tutarlı veriyle başlamak istiyor. **Karar:** kişisel veri silinir, hesap+profil+tercihler+kategoriler+aile KORUNUR; onay = yazarak "SIFIRLA".
 
-### Backend (~0.5 gün)
-- [ ] `POST /api/users/me/reset` + `UsersService.resetData` — atomik `$transaction`, FK-güvenli silme (account/transaction/budget/debt/subscription/receipt/insight/tag+merchantMap[user])
-- [ ] Kategoriler + aile (member/group/sharedBudget) korunur; kullanıcının SharedExpense'leri silinir + SharedBudget.spent recompute
-- [ ] Fiş görselleri disk'ten silinir; user satırı + profil + tercihler korunur
-- [ ] Unit + e2e test
+### Backend ✅ (commit ee560fd)
+- [x] `POST /api/users/me/reset` + `UsersService.resetData` — atomik `$transaction`, FK-güvenli silme (account/transaction/budget/debt/subscription/receipt/insight/tag+merchantMap[user])
+- [x] Kategoriler + aile (member/group/sharedBudget) korunur; etkilenen `SharedBudget.spent` recompute — kullanıcının ortak bütçe katkısı `Transaction.sharedBudgetId` üzerinden silinir, kalan transaction'lardan yeniden hesaplanır (eski `SharedExpense` modeli şemada yok)
+- [x] Fiş görselleri disk'ten silinir; user satırı + profil + tercihler korunur
+- [x] Unit + e2e test (168 unit ✓)
 
-### Frontend (~0.5 gün)
-- [ ] `UsersRepository.resetData()`
-- [ ] Ayarlar en altına "Tehlikeli Bölge" + "Tüm Verileri Sıfırla" (kırmızı)
-- [ ] Yazarak onay sheet ("SIFIRLA"/"RESET" yazılmadan buton disabled)
-- [ ] Başarı → `/home` boş durum + refresh; l10n (TR + EN) + test
+### Frontend ✅ (commit 2b74d50)
+- [x] `UsersRepository.resetData()`
+- [x] Ayarlar en altına "Tehlikeli Bölge" + "Tüm Verileri Sıfırla" (kırmızı)
+- [x] Yazarak onay sheet ("SIFIRLA"/"RESET" yazılmadan buton disabled)
+- [x] Başarı → `/home` boş durum + refresh; l10n (TR + EN) + test (analyze temiz, 141 test ✓)
 
 ### PM / Deploy
-- [ ] PM: dev session'ları başlat + denetle
-- [ ] PM: entegrasyon smoke (veri gir → reset → boş, profil/tercih/aile duruyor)
-- [ ] Railway deploy + build verify
+- [x] PM: dev session'ları başlat + denetle
+- [x] Railway deploy + build verify — endpoint canlı doğrulandı (auth'suz POST → 401, 25 May 2026)
+- [ ] Cihazda entegrasyon smoke (veri gir → reset → boş, profil/tercih/aile duruyor; dashboard stale kalmıyor mu — contract §3.3) — kullanıcı testi
 
 ---
 

@@ -270,9 +270,23 @@ class _TransactionsViewState extends State<_TransactionsView> {
                               hintText: s.searchLabel,
                               hintStyle: AppTypography.bodyMd
                                   .copyWith(color: AppColors.onSurfaceVariant),
-                              border: InputBorder.none,
+                              prefixIcon: const Icon(Icons.search_rounded,
+                                  size: 20,
+                                  color: AppColors.onSurfaceVariant),
+                              prefixIconConstraints: const BoxConstraints(
+                                  minWidth: 40, minHeight: 40),
+                              filled: true,
+                              fillColor: AppColors.surfaceContainerHighest,
                               isDense: true,
-                              contentPadding: EdgeInsets.zero,
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(
+                                    AppSpacing.radiusMd),
+                                borderSide: BorderSide.none,
+                              ),
+                              contentPadding: const EdgeInsets.symmetric(
+                                horizontal: AppSpacing.md,
+                                vertical: AppSpacing.sm,
+                              ),
                             ),
                             onChanged: (q) => _onSearchChanged(q, filter),
                           )
@@ -480,18 +494,9 @@ class _ActiveFilterChips extends StatelessWidget {
       chips.add((key: 'account', label: acc?.name ?? s.accountLabel));
     }
     if (filter.startDate != null || filter.endDate != null) {
-      final start = filter.startDate;
-      final end = filter.endDate;
-      String label;
-      if (start != null && end != null) {
-        label =
-            '${start.day}.${start.month} – ${end.day}.${end.month}';
-      } else if (start != null) {
-        label = '≥ ${start.day}.${start.month}.${start.year}';
-      } else {
-        label = '≤ ${end!.day}.${end.month}.${end.year}';
-      }
-      chips.add((key: 'date', label: label));
+      chips.add(
+        (key: 'date', label: _dateLabel(filter.startDate, filter.endDate)),
+      );
     }
     if (filter.search != null && filter.search!.isNotEmpty) {
       chips.add((key: 'search', label: '"${filter.search}"'));
@@ -517,6 +522,41 @@ class _ActiveFilterChips extends StatelessWidget {
             .toList(),
       ),
     );
+  }
+
+  /// Tarih filtresi özet etiketi: preset'e denk geliyorsa preset adı
+  /// (Bu Ay / Son 3 Ay / Bu Yıl), aksi halde "Özel" tarih aralığı.
+  /// Eşleştirme, filtre sheet'indeki `_detectPreset` ile aynı mantığı izler.
+  String _dateLabel(DateTime? start, DateTime? end) {
+    final now = DateTime.now();
+    if (start != null) {
+      final startOfMonth = DateTime(now.year, now.month, 1);
+      final endOfMonth = DateTime(now.year, now.month + 1, 0);
+      if (start.year == startOfMonth.year &&
+          start.month == startOfMonth.month &&
+          start.day == 1 &&
+          (end == null ||
+              (end.year == endOfMonth.year &&
+                  end.month == endOfMonth.month))) {
+        return s.thisMonthLabel;
+      }
+      final start3M = DateTime(now.year, now.month - 2, 1);
+      if (start.year == start3M.year &&
+          start.month == start3M.month &&
+          start.day == 1) {
+        return s.last3MonthsLabel;
+      }
+      if (start.year == now.year && start.month == 1 && start.day == 1) {
+        return s.thisYearLabel;
+      }
+    }
+    // Özel / kısmi aralık
+    if (start != null && end != null) {
+      return '${start.day}.${start.month} – ${end.day}.${end.month}';
+    } else if (start != null) {
+      return '≥ ${start.day}.${start.month}.${start.year}';
+    }
+    return '≤ ${end!.day}.${end.month}.${end.year}';
   }
 }
 

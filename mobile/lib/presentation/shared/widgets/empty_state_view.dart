@@ -9,15 +9,18 @@ class EmptyStateView extends StatelessWidget {
     required this.icon,
     required this.title,
     required this.subtitle,
-    required this.buttonLabel,
-    required this.onAction,
+    this.buttonLabel,
+    this.onAction,
   });
 
   final IconData icon;
   final String title;
   final String subtitle;
-  final String buttonLabel;
-  final VoidCallback onAction;
+
+  /// CTA butonu metni. `null` ise (veya [onAction] yoksa) buton gösterilmez —
+  /// salt-okunur ekranlar (ör. raporlar) için.
+  final String? buttonLabel;
+  final VoidCallback? onAction;
 
   @override
   Widget build(BuildContext context) {
@@ -42,23 +45,25 @@ class EmptyStateView extends StatelessWidget {
               ),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: AppSpacing.xl),
-            SizedBox(
-              width: double.infinity,
-              height: 52,
-              child: FilledButton.icon(
-                onPressed: onAction,
-                icon: const Icon(Icons.add_rounded, size: 20),
-                label: Text(buttonLabel),
-                style: FilledButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  foregroundColor: AppColors.surface,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
+            if (buttonLabel != null && onAction != null) ...[
+              const SizedBox(height: AppSpacing.xl),
+              SizedBox(
+                width: double.infinity,
+                height: 52,
+                child: FilledButton.icon(
+                  onPressed: onAction,
+                  icon: const Icon(Icons.add_rounded, size: 20),
+                  label: Text(buttonLabel!),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: AppColors.surface,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
+                    ),
                   ),
                 ),
               ),
-            ),
+            ],
           ],
         ),
       ),

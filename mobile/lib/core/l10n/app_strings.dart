@@ -122,6 +122,8 @@ abstract class AppStrings {
   String get editAccountTitle;
   String get newBudgetTitle;
   String get reportsTitle;
+  String get reportsEmptyTitle;
+  String get reportsEmptySubtitle;
   String get receiptPreviewTitle;
   String get debtsTitle;
   String get smartTracking;
@@ -792,6 +794,11 @@ class _Tr extends AppStrings {
   String get newBudgetTitle => 'Yeni Bütçe';
   @override
   String get reportsTitle => 'Raporlar';
+  @override
+  String get reportsEmptyTitle => 'Henüz rapor yok';
+  @override
+  String get reportsEmptySubtitle =>
+      'Bu dönemde işlem bulunmuyor. İşlem ekledikçe nakit akışı, harcama dağılımı ve kategori trendleri burada görünecek.';
   @override
   String get receiptPreviewTitle => 'Makbuz Önizleme';
   @override
@@ -1893,6 +1900,11 @@ class _En extends AppStrings {
   String get newBudgetTitle => 'New Budget';
   @override
   String get reportsTitle => 'Reports';
+  @override
+  String get reportsEmptyTitle => 'No reports yet';
+  @override
+  String get reportsEmptySubtitle =>
+      'No transactions in this period. As you add transactions, cash flow, spending distribution, and category trends will appear here.';
   @override
   String get receiptPreviewTitle => 'Receipt Preview';
   @override

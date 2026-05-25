@@ -6,6 +6,7 @@ import 'package:wallet_app/presentation/reports/widgets/expense_distribution_sec
 import 'package:wallet_app/presentation/reports/widgets/period_filter.dart';
 import 'package:wallet_app/presentation/reports/widgets/section_title.dart';
 import 'package:wallet_app/presentation/reports/widgets/trend_list.dart';
+import 'package:wallet_app/presentation/shared/widgets/empty_state_view.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
@@ -127,6 +128,29 @@ class _GeneralReportTab extends StatelessWidget {
           );
         }
         final loaded = state as ReportsLoaded;
+        final hasNoData = loaded.cashFlow.isEmpty &&
+            loaded.distribution.isEmpty &&
+            loaded.trends.isEmpty;
+        if (hasNoData) {
+          return Column(
+            children: [
+              const SizedBox(height: AppSpacing.lg),
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.pagePadding,
+                ),
+                child: PeriodFilter(activePeriod: loaded.period),
+              ),
+              Expanded(
+                child: EmptyStateView(
+                  icon: Icons.bar_chart_rounded,
+                  title: AppStrings.of(context).reportsEmptyTitle,
+                  subtitle: AppStrings.of(context).reportsEmptySubtitle,
+                ),
+              ),
+            ],
+          );
+        }
         return ListView(
           padding: const EdgeInsets.symmetric(
             horizontal: AppSpacing.pagePadding,

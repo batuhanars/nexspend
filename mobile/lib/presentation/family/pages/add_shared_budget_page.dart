@@ -31,11 +31,7 @@ class _AddSharedBudgetPageState extends State<AddSharedBudgetPage> {
   final _nameController = TextEditingController();
   CategoryModel? _selectedCategory;
   BudgetPeriod _period = BudgetPeriod.MONTHLY;
-  DateTime _startDate = DateTime(
-    DateTime.now().year,
-    DateTime.now().month,
-    1,
-  );
+  DateTime _startDate = DateTime(DateTime.now().year, DateTime.now().month, 1);
   DateTime? _endDate;
 
   @override
@@ -58,6 +54,10 @@ class _AddSharedBudgetPageState extends State<AddSharedBudgetPage> {
       _showError(AppStrings.of(context).selectCategoryPrompt);
       return;
     }
+    if (_period == BudgetPeriod.CUSTOM && _endDate == null) {
+      _showError(AppStrings.of(context).selectEndDate);
+      return;
+    }
 
     final data = <String, dynamic>{
       'groupId': widget.groupId,
@@ -66,6 +66,8 @@ class _AddSharedBudgetPageState extends State<AddSharedBudgetPage> {
       'amount': amount,
       'period': _period.name,
       'startDate': _startDate.toIso8601String(),
+      if (_period == BudgetPeriod.CUSTOM && _endDate != null)
+        'endDate': _endDate!.toIso8601String(),
     };
 
     context.read<AddSharedBudgetBloc>().add(AddSharedBudgetSubmitted(data));
@@ -144,8 +146,11 @@ class _AddSharedBudgetPageState extends State<AddSharedBudgetPage> {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(Icons.event_available_outlined,
-              size: 14, color: AppColors.primary),
+          const Icon(
+            Icons.event_available_outlined,
+            size: 14,
+            color: AppColors.primary,
+          ),
           const SizedBox(width: AppSpacing.xs),
           Flexible(
             child: Text(
@@ -229,15 +234,15 @@ class _AddSharedBudgetPageState extends State<AddSharedBudgetPage> {
                   if (categories.isEmpty)
                     Text(
                       s.noCategoriesFound,
-                      style: AppTypography.bodyMd
-                          .copyWith(color: AppColors.onSurfaceVariant),
+                      style: AppTypography.bodyMd.copyWith(
+                        color: AppColors.onSurfaceVariant,
+                      ),
                     )
                   else
                     CategoryGrid(
                       categories: categories,
                       selected: _selectedCategory,
-                      onSelect: (c) =>
-                          setState(() => _selectedCategory = c),
+                      onSelect: (c) => setState(() => _selectedCategory = c),
                     ),
                   const SizedBox(height: AppSpacing.xl),
 
@@ -277,16 +282,19 @@ class _AddSharedBudgetPageState extends State<AddSharedBudgetPage> {
                     width: double.infinity,
                     height: 56,
                     child: FilledButton(
-                      onPressed:
-                          isSubmitting ? null : () => _submit(categories),
+                      onPressed: isSubmitting
+                          ? null
+                          : () => _submit(categories),
                       style: FilledButton.styleFrom(
                         backgroundColor: AppColors.primary,
                         foregroundColor: AppColors.surface,
-                        disabledBackgroundColor:
-                            AppColors.primary.withValues(alpha: 0.5),
+                        disabledBackgroundColor: AppColors.primary.withValues(
+                          alpha: 0.5,
+                        ),
                         shape: RoundedRectangleBorder(
-                          borderRadius:
-                              BorderRadius.circular(AppSpacing.radiusXl),
+                          borderRadius: BorderRadius.circular(
+                            AppSpacing.radiusXl,
+                          ),
                         ),
                       ),
                       child: isSubmitting

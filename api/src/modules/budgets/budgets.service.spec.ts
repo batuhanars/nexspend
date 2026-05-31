@@ -174,6 +174,33 @@ describe('BudgetsService', () => {
         ConflictException,
       );
     });
+
+    it('CUSTOM dönemde verilen bitiş tarihini kullanır', async () => {
+      mockPrisma.budget.findFirst.mockResolvedValueOnce(null);
+      mockPrisma.budget.create.mockResolvedValue(baseBudget);
+      mockPrisma.transaction.aggregate.mockResolvedValue({
+        _sum: { amount: 0 },
+      });
+      mockPrisma.budget.update.mockResolvedValue(baseBudget);
+
+      await service.create(USER_ID, {
+        ...dto,
+        period: 'CUSTOM',
+        startDate: '2026-06-01',
+        endDate: '2026-06-15',
+      });
+
+      const createCall = mockPrisma.budget.create.mock.calls[0][0];
+      expect(createCall.data.period).toBe('CUSTOM');
+      expect(createCall.data.endDate.toISOString()).toContain('2026-06-15');
+    });
+
+    it('CUSTOM dönemde bitiş tarihi yoksa BadRequestException fırlatır', async () => {
+      // resolveEndDate, çakışma sorgusundan önce hata fırlatır (findFirst mock'u gerekmez)
+      await expect(
+        service.create(USER_ID, { ...dto, period: 'CUSTOM' }),
+      ).rejects.toThrow(BadRequestException);
+    });
   });
 
   // ─── update ──────────────────────────────────────────────────────────────────

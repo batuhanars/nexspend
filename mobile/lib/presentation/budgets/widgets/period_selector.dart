@@ -6,22 +6,34 @@ import '../../../core/l10n/app_strings.dart';
 import '../../../data/models/budget_model.dart';
 
 class PeriodSelector extends StatelessWidget {
-  const PeriodSelector({super.key, required this.selected, required this.onSelect});
+  const PeriodSelector({
+    super.key,
+    required this.selected,
+    required this.onSelect,
+  });
   final BudgetPeriod selected;
   final ValueChanged<BudgetPeriod> onSelect;
 
   String _label(BudgetPeriod p, AppStrings s) => switch (p) {
-        BudgetPeriod.MONTHLY => s.billingCycleMonthly,
-        BudgetPeriod.WEEKLY => s.billingCycleWeekly,
-        BudgetPeriod.YEARLY => s.billingCycleYearly,
-        BudgetPeriod.CUSTOM => s.periodCustom,
-      };
+    BudgetPeriod.MONTHLY => s.billingCycleMonthly,
+    BudgetPeriod.WEEKLY => s.billingCycleWeekly,
+    BudgetPeriod.YEARLY => s.billingCycleYearly,
+    BudgetPeriod.CUSTOM => s.periodCustom,
+  };
+
+  // Görünüm sırası: Haftalık / Aylık / Yıllık / Özel
+  static const _order = [
+    BudgetPeriod.WEEKLY,
+    BudgetPeriod.MONTHLY,
+    BudgetPeriod.YEARLY,
+    BudgetPeriod.CUSTOM,
+  ];
 
   @override
   Widget build(BuildContext context) {
     final s = AppStrings.of(context);
     return Row(
-      children: BudgetPeriod.values.map((p) {
+      children: _order.map((p) {
         final isSelected = p == selected;
         return Expanded(
           child: GestureDetector(
@@ -47,8 +59,7 @@ class PeriodSelector extends StatelessWidget {
                 textAlign: TextAlign.center,
                 style: AppTypography.bodySm.copyWith(
                   color: isSelected ? AppColors.primary : AppColors.onSurface,
-                  fontWeight:
-                      isSelected ? FontWeight.w600 : FontWeight.w400,
+                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
                 ),
               ),
             ),

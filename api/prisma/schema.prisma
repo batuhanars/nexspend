@@ -41,6 +41,7 @@ enum BudgetPeriod {
   WEEKLY
   MONTHLY
   YEARLY
+  CUSTOM // manuel başlangıç + bitiş tarihi (tek seferlik; otomatik yenilenmez)
 }
 
 enum DebtType {

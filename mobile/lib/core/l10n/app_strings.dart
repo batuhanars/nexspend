@@ -158,6 +158,7 @@ abstract class AppStrings {
   String get periodLabel;
   String get startDateLabel;
   String get endDateLabel;
+  String get selectEndDate;
   String get billingCycleLabel;
   String get autoDeductLabel;
   String get installmentsSection;
@@ -882,6 +883,8 @@ class _Tr extends AppStrings {
   String get startDateLabel => 'Başlangıç';
   @override
   String get endDateLabel => 'Bitiş';
+  @override
+  String get selectEndDate => 'Bitiş tarihini seçin';
   @override
   String get billingCycleLabel => 'Yenileme Dönemi';
   @override
@@ -2016,6 +2019,8 @@ class _En extends AppStrings {
   String get startDateLabel => 'Start';
   @override
   String get endDateLabel => 'End';
+  @override
+  String get selectEndDate => 'Select end date';
   @override
   String get billingCycleLabel => 'Renewal Period';
   @override

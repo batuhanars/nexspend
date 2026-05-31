@@ -35,11 +35,7 @@ class _AddBudgetPageState extends State<AddBudgetPage> {
   CategoryModel? _selectedCategory;
   BudgetPeriod _period = BudgetPeriod.MONTHLY;
   bool _smartTracking = true;
-  DateTime _startDate = DateTime(
-    DateTime.now().year,
-    DateTime.now().month,
-    1,
-  );
+  DateTime _startDate = DateTime(DateTime.now().year, DateTime.now().month, 1);
   DateTime? _endDate;
 
   @override
@@ -83,6 +79,10 @@ class _AddBudgetPageState extends State<AddBudgetPage> {
       _showError(AppStrings.of(context).selectCategoryPrompt);
       return;
     }
+    if (_period == BudgetPeriod.CUSTOM && _endDate == null) {
+      _showError(AppStrings.of(context).selectEndDate);
+      return;
+    }
 
     final data = <String, dynamic>{
       'categoryId': _selectedCategory!.id,
@@ -102,10 +102,7 @@ class _AddBudgetPageState extends State<AddBudgetPage> {
 
   void _showError(String msg) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(msg),
-        backgroundColor: AppColors.error,
-      ),
+      SnackBar(content: Text(msg), backgroundColor: AppColors.error),
     );
   }
 
@@ -171,15 +168,16 @@ class _AddBudgetPageState extends State<AddBudgetPage> {
       decoration: BoxDecoration(
         color: AppColors.primary.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-        border: Border.all(
-          color: AppColors.primary.withValues(alpha: 0.2),
-        ),
+        border: Border.all(color: AppColors.primary.withValues(alpha: 0.2)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(Icons.event_available_outlined,
-              size: 14, color: AppColors.primary),
+          const Icon(
+            Icons.event_available_outlined,
+            size: 14,
+            color: AppColors.primary,
+          ),
           const SizedBox(width: AppSpacing.xs),
           Flexible(
             child: Text(
@@ -244,7 +242,9 @@ class _AddBudgetPageState extends State<AddBudgetPage> {
             }
 
             // Prefill'de kategori otomatik seçilir (kategoriler yüklendikten sonra)
-            if (isPrefill && _selectedCategory == null && categories.isNotEmpty) {
+            if (isPrefill &&
+                _selectedCategory == null &&
+                categories.isNotEmpty) {
               final prefillCategoryId = widget.prefill?.category?.id;
               if (prefillCategoryId != null) {
                 final match = categories
@@ -284,15 +284,15 @@ class _AddBudgetPageState extends State<AddBudgetPage> {
                   if (categories.isEmpty)
                     Text(
                       s.noCategoriesFound,
-                      style: AppTypography.bodyMd
-                          .copyWith(color: AppColors.onSurfaceVariant),
+                      style: AppTypography.bodyMd.copyWith(
+                        color: AppColors.onSurfaceVariant,
+                      ),
                     )
                   else
                     CategoryGrid(
                       categories: categories,
                       selected: _selectedCategory,
-                      onSelect: (c) =>
-                          setState(() => _selectedCategory = c),
+                      onSelect: (c) => setState(() => _selectedCategory = c),
                     ),
                   const SizedBox(height: AppSpacing.xl),
 
@@ -335,8 +335,7 @@ class _AddBudgetPageState extends State<AddBudgetPage> {
                     ),
                     decoration: BoxDecoration(
                       color: AppColors.surfaceContainerHighest,
-                      borderRadius:
-                          BorderRadius.circular(AppSpacing.radiusMd),
+                      borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
                     ),
                     child: Row(
                       children: [
@@ -344,23 +343,26 @@ class _AddBudgetPageState extends State<AddBudgetPage> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(s.smartTracking,
-                                  style: AppTypography.bodyMd),
+                              Text(
+                                s.smartTracking,
+                                style: AppTypography.bodyMd,
+                              ),
                               Text(
                                 s.smartTrackingSubtitle,
                                 style: AppTypography.bodySm.copyWith(
-                                    color: AppColors.onSurfaceVariant),
+                                  color: AppColors.onSurfaceVariant,
+                                ),
                               ),
                             ],
                           ),
                         ),
                         Switch(
                           value: _smartTracking,
-                          onChanged: (v) =>
-                              setState(() => _smartTracking = v),
+                          onChanged: (v) => setState(() => _smartTracking = v),
                           activeThumbColor: AppColors.primary,
-                          activeTrackColor:
-                              AppColors.primary.withValues(alpha: 0.4),
+                          activeTrackColor: AppColors.primary.withValues(
+                            alpha: 0.4,
+                          ),
                         ),
                       ],
                     ),
@@ -386,11 +388,13 @@ class _AddBudgetPageState extends State<AddBudgetPage> {
                       style: FilledButton.styleFrom(
                         backgroundColor: AppColors.primary,
                         foregroundColor: AppColors.surface,
-                        disabledBackgroundColor:
-                            AppColors.primary.withValues(alpha: 0.5),
+                        disabledBackgroundColor: AppColors.primary.withValues(
+                          alpha: 0.5,
+                        ),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(
-                              AppSpacing.radiusXl),
+                            AppSpacing.radiusXl,
+                          ),
                         ),
                       ),
                       child: isSubmitting

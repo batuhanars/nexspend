@@ -24,7 +24,7 @@ import { CreateGroupDto } from './dto/create-group.dto';
 import { SendInviteDto } from './dto/send-invite.dto';
 import { CreateSharedBudgetDto } from './dto/create-shared-budget.dto';
 import { UpdateSharedBudgetDto } from './dto/update-shared-budget.dto';
-import { computeEndDate, parseLocalDate } from '../budgets/period.utils';
+import { parseLocalDate, resolveEndDate } from '../budgets/period.utils';
 
 @Injectable()
 export class FamilyService {
@@ -314,9 +314,7 @@ export class FamilyService {
 
     const period = dto.period ?? 'MONTHLY';
     const startDate = parseLocalDate(dto.startDate);
-    const endDate = dto.endDate
-      ? parseLocalDate(dto.endDate)
-      : computeEndDate(startDate, period);
+    const endDate = resolveEndDate(startDate, period, dto.endDate);
 
     const budget = await this.prisma.sharedBudget.create({
       data: {

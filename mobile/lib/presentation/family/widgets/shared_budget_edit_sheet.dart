@@ -166,49 +166,55 @@ class _SharedBudgetEditSheetState extends State<SharedBudgetEditSheet> {
             Text(s.periodLabel, style: AppTypography.titleSm),
             const SizedBox(height: AppSpacing.sm),
             Row(
-              children: BudgetPeriod.values.map((p) {
-                final isSelected = p == _period;
-                return Expanded(
-                  child: GestureDetector(
-                    onTap: () => setState(() => _period = p),
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 150),
-                      margin: EdgeInsets.only(
-                        right: p != BudgetPeriod.CUSTOM ? AppSpacing.sm : 0,
-                      ),
-                      padding: const EdgeInsets.symmetric(
-                        vertical: AppSpacing.sm,
-                      ),
-                      alignment: Alignment.center,
-                      decoration: BoxDecoration(
-                        color: isSelected
-                            ? AppColors.primary.withValues(alpha: 0.15)
-                            : AppColors.surfaceContainerHighest,
-                        borderRadius: BorderRadius.circular(
-                          AppSpacing.radiusMd,
+              children:
+                  const [
+                    BudgetPeriod.WEEKLY,
+                    BudgetPeriod.MONTHLY,
+                    BudgetPeriod.YEARLY,
+                    BudgetPeriod.CUSTOM,
+                  ].map((p) {
+                    final isSelected = p == _period;
+                    return Expanded(
+                      child: GestureDetector(
+                        onTap: () => setState(() => _period = p),
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 150),
+                          margin: EdgeInsets.only(
+                            right: p != BudgetPeriod.CUSTOM ? AppSpacing.sm : 0,
+                          ),
+                          padding: const EdgeInsets.symmetric(
+                            vertical: AppSpacing.sm,
+                          ),
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            color: isSelected
+                                ? AppColors.primary.withValues(alpha: 0.15)
+                                : AppColors.surfaceContainerHighest,
+                            borderRadius: BorderRadius.circular(
+                              AppSpacing.radiusMd,
+                            ),
+                            border: Border.all(
+                              color: isSelected
+                                  ? AppColors.primary
+                                  : Colors.transparent,
+                              width: 1.5,
+                            ),
+                          ),
+                          child: Text(
+                            _periodLabels(context)[p]!,
+                            style: AppTypography.bodySm.copyWith(
+                              color: isSelected
+                                  ? AppColors.primary
+                                  : AppColors.onSurface,
+                              fontWeight: isSelected
+                                  ? FontWeight.w600
+                                  : FontWeight.w400,
+                            ),
+                          ),
                         ),
-                        border: Border.all(
-                          color: isSelected
-                              ? AppColors.primary
-                              : Colors.transparent,
-                          width: 1.5,
-                        ),
                       ),
-                      child: Text(
-                        _periodLabels(context)[p]!,
-                        style: AppTypography.bodySm.copyWith(
-                          color: isSelected
-                              ? AppColors.primary
-                              : AppColors.onSurface,
-                          fontWeight: isSelected
-                              ? FontWeight.w600
-                              : FontWeight.w400,
-                        ),
-                      ),
-                    ),
-                  ),
-                );
-              }).toList(),
+                    );
+                  }).toList(),
             ),
             const SizedBox(height: AppSpacing.xl),
 

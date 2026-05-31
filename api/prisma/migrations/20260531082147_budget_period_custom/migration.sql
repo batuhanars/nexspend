@@ -1,0 +1,5 @@
+-- AlterTable
+ALTER TABLE `budgets` MODIFY `period` ENUM('WEEKLY', 'MONTHLY', 'YEARLY', 'CUSTOM') NOT NULL DEFAULT 'MONTHLY';
+
+-- AlterTable
+ALTER TABLE `shared_budgets` MODIFY `period` ENUM('WEEKLY', 'MONTHLY', 'YEARLY', 'CUSTOM') NOT NULL DEFAULT 'MONTHLY';

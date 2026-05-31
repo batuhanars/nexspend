@@ -1,3 +1,4 @@
+import { BadRequestException } from '@nestjs/common';
 import { BudgetPeriod } from '@prisma/client';
 
 /// ISO tarih string'ini timezone-safe Date object'e çevirir.
@@ -31,7 +32,35 @@ export function computeEndDate(startDate: Date, period: BudgetPeriod): Date {
     case 'YEARLY':
       end.setUTCFullYear(end.getUTCFullYear() + 1);
       break;
+    case 'CUSTOM':
+      // CUSTOM'da bitiş tarihi kullanıcıdan gelir; otomatik hesaplanamaz.
+      throw new BadRequestException('Özel dönem için bitiş tarihi gereklidir');
   }
   end.setUTCDate(end.getUTCDate() - 1);
   return end;
+}
+
+/// Bütçe bitiş tarihini çözer. CUSTOM ise endDate zorunludur ve başlangıçtan
+/// sonra olmalıdır; diğer dönemlerde verilmezse period'a göre hesaplanır.
+/// Hem kişisel (budgets) hem ortak (family) bütçe create akışı kullanır.
+export function resolveEndDate(
+  startDate: Date,
+  period: BudgetPeriod,
+  endDateStr?: string,
+): Date {
+  if (period === 'CUSTOM') {
+    if (!endDateStr) {
+      throw new BadRequestException('Özel dönem için bitiş tarihi gereklidir');
+    }
+    const end = parseLocalDate(endDateStr);
+    if (end <= startDate) {
+      throw new BadRequestException(
+        'Bitiş tarihi başlangıç tarihinden sonra olmalıdır',
+      );
+    }
+    return end;
+  }
+  return endDateStr
+    ? parseLocalDate(endDateStr)
+    : computeEndDate(startDate, period);
 }

@@ -1,32 +1,27 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
 import { SubscriptionsService } from '../subscriptions.service';
-import { NotificationsService } from '../../notifications/notifications.service';
 
 @Injectable()
 export class UpcomingRenewalNotifyJob {
   private readonly logger = new Logger(UpcomingRenewalNotifyJob.name);
 
-  constructor(
-    private readonly subscriptionsService: SubscriptionsService,
-    private readonly notifications: NotificationsService,
-  ) {}
+  constructor(private readonly subscriptionsService: SubscriptionsService) {}
 
-  @Cron('0 9 * * *') // Her gün 09:00
+  /// Her gün 09:00. Abonelik: yarın yenilenecekler. Fatura: reminderDaysBefore
+  /// günü / son ödeme günü / gecikme (-1, -3). Cron günde bir çalıştığı için
+  /// her eşik bir kez bildirim üretir; ek state tutulmaz (statement job deseni).
+  @Cron('0 9 * * *')
   async run() {
-    const upcoming = await this.subscriptionsService.getUpcomingForNotify();
-    if (upcoming.length === 0) return;
-
-    this.logger.log(`${upcoming.length} abonelik yarın yenilenecek`);
-
-    for (const sub of upcoming) {
-      this.logger.log(
-        `[Bildirim] ${sub.user.fullName} — yarın yenilenecek: ${sub.name}`,
-      );
-      await this.notifications.sendToUser(
-        sub.userId,
-        'Abonelik Yenileniyor',
-        `${sub.name} aboneliğiniz yarın yenilenecek.`,
+    try {
+      const sent = await this.subscriptionsService.notifyUpcoming();
+      if (sent > 0) {
+        this.logger.log(`${sent} abonelik/fatura bildirimi gönderildi`);
+      }
+    } catch (err) {
+      this.logger.error(
+        `Abonelik bildirimi hatası: ${(err as Error).message}`,
+        (err as Error).stack,
       );
     }
   }

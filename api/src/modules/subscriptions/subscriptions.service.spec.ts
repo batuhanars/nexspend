@@ -1,6 +1,10 @@
 /* eslint-disable */
-import { NotFoundException } from '@nestjs/common';
-import { SubscriptionPeriod, TransactionType } from '@prisma/client';
+import { NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  SubscriptionPeriod,
+  SubscriptionKind,
+  TransactionType,
+} from '@prisma/client';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { SubscriptionsService } from './subscriptions.service';
 import { BalanceService } from '../../common/services/balance.service';
@@ -31,6 +35,10 @@ const mockEventEmitter = {
   emit: jest.fn(),
 };
 
+const mockNotifications = {
+  sendToUser: jest.fn(),
+};
+
 const USER_ID = 'user-1';
 const SUB_ID = 'sub-1';
 const ACCOUNT_ID = 'acc-1';
@@ -40,6 +48,7 @@ const baseSub = {
   userId: USER_ID,
   name: 'Netflix',
   amount: 149.99,
+  reminderDaysBefore: 3,
   period: SubscriptionPeriod.MONTHLY,
   icon: 'netflix',
   color: '#E50914',
@@ -62,6 +71,7 @@ describe('SubscriptionsService', () => {
       mockPrisma as any,
       mockBalanceService as any,
       mockEventEmitter as any,
+      mockNotifications as any,
     );
     jest.clearAllMocks();
   });
@@ -173,15 +183,86 @@ describe('SubscriptionsService', () => {
       autoDeduct: true,
     };
 
-    it('autoDeduct=true ise ilk işlemi otomatik oluşturur', async () => {
+    it('autoDeduct=true olsa bile oluşturmada işlem YARATMAZ (ilk kesinti yenileme tarihinde)', async () => {
       mockPrisma.subscription.create.mockResolvedValue({
         ...baseSub,
         name: 'Spotify',
         amount: 49.99,
       });
+
+      await service.create(USER_ID, dto);
+
+      expect(mockPrisma.subscription.create).toHaveBeenCalled();
+      expect(mockPrisma.$transaction).not.toHaveBeenCalled();
+      expect(mockEventEmitter.emit).not.toHaveBeenCalled();
+    });
+
+    it('abonelikte autoDeduct daima true olur (dto.autoDeduct yok sayılır)', async () => {
+      mockPrisma.subscription.create.mockResolvedValue({ ...baseSub });
+
+      await service.create(USER_ID, { ...dto, autoDeduct: false });
+
+      expect(mockPrisma.subscription.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            kind: SubscriptionKind.SUBSCRIPTION,
+            autoDeduct: true,
+          }),
+        }),
+      );
+      expect(mockPrisma.$transaction).not.toHaveBeenCalled();
+    });
+
+    it('kind=BILL ise autoDeduct false zorlanır ve ilk işlem oluşmaz', async () => {
+      mockPrisma.subscription.create.mockResolvedValue({
+        ...baseSub,
+        name: 'Elektrik',
+        kind: SubscriptionKind.BILL,
+        autoDeduct: false,
+      });
+
+      await service.create(USER_ID, {
+        ...dto,
+        kind: SubscriptionKind.BILL,
+        autoDeduct: true, // gönderilse bile yoksayılmalı
+      });
+
+      expect(mockPrisma.subscription.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            kind: SubscriptionKind.BILL,
+            autoDeduct: false,
+          }),
+        }),
+      );
+      expect(mockPrisma.$transaction).not.toHaveBeenCalled();
+    });
+
+    it('SUBSCRIPTION türünde tutar yoksa BadRequestException fırlatır', async () => {
+      const { amount, ...noAmount } = dto;
+
+      await expect(service.create(USER_ID, noAmount as any)).rejects.toThrow(
+        BadRequestException,
+      );
+      expect(mockPrisma.subscription.create).not.toHaveBeenCalled();
+    });
+  });
+
+  // ─── markPaid ────────────────────────────────────────────────────────────────
+
+  describe('markPaid()', () => {
+    const billSub = {
+      ...baseSub,
+      name: 'Elektrik',
+      kind: SubscriptionKind.BILL,
+      autoDeduct: false,
+      amount: 300,
+    };
+
+    it('gerçek tutarla işlem oluşturur, son ödeme tarihini ilerletir ve tahmini günceller', async () => {
+      mockPrisma.subscription.findFirst.mockResolvedValue(billSub);
       mockPrisma.$transaction.mockImplementation(async (fn: any) => {
         const tx = {
-          account: { update: jest.fn().mockResolvedValue({}) },
           transaction: {
             create: jest
               .fn()
@@ -190,29 +271,150 @@ describe('SubscriptionsService', () => {
         };
         return fn(tx);
       });
+      mockPrisma.subscription.update.mockResolvedValue(billSub);
 
-      await service.create(USER_ID, dto);
+      await service.markPaid(USER_ID, SUB_ID, { amount: 427.5 });
 
-      expect(mockPrisma.subscription.create).toHaveBeenCalled();
-      expect(mockPrisma.$transaction).toHaveBeenCalled();
+      // gerçek tutar (427.5) bakiyeye uygulanmalı, tahmini (300) değil
+      expect(mockBalanceService.apply).toHaveBeenCalledWith(
+        expect.anything(),
+        ACCOUNT_ID,
+        TransactionType.EXPENSE,
+        427.5,
+      );
       expect(mockEventEmitter.emit).toHaveBeenCalledWith(
         'transaction.created',
         expect.any(Object),
       );
+      expect(mockPrisma.subscription.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({ amount: 427.5 }),
+        }),
+      );
     });
 
-    it('autoDeduct=false ise işlem oluşturmaz', async () => {
-      mockPrisma.subscription.create.mockResolvedValue({
-        ...baseSub,
-        name: 'Manuel',
-        amount: 100,
-        autoDeduct: false,
-      });
+    it('sahip değilse NotFoundException fırlatır', async () => {
+      mockPrisma.subscription.findFirst.mockResolvedValue(null);
 
-      await service.create(USER_ID, { ...dto, autoDeduct: false });
+      await expect(
+        service.markPaid(USER_ID, 'bad-id', { amount: 100 }),
+      ).rejects.toThrow(NotFoundException);
+    });
+  });
 
-      expect(mockPrisma.$transaction).not.toHaveBeenCalled();
-      expect(mockEventEmitter.emit).not.toHaveBeenCalled();
+  // ─── notifyUpcoming ────────────────────────────────────────────────────────────
+
+  describe('notifyUpcoming()', () => {
+    const daysFromNow = (n: number) => {
+      const d = new Date();
+      d.setHours(0, 0, 0, 0);
+      d.setDate(d.getDate() + n);
+      return d;
+    };
+
+    it('otomatik abonelik reminderDaysBefore gününde yenileme bildirimi gönderir', async () => {
+      mockPrisma.subscription.findMany.mockResolvedValue([
+        {
+          ...baseSub,
+          autoDeduct: true,
+          reminderDaysBefore: 3,
+          nextRenewal: daysFromNow(3),
+        },
+      ]);
+
+      const sent = await service.notifyUpcoming();
+
+      expect(sent).toBe(1);
+      expect(mockNotifications.sendToUser).toHaveBeenCalledWith(
+        USER_ID,
+        'Abonelik yenileniyor',
+        expect.stringContaining('3 gün'),
+        expect.objectContaining({ type: 'subscription_renewal' }),
+      );
+    });
+
+    it('otomatik abonelik yenileme günü (0) bildirimi gönderir', async () => {
+      mockPrisma.subscription.findMany.mockResolvedValue([
+        {
+          ...baseSub,
+          autoDeduct: true,
+          reminderDaysBefore: 3,
+          nextRenewal: daysFromNow(0),
+        },
+      ]);
+
+      const sent = await service.notifyUpcoming();
+
+      expect(sent).toBe(1);
+      expect(mockNotifications.sendToUser).toHaveBeenCalledWith(
+        USER_ID,
+        'Abonelik bugün yenileniyor',
+        expect.any(String),
+        expect.objectContaining({ type: 'subscription_renewal' }),
+      );
+    });
+
+    it('fatura, reminderDaysBefore gününde "yaklaşıyor" bildirimi gönderir', async () => {
+      mockPrisma.subscription.findMany.mockResolvedValue([
+        {
+          ...baseSub,
+          name: 'Su',
+          kind: SubscriptionKind.BILL,
+          autoDeduct: false,
+          reminderDaysBefore: 3,
+          nextRenewal: daysFromNow(3),
+        },
+      ]);
+
+      const sent = await service.notifyUpcoming();
+
+      expect(sent).toBe(1);
+      expect(mockNotifications.sendToUser).toHaveBeenCalledWith(
+        USER_ID,
+        'Son ödeme yaklaşıyor',
+        expect.any(String),
+        expect.objectContaining({ type: 'subscription_bill' }),
+      );
+    });
+
+    it('faturanın son ödemesi geçmişse gecikme bildirimi gönderir', async () => {
+      mockPrisma.subscription.findMany.mockResolvedValue([
+        {
+          ...baseSub,
+          name: 'Doğalgaz',
+          kind: SubscriptionKind.BILL,
+          autoDeduct: false,
+          reminderDaysBefore: 3,
+          nextRenewal: daysFromNow(-1),
+        },
+      ]);
+
+      const sent = await service.notifyUpcoming();
+
+      expect(sent).toBe(1);
+      expect(mockNotifications.sendToUser).toHaveBeenCalledWith(
+        USER_ID,
+        'Ödeme gecikti',
+        expect.any(String),
+        expect.objectContaining({ type: 'subscription_bill' }),
+      );
+    });
+
+    it('eşik dışındaki kayıtlar için bildirim göndermez', async () => {
+      mockPrisma.subscription.findMany.mockResolvedValue([
+        {
+          ...baseSub,
+          kind: SubscriptionKind.BILL,
+          autoDeduct: false,
+          reminderDaysBefore: 3,
+          nextRenewal: daysFromNow(10),
+        },
+      ]);
+
+      const sent = await service.notifyUpcoming();
+
+      expect(sent).toBe(0);
+      expect(mockNotifications.sendToUser).not.toHaveBeenCalled();
     });
   });
 

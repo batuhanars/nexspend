@@ -335,6 +335,22 @@ abstract class AppStrings {
   String get billingCycleYearly;
   String get subscriptionNameHint;
 
+  // Subscription vs Bill (fatura)
+  String get subscriptionKindLabel;
+  String get kindSubscription;
+  String get kindBill;
+  String get billNameHint;
+  String get billDueDateLabel;
+  String get selectDueDate;
+  String get selectRenewalDate;
+  String get reminderDaysBeforeLabel;
+  String reminderDaysOption(int n);
+  String get payBillTitle;
+  String get payBillBtn;
+  String get enterPaidAmount;
+  String get billPaidSuccess;
+  String get billAmountOptionalHint;
+
   // Receipt scanner
   String get cameraNotFound;
   String get cameraStartFailed;
@@ -867,7 +883,7 @@ class _Tr extends AppStrings {
   @override
   String get endDateLabel => 'Bitiş';
   @override
-  String get billingCycleLabel => 'Fatura Dönemi';
+  String get billingCycleLabel => 'Yenileme Dönemi';
   @override
   String get autoDeductLabel => 'Otomatik Kesinti';
   @override
@@ -1199,6 +1215,34 @@ class _Tr extends AppStrings {
   String get billingCycleYearly => 'Yıllık';
   @override
   String get subscriptionNameHint => 'Abonelik adı (Netflix, Spotify...)';
+  @override
+  String get subscriptionKindLabel => 'Tür';
+  @override
+  String get kindSubscription => 'Abonelik';
+  @override
+  String get kindBill => 'Fatura';
+  @override
+  String get billNameHint => 'Fatura adı (Elektrik, Su, Telefon...)';
+  @override
+  String get billDueDateLabel => 'Son Ödeme Tarihi';
+  @override
+  String get selectDueDate => 'Son ödeme tarihini seçin';
+  @override
+  String get selectRenewalDate => 'Yenileme tarihini seçin';
+  @override
+  String get reminderDaysBeforeLabel => 'Hatırlatma';
+  @override
+  String reminderDaysOption(int n) => '$n gün önce';
+  @override
+  String get payBillTitle => 'Fatura Öde';
+  @override
+  String get payBillBtn => 'Öde';
+  @override
+  String get enterPaidAmount => 'Ödenen tutarı girin';
+  @override
+  String get billPaidSuccess => 'Fatura ödendi';
+  @override
+  String get billAmountOptionalHint => 'Tahmini tutar (opsiyonel)';
 
   @override
   String get cameraNotFound => 'Kamera bulunamadı';
@@ -1973,7 +2017,7 @@ class _En extends AppStrings {
   @override
   String get endDateLabel => 'End';
   @override
-  String get billingCycleLabel => 'Billing Cycle';
+  String get billingCycleLabel => 'Renewal Period';
   @override
   String get autoDeductLabel => 'Auto Deduction';
   @override
@@ -2305,6 +2349,34 @@ class _En extends AppStrings {
   String get billingCycleYearly => 'Yearly';
   @override
   String get subscriptionNameHint => 'Subscription name (Netflix, Spotify...)';
+  @override
+  String get subscriptionKindLabel => 'Type';
+  @override
+  String get kindSubscription => 'Subscription';
+  @override
+  String get kindBill => 'Bill';
+  @override
+  String get billNameHint => 'Bill name (Electricity, Water, Phone...)';
+  @override
+  String get billDueDateLabel => 'Due Date';
+  @override
+  String get selectDueDate => 'Select due date';
+  @override
+  String get selectRenewalDate => 'Select renewal date';
+  @override
+  String get reminderDaysBeforeLabel => 'Reminder';
+  @override
+  String reminderDaysOption(int n) => '$n days before';
+  @override
+  String get payBillTitle => 'Pay Bill';
+  @override
+  String get payBillBtn => 'Pay';
+  @override
+  String get enterPaidAmount => 'Enter paid amount';
+  @override
+  String get billPaidSuccess => 'Bill paid';
+  @override
+  String get billAmountOptionalHint => 'Estimated amount (optional)';
 
   @override
   String get cameraNotFound => 'Camera not found';

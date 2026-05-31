@@ -1,17 +1,25 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-argument */
-import { Injectable, NotFoundException, Logger } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+  Logger,
+} from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import {
   TransactionType,
   TransactionSource,
   SubscriptionPeriod,
+  SubscriptionKind,
 } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import { BalanceService } from '../../common/services/balance.service';
+import { NotificationsService } from '../notifications/notifications.service';
 import { advanceByFrequency } from '../../common/utils/frequency.utils';
 import { TransactionCreatedEvent } from '../../common/events/transaction.events';
 import { CreateSubscriptionDto } from './dto/create-subscription.dto';
 import { UpdateSubscriptionDto } from './dto/update-subscription.dto';
+import { PaySubscriptionDto } from './dto/pay-subscription.dto';
 
 @Injectable()
 export class SubscriptionsService {
@@ -21,6 +29,7 @@ export class SubscriptionsService {
     private readonly prisma: PrismaService,
     private readonly balanceService: BalanceService,
     private readonly eventEmitter: EventEmitter2,
+    private readonly notifications: NotificationsService,
   ) {}
 
   async findAll(userId: string) {
@@ -80,11 +89,25 @@ export class SubscriptionsService {
   }
 
   async create(userId: string, dto: CreateSubscriptionDto) {
+    const kind = dto.kind ?? SubscriptionKind.SUBSCRIPTION;
+    const isBill = kind === SubscriptionKind.BILL;
+
+    // Abonelikte tutar zorunlu; faturada tahmini tutar opsiyonel (gerçek tutar ödeme anında girilir)
+    if (!isBill && dto.amount == null) {
+      throw new BadRequestException('Abonelik için tutar zorunludur');
+    }
+
+    // Invariant: abonelik daima otomatik yenilenir, fatura daima manuel.
+    // (autoDeduct artık kullanıcı tarafından seçilmez, kind'den türetilir.)
+    const autoDeduct = !isBill;
+
     const subscription = await this.prisma.subscription.create({
       data: {
         userId,
         name: dto.name,
-        amount: dto.amount,
+        amount: dto.amount ?? 0,
+        kind,
+        reminderDaysBefore: dto.reminderDaysBefore ?? 3,
         period: dto.period ?? SubscriptionPeriod.MONTHLY,
         icon: dto.icon ?? null,
         color: dto.color ?? null,
@@ -92,7 +115,7 @@ export class SubscriptionsService {
         categoryId: dto.categoryId ?? null,
         startDate: new Date(dto.startDate),
         nextRenewal: new Date(dto.nextRenewal),
-        autoDeduct: dto.autoDeduct ?? true,
+        autoDeduct,
       },
       include: {
         account: { select: { id: true, name: true, icon: true, color: true } },
@@ -100,11 +123,9 @@ export class SubscriptionsService {
       },
     });
 
-    // İlk satın almada otomatik işlem oluştur
-    if (subscription.autoDeduct) {
-      await this.createRenewalTransaction(userId, subscription);
-    }
-
+    // Oluşturmada işlem YARATILMAZ. Otomatik kesintili abonelikler ilk kesintiyi
+    // yenileme tarihi geldiğinde processRenewals (cron) ile alır. Böylece mevcut
+    // bir abonelik gerçek yenileme tarihiyle takibe alındığında çift kayıt olmaz.
     return this.format(subscription);
   }
 
@@ -122,6 +143,9 @@ export class SubscriptionsService {
           ...(dto.color !== undefined && { color: dto.color }),
           ...(dto.accountId !== undefined && { accountId: dto.accountId }),
           ...(dto.categoryId !== undefined && { categoryId: dto.categoryId }),
+          ...(dto.reminderDaysBefore !== undefined && {
+            reminderDaysBefore: dto.reminderDaysBefore,
+          }),
           ...(dto.nextRenewal !== undefined && {
             nextRenewal: new Date(dto.nextRenewal),
           }),
@@ -170,6 +194,7 @@ export class SubscriptionsService {
       where: {
         isActive: true,
         autoDeduct: true,
+        kind: SubscriptionKind.SUBSCRIPTION,
         nextRenewal: { lt: tomorrow },
       },
       include: {
@@ -189,17 +214,96 @@ export class SubscriptionsService {
     }
   }
 
-  async getUpcomingForNotify() {
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    tomorrow.setHours(0, 0, 0, 0);
-    const dayAfter = new Date(tomorrow);
-    dayAfter.setDate(dayAfter.getDate() + 1);
+  // Cron job tarafından çağrılır — gün başına bir kez bildirim eşiklerini tarar.
+  // SUBSCRIPTION: reminderDaysBefore günü + yenileme günü (otomatik kesinti varsa).
+  // BILL: reminderDaysBefore günü + son ödeme günü + gecikme (-1/-3).
+  // Ek "gönderildi mi" state'i tutulmaz (statement job deseni).
+  async notifyUpcoming(): Promise<number> {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
 
-    return this.prisma.subscription.findMany({
-      where: { isActive: true, nextRenewal: { gte: tomorrow, lt: dayAfter } },
-      include: { user: { select: { fullName: true, email: true } } },
+    const subs = await this.prisma.subscription.findMany({
+      where: { isActive: true },
     });
+
+    let sent = 0;
+
+    for (const sub of subs) {
+      const due = new Date(sub.nextRenewal);
+      due.setHours(0, 0, 0, 0);
+      const daysUntilDue = Math.round(
+        (due.getTime() - today.getTime()) / 86_400_000,
+      );
+
+      let title: string | null = null;
+      let body: string | null = null;
+
+      if (sub.kind === SubscriptionKind.BILL) {
+        if (daysUntilDue === sub.reminderDaysBefore && daysUntilDue > 0) {
+          title = 'Son ödeme yaklaşıyor';
+          body = `${sub.name} faturanızın son ödeme tarihine ${daysUntilDue} gün kaldı.`;
+        } else if (daysUntilDue === 0) {
+          title = 'Son ödeme bugün';
+          body = `${sub.name} faturanızın son ödeme günü bugün.`;
+        } else if (daysUntilDue === -1 || daysUntilDue === -3) {
+          title = 'Ödeme gecikti';
+          body = `${sub.name} faturası ${-daysUntilDue} gün gecikti.`;
+        }
+      } else if (sub.autoDeduct) {
+        // Otomatik kesintili abonelik — yenileme tarihi yaklaşınca hatırlat
+        if (daysUntilDue === sub.reminderDaysBefore && daysUntilDue > 0) {
+          title = 'Abonelik yenileniyor';
+          body = `${sub.name} aboneliğiniz ${daysUntilDue} gün sonra yenilenecek.`;
+        } else if (daysUntilDue === 0) {
+          title = 'Abonelik bugün yenileniyor';
+          body = `${sub.name} aboneliğiniz bugün yenilenecek.`;
+        }
+      }
+
+      if (title && body) {
+        await this.notifications.sendToUser(sub.userId, title, body, {
+          type:
+            sub.kind === SubscriptionKind.BILL
+              ? 'subscription_bill'
+              : 'subscription_renewal',
+          subscriptionId: sub.id,
+          accountId: sub.accountId,
+        });
+        sent++;
+      }
+    }
+
+    return sent;
+  }
+
+  // Fatura ödemesi — kullanıcı gerçek tutarı girer, işlem oluşur, son ödeme tarihi ilerler.
+  async markPaid(userId: string, id: string, dto: PaySubscriptionDto) {
+    const sub = await this.findOwned(userId, id);
+    const paidDate = dto.paidDate ? new Date(dto.paidDate) : new Date();
+
+    await this.createRenewalTransaction(userId, sub, dto.amount, paidDate);
+
+    const nextRenewal = advanceByFrequency(
+      new Date(sub.nextRenewal),
+      sub.period,
+    );
+
+    return this.format(
+      await this.prisma.subscription.update({
+        where: { id },
+        data: {
+          nextRenewal,
+          // Faturada ödenen gerçek tutar bir sonraki tahmini olarak saklanır
+          ...(sub.kind === SubscriptionKind.BILL && { amount: dto.amount }),
+        },
+        include: {
+          account: {
+            select: { id: true, name: true, icon: true, color: true },
+          },
+          category: true,
+        },
+      }),
+    );
   }
 
   private async processOneRenewal(sub: any) {
@@ -216,15 +320,21 @@ export class SubscriptionsService {
     });
   }
 
-  private async createRenewalTransaction(userId: string, sub: any) {
-    const now = new Date();
+  private async createRenewalTransaction(
+    userId: string,
+    sub: any,
+    amount: number = Number(sub.amount),
+    when: Date = new Date(),
+  ) {
+    const isBill = sub.kind === SubscriptionKind.BILL;
+    const title = isBill ? `${sub.name} — Fatura` : `${sub.name} — Abonelik`;
 
     const transaction = await this.prisma.$transaction(async (tx) => {
       await this.balanceService.apply(
         tx,
         sub.accountId,
         TransactionType.EXPENSE,
-        Number(sub.amount),
+        amount,
       );
 
       return tx.transaction.create({
@@ -234,9 +344,9 @@ export class SubscriptionsService {
           categoryId: sub.categoryId ?? null,
           type: TransactionType.EXPENSE,
           source: TransactionSource.SUBSCRIPTION,
-          amount: sub.amount,
-          title: `${sub.name} — Abonelik`,
-          transactionDate: now,
+          amount,
+          title,
+          transactionDate: when,
           relatedSubId: sub.id,
         },
       });
@@ -251,8 +361,8 @@ export class SubscriptionsService {
         sub.categoryId ?? null,
         TransactionType.EXPENSE,
         TransactionSource.SUBSCRIPTION,
-        Number(sub.amount),
-        now,
+        amount,
+        when,
       ),
     );
   }

@@ -34,3 +34,5 @@ mobile/android/app/google-services.json
 mobile/ios/Pods/
 mobile/ios/Flutter/flutter_export_environment.sh
 mobile/ios/Runner.xcworkspace/xcshareddata/WorkspaceSettings.xcsettings
+
+screenshots/

@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE `subscriptions` ADD COLUMN `kind` ENUM('SUBSCRIPTION', 'BILL') NOT NULL DEFAULT 'SUBSCRIPTION',
+    ADD COLUMN `reminder_days_before` INTEGER NOT NULL DEFAULT 3;

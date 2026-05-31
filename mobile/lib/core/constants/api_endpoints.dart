@@ -70,6 +70,7 @@ class ApiEndpoints {
   static String subscriptionById(String id) => '/api/subscriptions/$id';
   static String subscriptionToggle(String id) =>
       '/api/subscriptions/$id/toggle';
+  static String subscriptionPay(String id) => '/api/subscriptions/$id/pay';
 
   // Categories
   static const String categories = '/api/categories';

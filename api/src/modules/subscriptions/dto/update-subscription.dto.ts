@@ -6,6 +6,9 @@ import {
   IsEnum,
   IsDateString,
   IsBoolean,
+  IsInt,
+  Min,
+  Max,
   Matches,
   MaxLength,
 } from 'class-validator';
@@ -21,6 +24,12 @@ export class UpdateSubscriptionDto {
   @IsPositive()
   @IsOptional()
   amount?: number;
+
+  @IsInt()
+  @Min(0)
+  @Max(30)
+  @IsOptional()
+  reminderDaysBefore?: number;
 
   @IsEnum(SubscriptionPeriod)
   @IsOptional()

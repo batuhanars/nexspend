@@ -60,6 +60,11 @@ enum SubscriptionPeriod {
   YEARLY
 }
 
+enum SubscriptionKind {
+  SUBSCRIPTION // oto-kesintili, sabit tutarlı abonelik (Netflix, Spotify)
+  BILL         // manuel ödenen, değişken tutarlı fatura (elektrik, su, telefon)
+}
+
 enum RecurrenceFrequency {
   DAILY
   WEEKLY
@@ -450,6 +455,8 @@ model Subscription {
   categoryId  String?            @map("category_id") @db.VarChar(36)
   isActive    Boolean            @default(true) @map("is_active")
   autoDeduct  Boolean            @default(true) @map("auto_deduct")
+  kind        SubscriptionKind   @default(SUBSCRIPTION) @map("kind")
+  reminderDaysBefore Int         @default(3) @map("reminder_days_before")
   createdAt   DateTime           @default(now()) @map("created_at") @db.DateTime(0)
   updatedAt   DateTime           @updatedAt @map("updated_at") @db.DateTime(0)
 

@@ -219,6 +219,103 @@ class _SubscriptionDetailPageState extends State<SubscriptionDetailPage> {
     }
   }
 
+  Future<void> _payBill() async {
+    double? pendingAmount = _sub.amount > 0 ? _sub.amount : null;
+    double? confirmedAmount;
+
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: AppColors.surfaceContainerHigh,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(AppSpacing.radiusLg),
+        ),
+      ),
+      builder: (sheetCtx) {
+        return Padding(
+          padding: EdgeInsets.fromLTRB(
+            AppSpacing.pagePadding,
+            AppSpacing.xl,
+            AppSpacing.pagePadding,
+            MediaQuery.of(sheetCtx).viewInsets.bottom + AppSpacing.xl,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    AppStrings.of(sheetCtx).payBillTitle,
+                    style: AppTypography.headlineSm,
+                  ),
+                  IconButton(
+                    onPressed: () => Navigator.of(sheetCtx).pop(),
+                    icon: const Icon(Icons.close_rounded),
+                    color: AppColors.onSurfaceVariant,
+                  ),
+                ],
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              Text(
+                AppStrings.of(sheetCtx).enterPaidAmount,
+                style: AppTypography.bodySm.copyWith(
+                  color: AppColors.onSurfaceVariant,
+                ),
+              ),
+              const SizedBox(height: AppSpacing.xl),
+              Center(
+                child: SplitAmountField(
+                  initialValue: _sub.amount > 0 ? _sub.amount : null,
+                  onChanged: (v) => pendingAmount = v,
+                  color: AppColors.tertiary,
+                ),
+              ),
+              const SizedBox(height: AppSpacing.xl),
+              FilledButton(
+                onPressed: () {
+                  if (pendingAmount == null || pendingAmount! <= 0) {
+                    ScaffoldMessenger.of(sheetCtx).showSnackBar(
+                      SnackBar(
+                        content: Text(AppStrings.of(sheetCtx).enterValidAmount),
+                        backgroundColor: AppColors.error,
+                      ),
+                    );
+                    return;
+                  }
+                  confirmedAmount = pendingAmount;
+                  Navigator.of(sheetCtx).pop();
+                },
+                style: FilledButton.styleFrom(
+                  minimumSize: const Size.fromHeight(56),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
+                  ),
+                ),
+                child: Text(AppStrings.of(sheetCtx).payBillBtn),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+
+    if (confirmedAmount != null && mounted) {
+      context.read<SubscriptionsBloc>().add(
+        SubscriptionPayRequested(id: _sub.id, amount: confirmedAmount!),
+      );
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(AppStrings.of(context).billPaidSuccess),
+          backgroundColor: AppColors.secondary,
+        ),
+      );
+      Navigator.of(context).pop();
+    }
+  }
+
   Future<void> _delete() async {
     final confirmed = await showDialog<bool>(
       context: context,
@@ -295,6 +392,27 @@ class _SubscriptionDetailPageState extends State<SubscriptionDetailPage> {
           const SizedBox(height: AppSpacing.xl),
           SubscriptionDetailsCard(sub: _sub),
           const SizedBox(height: AppSpacing.xl),
+          if (_sub.isBill) ...[
+            FilledButton(
+              onPressed: _payBill,
+              style: FilledButton.styleFrom(
+                minimumSize: const Size.fromHeight(56),
+                backgroundColor: AppColors.primary,
+                foregroundColor: AppColors.onPrimary,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
+                ),
+              ),
+              child: Text(
+                AppStrings.of(context).payBillBtn,
+                style: AppTypography.bodyMd.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.surface,
+                ),
+              ),
+            ),
+            const SizedBox(height: AppSpacing.md),
+          ],
           FilledButton(
             onPressed: _toggle,
             style: FilledButton.styleFrom(

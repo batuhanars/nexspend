@@ -14,6 +14,7 @@ import {
 import { SubscriptionsService } from './subscriptions.service';
 import { CreateSubscriptionDto } from './dto/create-subscription.dto';
 import { UpdateSubscriptionDto } from './dto/update-subscription.dto';
+import { PaySubscriptionDto } from './dto/pay-subscription.dto';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 
@@ -74,5 +75,14 @@ export class SubscriptionsController {
   @Patch(':id/toggle')
   toggle(@CurrentUser() user: { id: string }, @Param('id') id: string) {
     return this.subscriptionsService.toggle(user.id, id);
+  }
+
+  @Post(':id/pay')
+  pay(
+    @CurrentUser() user: { id: string },
+    @Param('id') id: string,
+    @Body() dto: PaySubscriptionDto,
+  ) {
+    return this.subscriptionsService.markPaid(user.id, id, dto);
   }
 }

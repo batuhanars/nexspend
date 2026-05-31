@@ -24,32 +24,37 @@ class SubscriptionDetailsCard extends StatelessWidget {
           Text(s.detailsCardTitle, style: AppTypography.titleSm),
           const SizedBox(height: AppSpacing.md),
           if (sub.description != null) ...[
-            SubscriptionDetailRow(label: s.descriptionLabel, value: sub.description!),
-            const Divider(
-                color: AppColors.surfaceContainerHighest, height: 1),
+            SubscriptionDetailRow(
+              label: s.descriptionLabel,
+              value: sub.description!,
+            ),
+            const Divider(color: AppColors.surfaceContainerHighest, height: 1),
           ],
           if (sub.categoryName != null) ...[
-            SubscriptionDetailRow(label: s.categoryLabel, value: sub.categoryName!),
-            const Divider(
-                color: AppColors.surfaceContainerHighest, height: 1),
+            SubscriptionDetailRow(
+              label: s.categoryLabel,
+              value: sub.categoryName!,
+            ),
+            const Divider(color: AppColors.surfaceContainerHighest, height: 1),
           ],
           if (sub.accountName != null) ...[
-            SubscriptionDetailRow(label: s.accountLabel, value: sub.accountName!),
-            const Divider(
-                color: AppColors.surfaceContainerHighest, height: 1),
+            SubscriptionDetailRow(
+              label: s.accountLabel,
+              value: sub.accountName!,
+            ),
+            const Divider(color: AppColors.surfaceContainerHighest, height: 1),
           ],
+          // Hatırlatma her iki tür için
           SubscriptionDetailRow(
-            label: s.autoDeductLabel,
-            value: sub.autoDeduct ? s.onValue : s.offValue,
+            label: s.reminderDaysBeforeLabel,
+            value: s.reminderDaysOption(sub.reminderDaysBefore),
           ),
           if (sub.nextRenewalDate != null) ...[
-            const Divider(
-                color: AppColors.surfaceContainerHighest, height: 1),
+            const Divider(color: AppColors.surfaceContainerHighest, height: 1),
             SubscriptionDetailRow(
-              label: s.nextRenewalLabel,
+              label: sub.isBill ? s.billDueDateLabel : s.nextRenewalLabel,
               value: _formatDate(sub.nextRenewalDate!),
-              valueColor:
-                  sub.isRenewingSoon ? AppColors.warning : null,
+              valueColor: sub.isRenewingSoon ? AppColors.warning : null,
             ),
           ],
         ],
@@ -81,8 +86,9 @@ class SubscriptionDetailRow extends StatelessWidget {
         children: [
           Text(
             label,
-            style: AppTypography.bodySm
-                .copyWith(color: AppColors.onSurfaceVariant),
+            style: AppTypography.bodySm.copyWith(
+              color: AppColors.onSurfaceVariant,
+            ),
           ),
           Text(
             value,

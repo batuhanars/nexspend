@@ -69,6 +69,7 @@ class FamilyRepository {
     required double amount,
     required String startDate,
     required String period,
+    String? endDate,
   }) async {
     final response = await _dio.post(
       ApiEndpoints.familyGroupBudgets(groupId),
@@ -78,6 +79,7 @@ class FamilyRepository {
         'amount': amount,
         'startDate': startDate,
         'period': period,
+        'endDate': ?endDate,
       },
     );
     return SharedBudgetModel.fromJson(

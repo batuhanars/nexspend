@@ -54,6 +54,7 @@ class AddSharedBudgetBloc
         amount: data['amount'] as double,
         startDate: data['startDate'] as String,
         period: data['period'] as String,
+        endDate: data['endDate'] as String?,
       );
       emit(AddSharedBudgetSuccess(budget));
     } catch (_) {

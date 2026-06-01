@@ -2,10 +2,10 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
 import '../../../core/l10n/app_strings.dart';
+import '../../../core/theme/app_palette.dart';
 import '../../../core/utils/validators.dart';
 import '../../../navigation/route_names.dart';
 import '../bloc/auth_bloc.dart';
@@ -44,7 +44,8 @@ class _CheckItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = met ? AppColors.secondary : AppColors.onSurfaceVariant;
+    final colors = context.colors;
+    final color = met ? colors.secondary : colors.onSurfaceVariant;
     return Row(
       children: [
         Icon(
@@ -129,6 +130,7 @@ class _RegisterPageState extends State<RegisterPage> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return BlocListener<AuthBloc, AuthState>(
       listener: (context, state) {
         if (state is AuthAuthenticated) {
@@ -137,7 +139,7 @@ class _RegisterPageState extends State<RegisterPage> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(state.message),
-              backgroundColor: AppColors.error,
+              backgroundColor: context.colors.error,
             ),
           );
         }
@@ -162,12 +164,12 @@ class _RegisterPageState extends State<RegisterPage> {
                   const SizedBox(height: AppSpacing.lg),
                   Text(
                     AppStrings.of(context).createAccount,
-                    style: AppTypography.headlineMd.copyWith(color: AppColors.onSurface),
+                    style: AppTypography.headlineMd.copyWith(color: colors.onSurface),
                   ),
                   const SizedBox(height: AppSpacing.xs),
                   Text(
                     AppStrings.of(context).createAccountSubtitle,
-                    style: AppTypography.bodyMd.copyWith(color: AppColors.onSurfaceVariant),
+                    style: AppTypography.bodyMd.copyWith(color: colors.onSurfaceVariant),
                   ),
                   const SizedBox(height: AppSpacing.xxl),
                   AuthInputField(
@@ -235,27 +237,27 @@ class _RegisterPageState extends State<RegisterPage> {
                         value: _termsAccepted,
                         onChanged: (val) =>
                             setState(() => _termsAccepted = val ?? false),
-                        activeColor: AppColors.primary,
+                        activeColor: colors.primary,
                         side: BorderSide(
                           color: _termsAccepted
-                              ? AppColors.primary
-                              : AppColors.onSurfaceVariant,
+                              ? colors.primary
+                              : colors.onSurfaceVariant,
                         ),
                       ),
                       Expanded(
                         child: Text.rich(
                           TextSpan(
                             style: AppTypography.bodySm
-                                .copyWith(color: AppColors.onSurfaceVariant),
+                                .copyWith(color: colors.onSurfaceVariant),
                             children: [
                               TextSpan(text: AppStrings.of(context).legalAcceptPrefix),
                               TextSpan(
                                 text: AppStrings.of(context).privacyPolicyTitle,
                                 recognizer: _privacyRecognizer,
                                 style: AppTypography.bodySm.copyWith(
-                                  color: AppColors.primary,
+                                  color: colors.primary,
                                   decoration: TextDecoration.underline,
-                                  decorationColor: AppColors.primary,
+                                  decorationColor: colors.primary,
                                 ),
                               ),
                               TextSpan(text: AppStrings.of(context).legalAcceptAnd),
@@ -263,9 +265,9 @@ class _RegisterPageState extends State<RegisterPage> {
                                 text: AppStrings.of(context).termsOfServiceTitle,
                                 recognizer: _termsRecognizer,
                                 style: AppTypography.bodySm.copyWith(
-                                  color: AppColors.primary,
+                                  color: colors.primary,
                                   decoration: TextDecoration.underline,
-                                  decorationColor: AppColors.primary,
+                                  decorationColor: colors.primary,
                                 ),
                               ),
                             ],
@@ -292,7 +294,7 @@ class _RegisterPageState extends State<RegisterPage> {
                       Text(
                         AppStrings.of(context).hasAccount,
                         style: AppTypography.bodyMd.copyWith(
-                          color: AppColors.onSurfaceVariant,
+                          color: colors.onSurfaceVariant,
                         ),
                       ),
                       TextButton(
@@ -303,7 +305,7 @@ class _RegisterPageState extends State<RegisterPage> {
                         child: Text(
                           AppStrings.of(context).loginAction,
                           style: AppTypography.bodyMd.copyWith(
-                            color: AppColors.primary,
+                            color: colors.primary,
                             fontWeight: FontWeight.w600,
                           ),
                         ),

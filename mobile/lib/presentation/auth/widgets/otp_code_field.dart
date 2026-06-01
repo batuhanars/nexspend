@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
+import '../../../core/theme/app_palette.dart';
 
 /// OTP / sıfırlama kodu için kare kutucuk dizini. Görsel olarak `length` adet
 /// kutucuk gösterir, arka planda tek bir görünmez TextField input alır — bu
@@ -117,8 +117,8 @@ class _OtpCodeFieldState extends State<OtpCodeField> {
             padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
             child: Text(
               widget.errorText!,
-              style: const TextStyle(
-                color: AppColors.error,
+              style: TextStyle(
+                color: context.colors.error,
                 fontSize: 12,
               ),
             ),
@@ -144,14 +144,15 @@ class _DigitBox extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     final borderColor = hasError
-        ? AppColors.error
+        ? colors.error
         : isActive
-            ? AppColors.primary
+            ? colors.primary
             : Colors.transparent;
     final bg = isFilled
-        ? AppColors.primary.withValues(alpha: 0.10)
-        : AppColors.surfaceContainerHighest;
+        ? colors.primary.withValues(alpha: 0.10)
+        : colors.surfaceContainerHighest;
     return AnimatedContainer(
       duration: const Duration(milliseconds: 150),
       width: 48,
@@ -166,7 +167,7 @@ class _DigitBox extends StatelessWidget {
         boxShadow: isActive && !hasError
             ? [
                 BoxShadow(
-                  color: AppColors.primary.withValues(alpha: 0.2),
+                  color: colors.primary.withValues(alpha: 0.2),
                   blurRadius: 8,
                   spreadRadius: 0,
                 ),
@@ -176,11 +177,11 @@ class _DigitBox extends StatelessWidget {
       alignment: Alignment.center,
       child: Text(
         char,
-        style: const TextStyle(
+        style: TextStyle(
           fontFamily: 'Inter',
           fontSize: 24,
           fontWeight: FontWeight.w600,
-          color: AppColors.onSurface,
+          color: colors.onSurface,
           height: 1.0,
         ),
       ),

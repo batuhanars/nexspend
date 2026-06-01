@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/theme/app_palette.dart';
 
@@ -33,13 +32,14 @@ class SplitAmountField extends StatefulWidget {
   const SplitAmountField({
     super.key,
     required this.onChanged,
-    this.color = AppColors.primary,
+    this.color,
     this.autofocus = true,
     this.initialValue,
   });
 
   final ValueChanged<double?> onChanged;
-  final Color color;
+  // null → context.colors.primary olarak çözülür (tema-duyarlı varsayılan)
+  final Color? color;
   final bool autofocus;
   final double? initialValue;
 
@@ -102,8 +102,8 @@ class _SplitAmountFieldState extends State<SplitAmountField> {
 
   @override
   Widget build(BuildContext context) {
-    final color = widget.color;
     final colors = context.colors;
+    final color = widget.color ?? colors.primary;
 
     final numStyle = TextStyle(
       fontFamily: 'Inter',

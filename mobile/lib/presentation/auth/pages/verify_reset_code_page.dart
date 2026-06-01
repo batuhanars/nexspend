@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
 import '../../../core/l10n/app_strings.dart';
+import '../../../core/theme/app_palette.dart';
 import '../../../navigation/route_names.dart';
 import '../bloc/auth_bloc.dart';
 import '../widgets/auth_button.dart';
@@ -52,6 +52,7 @@ class _VerifyResetCodePageState extends State<VerifyResetCodePage> {
   @override
   Widget build(BuildContext context) {
     final s = AppStrings.of(context);
+    final colors = context.colors;
     return BlocListener<AuthBloc, AuthState>(
       listener: (context, state) {
         if (state is VerifyResetCodeSuccess) {
@@ -61,7 +62,7 @@ class _VerifyResetCodePageState extends State<VerifyResetCodePage> {
         } else if (state is AuthFailure) {
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
             content: Text(state.message),
-            backgroundColor: AppColors.error,
+            backgroundColor: context.colors.error,
           ));
         }
       },
@@ -86,26 +87,26 @@ class _VerifyResetCodePageState extends State<VerifyResetCodePage> {
                   width: 56,
                   height: 56,
                   decoration: BoxDecoration(
-                    color: AppColors.primary.withValues(alpha: 0.12),
+                    color: colors.primary.withValues(alpha: 0.12),
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.pin_outlined,
                     size: 28,
-                    color: AppColors.primary,
+                    color: colors.primary,
                   ),
                 ),
                 const SizedBox(height: AppSpacing.lg),
                 Text(
                   s.verifyCodeTitle,
                   style: AppTypography.headlineMd
-                      .copyWith(color: AppColors.onSurface),
+                      .copyWith(color: colors.onSurface),
                 ),
                 const SizedBox(height: AppSpacing.xs),
                 Text(
                   s.verifyCodeSubtitle,
                   style: AppTypography.bodyMd
-                      .copyWith(color: AppColors.onSurfaceVariant),
+                      .copyWith(color: colors.onSurfaceVariant),
                 ),
                 const SizedBox(height: AppSpacing.xxl),
                 OtpCodeField(

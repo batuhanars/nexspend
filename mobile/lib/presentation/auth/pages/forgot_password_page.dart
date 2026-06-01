@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
 import '../../../core/l10n/app_strings.dart';
+import '../../../core/theme/app_palette.dart';
 import '../../../core/utils/validators.dart';
 import '../../../navigation/route_names.dart';
 import '../bloc/auth_bloc.dart';
@@ -38,6 +38,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return BlocListener<AuthBloc, AuthState>(
       listener: (context, state) {
         if (state is ForgotPasswordSuccess) {
@@ -46,7 +47,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(state.message),
-              backgroundColor: AppColors.error,
+              backgroundColor: context.colors.error,
             ),
           );
         }
@@ -73,24 +74,24 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                     width: 56,
                     height: 56,
                     decoration: BoxDecoration(
-                      color: AppColors.primary.withValues(alpha: 0.12),
+                      color: colors.primary.withValues(alpha: 0.12),
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(
+                    child: Icon(
                       Icons.mail_outline_rounded,
                       size: 28,
-                      color: AppColors.primary,
+                      color: colors.primary,
                     ),
                   ),
                   const SizedBox(height: AppSpacing.lg),
                   Text(
                     AppStrings.of(context).forgotPasswordTitle,
-                    style: AppTypography.headlineMd.copyWith(color: AppColors.onSurface),
+                    style: AppTypography.headlineMd.copyWith(color: colors.onSurface),
                   ),
                   const SizedBox(height: AppSpacing.xs),
                   Text(
                     AppStrings.of(context).forgotPasswordSubtitle,
-                    style: AppTypography.bodyMd.copyWith(color: AppColors.onSurfaceVariant),
+                    style: AppTypography.bodyMd.copyWith(color: colors.onSurfaceVariant),
                   ),
                   const SizedBox(height: AppSpacing.xxl),
                   AuthInputField(
@@ -127,8 +128,8 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
     showDialog<void>(
       context: context,
       barrierDismissible: false,
-      builder: (_) => AlertDialog(
-        backgroundColor: AppColors.surfaceContainerHigh,
+      builder: (dlgCtx) => AlertDialog(
+        backgroundColor: dlgCtx.colors.surfaceContainerHigh,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
         ),
@@ -139,35 +140,35 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
               width: 64,
               height: 64,
               decoration: BoxDecoration(
-                color: AppColors.income.withValues(alpha: 0.12),
+                color: dlgCtx.colors.income.withValues(alpha: 0.12),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.check_circle_outline_rounded,
                 size: 36,
-                color: AppColors.income,
+                color: dlgCtx.colors.income,
               ),
             ),
             const SizedBox(height: AppSpacing.lg),
             Text(
-              AppStrings.of(context).resetLinkSentTitle,
-              style: AppTypography.titleSm.copyWith(color: AppColors.onSurface),
+              AppStrings.of(dlgCtx).resetLinkSentTitle,
+              style: AppTypography.titleSm.copyWith(color: dlgCtx.colors.onSurface),
             ),
             const SizedBox(height: AppSpacing.sm),
             Text(
-              AppStrings.of(context).resetLinkSentContent(email),
+              AppStrings.of(dlgCtx).resetLinkSentContent(email),
               textAlign: TextAlign.center,
-              style: AppTypography.bodyMd.copyWith(color: AppColors.onSurfaceVariant),
+              style: AppTypography.bodyMd.copyWith(color: dlgCtx.colors.onSurfaceVariant),
             ),
             const SizedBox(height: AppSpacing.xl),
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: () {
-                  Navigator.of(context).pop();
+                  Navigator.of(dlgCtx).pop();
                   context.go(RouteNames.verifyResetCode);
                 },
-                child: Text(AppStrings.of(context).enterResetCode),
+                child: Text(AppStrings.of(dlgCtx).enterResetCode),
               ),
             ),
           ],

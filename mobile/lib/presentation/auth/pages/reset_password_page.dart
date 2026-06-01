@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
 import '../../../core/l10n/app_strings.dart';
+import '../../../core/theme/app_palette.dart';
 import '../../../core/utils/validators.dart';
 import '../../../navigation/route_names.dart';
 import '../bloc/auth_bloc.dart';
@@ -58,6 +58,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
   @override
   Widget build(BuildContext context) {
     final password = _passwordController.text;
+    final colors = context.colors;
 
     return BlocListener<AuthBloc, AuthState>(
       listener: (context, state) {
@@ -67,7 +68,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(state.message),
-              backgroundColor: AppColors.error,
+              backgroundColor: context.colors.error,
             ),
           );
         }
@@ -94,24 +95,24 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                     width: 56,
                     height: 56,
                     decoration: BoxDecoration(
-                      color: AppColors.primary.withValues(alpha: 0.12),
+                      color: colors.primary.withValues(alpha: 0.12),
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(
+                    child: Icon(
                       Icons.lock_reset_rounded,
                       size: 28,
-                      color: AppColors.primary,
+                      color: colors.primary,
                     ),
                   ),
                   const SizedBox(height: AppSpacing.lg),
                   Text(
                     AppStrings.of(context).resetPasswordTitle,
-                    style: AppTypography.headlineMd.copyWith(color: AppColors.onSurface),
+                    style: AppTypography.headlineMd.copyWith(color: colors.onSurface),
                   ),
                   const SizedBox(height: AppSpacing.xs),
                   Text(
                     AppStrings.of(context).resetPasswordSubtitle,
-                    style: AppTypography.bodyMd.copyWith(color: AppColors.onSurfaceVariant),
+                    style: AppTypography.bodyMd.copyWith(color: colors.onSurfaceVariant),
                   ),
                   const SizedBox(height: AppSpacing.xxl),
                   AuthInputField(
@@ -167,8 +168,8 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
     showDialog<void>(
       context: context,
       barrierDismissible: false,
-      builder: (_) => AlertDialog(
-        backgroundColor: AppColors.surfaceContainerHigh,
+      builder: (dlgCtx) => AlertDialog(
+        backgroundColor: dlgCtx.colors.surfaceContainerHigh,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
         ),
@@ -179,35 +180,35 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
               width: 64,
               height: 64,
               decoration: BoxDecoration(
-                color: AppColors.income.withValues(alpha: 0.12),
+                color: dlgCtx.colors.income.withValues(alpha: 0.12),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.check_circle_outline_rounded,
                 size: 36,
-                color: AppColors.income,
+                color: dlgCtx.colors.income,
               ),
             ),
             const SizedBox(height: AppSpacing.lg),
             Text(
-              AppStrings.of(context).passwordUpdatedTitle,
-              style: AppTypography.titleSm.copyWith(color: AppColors.onSurface),
+              AppStrings.of(dlgCtx).passwordUpdatedTitle,
+              style: AppTypography.titleSm.copyWith(color: dlgCtx.colors.onSurface),
             ),
             const SizedBox(height: AppSpacing.sm),
             Text(
-              AppStrings.of(context).passwordUpdatedContent,
+              AppStrings.of(dlgCtx).passwordUpdatedContent,
               textAlign: TextAlign.center,
-              style: AppTypography.bodyMd.copyWith(color: AppColors.onSurfaceVariant),
+              style: AppTypography.bodyMd.copyWith(color: dlgCtx.colors.onSurfaceVariant),
             ),
             const SizedBox(height: AppSpacing.xl),
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: () {
-                  Navigator.of(context).pop();
+                  Navigator.of(dlgCtx).pop();
                   context.go(RouteNames.login);
                 },
-                child: Text(AppStrings.of(context).loginAction),
+                child: Text(AppStrings.of(dlgCtx).loginAction),
               ),
             ),
           ],
@@ -224,10 +225,11 @@ class _PasswordChecklist extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return Container(
       padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
-        color: AppColors.surfaceContainerHigh,
+        color: colors.surfaceContainerHigh,
         borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
       ),
       child: Column(
@@ -235,7 +237,7 @@ class _PasswordChecklist extends StatelessWidget {
         children: [
           Text(
             AppStrings.of(context).passwordRequirements,
-            style: AppTypography.labelMd.copyWith(color: AppColors.onSurfaceVariant),
+            style: AppTypography.labelMd.copyWith(color: colors.onSurfaceVariant),
           ),
           const SizedBox(height: AppSpacing.sm),
           _CheckItem(
@@ -264,6 +266,7 @@ class _CheckItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return Padding(
       padding: const EdgeInsets.only(top: AppSpacing.xs),
       child: Row(
@@ -271,13 +274,13 @@ class _CheckItem extends StatelessWidget {
           Icon(
             met ? Icons.check_circle_rounded : Icons.radio_button_unchecked_rounded,
             size: 16,
-            color: met ? AppColors.income : AppColors.onSurfaceVariant,
+            color: met ? colors.income : colors.onSurfaceVariant,
           ),
           const SizedBox(width: AppSpacing.sm),
           Text(
             label,
             style: AppTypography.bodySm.copyWith(
-              color: met ? AppColors.income : AppColors.onSurfaceVariant,
+              color: met ? colors.income : colors.onSurfaceVariant,
             ),
           ),
         ],

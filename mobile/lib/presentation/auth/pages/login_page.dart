@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
 import '../../../core/di/injection.dart';
 import '../../../core/l10n/app_strings.dart';
 import '../../../core/services/local_auth_service.dart';
 import '../../../core/storage/secure_storage.dart';
+import '../../../core/theme/app_palette.dart';
 import '../../../core/utils/validators.dart';
 import '../../../navigation/route_names.dart';
 import '../bloc/auth_bloc.dart';
@@ -94,7 +94,7 @@ class _LoginPageState extends State<LoginPage> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(state.message),
-              backgroundColor: AppColors.error,
+              backgroundColor: context.colors.error,
             ),
           );
         }
@@ -142,7 +142,7 @@ class _LoginPageState extends State<LoginPage> {
                       child: Text(
                         AppStrings.of(context).forgotPasswordAction,
                         style: AppTypography.bodySm.copyWith(
-                          color: AppColors.primary,
+                          color: context.colors.primary,
                         ),
                       ),
                     ),
@@ -198,31 +198,32 @@ class _LoginPageState extends State<LoginPage> {
 class _Header extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return Column(
       children: [
         Container(
           width: 72,
           height: 72,
           decoration: BoxDecoration(
-            color: AppColors.primary.withValues(alpha: 0.12),
+            color: colors.primary.withValues(alpha: 0.12),
             shape: BoxShape.circle,
           ),
-          child: const Icon(
+          child: Icon(
             Icons.lock_outline_rounded,
             size: 36,
-            color: AppColors.primary,
+            color: colors.primary,
           ),
         ),
         const SizedBox(height: AppSpacing.lg),
         Text(
           AppStrings.of(context).welcomeBack,
           textAlign: TextAlign.center,
-          style: AppTypography.headlineMd.copyWith(color: AppColors.onSurface),
+          style: AppTypography.headlineMd.copyWith(color: colors.onSurface),
         ),
         const SizedBox(height: AppSpacing.sm),
         Text(
           AppStrings.of(context).signInSubtitle,
-          style: AppTypography.bodyMd.copyWith(color: AppColors.onSurfaceVariant),
+          style: AppTypography.bodyMd.copyWith(color: colors.onSurfaceVariant),
         ),
       ],
     );
@@ -232,11 +233,12 @@ class _Header extends StatelessWidget {
 class _Divider extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return Row(
       children: [
         Expanded(
           child: Divider(
-            color: AppColors.outlineVariant.withValues(alpha: 0.3),
+            color: colors.outlineVariant.withValues(alpha: 0.3),
             thickness: 1,
           ),
         ),
@@ -244,12 +246,12 @@ class _Divider extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
           child: Text(
             AppStrings.of(context).orDivider,
-            style: AppTypography.bodySm.copyWith(color: AppColors.onSurfaceVariant),
+            style: AppTypography.bodySm.copyWith(color: colors.onSurfaceVariant),
           ),
         ),
         Expanded(
           child: Divider(
-            color: AppColors.outlineVariant.withValues(alpha: 0.3),
+            color: colors.outlineVariant.withValues(alpha: 0.3),
             thickness: 1,
           ),
         ),
@@ -264,6 +266,7 @@ class _BiometricButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return SizedBox(
       width: double.infinity,
       height: 56,
@@ -275,9 +278,9 @@ class _BiometricButton extends StatelessWidget {
           style: AppTypography.bodyMd.copyWith(fontWeight: FontWeight.w600),
         ),
         style: OutlinedButton.styleFrom(
-          foregroundColor: AppColors.primary,
+          foregroundColor: colors.primary,
           side: BorderSide(
-            color: AppColors.primary.withValues(alpha: 0.4),
+            color: colors.primary.withValues(alpha: 0.4),
           ),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
@@ -291,12 +294,13 @@ class _BiometricButton extends StatelessWidget {
 class _RegisterLink extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Text(
           AppStrings.of(context).noAccount,
-          style: AppTypography.bodyMd.copyWith(color: AppColors.onSurfaceVariant),
+          style: AppTypography.bodyMd.copyWith(color: colors.onSurfaceVariant),
         ),
         TextButton(
           onPressed: () => context.push(RouteNames.register),
@@ -304,7 +308,7 @@ class _RegisterLink extends StatelessWidget {
           child: Text(
             AppStrings.of(context).registerAction,
             style: AppTypography.bodyMd.copyWith(
-              color: AppColors.primary,
+              color: colors.primary,
               fontWeight: FontWeight.w600,
             ),
           ),

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:wallet_app/core/l10n/app_strings.dart';
-import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
+import '../../../core/theme/app_palette.dart';
 
 class GoogleSignInButton extends StatelessWidget {
   const GoogleSignInButton({
@@ -17,20 +17,21 @@ class GoogleSignInButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return SizedBox(
       width: double.infinity,
       height: 56,
       child: OutlinedButton(
         onPressed: isLoading ? null : onPressed,
         style: OutlinedButton.styleFrom(
-          foregroundColor: AppColors.onSurface,
+          foregroundColor: colors.onSurface,
           side: BorderSide(
-            color: AppColors.outlineVariant.withValues(alpha: 0.3),
+            color: colors.outlineVariant.withValues(alpha: 0.3),
           ),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
           ),
-          backgroundColor: AppColors.surfaceContainerHigh,
+          backgroundColor: colors.surfaceContainerHigh,
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -43,7 +44,7 @@ class GoogleSignInButton extends StatelessWidget {
             const SizedBox(width: AppSpacing.sm),
             Text(
               AppStrings.of(context).continueWithGoogle,
-              style: AppTypography.titleSm.copyWith(color: AppColors.onSurface),
+              style: AppTypography.titleSm.copyWith(color: colors.onSurface),
             ),
           ],
         ),

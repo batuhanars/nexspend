@@ -1,6 +1,6 @@
 # Stitch Wallet App — Görev Takip Dosyası
 
-> Son güncelleme: 1 Haziran 2026 (Tema Sistemi S4 tamamlandı — transactions migrate, en büyük batch; commit `ac3cce1`, `origin/main`'e push edildi, analyze temiz + test 149 ✅)  
+> Son güncelleme: 1 Haziran 2026 (Tema Sistemi S5 tamamlandı — budgets migrate, durum renkleri + CustomPainter §8 doğru; commit `0028b23`, `origin/main`'e push edildi, analyze temiz + test 149 ✅)  
 > ✅ = Tamamlandı | 🔧 = Kısmen yapıldı | ❌ = Henüz başlanmadı  
 > ☑ = Kodda mevcut ancak migration henüz çalıştırılmadı
 
@@ -46,8 +46,14 @@
 - [x] Pattern notu: build başında `final colors = context.colors;` → local var (temiz, tek lookup)
 - [x] PM kapı denetimi: analyze temiz + test 149/149 ✅
 
-### S5..Sn — Feature migration ❌ (sıradaki: S5 = budgets)
-- [ ] budgets → accounts → debts → subscriptions → family → receipt_scanner → reports/insights/inflation → settings(+switcher) (contract §7)
+### S5 — budgets ✅ (commit `0028b23`, 1 Haz 2026)
+- [x] `presentation/budgets/**` tamamı migrate (0 `AppColors` kaldı)
+- [x] Bütçe durum renkleri (OK/WARNING/CRITICAL/EXCEEDED → primary/warning/danger/expense) korundu
+- [x] CustomPainter (`overview_card.dart`): renk widget'tan constructor ile geçiriliyor, painter içinde context yok (§8 doğru) ✅
+- [x] PM kapı denetimi: analyze temiz + test 149/149 ✅
+
+### S6..Sn — Feature migration ❌ (sıradaki: S6 = accounts)
+- [ ] accounts → debts → subscriptions → family → receipt_scanner → reports/insights/inflation → settings(+switcher) (contract §7)
 - [ ] Her batch: `AppColors.X` → `context.colors.X`, analyze+test yeşil, light modda görsel QA
 
 ### S-son — Açılış ❌

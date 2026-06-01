@@ -192,7 +192,8 @@
       "PowerShell(docker inspect wallet_db *)",
       "Bash(docker exec *)",
       "Bash(docker volume *)",
-      "Bash(docker run *)"
+      "Bash(docker run *)",
+      "Bash(git grep *)"
     ]
   }
 }

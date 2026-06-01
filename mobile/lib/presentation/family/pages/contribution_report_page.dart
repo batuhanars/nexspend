@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
+import '../../../core/theme/app_palette.dart';
 import '../bloc/family_bloc.dart';
 import '../bloc/family_event.dart';
 import '../bloc/family_state.dart';
@@ -44,12 +44,13 @@ class _ContributionReportPageState extends State<ContributionReportPage> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return Scaffold(
-      backgroundColor: AppColors.surface,
+      backgroundColor: colors.surface,
       appBar: AppBar(
-        backgroundColor: AppColors.surface,
+        backgroundColor: colors.surface,
         surfaceTintColor: Colors.transparent,
-        iconTheme: const IconThemeData(color: AppColors.onSurface),
+        iconTheme: IconThemeData(color: colors.onSurface),
         title: const Text('Katkı Raporu'),
         titleTextStyle: AppTypography.headlineSm,
         actions: [
@@ -63,12 +64,12 @@ class _ContributionReportPageState extends State<ContributionReportPage> {
       body: BlocBuilder<FamilyBloc, FamilyState>(
         builder: (context, state) {
           return switch (state) {
-            FamilyContributionsLoading() => const Center(
-                child: CircularProgressIndicator(color: AppColors.primary),
+            FamilyContributionsLoading() => Center(
+                child: CircularProgressIndicator(color: colors.primary),
               ),
             FamilyContributionsLoaded(:final report) => RefreshIndicator(
-                color: AppColors.primary,
-                backgroundColor: AppColors.surfaceContainerHigh,
+                color: colors.primary,
+                backgroundColor: colors.surfaceContainerHigh,
                 onRefresh: () async => _fetch(),
                 child: ListView(
                   padding: const EdgeInsets.all(AppSpacing.pagePadding),
@@ -79,7 +80,7 @@ class _ContributionReportPageState extends State<ContributionReportPage> {
                         const SizedBox(width: AppSpacing.sm),
                         Text(report.period,
                             style: AppTypography.labelSm
-                                .copyWith(color: AppColors.primary)),
+                                .copyWith(color: colors.primary)),
                       ],
                     ),
                     const SizedBox(height: AppSpacing.xl),
@@ -88,7 +89,7 @@ class _ContributionReportPageState extends State<ContributionReportPage> {
                         child: Text(
                           'Bu dönem için katkı verisi yok.',
                           style: AppTypography.bodyMd.copyWith(
-                              color: AppColors.onSurfaceVariant),
+                              color: colors.onSurfaceVariant),
                         ),
                       )
                     else
@@ -112,20 +113,20 @@ class _ContributionReportPageState extends State<ContributionReportPage> {
                   children: [
                     Text(message,
                         style: AppTypography.bodyMd.copyWith(
-                            color: AppColors.onSurfaceVariant),
+                            color: colors.onSurfaceVariant),
                         textAlign: TextAlign.center),
                     const SizedBox(height: AppSpacing.lg),
                     TextButton(
                       onPressed: _fetch,
                       child: Text('Tekrar Dene',
                           style: AppTypography.bodyMd
-                              .copyWith(color: AppColors.primary)),
+                              .copyWith(color: colors.primary)),
                     ),
                   ],
                 ),
               ),
-            _ => const Center(
-                child: CircularProgressIndicator(color: AppColors.primary),
+            _ => Center(
+                child: CircularProgressIndicator(color: colors.primary),
               ),
           };
         },
@@ -142,46 +143,49 @@ class _ContributionReportPageState extends State<ContributionReportPage> {
 
     showModalBottomSheet<void>(
       context: context,
-      backgroundColor: AppColors.surfaceContainerHigh,
+      backgroundColor: context.colors.surfaceContainerHigh,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(
           top: Radius.circular(AppSpacing.radiusXl),
         ),
       ),
-      builder: (ctx) => Padding(
-        padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(
-                AppSpacing.pagePadding,
-                0,
-                AppSpacing.pagePadding,
-                AppSpacing.lg,
+      builder: (ctx) {
+        final colors = ctx.colors;
+        return Padding(
+          padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  AppSpacing.pagePadding,
+                  0,
+                  AppSpacing.pagePadding,
+                  AppSpacing.lg,
+                ),
+                child: Text('Dönem Seç', style: AppTypography.titleSm),
               ),
-              child: Text('Dönem Seç', style: AppTypography.titleSm),
-            ),
-            ...months.map(
-              (period) => ListTile(
-                contentPadding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.pagePadding),
-                title: Text(period, style: AppTypography.bodyMd),
-                trailing: _period == period
-                    ? const Icon(Icons.check_rounded,
-                        color: AppColors.primary, size: 20)
-                    : null,
-                onTap: () {
-                  Navigator.of(ctx).pop();
-                  setState(() => _period = period);
-                  _fetch();
-                },
+              ...months.map(
+                (period) => ListTile(
+                  contentPadding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.pagePadding),
+                  title: Text(period, style: AppTypography.bodyMd),
+                  trailing: _period == period
+                      ? Icon(Icons.check_rounded,
+                          color: colors.primary, size: 20)
+                      : null,
+                  onTap: () {
+                    Navigator.of(ctx).pop();
+                    setState(() => _period = period);
+                    _fetch();
+                  },
+                ),
               ),
-            ),
-          ],
-        ),
-      ),
+            ],
+          ),
+        );
+      },
     );
   }
 }

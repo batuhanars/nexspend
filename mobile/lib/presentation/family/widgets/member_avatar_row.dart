@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
 import '../../../core/l10n/app_strings.dart';
+import '../../../core/theme/app_palette.dart';
 import '../../../data/models/family_model.dart';
 
 class MemberAvatarRow extends StatelessWidget {
@@ -65,17 +65,18 @@ class _Avatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     final initials = member.name.isNotEmpty
         ? member.name.trim().split(' ').map((w) => w[0]).take(2).join()
         : '?';
 
-    final colors = [
-      AppColors.primary,
-      AppColors.secondary,
-      AppColors.tertiary,
-      AppColors.primaryContainer,
+    final avatarColors = [
+      colors.primary,
+      colors.secondary,
+      colors.tertiary,
+      colors.primaryContainer,
     ];
-    final bg = colors[index % colors.length];
+    final bg = avatarColors[index % avatarColors.length];
 
     return Container(
       width: 36,
@@ -83,7 +84,7 @@ class _Avatar extends StatelessWidget {
       decoration: BoxDecoration(
         color: bg.withValues(alpha: 0.25),
         shape: BoxShape.circle,
-        border: Border.all(color: AppColors.surface, width: 2),
+        border: Border.all(color: colors.surface, width: 2),
       ),
       child: Center(
         child: Text(
@@ -106,6 +107,7 @@ class _MemberListTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     final initials = member.name.isNotEmpty
         ? member.name.trim().split(' ').map((w) => w[0]).take(2).join()
         : '?';
@@ -118,14 +120,14 @@ class _MemberListTile extends StatelessWidget {
             width: 40,
             height: 40,
             decoration: BoxDecoration(
-              color: AppColors.primary.withValues(alpha: 0.15),
+              color: colors.primary.withValues(alpha: 0.15),
               shape: BoxShape.circle,
             ),
             child: Center(
               child: Text(
                 initials.toUpperCase(),
                 style: AppTypography.labelSm.copyWith(
-                  color: AppColors.primary,
+                  color: colors.primary,
                   letterSpacing: 0,
                 ),
               ),
@@ -152,8 +154,8 @@ class _MemberListTile extends StatelessWidget {
             ),
             decoration: BoxDecoration(
               color: member.role == FamilyRole.OWNER
-                  ? AppColors.primary.withValues(alpha: 0.15)
-                  : AppColors.surfaceContainerHighest,
+                  ? colors.primary.withValues(alpha: 0.15)
+                  : colors.surfaceContainerHighest,
               borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
             ),
             child: Text(
@@ -162,8 +164,8 @@ class _MemberListTile extends StatelessWidget {
                   : AppStrings.of(context).roleMember,
               style: AppTypography.labelSm.copyWith(
                 color: member.role == FamilyRole.OWNER
-                    ? AppColors.primary
-                    : AppColors.onSurfaceVariant,
+                    ? colors.primary
+                    : colors.onSurfaceVariant,
                 letterSpacing: 0,
               ),
             ),

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
+import '../../../core/theme/app_palette.dart';
 import '../../../data/models/family_model.dart';
 
 class InviteStatusBadge extends StatelessWidget {
@@ -11,11 +11,12 @@ class InviteStatusBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     final (label, color) = switch (status) {
-      InviteStatus.PENDING => ('Bekliyor', AppColors.tertiary),
-      InviteStatus.ACCEPTED => ('Kabul Edildi', AppColors.secondary),
-      InviteStatus.REJECTED => ('Reddedildi', AppColors.onSurfaceVariant),
-      InviteStatus.EXPIRED => ('Süresi Doldu', AppColors.error),
+      InviteStatus.PENDING => ('Bekliyor', colors.warning),
+      InviteStatus.ACCEPTED => ('Kabul Edildi', colors.success),
+      InviteStatus.REJECTED => ('Reddedildi', colors.onSurfaceVariant),
+      InviteStatus.EXPIRED => ('Süresi Doldu', colors.error),
     };
 
     return Container(

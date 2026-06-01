@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
 import '../../../core/l10n/app_strings.dart';
+import '../../../core/theme/app_palette.dart';
 import '../../../core/utils/budget_period.dart';
 import '../../../core/utils/date_formatter.dart';
 import '../../../data/models/budget_model.dart';
@@ -67,7 +67,7 @@ class _SharedBudgetEditSheetState extends State<SharedBudgetEditSheet> {
 
   void _showError(String msg) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(msg), backgroundColor: AppColors.error),
+      SnackBar(content: Text(msg), backgroundColor: context.colors.error),
     );
   }
 
@@ -99,6 +99,7 @@ class _SharedBudgetEditSheetState extends State<SharedBudgetEditSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     final s = AppStrings.of(context);
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
     return Padding(
@@ -120,7 +121,7 @@ class _SharedBudgetEditSheetState extends State<SharedBudgetEditSheet> {
                 height: 4,
                 margin: const EdgeInsets.only(bottom: AppSpacing.lg),
                 decoration: BoxDecoration(
-                  color: AppColors.onSurfaceVariant.withValues(alpha: 0.3),
+                  color: colors.onSurfaceVariant.withValues(alpha: 0.3),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -144,19 +145,19 @@ class _SharedBudgetEditSheetState extends State<SharedBudgetEditSheet> {
               style: AppTypography.bodyMd,
               decoration: InputDecoration(
                 labelText: s.budgetNameLabel,
-                prefixIcon: const Icon(
+                prefixIcon: Icon(
                   Icons.label_outline,
-                  color: AppColors.onSurfaceVariant,
+                  color: colors.onSurfaceVariant,
                   size: 20,
                 ),
                 filled: true,
-                fillColor: AppColors.surfaceContainerHighest,
+                fillColor: colors.surfaceContainerHighest,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
                   borderSide: BorderSide.none,
                 ),
                 labelStyle: AppTypography.bodySm.copyWith(
-                  color: AppColors.onSurfaceVariant,
+                  color: colors.onSurfaceVariant,
                 ),
               ),
             ),
@@ -166,55 +167,46 @@ class _SharedBudgetEditSheetState extends State<SharedBudgetEditSheet> {
             Text(s.periodLabel, style: AppTypography.titleSm),
             const SizedBox(height: AppSpacing.sm),
             Row(
-              children:
-                  const [
-                    BudgetPeriod.WEEKLY,
-                    BudgetPeriod.MONTHLY,
-                    BudgetPeriod.YEARLY,
-                    BudgetPeriod.CUSTOM,
-                  ].map((p) {
-                    final isSelected = p == _period;
-                    return Expanded(
-                      child: GestureDetector(
-                        onTap: () => setState(() => _period = p),
-                        child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 150),
-                          margin: EdgeInsets.only(
-                            right: p != BudgetPeriod.CUSTOM ? AppSpacing.sm : 0,
-                          ),
-                          padding: const EdgeInsets.symmetric(
-                            vertical: AppSpacing.sm,
-                          ),
-                          alignment: Alignment.center,
-                          decoration: BoxDecoration(
-                            color: isSelected
-                                ? AppColors.primary.withValues(alpha: 0.15)
-                                : AppColors.surfaceContainerHighest,
-                            borderRadius: BorderRadius.circular(
-                              AppSpacing.radiusMd,
-                            ),
-                            border: Border.all(
-                              color: isSelected
-                                  ? AppColors.primary
-                                  : Colors.transparent,
-                              width: 1.5,
-                            ),
-                          ),
-                          child: Text(
-                            _periodLabels(context)[p]!,
-                            style: AppTypography.bodySm.copyWith(
-                              color: isSelected
-                                  ? AppColors.primary
-                                  : AppColors.onSurface,
-                              fontWeight: isSelected
-                                  ? FontWeight.w600
-                                  : FontWeight.w400,
-                            ),
-                          ),
+              children: const [
+                BudgetPeriod.WEEKLY,
+                BudgetPeriod.MONTHLY,
+                BudgetPeriod.YEARLY,
+                BudgetPeriod.CUSTOM,
+              ].map((p) {
+                final isSelected = p == _period;
+                return Expanded(
+                  child: GestureDetector(
+                    onTap: () => setState(() => _period = p),
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 150),
+                      margin: EdgeInsets.only(
+                        right: p != BudgetPeriod.CUSTOM ? AppSpacing.sm : 0,
+                      ),
+                      padding: const EdgeInsets.symmetric(
+                        vertical: AppSpacing.sm,
+                      ),
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: isSelected
+                            ? colors.primary.withValues(alpha: 0.15)
+                            : colors.surfaceContainerHighest,
+                        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                        border: Border.all(
+                          color: isSelected ? colors.primary : Colors.transparent,
+                          width: 1.5,
                         ),
                       ),
-                    );
-                  }).toList(),
+                      child: Text(
+                        _periodLabels(context)[p]!,
+                        style: AppTypography.bodySm.copyWith(
+                          color: isSelected ? colors.primary : colors.onSurface,
+                          fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                        ),
+                      ),
+                    ),
+                  ),
+                );
+              }).toList(),
             ),
             const SizedBox(height: AppSpacing.xl),
 
@@ -225,28 +217,26 @@ class _SharedBudgetEditSheetState extends State<SharedBudgetEditSheet> {
                 vertical: AppSpacing.sm,
               ),
               decoration: BoxDecoration(
-                color: AppColors.primary.withValues(alpha: 0.08),
+                color: colors.primary.withValues(alpha: 0.08),
                 borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
                 border: Border.all(
-                  color: AppColors.primary.withValues(alpha: 0.2),
+                  color: colors.primary.withValues(alpha: 0.2),
                 ),
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(
+                  Icon(
                     Icons.event_available_outlined,
                     size: 14,
-                    color: AppColors.primary,
+                    color: colors.primary,
                   ),
                   const SizedBox(width: AppSpacing.xs),
                   Text(
                     s.budgetEndsOn(
                       DateFormatter.formatLong(_computedEndDate, context),
                     ),
-                    style: AppTypography.bodySm.copyWith(
-                      color: AppColors.primary,
-                    ),
+                    style: AppTypography.bodySm.copyWith(color: colors.primary),
                   ),
                 ],
               ),
@@ -260,8 +250,8 @@ class _SharedBudgetEditSheetState extends State<SharedBudgetEditSheet> {
               child: FilledButton(
                 onPressed: _save,
                 style: FilledButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  foregroundColor: AppColors.surface,
+                  backgroundColor: colors.primary,
+                  foregroundColor: colors.surface,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
                   ),
@@ -270,7 +260,7 @@ class _SharedBudgetEditSheetState extends State<SharedBudgetEditSheet> {
                   s.save,
                   style: AppTypography.bodyMd.copyWith(
                     fontWeight: FontWeight.w600,
-                    color: AppColors.surface,
+                    color: colors.surface,
                   ),
                 ),
               ),

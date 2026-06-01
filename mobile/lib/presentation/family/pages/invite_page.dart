@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
+import '../../../core/theme/app_palette.dart';
 import '../../../navigation/route_names.dart';
 import '../bloc/family_bloc.dart';
 import '../bloc/family_event.dart';
@@ -21,6 +21,7 @@ class InvitePage extends StatefulWidget {
 class _InvitePageState extends State<InvitePage> {
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return BlocListener<FamilyBloc, FamilyState>(
       listener: (context, state) {
         if (state is FamilyInviteAccepted) {
@@ -34,11 +35,11 @@ class _InvitePageState extends State<InvitePage> {
         }
       },
       child: Scaffold(
-        backgroundColor: AppColors.surface,
+        backgroundColor: colors.surface,
         appBar: AppBar(
-          backgroundColor: AppColors.surface,
+          backgroundColor: colors.surface,
           surfaceTintColor: Colors.transparent,
-          iconTheme: const IconThemeData(color: AppColors.onSurface),
+          iconTheme: IconThemeData(color: colors.onSurface),
           title: const Text('Davet'),
           titleTextStyle: AppTypography.headlineSm,
         ),
@@ -51,8 +52,8 @@ class _InvitePageState extends State<InvitePage> {
               return _ErrorView(message: state.message);
             }
             if (state is FamilyInviteProcessing) {
-              return const Center(
-                child: CircularProgressIndicator(color: AppColors.primary),
+              return Center(
+                child: CircularProgressIndicator(color: colors.primary),
               );
             }
             return _InviteView(token: widget.token);
@@ -70,6 +71,7 @@ class _InviteView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return Padding(
       padding: const EdgeInsets.all(AppSpacing.pagePadding),
       child: Column(
@@ -79,12 +81,12 @@ class _InviteView extends StatelessWidget {
             width: 80,
             height: 80,
             decoration: BoxDecoration(
-              color: AppColors.primary.withValues(alpha: 0.12),
+              color: colors.primary.withValues(alpha: 0.12),
               shape: BoxShape.circle,
             ),
-            child: const Icon(
+            child: Icon(
               Icons.group_add_outlined,
-              color: AppColors.primary,
+              color: colors.primary,
               size: 40,
             ),
           ),
@@ -97,8 +99,7 @@ class _InviteView extends StatelessWidget {
           const SizedBox(height: AppSpacing.md),
           Text(
             'Seni ortak bir bütçe grubuna davet ettiler. Kabul edersen grupta harcamalarını birlikte takip edebilirsiniz.',
-            style: AppTypography.bodyMd
-                .copyWith(color: AppColors.onSurfaceVariant),
+            style: AppTypography.bodyMd.copyWith(color: colors.onSurfaceVariant),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: AppSpacing.xxxl),
@@ -107,8 +108,8 @@ class _InviteView extends StatelessWidget {
                   FamilyInviteAcceptRequested(token: token),
                 ),
             style: FilledButton.styleFrom(
-              backgroundColor: AppColors.primary,
-              foregroundColor: AppColors.onPrimary,
+              backgroundColor: colors.primary,
+              foregroundColor: colors.onPrimary,
               minimumSize: const Size(double.infinity, 56),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
@@ -122,8 +123,8 @@ class _InviteView extends StatelessWidget {
                   FamilyInviteRejectRequested(token: token),
                 ),
             style: OutlinedButton.styleFrom(
-              foregroundColor: AppColors.onSurfaceVariant,
-              side: const BorderSide(color: AppColors.outlineVariant),
+              foregroundColor: colors.onSurfaceVariant,
+              side: BorderSide(color: colors.outlineVariant),
               minimumSize: const Size(double.infinity, 56),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
@@ -142,15 +143,14 @@ class _ExpiredView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return Center(
       child: Padding(
-        padding:
-            const EdgeInsets.symmetric(horizontal: AppSpacing.pagePadding),
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.pagePadding),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.timer_off_outlined,
-                color: AppColors.onSurfaceVariant, size: 64),
+            Icon(Icons.timer_off_outlined, color: colors.onSurfaceVariant, size: 64),
             const SizedBox(height: AppSpacing.xl),
             Text(
               'Bu davet süresi dolmuş',
@@ -160,8 +160,7 @@ class _ExpiredView extends StatelessWidget {
             const SizedBox(height: AppSpacing.sm),
             Text(
               'Grup sahibinden yeni bir davet göndermesini isteyin.',
-              style: AppTypography.bodyMd
-                  .copyWith(color: AppColors.onSurfaceVariant),
+              style: AppTypography.bodyMd.copyWith(color: colors.onSurfaceVariant),
               textAlign: TextAlign.center,
             ),
           ],
@@ -178,20 +177,18 @@ class _ErrorView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return Center(
       child: Padding(
-        padding:
-            const EdgeInsets.symmetric(horizontal: AppSpacing.pagePadding),
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.pagePadding),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.error_outline_rounded,
-                color: AppColors.onSurfaceVariant, size: 64),
+            Icon(Icons.error_outline_rounded, color: colors.onSurfaceVariant, size: 64),
             const SizedBox(height: AppSpacing.xl),
             Text(
               message,
-              style: AppTypography.bodyMd
-                  .copyWith(color: AppColors.onSurfaceVariant),
+              style: AppTypography.bodyMd.copyWith(color: colors.onSurfaceVariant),
               textAlign: TextAlign.center,
             ),
           ],

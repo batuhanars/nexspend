@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
 import '../../../core/l10n/app_strings.dart';
+import '../../../core/theme/app_palette.dart';
 import '../../../core/utils/budget_period.dart';
 import '../../../core/utils/date_formatter.dart';
 import '../../../data/models/budget_model.dart' show BudgetPeriod;
@@ -75,7 +75,7 @@ class _AddSharedBudgetPageState extends State<AddSharedBudgetPage> {
 
   void _showError(String msg) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(msg), backgroundColor: AppColors.error),
+      SnackBar(content: Text(msg), backgroundColor: context.colors.error),
     );
   }
 
@@ -91,10 +91,10 @@ class _AddSharedBudgetPageState extends State<AddSharedBudgetPage> {
       builder: (ctx, child) => Theme(
         data: Theme.of(ctx).copyWith(
           colorScheme: ColorScheme.dark(
-            primary: AppColors.primary,
-            onPrimary: AppColors.surface,
-            surface: AppColors.surfaceContainerHigh,
-            onSurface: AppColors.onSurface,
+            primary: ctx.colors.primary,
+            onPrimary: ctx.colors.surface,
+            surface: ctx.colors.surfaceContainerHigh,
+            onSurface: ctx.colors.onSurface,
           ),
         ),
         child: child!,
@@ -119,6 +119,7 @@ class _AddSharedBudgetPageState extends State<AddSharedBudgetPage> {
       '${dt.day.toString().padLeft(2, '0')}.${dt.month.toString().padLeft(2, '0')}.${dt.year}';
 
   Widget _buildEndDateWidget(BuildContext context) {
+    final colors = context.colors;
     if (_period == BudgetPeriod.CUSTOM) {
       return DateButton(
         label: AppStrings.of(context).endDateLabel,
@@ -139,23 +140,23 @@ class _AddSharedBudgetPageState extends State<AddSharedBudgetPage> {
         vertical: AppSpacing.sm,
       ),
       decoration: BoxDecoration(
-        color: AppColors.primary.withValues(alpha: 0.08),
+        color: colors.primary.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-        border: Border.all(color: AppColors.primary.withValues(alpha: 0.2)),
+        border: Border.all(color: colors.primary.withValues(alpha: 0.2)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(
+          Icon(
             Icons.event_available_outlined,
             size: 14,
-            color: AppColors.primary,
+            color: colors.primary,
           ),
           const SizedBox(width: AppSpacing.xs),
           Flexible(
             child: Text(
               s.budgetEndsOn(formatted),
-              style: AppTypography.bodySm.copyWith(color: AppColors.primary),
+              style: AppTypography.bodySm.copyWith(color: colors.primary),
             ),
           ),
         ],
@@ -165,6 +166,7 @@ class _AddSharedBudgetPageState extends State<AddSharedBudgetPage> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     final s = AppStrings.of(context);
 
     return BlocListener<AddSharedBudgetBloc, AddSharedBudgetState>(
@@ -173,7 +175,7 @@ class _AddSharedBudgetPageState extends State<AddSharedBudgetPage> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(s.budgetCreatedSuccess),
-              backgroundColor: AppColors.secondary,
+              backgroundColor: colors.secondary,
             ),
           );
           Navigator.of(context).pop(true);
@@ -182,12 +184,12 @@ class _AddSharedBudgetPageState extends State<AddSharedBudgetPage> {
         }
       },
       child: Scaffold(
-        backgroundColor: AppColors.surface,
+        backgroundColor: colors.surface,
         appBar: AppBar(
-          backgroundColor: AppColors.surface,
+          backgroundColor: colors.surface,
           surfaceTintColor: Colors.transparent,
           leading: IconButton(
-            icon: const Icon(Icons.close, color: AppColors.onSurface),
+            icon: Icon(Icons.close, color: colors.onSurface),
             onPressed: () => Navigator.of(context).pop(),
           ),
           title: Text(s.addSharedBudgetTitle, style: AppTypography.titleSm),
@@ -205,8 +207,8 @@ class _AddSharedBudgetPageState extends State<AddSharedBudgetPage> {
             };
 
             if (isLoading) {
-              return const Center(
-                child: CircularProgressIndicator(color: AppColors.primary),
+              return Center(
+                child: CircularProgressIndicator(color: colors.primary),
               );
             }
 
@@ -235,7 +237,7 @@ class _AddSharedBudgetPageState extends State<AddSharedBudgetPage> {
                     Text(
                       s.noCategoriesFound,
                       style: AppTypography.bodyMd.copyWith(
-                        color: AppColors.onSurfaceVariant,
+                        color: colors.onSurfaceVariant,
                       ),
                     )
                   else
@@ -282,19 +284,13 @@ class _AddSharedBudgetPageState extends State<AddSharedBudgetPage> {
                     width: double.infinity,
                     height: 56,
                     child: FilledButton(
-                      onPressed: isSubmitting
-                          ? null
-                          : () => _submit(categories),
+                      onPressed: isSubmitting ? null : () => _submit(categories),
                       style: FilledButton.styleFrom(
-                        backgroundColor: AppColors.primary,
-                        foregroundColor: AppColors.surface,
-                        disabledBackgroundColor: AppColors.primary.withValues(
-                          alpha: 0.5,
-                        ),
+                        backgroundColor: colors.primary,
+                        foregroundColor: colors.surface,
+                        disabledBackgroundColor: colors.primary.withValues(alpha: 0.5),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(
-                            AppSpacing.radiusXl,
-                          ),
+                          borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
                         ),
                       ),
                       child: isSubmitting
@@ -310,7 +306,7 @@ class _AddSharedBudgetPageState extends State<AddSharedBudgetPage> {
                               s.save,
                               style: AppTypography.bodyMd.copyWith(
                                 fontWeight: FontWeight.w600,
-                                color: AppColors.surface,
+                                color: colors.surface,
                               ),
                             ),
                     ),

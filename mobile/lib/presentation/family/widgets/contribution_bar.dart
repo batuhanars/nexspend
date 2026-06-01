@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
+import '../../../core/theme/app_palette.dart';
 import '../../../core/utils/currency_formatter.dart';
 import '../../../data/models/family_model.dart';
 
@@ -17,11 +17,11 @@ class ContributionBar extends StatelessWidget {
   final int colorIndex;
   final bool expanded;
 
-  static const _barColors = [AppColors.primary, AppColors.secondary];
-
   @override
   Widget build(BuildContext context) {
-    final color = _barColors[colorIndex % _barColors.length];
+    final colors = context.colors;
+    final barColors = [colors.primary, colors.secondary];
+    final color = barColors[colorIndex % barColors.length];
     final pct = (member.percentage / 100).clamp(0.0, 1.0);
 
     return Column(
@@ -52,7 +52,7 @@ class ContributionBar extends StatelessWidget {
           borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
           child: LinearProgressIndicator(
             value: pct,
-            backgroundColor: AppColors.surfaceContainerHighest,
+            backgroundColor: colors.surfaceContainerHighest,
             valueColor: AlwaysStoppedAnimation<Color>(color),
             minHeight: 8,
           ),

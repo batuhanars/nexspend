@@ -1,6 +1,6 @@
 # Stitch Wallet App — Görev Takip Dosyası
 
-> Son güncelleme: 25 Mayıs 2026 (Post-Sprint 13 cila — tekli silme MANUAL-only + raporlar boş durum + arama çubuğu/filtre chip; commit `5513c8f`/`fc6232e`/`8559261`/`2186016`, `origin/main`'e push edildi, CI yeşil)  
+> Son güncelleme: 1 Haziran 2026 (Tema Sistemi S1 altyapı tamamlandı — AppPalette ThemeExtension + light tema + ThemeNotifier; commit `d9414ce`, `origin/main`'e push edildi, analyze temiz + test 149 ✅)  
 > ✅ = Tamamlandı | 🔧 = Kısmen yapıldı | ❌ = Henüz başlanmadı  
 > ☑ = Kodda mevcut ancak migration henüz çalıştırılmadı
 
@@ -12,7 +12,31 @@
 - `TRANSACTIONS_V2_CONTRACT.md` — İşlem düzenleme + gelişmiş filtre & arama sözleşmesi (planlandı 24 May 2026)
 - `TRANSACTIONS_BULK_DELETE_CONTRACT.md` — İşlemlerde toplu silme sözleşmesi (planlandı 24 May 2026)
 - `DATA_RESET_CONTRACT.md` — Tüm kişisel verileri sıfırlama sözleşmesi (planlandı 24 May 2026)
+- `THEME_SYSTEM_CONTRACT.md` — Light/Dark/Sistem tema sistemi sözleşmesi (Yol A theme-aware refactor, 1 Haz 2026)
 - `STITCH_PROMPTS.md` — UI tasarım promptları
+
+---
+
+# AKTİF — Tema Sistemi (Light / Dark / Sistem)
+> 📖 Contract: `THEME_SYSTEM_CONTRACT.md` | Karar: Yol A (theme-aware refactor) — renkler statik `AppColors` yerine `AppPalette` ThemeExtension + `context.colors` üzerinden okunur. Çoklu oturum. Switcher tüm migration bitene kadar kullanıcıya açılmaz.
+
+### S1 — Altyapı ✅ (commit `d9414ce`, 1 Haz 2026)
+- [x] `AppPalette extends ThemeExtension` — 37 token, light+dark instance (contract §4 ile birebir), copyWith + lerp
+- [x] `context.colors` uzantısı (BuildContext extension, dark fallback)
+- [x] `AppTheme.light` + her iki ThemeData'ya `extensions` kaydı; appBar overlay tema-duyarlı
+- [x] `AppTypography` renk gömme kaldırıldı (0 `color:` — temadan beslenir)
+- [x] `ThemeNotifier` (ValueNotifier, LocaleNotifier pattern'i)
+- [x] `SecureStorage.getThemeMode/saveThemeMode` (default `dark` — geriye dönük uyum ✅)
+- [x] `main.dart` ThemeNotifier kaydı + `app.dart` theme/darkTheme/themeMode + listener
+- [x] PM kapı denetimi: `flutter analyze` temiz + `flutter test` 149/149 ✅; dark palet hex'leri AppColors ile birebir (regresyon yok)
+- [ ] **Artık (S2'ye taşındı):** `presentation/shared/widgets/split_amount_field.dart` — 1 adet `AppColors.` kaldı, `context.colors`'a geçilecek
+
+### S2..Sn — Feature migration ❌ (sıradaki: S2 = auth)
+- [ ] core/shared kalıntısı (split_amount_field) → auth → dashboard → transactions → budgets → accounts → debts → subscriptions → family → receipt_scanner → reports/insights/inflation → settings(+switcher) (contract §7)
+- [ ] Her batch: `AppColors.X` → `context.colors.X`, analyze+test yeşil, light modda görsel QA
+
+### S-son — Açılış ❌
+- [ ] Settings'e Light/Dark/Sistem seçici (contract §6), `AppColors` silinir (`grep AppColors lib/` → 0), tam QA
 
 ---
 

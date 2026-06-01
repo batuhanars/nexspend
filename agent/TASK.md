@@ -1,6 +1,6 @@
 # Stitch Wallet App — Görev Takip Dosyası
 
-> Son güncelleme: 1 Haziran 2026 (Tema Sistemi S11 tamamlandı — reports/insights/inflation migrate; commit `5111f16`. Kalan tek adım: S-son = settings + switcher açılışı + AppColors silme. analyze temiz + test 149 ✅)  
+> Son güncelleme: 1 Haziran 2026 (🎉 TEMA SİSTEMİ TAMAMLANDI — S-son switcher + AppColors silme; S-son analyze atladığı için derleme patlamıştı, PM hotfix `85b99c7` ile giderildi. analyze temiz + test 149 + `flutter build apk` başarılı. Kalan: manuel görsel QA)  
 > ✅ = Tamamlandı | 🔧 = Kısmen yapıldı | ❌ = Henüz başlanmadı  
 > ☑ = Kodda mevcut ancak migration henüz çalıştırılmadı
 
@@ -80,9 +80,17 @@
 - [x] PM kapı denetimi: analyze temiz + test 149/149 ✅
 - [ ] 📌 Final QA notu: donut'taki 5 sabit kategori rengi (#7C9EFF/#50C8A8/#FFD580/#F28BCA/#95D5F5) light modda kontrast açısından gözle kontrol edilsin
 
-### S-son — settings + açılış ❌
-- [ ] `presentation/settings/**` + `legal/**` + `onboarding/**` migrate
-- [ ] Settings'e Light/Dark/Sistem seçici (contract §6), `AppColors` SİLİNİR (`grep AppColors lib/` → 0), tam QA
+### S-son — settings + açılış ✅ (commit `f4a3932` + hotfix `85b99c7`, 1 Haz 2026)
+- [x] `presentation/settings/**` + `legal/**` + `onboarding/**` migrate
+- [x] Settings'e Light/Dark/Sistem seçici eklendi (bottom sheet → `ThemeNotifier.setMode` + `SecureStorage.saveThemeMode`, subtitle aktif mod, l10n tr/en)
+- [x] `AppColors` SİLİNDİ — `grep AppColors lib/` → 0 ✅
+- [x] **⚠️ Hotfix (`85b99c7`):** S-son `flutter analyze` kapısını ATLAYIP commit etmiş; runtime derleme patlıyordu (~28 hata: const cascade, ölü import, context'siz çağrı, throw eden `cardColor`). PM tarafından giderildi → analyze temiz + test 149/149 + `flutter build apk --debug` başarılı. Dark bire bir korundu.
+- [x] `AccountModel.cardColor` (throw ediyordu) → `customColor` (Color?); efektif renk `context.colorForAccount(account)` ile tema-duyarlı
+
+### 🎉 TEMA SİSTEMİ TAMAMLANDI (altyapı + 13 batch + hotfix)
+- [x] Tüm uygulama tema-duyarlı (`context.colors`), `AppColors` yok
+- [x] Light/Dark/Sistem switcher canlı + kalıcı, build başarılı
+- [ ] 📌 Kalan: **manuel görsel QA** (3 mod × ana ekranlar) — kullanıcı tarafında; özellikle status bar ikon kontrastı + donut'taki 5 sabit kategori rengi light kontrastı
 
 ### S-son — Açılış ❌
 - [ ] Settings'e Light/Dark/Sistem seçici (contract §6), `AppColors` silinir (`grep AppColors lib/` → 0), tam QA

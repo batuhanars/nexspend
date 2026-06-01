@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
-import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
 import '../../../core/l10n/app_strings.dart';
+import '../../../core/theme/app_palette.dart';
 
 enum BudgetCreateChoice { budget, group }
 
 /// Bütçeler ekranındaki "+" butonuna basıldığında açılan modal sheet.
-/// Kullanıcının seçimi (bütçe/grup) `BudgetCreateChoice` ile döner, iptalde null.
 Future<BudgetCreateChoice?> showBudgetCreateSheet(BuildContext context) {
+  final colors = context.colors;
   return showModalBottomSheet<BudgetCreateChoice>(
     context: context,
-    backgroundColor: AppColors.surfaceContainerHigh,
+    backgroundColor: colors.surfaceContainerHigh,
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(
         top: Radius.circular(AppSpacing.radiusLg),
@@ -32,7 +32,7 @@ Future<BudgetCreateChoice?> showBudgetCreateSheet(BuildContext context) {
               height: 4,
               margin: const EdgeInsets.only(bottom: AppSpacing.md),
               decoration: BoxDecoration(
-                color: AppColors.surfaceContainerHighest,
+                color: sheetCtx.colors.surfaceContainerHighest,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -69,6 +69,7 @@ class _SheetActionTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
@@ -78,7 +79,7 @@ class _SheetActionTile extends StatelessWidget {
           vertical: AppSpacing.lg,
         ),
         decoration: BoxDecoration(
-          color: AppColors.surfaceContainerHighest,
+          color: colors.surfaceContainerHighest,
           borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
         ),
         child: Row(
@@ -87,24 +88,24 @@ class _SheetActionTile extends StatelessWidget {
               width: 40,
               height: 40,
               decoration: BoxDecoration(
-                color: AppColors.primary.withValues(alpha: 0.15),
+                color: colors.primary.withValues(alpha: 0.15),
                 shape: BoxShape.circle,
               ),
-              child: Icon(icon, color: AppColors.primary, size: 20),
+              child: Icon(icon, color: colors.primary, size: 20),
             ),
             const SizedBox(width: AppSpacing.md),
             Expanded(
               child: Text(
                 label,
                 style: AppTypography.bodyMd.copyWith(
-                  color: AppColors.onSurface,
+                  color: colors.onSurface,
                   fontWeight: FontWeight.w600,
                 ),
               ),
             ),
-            const Icon(
+            Icon(
               Icons.chevron_right_rounded,
-              color: AppColors.onSurfaceVariant,
+              color: colors.onSurfaceVariant,
               size: 20,
             ),
           ],

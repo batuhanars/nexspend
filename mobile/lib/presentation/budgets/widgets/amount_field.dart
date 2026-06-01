@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
 import '../../../core/l10n/app_strings.dart';
+import '../../../core/theme/app_palette.dart';
 import '../../shared/widgets/split_amount_field.dart';
 
 class AmountField extends StatelessWidget {
@@ -19,7 +19,7 @@ class AmountField extends StatelessWidget {
         Text(
           AppStrings.of(context).budgetAmountLabel,
           style: AppTypography.labelSm.copyWith(
-            color: AppColors.onSurfaceVariant,
+            color: context.colors.onSurfaceVariant,
             letterSpacing: 1.5,
           ),
         ),

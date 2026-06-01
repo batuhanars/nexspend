@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
 import '../../../core/l10n/app_strings.dart';
+import '../../../core/theme/app_palette.dart';
 import '../../../data/models/budget_model.dart';
 
 class PeriodSelector extends StatelessWidget {
@@ -21,7 +21,6 @@ class PeriodSelector extends StatelessWidget {
     BudgetPeriod.CUSTOM => s.periodCustom,
   };
 
-  // Görünüm sırası: Haftalık / Aylık / Yıllık / Özel
   static const _order = [
     BudgetPeriod.WEEKLY,
     BudgetPeriod.MONTHLY,
@@ -32,6 +31,7 @@ class PeriodSelector extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final s = AppStrings.of(context);
+    final colors = context.colors;
     return Row(
       children: _order.map((p) {
         final isSelected = p == selected;
@@ -46,11 +46,11 @@ class PeriodSelector extends StatelessWidget {
               padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
               decoration: BoxDecoration(
                 color: isSelected
-                    ? AppColors.primary.withValues(alpha: 0.15)
-                    : AppColors.surfaceContainerHighest,
+                    ? colors.primary.withValues(alpha: 0.15)
+                    : colors.surfaceContainerHighest,
                 borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
                 border: Border.all(
-                  color: isSelected ? AppColors.primary : Colors.transparent,
+                  color: isSelected ? colors.primary : Colors.transparent,
                   width: 1.5,
                 ),
               ),
@@ -58,7 +58,7 @@ class PeriodSelector extends StatelessWidget {
                 _label(p, s),
                 textAlign: TextAlign.center,
                 style: AppTypography.bodySm.copyWith(
-                  color: isSelected ? AppColors.primary : AppColors.onSurface,
+                  color: isSelected ? colors.primary : colors.onSurface,
                   fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
                 ),
               ),

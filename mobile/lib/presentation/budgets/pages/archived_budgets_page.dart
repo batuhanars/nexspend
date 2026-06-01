@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
 import '../../../core/di/injection.dart';
 import '../../../core/l10n/app_strings.dart';
+import '../../../core/theme/app_palette.dart';
 import '../../../core/utils/currency_formatter.dart';
 import '../../../core/utils/date_formatter.dart';
 import '../../../data/models/budget_model.dart';
@@ -82,19 +82,20 @@ class _ArchivedBudgetsPageState extends State<ArchivedBudgetsPage>
   @override
   Widget build(BuildContext context) {
     final s = AppStrings.of(context);
+    final colors = context.colors;
     return Scaffold(
-      backgroundColor: AppColors.surface,
+      backgroundColor: colors.surface,
       appBar: AppBar(
-        backgroundColor: AppColors.surface,
+        backgroundColor: colors.surface,
         surfaceTintColor: Colors.transparent,
-        iconTheme: const IconThemeData(color: AppColors.onSurface),
+        iconTheme: IconThemeData(color: colors.onSurface),
         title: Text(s.archivedBudgetsTitle, style: AppTypography.titleSm),
         centerTitle: true,
         bottom: TabBar(
           controller: _tabController,
-          labelColor: AppColors.primary,
-          unselectedLabelColor: AppColors.onSurfaceVariant,
-          indicatorColor: AppColors.primary,
+          labelColor: colors.primary,
+          unselectedLabelColor: colors.onSurfaceVariant,
+          indicatorColor: colors.primary,
           labelStyle: AppTypography.bodySm.copyWith(
             fontWeight: FontWeight.w600,
           ),
@@ -127,16 +128,17 @@ class _PersonalArchivedTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final s = AppStrings.of(context);
+    final colors = context.colors;
     return RefreshIndicator(
-      color: AppColors.primary,
-      backgroundColor: AppColors.surfaceContainerHigh,
+      color: colors.primary,
+      backgroundColor: colors.surfaceContainerHigh,
       onRefresh: onRefresh,
       child: FutureBuilder<List<BudgetModel>>(
         future: future,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(
-              child: CircularProgressIndicator(color: AppColors.primary),
+            return Center(
+              child: CircularProgressIndicator(color: colors.primary),
             );
           }
           final budgets = snapshot.data ?? [];
@@ -185,9 +187,10 @@ class _SharedArchivedTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final s = AppStrings.of(context);
+    final colors = context.colors;
     return RefreshIndicator(
-      color: AppColors.primary,
-      backgroundColor: AppColors.surfaceContainerHigh,
+      color: colors.primary,
+      backgroundColor: colors.surfaceContainerHigh,
       onRefresh: onRefresh,
       child:
           FutureBuilder<
@@ -196,15 +199,14 @@ class _SharedArchivedTab extends StatelessWidget {
             future: future,
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Center(
-                  child: CircularProgressIndicator(color: AppColors.primary),
+                return Center(
+                  child: CircularProgressIndicator(color: colors.primary),
                 );
               }
               final items = snapshot.data ?? [];
               if (items.isEmpty) {
                 return _RefreshableEmpty(message: s.archivedBudgetsEmpty);
               }
-              // Group by groupName
               final byGroup =
                   <
                     String,
@@ -229,7 +231,7 @@ class _SharedArchivedTab extends StatelessWidget {
                       child: Text(
                         entry.key.toUpperCase(),
                         style: AppTypography.labelSm.copyWith(
-                          color: AppColors.onSurfaceVariant,
+                          color: colors.onSurfaceVariant,
                         ),
                       ),
                     ),
@@ -287,19 +289,20 @@ class _ArchivedBudgetCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     final pct = (percentage / 100).clamp(0.0, 1.0);
     final color = percentage >= 100
-        ? AppColors.tertiary
+        ? colors.expense
         : percentage >= 90
-        ? AppColors.tertiary.withValues(alpha: 0.7)
-        : AppColors.primary;
+            ? colors.expense.withValues(alpha: 0.7)
+            : colors.primary;
 
     return GestureDetector(
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.all(AppSpacing.lg),
         decoration: BoxDecoration(
-          color: AppColors.surfaceContainerHigh,
+          color: colors.surfaceContainerHigh,
           borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
         ),
         child: Column(
@@ -316,7 +319,7 @@ class _ArchivedBudgetCard extends StatelessWidget {
                       Text(
                         categoryName,
                         style: AppTypography.bodySm.copyWith(
-                          color: AppColors.onSurfaceVariant,
+                          color: colors.onSurfaceVariant,
                         ),
                       ),
                     ],
@@ -328,13 +331,14 @@ class _ArchivedBudgetCard extends StatelessWidget {
                     vertical: 3,
                   ),
                   decoration: BoxDecoration(
-                    color: AppColors.onSurfaceVariant.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+                    color: colors.onSurfaceVariant.withValues(alpha: 0.12),
+                    borderRadius:
+                        BorderRadius.circular(AppSpacing.radiusSm),
                   ),
                   child: Text(
                     '%$percentage',
                     style: AppTypography.labelSm.copyWith(
-                      color: AppColors.onSurfaceVariant,
+                      color: colors.onSurfaceVariant,
                       fontWeight: FontWeight.w600,
                       fontSize: 10,
                     ),
@@ -346,7 +350,7 @@ class _ArchivedBudgetCard extends StatelessWidget {
             Text(
               '${DateFormatter.formatMini(startDate, context)} — ${DateFormatter.formatMini(endDate, context)}',
               style: AppTypography.bodySm.copyWith(
-                color: AppColors.onSurfaceVariant,
+                color: colors.onSurfaceVariant,
               ),
             ),
             const SizedBox(height: AppSpacing.sm),
@@ -362,7 +366,7 @@ class _ArchivedBudgetCard extends StatelessWidget {
                 Text(
                   ' / ${CurrencyFormatter.format(amount)}',
                   style: AppTypography.bodySm.copyWith(
-                    color: AppColors.onSurfaceVariant,
+                    color: colors.onSurfaceVariant,
                   ),
                 ),
               ],
@@ -373,7 +377,7 @@ class _ArchivedBudgetCard extends StatelessWidget {
               child: LinearProgressIndicator(
                 value: pct,
                 minHeight: 5,
-                backgroundColor: AppColors.surfaceContainerHighest,
+                backgroundColor: colors.surfaceContainerHighest,
                 valueColor: AlwaysStoppedAnimation(color),
               ),
             ),
@@ -408,6 +412,7 @@ class _EmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -415,13 +420,13 @@ class _EmptyState extends StatelessWidget {
           Icon(
             Icons.inventory_2_outlined,
             size: 48,
-            color: AppColors.onSurfaceVariant.withValues(alpha: 0.4),
+            color: colors.onSurfaceVariant.withValues(alpha: 0.4),
           ),
           const SizedBox(height: AppSpacing.md),
           Text(
             message,
             style: AppTypography.bodyMd.copyWith(
-              color: AppColors.onSurfaceVariant,
+              color: colors.onSurfaceVariant,
             ),
             textAlign: TextAlign.center,
           ),

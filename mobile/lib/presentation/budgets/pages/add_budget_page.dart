@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import '../../../core/l10n/app_strings.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
+import '../../../core/theme/app_palette.dart';
 import '../../../core/utils/budget_period.dart';
 import '../../../core/utils/date_formatter.dart';
 import '../../../data/models/budget_model.dart';
@@ -52,9 +52,8 @@ class _AddBudgetPageState extends State<AddBudgetPage> {
     _nameController.text = p.name;
     _period = p.period;
     _smartTracking = p.smartTracking;
-    // Yeni dönem: eski endDate + 1 gün
     _startDate = p.endDate.add(const Duration(days: 1));
-    _endDate = null; // custom olmadığı sürece yeniden hesaplanır
+    _endDate = null;
   }
 
   @override
@@ -66,7 +65,6 @@ class _AddBudgetPageState extends State<AddBudgetPage> {
 
   void _submit(List<CategoryModel> categories) {
     final amount = _amount;
-
     if (amount == null || amount <= 0) {
       _showError(AppStrings.of(context).enterValidAmount);
       return;
@@ -102,7 +100,7 @@ class _AddBudgetPageState extends State<AddBudgetPage> {
 
   void _showError(String msg) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(msg), backgroundColor: AppColors.error),
+      SnackBar(content: Text(msg), backgroundColor: context.colors.error),
     );
   }
 
@@ -118,10 +116,10 @@ class _AddBudgetPageState extends State<AddBudgetPage> {
       builder: (ctx, child) => Theme(
         data: Theme.of(ctx).copyWith(
           colorScheme: ColorScheme.dark(
-            primary: AppColors.primary,
-            onPrimary: AppColors.surface,
-            surface: AppColors.surfaceContainerHigh,
-            onSurface: AppColors.onSurface,
+            primary: ctx.colors.primary,
+            onPrimary: ctx.colors.surface,
+            surface: ctx.colors.surfaceContainerHigh,
+            onSurface: ctx.colors.onSurface,
           ),
         ),
         child: child!,
@@ -146,6 +144,7 @@ class _AddBudgetPageState extends State<AddBudgetPage> {
       '${dt.day.toString().padLeft(2, '0')}.${dt.month.toString().padLeft(2, '0')}.${dt.year}';
 
   Widget _buildEndDateChip(BuildContext context) {
+    final colors = context.colors;
     if (_period == BudgetPeriod.CUSTOM) {
       return DateButton(
         label: AppStrings.of(context).endDateLabel,
@@ -166,23 +165,23 @@ class _AddBudgetPageState extends State<AddBudgetPage> {
         vertical: AppSpacing.sm,
       ),
       decoration: BoxDecoration(
-        color: AppColors.primary.withValues(alpha: 0.08),
+        color: colors.primary.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-        border: Border.all(color: AppColors.primary.withValues(alpha: 0.2)),
+        border: Border.all(color: colors.primary.withValues(alpha: 0.2)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(
+          Icon(
             Icons.event_available_outlined,
             size: 14,
-            color: AppColors.primary,
+            color: colors.primary,
           ),
           const SizedBox(width: AppSpacing.xs),
           Flexible(
             child: Text(
               s.budgetEndsOn(formatted),
-              style: AppTypography.bodySm.copyWith(color: AppColors.primary),
+              style: AppTypography.bodySm.copyWith(color: colors.primary),
             ),
           ),
         ],
@@ -193,6 +192,7 @@ class _AddBudgetPageState extends State<AddBudgetPage> {
   @override
   Widget build(BuildContext context) {
     final s = AppStrings.of(context);
+    final colors = context.colors;
     final isPrefill = widget.prefill != null;
 
     return BlocListener<AddBudgetBloc, AddBudgetState>(
@@ -201,7 +201,7 @@ class _AddBudgetPageState extends State<AddBudgetPage> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(s.budgetCreatedSuccess),
-              backgroundColor: AppColors.secondary,
+              backgroundColor: colors.income,
             ),
           );
           Navigator.of(context).pop(state.budget);
@@ -210,12 +210,12 @@ class _AddBudgetPageState extends State<AddBudgetPage> {
         }
       },
       child: Scaffold(
-        backgroundColor: AppColors.surface,
+        backgroundColor: colors.surface,
         appBar: AppBar(
-          backgroundColor: AppColors.surface,
+          backgroundColor: colors.surface,
           surfaceTintColor: Colors.transparent,
           leading: IconButton(
-            icon: const Icon(Icons.close, color: AppColors.onSurface),
+            icon: Icon(Icons.close, color: colors.onSurface),
             onPressed: () => Navigator.of(context).pop(),
           ),
           title: Text(
@@ -236,12 +236,11 @@ class _AddBudgetPageState extends State<AddBudgetPage> {
             };
 
             if (isLoading) {
-              return const Center(
-                child: CircularProgressIndicator(color: AppColors.primary),
+              return Center(
+                child: CircularProgressIndicator(color: colors.primary),
               );
             }
 
-            // Prefill'de kategori otomatik seçilir (kategoriler yüklendikten sonra)
             if (isPrefill &&
                 _selectedCategory == null &&
                 categories.isNotEmpty) {
@@ -285,7 +284,7 @@ class _AddBudgetPageState extends State<AddBudgetPage> {
                     Text(
                       s.noCategoriesFound,
                       style: AppTypography.bodyMd.copyWith(
-                        color: AppColors.onSurfaceVariant,
+                        color: colors.onSurfaceVariant,
                       ),
                     )
                   else
@@ -334,8 +333,9 @@ class _AddBudgetPageState extends State<AddBudgetPage> {
                       vertical: AppSpacing.md,
                     ),
                     decoration: BoxDecoration(
-                      color: AppColors.surfaceContainerHighest,
-                      borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                      color: colors.surfaceContainerHighest,
+                      borderRadius:
+                          BorderRadius.circular(AppSpacing.radiusMd),
                     ),
                     child: Row(
                       children: [
@@ -343,14 +343,11 @@ class _AddBudgetPageState extends State<AddBudgetPage> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
-                                s.smartTracking,
-                                style: AppTypography.bodyMd,
-                              ),
+                              Text(s.smartTracking, style: AppTypography.bodyMd),
                               Text(
                                 s.smartTrackingSubtitle,
                                 style: AppTypography.bodySm.copyWith(
-                                  color: AppColors.onSurfaceVariant,
+                                  color: colors.onSurfaceVariant,
                                 ),
                               ),
                             ],
@@ -358,11 +355,11 @@ class _AddBudgetPageState extends State<AddBudgetPage> {
                         ),
                         Switch(
                           value: _smartTracking,
-                          onChanged: (v) => setState(() => _smartTracking = v),
-                          activeThumbColor: AppColors.primary,
-                          activeTrackColor: AppColors.primary.withValues(
-                            alpha: 0.4,
-                          ),
+                          onChanged: (v) =>
+                              setState(() => _smartTracking = v),
+                          activeThumbColor: colors.primary,
+                          activeTrackColor:
+                              colors.primary.withValues(alpha: 0.4),
                         ),
                       ],
                     ),
@@ -382,19 +379,15 @@ class _AddBudgetPageState extends State<AddBudgetPage> {
                     width: double.infinity,
                     height: 56,
                     child: FilledButton(
-                      onPressed: isSubmitting
-                          ? null
-                          : () => _submit(categories),
+                      onPressed: isSubmitting ? null : () => _submit(categories),
                       style: FilledButton.styleFrom(
-                        backgroundColor: AppColors.primary,
-                        foregroundColor: AppColors.surface,
-                        disabledBackgroundColor: AppColors.primary.withValues(
-                          alpha: 0.5,
-                        ),
+                        backgroundColor: colors.primary,
+                        foregroundColor: colors.surface,
+                        disabledBackgroundColor:
+                            colors.primary.withValues(alpha: 0.5),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(
-                            AppSpacing.radiusXl,
-                          ),
+                          borderRadius:
+                              BorderRadius.circular(AppSpacing.radiusXl),
                         ),
                       ),
                       child: isSubmitting
@@ -410,7 +403,7 @@ class _AddBudgetPageState extends State<AddBudgetPage> {
                               s.save,
                               style: AppTypography.bodyMd.copyWith(
                                 fontWeight: FontWeight.w600,
-                                color: AppColors.surface,
+                                color: colors.surface,
                               ),
                             ),
                     ),

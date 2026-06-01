@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
+import '../../../core/theme/app_palette.dart';
 
 class DateButton extends StatelessWidget {
   const DateButton({
@@ -16,6 +16,7 @@ class DateButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -24,15 +25,15 @@ class DateButton extends StatelessWidget {
           vertical: AppSpacing.md,
         ),
         decoration: BoxDecoration(
-          color: AppColors.surfaceContainerHighest,
+          color: colors.surfaceContainerHighest,
           borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
         ),
         child: Row(
           children: [
-            const Icon(
+            Icon(
               Icons.calendar_today_outlined,
               size: 16,
-              color: AppColors.onSurfaceVariant,
+              color: colors.onSurfaceVariant,
             ),
             const SizedBox(width: AppSpacing.sm),
             Expanded(
@@ -42,7 +43,7 @@ class DateButton extends StatelessWidget {
                   Text(
                     label,
                     style: AppTypography.labelSm.copyWith(
-                      color: AppColors.onSurfaceVariant,
+                      color: colors.onSurfaceVariant,
                       fontSize: 10,
                     ),
                   ),

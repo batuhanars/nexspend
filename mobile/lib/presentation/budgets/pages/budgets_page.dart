@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
-import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
 import '../../../core/l10n/app_strings.dart';
+import '../../../core/theme/app_palette.dart';
 import '../../../core/utils/icon_mapper.dart';
 import '../../../data/models/budget_model.dart';
 import '../../../data/models/family_model.dart';
@@ -66,9 +66,9 @@ class _BudgetsViewState extends State<_BudgetsView> {
   @override
   Widget build(BuildContext context) {
     final s = AppStrings.of(context);
+    final colors = context.colors;
     return MultiBlocListener(
       listeners: [
-        // İlk yüklemede (Loading→Loaded) aktif bütçeler için suggestion çek
         BlocListener<BudgetsBloc, BudgetsState>(
           listenWhen: (prev, curr) =>
               curr is BudgetsLoaded && prev is! BudgetsLoaded,
@@ -84,7 +84,6 @@ class _BudgetsViewState extends State<_BudgetsView> {
             }
           },
         ),
-        // Apply başarılı → bütçeleri + suggestion'ları yenile
         BlocListener<InflationBloc, InflationState>(
           listener: (context, state) {
             if (state is InflationApplied) {
@@ -99,26 +98,26 @@ class _BudgetsViewState extends State<_BudgetsView> {
                       InflationSuggestionsFetchRequested(budgetIds: ids),
                     );
               }
-              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                content: Text('Bütçe enflasyona göre güncellendi'),
-                backgroundColor: AppColors.secondary,
+              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                content: const Text('Bütçe enflasyona göre güncellendi'),
+                backgroundColor: context.colors.income,
               ));
             } else if (state is InflationApplyError) {
               ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                 content: Text(state.message),
-                backgroundColor: AppColors.error,
+                backgroundColor: context.colors.error,
               ));
             }
           },
         ),
       ],
       child: Scaffold(
-        backgroundColor: AppColors.surface,
+        backgroundColor: colors.surface,
         body: BlocBuilder<BudgetsBloc, BudgetsState>(
           builder: (context, state) {
             return RefreshIndicator(
-              color: AppColors.primary,
-              backgroundColor: AppColors.surfaceContainerHigh,
+              color: colors.primary,
+              backgroundColor: colors.surfaceContainerHigh,
               onRefresh: () async {
                 context
                     .read<BudgetsBloc>()
@@ -127,9 +126,6 @@ class _BudgetsViewState extends State<_BudgetsView> {
                     .read<BudgetsBloc>()
                     .stream
                     .firstWhere((s) => s is BudgetsLoaded || s is BudgetsError);
-                // _onRefresh intermediate BudgetsLoading emit etmediği için
-                // listenWhen tetiklenmiyor → suggestion fetch'i burada açıkça
-                // tetikliyoruz, aksi halde değişen updatedAt'ler yansımıyor.
                 if (newState is BudgetsLoaded && context.mounted) {
                   final ids = newState.budgets
                       .where((b) => b.isActive)
@@ -145,22 +141,23 @@ class _BudgetsViewState extends State<_BudgetsView> {
                 slivers: [
                   SliverAppBar(
                     floating: true,
-                    backgroundColor: AppColors.surface,
+                    backgroundColor: colors.surface,
                     surfaceTintColor: Colors.transparent,
-                    title:
-                        Text(s.budgetsTitle, style: AppTypography.headlineSm),
+                    title: Text(s.budgetsTitle,
+                        style: AppTypography.headlineSm),
                     actions: [
                       IconButton(
-                        icon: const Icon(
+                        icon: Icon(
                           Icons.inventory_2_outlined,
-                          color: AppColors.onSurfaceVariant,
+                          color: colors.onSurfaceVariant,
                         ),
-                        onPressed: () => context.push(RouteNames.archivedBudgets),
+                        onPressed: () =>
+                            context.push(RouteNames.archivedBudgets),
                       ),
                       IconButton(
-                        icon: const Icon(
+                        icon: Icon(
                           Icons.add_rounded,
-                          color: AppColors.primary,
+                          color: colors.primary,
                         ),
                         onPressed: () => _onCreatePressed(context),
                       ),
@@ -177,8 +174,8 @@ class _BudgetsViewState extends State<_BudgetsView> {
     );
   }
 
-  Widget _buildBody(
-      BuildContext context, BudgetsState state, AppStrings s) {
+  Widget _buildBody(BuildContext context, BudgetsState state, AppStrings s) {
+    final colors = context.colors;
     return switch (state) {
       BudgetsInitial() || BudgetsLoading() => const SliverFillRemaining(
           child: BudgetsShimmer(),
@@ -247,9 +244,9 @@ class _BudgetsViewState extends State<_BudgetsView> {
                                 .add(BudgetDeleteRequested(b.id));
                             ScaffoldMessenger.of(context)
                                 .showSnackBar(SnackBar(
-                              content: Text(AppStrings.of(context)
-                                  .budgetDeletedSuccess),
-                              backgroundColor: AppColors.secondary,
+                              content: Text(
+                                  AppStrings.of(context).budgetDeletedSuccess),
+                              backgroundColor: colors.income,
                             ));
                           },
                           onEdit: () {
@@ -257,12 +254,10 @@ class _BudgetsViewState extends State<_BudgetsView> {
                             showModalBottomSheet(
                               context: context,
                               isScrollControlled: true,
-                              backgroundColor:
-                                  AppColors.surfaceContainerHigh,
+                              backgroundColor: colors.surfaceContainerHigh,
                               shape: const RoundedRectangleBorder(
                                 borderRadius: BorderRadius.vertical(
-                                  top: Radius.circular(
-                                      AppSpacing.radiusLg),
+                                  top: Radius.circular(AppSpacing.radiusLg),
                                 ),
                               ),
                               builder: (_) => BlocProvider.value(
@@ -283,8 +278,6 @@ class _BudgetsViewState extends State<_BudgetsView> {
   }
 }
 
-/// Aktif bütçeler için enflasyon öneri kartlarını gösterir.
-/// Null suggestion (204) olan bütçeler için kart render edilmez.
 class _InflationSuggestionsSection extends StatelessWidget {
   const _InflationSuggestionsSection({required this.budgets});
 
@@ -330,8 +323,6 @@ class _InflationSuggestionsSection extends StatelessWidget {
   }
 }
 
-// ── Gruplar Bölümü ─────────────────────────────────────────────────────────
-
 class _FamilyGroupsSection extends StatefulWidget {
   const _FamilyGroupsSection({super.key});
 
@@ -367,7 +358,7 @@ class FamilyGroupsSectionState extends State<_FamilyGroupsSection> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(AppStrings.of(context).createGroupError),
-            backgroundColor: AppColors.error,
+            backgroundColor: context.colors.error,
           ),
         );
       }
@@ -386,86 +377,91 @@ class FamilyGroupsSectionState extends State<_FamilyGroupsSection> {
     showDialog<void>(
       context: context,
       builder: (ctx) => StatefulBuilder(
-        builder: (ctx, setDialogState) => AlertDialog(
-          backgroundColor: AppColors.surfaceContainerHigh,
-          title: Text(AppStrings.of(context).createNewGroupTitle, style: AppTypography.titleSm),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: nameCtrl,
-                style: AppTypography.bodyMd,
-                decoration: InputDecoration(
-                  hintText: AppStrings.of(context).groupNameHint,
-                  hintStyle: AppTypography.bodyMd
-                      .copyWith(color: AppColors.onSurfaceVariant),
-                  filled: true,
-                  fillColor: AppColors.surfaceContainerHighest,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-                    borderSide: BorderSide.none,
+        builder: (ctx, setDialogState) {
+          final colors = ctx.colors;
+          return AlertDialog(
+            backgroundColor: colors.surfaceContainerHigh,
+            title: Text(AppStrings.of(context).createNewGroupTitle,
+                style: AppTypography.titleSm),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: nameCtrl,
+                  style: AppTypography.bodyMd,
+                  decoration: InputDecoration(
+                    hintText: AppStrings.of(context).groupNameHint,
+                    hintStyle: AppTypography.bodyMd
+                        .copyWith(color: colors.onSurfaceVariant),
+                    filled: true,
+                    fillColor: colors.surfaceContainerHighest,
+                    border: OutlineInputBorder(
+                      borderRadius:
+                          BorderRadius.circular(AppSpacing.radiusMd),
+                      borderSide: BorderSide.none,
+                    ),
                   ),
                 ),
+                const SizedBox(height: AppSpacing.md),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: icons.map((icon) {
+                    final isSelected = selectedIcon == icon;
+                    return GestureDetector(
+                      onTap: () =>
+                          setDialogState(() => selectedIcon = icon),
+                      child: Container(
+                        width: 44,
+                        height: 44,
+                        decoration: BoxDecoration(
+                          color: isSelected
+                              ? colors.primary.withValues(alpha: 0.2)
+                              : colors.surfaceContainerHighest,
+                          borderRadius:
+                              BorderRadius.circular(AppSpacing.radiusMd),
+                          border: isSelected
+                              ? Border.all(
+                                  color: colors.primary, width: 1.5)
+                              : null,
+                        ),
+                        child: Icon(
+                          _iconData(icon),
+                          color: isSelected
+                              ? colors.primary
+                              : colors.onSurfaceVariant,
+                          size: 22,
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(ctx).pop(),
+                child: Text(
+                  AppStrings.of(context).cancel,
+                  style: AppTypography.bodyMd
+                      .copyWith(color: colors.onSurfaceVariant),
+                ),
               ),
-              const SizedBox(height: AppSpacing.md),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: icons.map((icon) {
-                  final isSelected = selectedIcon == icon;
-                  return GestureDetector(
-                    onTap: () =>
-                        setDialogState(() => selectedIcon = icon),
-                    child: Container(
-                      width: 44,
-                      height: 44,
-                      decoration: BoxDecoration(
-                        color: isSelected
-                            ? AppColors.primary.withValues(alpha: 0.2)
-                            : AppColors.surfaceContainerHighest,
-                        borderRadius:
-                            BorderRadius.circular(AppSpacing.radiusMd),
-                        border: isSelected
-                            ? Border.all(
-                                color: AppColors.primary, width: 1.5)
-                            : null,
-                      ),
-                      child: Icon(
-                        _iconData(icon),
-                        color: isSelected
-                            ? AppColors.primary
-                            : AppColors.onSurfaceVariant,
-                        size: 22,
-                      ),
-                    ),
-                  );
-                }).toList(),
+              FilledButton(
+                onPressed: () {
+                  final name = nameCtrl.text.trim();
+                  if (name.isEmpty) return;
+                  Navigator.of(ctx).pop();
+                  _createGroup(name, selectedIcon);
+                },
+                style: FilledButton.styleFrom(
+                  backgroundColor: colors.primary,
+                  foregroundColor: colors.onPrimary,
+                ),
+                child: Text(AppStrings.of(context).createGroupBtn),
               ),
             ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(ctx).pop(),
-              child: Text(
-                AppStrings.of(context).cancel,
-                style: AppTypography.bodyMd
-                    .copyWith(color: AppColors.onSurfaceVariant),
-              ),
-            ),
-            FilledButton(
-              onPressed: () {
-                final name = nameCtrl.text.trim();
-                if (name.isEmpty) return;
-                Navigator.of(ctx).pop();
-                _createGroup(name, selectedIcon);
-              },
-              style: FilledButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                foregroundColor: AppColors.onPrimary,
-              ),
-              child: Text(AppStrings.of(context).createGroupBtn),
-            ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }
@@ -481,6 +477,7 @@ class FamilyGroupsSectionState extends State<_FamilyGroupsSection> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return FutureBuilder<List<FamilyGroupModel>>(
       future: _future,
       builder: (context, snapshot) {
@@ -507,12 +504,12 @@ class FamilyGroupsSectionState extends State<_FamilyGroupsSection> {
                     ),
                   ),
                   if (_isCreating)
-                    const SizedBox(
+                    SizedBox(
                       width: 18,
                       height: 18,
                       child: CircularProgressIndicator(
                         strokeWidth: 2,
-                        color: AppColors.primary,
+                        color: colors.primary,
                       ),
                     ),
                 ],
@@ -546,6 +543,7 @@ class _CreateGroupPromptCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -555,22 +553,21 @@ class _CreateGroupPromptCard extends StatelessWidget {
           horizontal: AppSpacing.lg,
         ),
         decoration: BoxDecoration(
-          color: AppColors.surfaceContainerHigh,
+          color: colors.surfaceContainerHigh,
           borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
           border: Border.all(
-            color: AppColors.primary.withValues(alpha: 0.3),
+            color: colors.primary.withValues(alpha: 0.3),
             width: 1,
           ),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.add_rounded, color: AppColors.primary, size: 20),
+            Icon(Icons.add_rounded, color: colors.primary, size: 20),
             const SizedBox(width: AppSpacing.sm),
             Text(
               AppStrings.of(context).createFamilyGroupPrompt,
-              style: AppTypography.bodyMd
-                  .copyWith(color: AppColors.primary),
+              style: AppTypography.bodyMd.copyWith(color: colors.primary),
             ),
           ],
         ),
@@ -590,6 +587,7 @@ class _FamilyGroupEntryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     final icon = IconMapper.fromString(group.icon ?? 'people');
     return GestureDetector(
       onTap: () async {
@@ -602,7 +600,7 @@ class _FamilyGroupEntryCard extends StatelessWidget {
           vertical: AppSpacing.md,
         ),
         decoration: BoxDecoration(
-          color: AppColors.surfaceContainerHigh,
+          color: colors.surfaceContainerHigh,
           borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
         ),
         child: Row(
@@ -611,10 +609,10 @@ class _FamilyGroupEntryCard extends StatelessWidget {
               width: 36,
               height: 36,
               decoration: BoxDecoration(
-                color: AppColors.primary.withValues(alpha: 0.12),
+                color: colors.primary.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
               ),
-              child: Icon(icon, size: 18, color: AppColors.primary),
+              child: Icon(icon, size: 18, color: colors.primary),
             ),
             const SizedBox(width: AppSpacing.md),
             Expanded(
@@ -629,14 +627,14 @@ class _FamilyGroupEntryCard extends StatelessWidget {
                   Text(
                     AppStrings.of(context).familyMemberCount(group.memberCount),
                     style: AppTypography.bodySm
-                        .copyWith(color: AppColors.onSurfaceVariant),
+                        .copyWith(color: colors.onSurfaceVariant),
                   ),
                 ],
               ),
             ),
-            const Icon(
+            Icon(
               Icons.chevron_right_rounded,
-              color: AppColors.onSurfaceVariant,
+              color: colors.onSurfaceVariant,
               size: 20,
             ),
           ],

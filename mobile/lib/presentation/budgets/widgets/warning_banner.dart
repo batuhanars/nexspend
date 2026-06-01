@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
 import '../../../core/l10n/app_strings.dart';
+import '../../../core/theme/app_palette.dart';
 import '../../../data/models/budget_model.dart';
 
 class WarningBanner extends StatelessWidget {
@@ -10,6 +11,7 @@ class WarningBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     final exceededCount =
         budgets.where((b) => b.status == BudgetStatus.EXCEEDED).length;
     final criticalCount =
@@ -18,9 +20,7 @@ class WarningBanner extends StatelessWidget {
     if (exceededCount == 0 && criticalCount == 0) return const SizedBox.shrink();
 
     final isExceeded = exceededCount > 0;
-    final color = isExceeded
-        ? const Color(0xFFEF5350)
-        : const Color(0xFFFF9800);
+    final color = isExceeded ? colors.danger : colors.warning;
     final icon =
         isExceeded ? Icons.error_outline : Icons.warning_amber_outlined;
     final message = isExceeded

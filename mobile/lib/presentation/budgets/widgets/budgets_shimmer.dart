@@ -1,26 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
-import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
+import '../../../core/theme/app_palette.dart';
 
 class BudgetsShimmer extends StatelessWidget {
   const BudgetsShimmer({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return Shimmer.fromColors(
-      baseColor: AppColors.surfaceContainerHigh,
-      highlightColor: AppColors.surfaceContainerHighest,
+      baseColor: colors.surfaceContainerHigh,
+      highlightColor: colors.surfaceContainerHighest,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: AppSpacing.pagePadding),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Overview card
             Container(
               height: 260,
               decoration: BoxDecoration(
-                color: AppColors.surfaceContainerHigh,
+                color: colors.surfaceContainerHigh,
                 borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
               ),
             ),
@@ -29,7 +29,7 @@ class BudgetsShimmer extends StatelessWidget {
               height: 16,
               width: 120,
               decoration: BoxDecoration(
-                color: AppColors.surfaceContainerHigh,
+                color: colors.surfaceContainerHigh,
                 borderRadius: BorderRadius.circular(4),
               ),
             ),
@@ -41,7 +41,7 @@ class BudgetsShimmer extends StatelessWidget {
                 child: Container(
                   height: 110,
                   decoration: BoxDecoration(
-                    color: AppColors.surfaceContainerHigh,
+                    color: colors.surfaceContainerHigh,
                     borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
                   ),
                 ),

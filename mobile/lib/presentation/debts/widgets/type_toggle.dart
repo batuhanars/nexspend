@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:wallet_app/core/constants/app_colors.dart';
 import 'package:wallet_app/core/constants/app_spacing.dart';
 import 'package:wallet_app/core/constants/app_typography.dart';
 import 'package:wallet_app/core/l10n/app_strings.dart';
+import 'package:wallet_app/core/theme/app_palette.dart';
 import 'package:wallet_app/data/models/debt_model.dart';
 
 class TypeToggle extends StatelessWidget {
@@ -16,14 +16,15 @@ class TypeToggle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     final s = AppStrings.of(context);
     final types = [
-      (label: s.debtTypeBorrowed, value: DebtType.BORROWED, color: AppColors.tertiary),
-      (label: s.debtTypeLent, value: DebtType.LENT, color: AppColors.secondary),
+      (label: s.debtTypeBorrowed, value: DebtType.BORROWED, color: colors.expense),
+      (label: s.debtTypeLent, value: DebtType.LENT, color: colors.income),
     ];
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.surfaceContainerHighest,
+        color: colors.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
       ),
       padding: const EdgeInsets.all(4),
@@ -46,7 +47,7 @@ class TypeToggle extends StatelessWidget {
                   child: Text(
                     t.label,
                     style: AppTypography.bodyMd.copyWith(
-                      color: isSelected ? t.color : AppColors.onSurfaceVariant,
+                      color: isSelected ? t.color : colors.onSurfaceVariant,
                       fontWeight: isSelected
                           ? FontWeight.w600
                           : FontWeight.w400,

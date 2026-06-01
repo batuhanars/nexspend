@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:wallet_app/core/constants/app_colors.dart';
 import 'package:wallet_app/core/constants/app_spacing.dart';
 import 'package:wallet_app/core/constants/app_typography.dart';
 import 'package:wallet_app/core/di/injection.dart';
 import 'package:wallet_app/core/l10n/app_strings.dart';
+import 'package:wallet_app/core/theme/app_palette.dart';
 import 'package:wallet_app/data/models/account_model.dart';
 import 'package:wallet_app/data/models/debt_model.dart';
 import 'package:wallet_app/data/repositories/account_repository.dart';
@@ -42,7 +42,7 @@ class _PaymentSheetState extends State<PaymentSheet> {
 
   void _showError(String msg) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(msg), backgroundColor: AppColors.error),
+      SnackBar(content: Text(msg), backgroundColor: context.colors.error),
     );
   }
 
@@ -78,7 +78,7 @@ class _PaymentSheetState extends State<PaymentSheet> {
               ? AppStrings.of(context).debtCollectionSuccess
               : AppStrings.of(context).debtPaymentSuccess,
         ),
-        backgroundColor: AppColors.secondary,
+        backgroundColor: context.colors.secondary,
       ),
     );
     Navigator.of(context).pop();
@@ -86,6 +86,7 @@ class _PaymentSheetState extends State<PaymentSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     final isLent = widget.debt.type == DebtType.LENT;
     return Padding(
       padding: EdgeInsets.fromLTRB(
@@ -110,7 +111,7 @@ class _PaymentSheetState extends State<PaymentSheet> {
               IconButton(
                 onPressed: () => Navigator.of(context).pop(),
                 icon: const Icon(Icons.close_rounded),
-                color: AppColors.onSurfaceVariant,
+                color: colors.onSurfaceVariant,
               ),
             ],
           ),
@@ -118,7 +119,7 @@ class _PaymentSheetState extends State<PaymentSheet> {
           Text(
             widget.debt.personName,
             style: AppTypography.bodyMd.copyWith(
-              color: AppColors.onSurfaceVariant,
+              color: colors.onSurfaceVariant,
             ),
           ),
           const SizedBox(height: AppSpacing.lg),
@@ -130,18 +131,18 @@ class _PaymentSheetState extends State<PaymentSheet> {
             decoration: InputDecoration(
               labelText: AppStrings.of(context).amountHint,
               labelStyle: AppTypography.bodyMd.copyWith(
-                color: AppColors.onSurfaceVariant,
+                color: colors.onSurfaceVariant,
               ),
               filled: true,
-              fillColor: AppColors.surfaceContainerHighest,
+              fillColor: colors.surfaceContainerHighest,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
                 borderSide: BorderSide.none,
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-                borderSide: const BorderSide(
-                  color: AppColors.primary,
+                borderSide: BorderSide(
+                  color: colors.primary,
                   width: 1.5,
                 ),
               ),
@@ -151,7 +152,7 @@ class _PaymentSheetState extends State<PaymentSheet> {
           Text(
             AppStrings.of(context).accountLabel,
             style: AppTypography.labelSm.copyWith(
-              color: AppColors.onSurfaceVariant,
+              color: colors.onSurfaceVariant,
             ),
           ),
           const SizedBox(height: AppSpacing.sm),
@@ -159,7 +160,7 @@ class _PaymentSheetState extends State<PaymentSheet> {
             future: _accountsFuture,
             builder: (context, snapshot) {
               if (!snapshot.hasData) {
-                return const SizedBox(
+                return SizedBox(
                   height: 36,
                   child: Center(
                     child: SizedBox(
@@ -167,7 +168,7 @@ class _PaymentSheetState extends State<PaymentSheet> {
                       height: 20,
                       child: CircularProgressIndicator(
                         strokeWidth: 2,
-                        color: AppColors.primary,
+                        color: colors.primary,
                       ),
                     ),
                   ),
@@ -180,7 +181,7 @@ class _PaymentSheetState extends State<PaymentSheet> {
                 return Text(
                   AppStrings.of(context).noAccountsFound,
                   style: AppTypography.bodySm.copyWith(
-                    color: AppColors.onSurfaceVariant,
+                    color: colors.onSurfaceVariant,
                   ),
                 );
               }
@@ -209,21 +210,21 @@ class _PaymentSheetState extends State<PaymentSheet> {
                         ),
                         decoration: BoxDecoration(
                           color: isSelected
-                              ? AppColors.primary.withValues(alpha: 0.15)
-                              : AppColors.surfaceContainerHighest,
+                              ? colors.primary.withValues(alpha: 0.15)
+                              : colors.surfaceContainerHighest,
                           borderRadius: BorderRadius.circular(
                             AppSpacing.radiusMd,
                           ),
                           border: isSelected
-                              ? Border.all(color: AppColors.primary, width: 1.5)
+                              ? Border.all(color: colors.primary, width: 1.5)
                               : null,
                         ),
                         child: Text(
                           a.name,
                           style: AppTypography.labelSm.copyWith(
                             color: isSelected
-                                ? AppColors.primary
-                                : AppColors.onSurfaceVariant,
+                                ? colors.primary
+                                : colors.onSurfaceVariant,
                             fontWeight: isSelected
                                 ? FontWeight.w600
                                 : FontWeight.w400,
@@ -243,18 +244,18 @@ class _PaymentSheetState extends State<PaymentSheet> {
             decoration: InputDecoration(
               hintText: AppStrings.of(context).noteOptionalHint,
               hintStyle: AppTypography.bodyMd.copyWith(
-                color: AppColors.onSurfaceVariant,
+                color: colors.onSurfaceVariant,
               ),
               filled: true,
-              fillColor: AppColors.surfaceContainerHighest,
+              fillColor: colors.surfaceContainerHighest,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
                 borderSide: BorderSide.none,
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-                borderSide: const BorderSide(
-                  color: AppColors.primary,
+                borderSide: BorderSide(
+                  color: colors.primary,
                   width: 1.5,
                 ),
               ),

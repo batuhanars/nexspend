@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
-import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
+import '../../../core/theme/app_palette.dart';
 import '../../shared/widgets/shimmer_box.dart';
 
 class DebtsShimmer extends StatelessWidget {
@@ -9,9 +9,10 @@ class DebtsShimmer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return Shimmer.fromColors(
-      baseColor: AppColors.surfaceContainerHigh,
-      highlightColor: AppColors.surfaceContainerHighest,
+      baseColor: colors.surfaceContainerHigh,
+      highlightColor: colors.surfaceContainerHighest,
       child: Column(
         children: [
           Padding(
@@ -44,13 +45,13 @@ class DebtsShimmer extends StatelessWidget {
               ],
             ),
           ),
-          ...List.generate(3, (_) => _debtCard()),
+          ...List.generate(3, (_) => _debtCard(colors)),
         ],
       ),
     );
   }
 
-  Widget _debtCard() => Padding(
+  Widget _debtCard(AppPalette colors) => Padding(
         padding: const EdgeInsets.symmetric(
           horizontal: AppSpacing.pagePadding,
           vertical: AppSpacing.xs,
@@ -58,7 +59,7 @@ class DebtsShimmer extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.all(AppSpacing.lg),
           decoration: BoxDecoration(
-            color: AppColors.surfaceContainerHigh,
+            color: colors.surfaceContainerHigh,
             borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
           ),
           child: Column(

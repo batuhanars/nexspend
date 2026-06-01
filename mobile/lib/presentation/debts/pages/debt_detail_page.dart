@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:wallet_app/core/l10n/app_strings.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:wallet_app/core/constants/app_colors.dart';
 import 'package:wallet_app/core/constants/app_spacing.dart';
 import 'package:wallet_app/core/constants/app_typography.dart';
 import 'package:wallet_app/core/di/injection.dart';
+import 'package:wallet_app/core/theme/app_palette.dart';
 import 'package:wallet_app/core/utils/currency_formatter.dart';
 import 'package:wallet_app/data/models/account_model.dart';
 import 'package:wallet_app/data/models/debt_model.dart';
@@ -12,6 +12,16 @@ import 'package:wallet_app/data/repositories/account_repository.dart';
 import 'package:wallet_app/presentation/debts/bloc/debt_detail_bloc.dart';
 import 'package:wallet_app/presentation/debts/widgets/installment_row.dart';
 import 'package:wallet_app/presentation/debts/widgets/payment_row.dart';
+
+Color _debtTypeColor(DebtType type, AppPalette colors) =>
+    type == DebtType.LENT ? colors.income : colors.expense;
+
+Color _debtStatusColor(DebtStatus status, AppPalette colors) =>
+    switch (status) {
+      DebtStatus.PAID => colors.success,
+      DebtStatus.OVERDUE => colors.danger,
+      _ => colors.warning,
+    };
 
 class DebtDetailPage extends StatelessWidget {
   const DebtDetailPage({super.key, required this.debt});
@@ -35,13 +45,14 @@ class _DebtDetailView extends StatelessWidget {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(AppStrings.of(context).debtDeletedSuccess),
-              backgroundColor: AppColors.secondary,
+              backgroundColor: context.colors.secondary,
             ),
           );
           Navigator.of(context).pop();
         }
       },
       builder: (context, state) {
+        final colors = context.colors;
         final debt = state is DebtDetailLoaded
             ? state.debt
             : state is DebtDetailLoading
@@ -52,9 +63,9 @@ class _DebtDetailView extends StatelessWidget {
                   : null);
 
         return Scaffold(
-          backgroundColor: AppColors.surface,
+          backgroundColor: colors.surface,
           appBar: AppBar(
-            backgroundColor: AppColors.surface,
+            backgroundColor: colors.surface,
             surfaceTintColor: Colors.transparent,
             leading: IconButton(
               icon: const Icon(Icons.arrow_back_rounded),
@@ -67,9 +78,9 @@ class _DebtDetailView extends StatelessWidget {
             actions: [
               if (debt != null)
                 IconButton(
-                  icon: const Icon(
+                  icon: Icon(
                     Icons.delete_outline_rounded,
-                    color: AppColors.error,
+                    color: colors.error,
                   ),
                   tooltip: AppStrings.of(context).delete,
                   onPressed: () => _confirmDelete(context, debt),
@@ -77,8 +88,8 @@ class _DebtDetailView extends StatelessWidget {
             ],
           ),
           body: switch (state) {
-            DebtDetailLoading() => const Center(
-              child: CircularProgressIndicator(color: AppColors.primary),
+            DebtDetailLoading() => Center(
+              child: CircularProgressIndicator(color: colors.primary),
             ),
             DebtDetailError(:final message) => Center(
               child: Column(
@@ -87,7 +98,7 @@ class _DebtDetailView extends StatelessWidget {
                   Text(
                     message,
                     style: AppTypography.bodyMd.copyWith(
-                      color: AppColors.onSurfaceVariant,
+                      color: colors.onSurfaceVariant,
                     ),
                   ),
                   const SizedBox(height: AppSpacing.lg),
@@ -106,7 +117,7 @@ class _DebtDetailView extends StatelessWidget {
               :final payments,
             ) =>
               RefreshIndicator(
-                color: AppColors.primary,
+                color: colors.primary,
                 onRefresh: () async => context.read<DebtDetailBloc>().add(
                   DebtDetailRefreshRequested(),
                 ),
@@ -169,7 +180,7 @@ class _DebtDetailView extends StatelessWidget {
                           child: Text(
                             AppStrings.of(context).noPaymentsYet,
                             style: AppTypography.bodyMd.copyWith(
-                              color: AppColors.onSurfaceVariant,
+                              color: colors.onSurfaceVariant,
                             ),
                           ),
                         ),
@@ -185,7 +196,7 @@ class _DebtDetailView extends StatelessWidget {
                   state.debt.status != DebtStatus.PAID &&
                   (!state.debt.hasInstallments || state.installments.isEmpty)
               ? Container(
-                  color: AppColors.surface,
+                  color: colors.surface,
                   child: SafeArea(
                     child: Padding(
                       padding: const EdgeInsets.fromLTRB(
@@ -198,8 +209,8 @@ class _DebtDetailView extends StatelessWidget {
                         onPressed: () => _showPaymentSheet(context, state.debt),
                         style: FilledButton.styleFrom(
                           minimumSize: const Size.fromHeight(56),
-                          backgroundColor: AppColors.primaryContainer,
-                          foregroundColor: AppColors.onPrimaryContainer,
+                          backgroundColor: colors.primaryContainer,
+                          foregroundColor: colors.onPrimaryContainer,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(
                               AppSpacing.radiusXl,
@@ -227,32 +238,35 @@ class _DebtDetailView extends StatelessWidget {
   Future<void> _confirmDelete(BuildContext context, DebtModel debt) async {
     final ok = await showDialog<bool>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: AppColors.surfaceContainerHigh,
-        title: Text(
-          AppStrings.of(context).deleteDebtTitle,
-          style: AppTypography.titleSm,
-        ),
-        content: Text(
-          '${debt.personName} ile olan borç kaydı silinecek.',
-          style: AppTypography.bodyMd.copyWith(
-            color: AppColors.onSurfaceVariant,
+      builder: (ctx) {
+        final colors = ctx.colors;
+        return AlertDialog(
+          backgroundColor: colors.surfaceContainerHigh,
+          title: Text(
+            AppStrings.of(context).deleteDebtTitle,
+            style: AppTypography.titleSm,
           ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(false),
-            child: Text(AppStrings.of(context).cancel),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(true),
-            child: Text(
-              AppStrings.of(context).delete,
-              style: const TextStyle(color: AppColors.error),
+          content: Text(
+            '${debt.personName} ile olan borç kaydı silinecek.',
+            style: AppTypography.bodyMd.copyWith(
+              color: colors.onSurfaceVariant,
             ),
           ),
-        ],
-      ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(false),
+              child: Text(AppStrings.of(context).cancel),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(true),
+              child: Text(
+                AppStrings.of(context).delete,
+                style: TextStyle(color: colors.error),
+              ),
+            ),
+          ],
+        );
+      },
     );
     if (ok == true && context.mounted) {
       context.read<DebtDetailBloc>().add(DebtDetailDeleteRequested());
@@ -263,7 +277,7 @@ class _DebtDetailView extends StatelessWidget {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: AppColors.surfaceContainerHigh,
+      backgroundColor: context.colors.surfaceContainerHigh,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(
           top: Radius.circular(AppSpacing.radiusXl),
@@ -284,7 +298,7 @@ class _DebtDetailView extends StatelessWidget {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: AppColors.surfaceContainerHigh,
+      backgroundColor: context.colors.surfaceContainerHigh,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(
           top: Radius.circular(AppSpacing.radiusXl),
@@ -339,7 +353,7 @@ class _DetailPaymentSheetState extends State<_DetailPaymentSheet> {
 
   void _showError(String msg) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(msg), backgroundColor: AppColors.error),
+      SnackBar(content: Text(msg), backgroundColor: context.colors.error),
     );
   }
 
@@ -369,6 +383,7 @@ class _DetailPaymentSheetState extends State<_DetailPaymentSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     final isLent = widget.debt.type == DebtType.LENT;
     return Padding(
       padding: EdgeInsets.fromLTRB(
@@ -397,7 +412,7 @@ class _DetailPaymentSheetState extends State<_DetailPaymentSheet> {
               IconButton(
                 onPressed: () => Navigator.of(context).pop(),
                 icon: const Icon(Icons.close_rounded),
-                color: AppColors.onSurfaceVariant,
+                color: colors.onSurfaceVariant,
               ),
             ],
           ),
@@ -417,6 +432,7 @@ class _DetailPaymentSheetState extends State<_DetailPaymentSheet> {
             _amountCtrl,
             AppStrings.of(context).amountHint,
             Icons.attach_money_rounded,
+            colors,
             numeric: true,
             readOnly: widget.installment != null,
           ),
@@ -424,7 +440,7 @@ class _DetailPaymentSheetState extends State<_DetailPaymentSheet> {
           Text(
             AppStrings.of(context).accountLabel,
             style: AppTypography.labelSm.copyWith(
-              color: AppColors.onSurfaceVariant,
+              color: colors.onSurfaceVariant,
             ),
           ),
           const SizedBox(height: AppSpacing.sm),
@@ -432,7 +448,7 @@ class _DetailPaymentSheetState extends State<_DetailPaymentSheet> {
             future: _accountsFuture,
             builder: (context, snapshot) {
               if (!snapshot.hasData) {
-                return const SizedBox(
+                return SizedBox(
                   height: 36,
                   child: Center(
                     child: SizedBox(
@@ -440,7 +456,7 @@ class _DetailPaymentSheetState extends State<_DetailPaymentSheet> {
                       height: 20,
                       child: CircularProgressIndicator(
                         strokeWidth: 2,
-                        color: AppColors.primary,
+                        color: colors.primary,
                       ),
                     ),
                   ),
@@ -453,7 +469,7 @@ class _DetailPaymentSheetState extends State<_DetailPaymentSheet> {
                 return Text(
                   AppStrings.of(context).noAccountsFound,
                   style: AppTypography.bodySm.copyWith(
-                    color: AppColors.onSurfaceVariant,
+                    color: colors.onSurfaceVariant,
                   ),
                 );
               }
@@ -482,21 +498,21 @@ class _DetailPaymentSheetState extends State<_DetailPaymentSheet> {
                         ),
                         decoration: BoxDecoration(
                           color: isSelected
-                              ? AppColors.primary.withValues(alpha: 0.15)
-                              : AppColors.surfaceContainerHighest,
+                              ? colors.primary.withValues(alpha: 0.15)
+                              : colors.surfaceContainerHighest,
                           borderRadius: BorderRadius.circular(
                             AppSpacing.radiusMd,
                           ),
                           border: isSelected
-                              ? Border.all(color: AppColors.primary, width: 1.5)
+                              ? Border.all(color: colors.primary, width: 1.5)
                               : null,
                         ),
                         child: Text(
                           a.name,
                           style: AppTypography.labelSm.copyWith(
                             color: isSelected
-                                ? AppColors.primary
-                                : AppColors.onSurfaceVariant,
+                                ? colors.primary
+                                : colors.onSurfaceVariant,
                             fontWeight: isSelected
                                 ? FontWeight.w600
                                 : FontWeight.w400,
@@ -514,6 +530,7 @@ class _DetailPaymentSheetState extends State<_DetailPaymentSheet> {
             _noteCtrl,
             AppStrings.of(context).noteOptionalHint,
             Icons.notes_outlined,
+            colors,
           ),
           const SizedBox(height: AppSpacing.xl),
           FilledButton(
@@ -534,7 +551,8 @@ class _DetailPaymentSheetState extends State<_DetailPaymentSheet> {
   Widget _inputField(
     TextEditingController ctrl,
     String hint,
-    IconData icon, {
+    IconData icon,
+    AppPalette colors, {
     bool numeric = false,
     bool readOnly = false,
   }) {
@@ -544,16 +562,16 @@ class _DetailPaymentSheetState extends State<_DetailPaymentSheet> {
           ? const TextInputType.numberWithOptions(decimal: true)
           : null,
       readOnly: readOnly,
-      style: const TextStyle(color: AppColors.onSurface, fontSize: 14),
+      style: TextStyle(color: colors.onSurface, fontSize: 14),
       decoration: InputDecoration(
         hintText: hint,
-        hintStyle: const TextStyle(
-          color: AppColors.onSurfaceVariant,
+        hintStyle: TextStyle(
+          color: colors.onSurfaceVariant,
           fontSize: 14,
         ),
-        prefixIcon: Icon(icon, size: 20, color: AppColors.onSurfaceVariant),
+        prefixIcon: Icon(icon, size: 20, color: colors.onSurfaceVariant),
         filled: true,
-        fillColor: AppColors.surfaceContainerHighest,
+        fillColor: colors.surfaceContainerHighest,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
           borderSide: BorderSide.none,
@@ -564,7 +582,7 @@ class _DetailPaymentSheetState extends State<_DetailPaymentSheet> {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-          borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
+          borderSide: BorderSide(color: colors.primary, width: 1.5),
         ),
       ),
     );
@@ -579,13 +597,15 @@ class _HeaderCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = debt.type.color;
+    final colors = context.colors;
+    final color = _debtTypeColor(debt.type, colors);
+    final statusColor = _debtStatusColor(debt.status, colors);
     final progress = debt.progress;
 
     return Container(
       padding: const EdgeInsets.all(AppSpacing.xl),
       decoration: BoxDecoration(
-        color: AppColors.surfaceContainerHigh,
+        color: colors.surfaceContainerHigh,
         borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
       ),
       child: Column(
@@ -617,13 +637,13 @@ class _HeaderCard extends StatelessWidget {
                   vertical: 3,
                 ),
                 decoration: BoxDecoration(
-                  color: debt.status.color.withValues(alpha: 0.12),
+                  color: statusColor.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
                 ),
                 child: Text(
                   debt.status.label,
                   style: AppTypography.labelSm.copyWith(
-                    color: debt.status.color,
+                    color: statusColor,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -688,10 +708,11 @@ class _SectionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return Container(
       padding: const EdgeInsets.all(AppSpacing.lg),
       decoration: BoxDecoration(
-        color: AppColors.surfaceContainerHigh,
+        color: colors.surfaceContainerHigh,
         borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
       ),
       child: Column(
@@ -710,8 +731,8 @@ class _SectionCard extends StatelessWidget {
               .expand(
                 (w) => [
                   w,
-                  const Divider(
-                    color: AppColors.surfaceContainerHighest,
+                  Divider(
+                    color: colors.surfaceContainerHighest,
                     height: 1,
                   ),
                 ],

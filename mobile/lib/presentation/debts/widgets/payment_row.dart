@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:wallet_app/core/constants/app_colors.dart';
 import 'package:wallet_app/core/constants/app_spacing.dart';
 import 'package:wallet_app/core/constants/app_typography.dart';
 import 'package:wallet_app/core/l10n/app_strings.dart';
+import 'package:wallet_app/core/theme/app_palette.dart';
 import 'package:wallet_app/core/utils/currency_formatter.dart';
 import 'package:wallet_app/core/utils/date_formatter.dart';
 import 'package:wallet_app/data/models/debt_model.dart';
@@ -14,7 +14,8 @@ class PaymentRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = isLent ? AppColors.secondary : AppColors.tertiary;
+    final colors = context.colors;
+    final color = isLent ? colors.income : colors.expense;
     final label = isLent ? AppStrings.of(context).paymentCollection : AppStrings.of(context).paymentLabel;
 
     return Padding(

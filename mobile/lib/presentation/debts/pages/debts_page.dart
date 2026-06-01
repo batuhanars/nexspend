@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:wallet_app/core/l10n/app_strings.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:wallet_app/presentation/debts/widgets/add_debt_sheet.dart';
@@ -8,9 +8,9 @@ import 'package:wallet_app/presentation/shared/widgets/empty_state_view.dart';
 import 'package:wallet_app/presentation/shared/widgets/error_view.dart';
 import 'package:wallet_app/presentation/shared/widgets/filter_chip_bar.dart';
 import 'package:wallet_app/presentation/debts/widgets/summary_cards.dart';
-import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
+import '../../../core/theme/app_palette.dart';
 import '../bloc/debts_bloc.dart';
 
 class DebtsPage extends StatelessWidget {
@@ -28,11 +28,12 @@ class _DebtsView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return Scaffold(
       body: BlocBuilder<DebtsBloc, DebtsState>(
         builder: (context, state) {
           return RefreshIndicator(
-            color: AppColors.primary,
+            color: colors.primary,
             onRefresh: () async =>
                 context.read<DebtsBloc>().add(const DebtsRefreshRequested()),
             child: CustomScrollView(
@@ -94,15 +95,16 @@ class _DebtsView extends StatelessWidget {
   }
 
   SliverAppBar _buildAppBar(BuildContext context) {
+    final colors = context.colors;
     return SliverAppBar(
       floating: true,
       title: Text(AppStrings.of(context).debtsTitle, style: AppTypography.headlineSm),
       centerTitle: false,
-      backgroundColor: AppColors.surface,
+      backgroundColor: colors.surface,
       surfaceTintColor: Colors.transparent,
       actions: [
         IconButton(
-          icon: const Icon(Icons.add_rounded, color: AppColors.primary),
+          icon: Icon(Icons.add_rounded, color: colors.primary),
           onPressed: () => _showAddDebtSheet(context),
         ),
       ],
@@ -113,7 +115,7 @@ class _DebtsView extends StatelessWidget {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: AppColors.surfaceContainerHigh,
+      backgroundColor: context.colors.surfaceContainerHigh,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(
           top: Radius.circular(AppSpacing.radiusXl),

@@ -1,11 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:wallet_app/core/constants/app_colors.dart';
 import 'package:wallet_app/core/constants/app_spacing.dart';
 import 'package:wallet_app/core/constants/app_typography.dart';
 import 'package:wallet_app/core/l10n/app_strings.dart';
+import 'package:wallet_app/core/theme/app_palette.dart';
 import 'package:wallet_app/core/utils/currency_formatter.dart';
 import 'package:wallet_app/core/utils/date_formatter.dart';
 import 'package:wallet_app/data/models/debt_model.dart';
+
+Color _debtStatusColor(DebtStatus status, AppPalette colors) =>
+    switch (status) {
+      DebtStatus.PAID => colors.success,
+      DebtStatus.OVERDUE => colors.danger,
+      _ => colors.warning,
+    };
 
 class InstallmentRow extends StatelessWidget {
   const InstallmentRow({
@@ -20,9 +27,10 @@ class InstallmentRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     final isPaid = installment.status == DebtStatus.PAID;
     final isOverdue = installment.status == DebtStatus.OVERDUE;
-    final color = installment.status.color;
+    final color = _debtStatusColor(installment.status, colors);
     // Vadesi henüz gelmemiş taksit ödenemez/tahsil edilemez — kullanıcı
     // taksitleri gününde işlemeli, ön ödeme/tahsilat şu an desteklenmiyor.
     final today = DateTime.now();
@@ -67,8 +75,8 @@ class InstallmentRow extends StatelessWidget {
                   style: AppTypography.bodyMd.copyWith(
                     fontWeight: FontWeight.w600,
                     color: isPaid
-                        ? AppColors.onSurfaceVariant
-                        : AppColors.onSurface,
+                        ? colors.onSurfaceVariant
+                        : colors.onSurface,
                     decoration:
                         isPaid ? TextDecoration.lineThrough : null,
                   ),
@@ -77,8 +85,8 @@ class InstallmentRow extends StatelessWidget {
                   DateFormatter.formatLong(installment.dueDate, context),
                   style: AppTypography.bodySm.copyWith(
                     color: isOverdue
-                        ? AppColors.error
-                        : AppColors.onSurfaceVariant,
+                        ? colors.error
+                        : colors.onSurfaceVariant,
                   ),
                 ),
               ],
@@ -90,7 +98,7 @@ class InstallmentRow extends StatelessWidget {
               style: TextButton.styleFrom(
                 foregroundColor: color,
                 disabledForegroundColor:
-                    AppColors.onSurfaceVariant.withValues(alpha: 0.4),
+                    colors.onSurfaceVariant.withValues(alpha: 0.4),
                 padding: const EdgeInsets.symmetric(
                   horizontal: AppSpacing.sm,
                   vertical: 0,
@@ -103,7 +111,7 @@ class InstallmentRow extends StatelessWidget {
                 style: AppTypography.labelSm.copyWith(
                   color: isDueReached
                       ? color
-                      : AppColors.onSurfaceVariant.withValues(alpha: 0.5),
+                      : colors.onSurfaceVariant.withValues(alpha: 0.5),
                   fontWeight: FontWeight.w700,
                 ),
               ),
@@ -116,7 +124,7 @@ class InstallmentRow extends StatelessWidget {
                   CurrencyFormatter.format(installment.amount),
                   style: AppTypography.bodyMd.copyWith(
                     fontWeight: FontWeight.w600,
-                    color: isPaid ? AppColors.onSurfaceVariant : color,
+                    color: isPaid ? colors.onSurfaceVariant : color,
                     decoration: isPaid ? TextDecoration.lineThrough : null,
                   ),
                 ),

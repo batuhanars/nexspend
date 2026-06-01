@@ -1,6 +1,6 @@
 # Stitch Wallet App — Görev Takip Dosyası
 
-> Son güncelleme: 1 Haziran 2026 (Tema Sistemi S1 altyapı tamamlandı — AppPalette ThemeExtension + light tema + ThemeNotifier; commit `d9414ce`, `origin/main`'e push edildi, analyze temiz + test 149 ✅)  
+> Son güncelleme: 1 Haziran 2026 (Tema Sistemi S2 tamamlandı — auth feature migrate + S1 artığı temizlendi; commit `0601c2a`, `origin/main`'e push edildi, analyze temiz + test 149 ✅)  
 > ✅ = Tamamlandı | 🔧 = Kısmen yapıldı | ❌ = Henüz başlanmadı  
 > ☑ = Kodda mevcut ancak migration henüz çalıştırılmadı
 
@@ -31,8 +31,13 @@
 - [x] PM kapı denetimi: `flutter analyze` temiz + `flutter test` 149/149 ✅; dark palet hex'leri AppColors ile birebir (regresyon yok)
 - [ ] **Artık (S2'ye taşındı):** `presentation/shared/widgets/split_amount_field.dart` — 1 adet `AppColors.` kaldı, `context.colors`'a geçilecek
 
-### S2..Sn — Feature migration ❌ (sıradaki: S2 = auth)
-- [ ] core/shared kalıntısı (split_amount_field) → auth → dashboard → transactions → budgets → accounts → debts → subscriptions → family → receipt_scanner → reports/insights/inflation → settings(+switcher) (contract §7)
+### S2 — auth + S1 artığı ✅ (commit `0601c2a`, 1 Haz 2026)
+- [x] `split_amount_field.dart` S1 artığı temizlendi
+- [x] `presentation/auth/**` tamamı `AppColors.X` → `context.colors.X` (0 kaldı)
+- [x] PM kapı denetimi: analyze temiz + test 149/149 ✅
+
+### S3..Sn — Feature migration ❌ (sıradaki: S3 = dashboard + home)
+- [ ] dashboard+home → transactions → budgets → accounts → debts → subscriptions → family → receipt_scanner → reports/insights/inflation → settings(+switcher) (contract §7)
 - [ ] Her batch: `AppColors.X` → `context.colors.X`, analyze+test yeşil, light modda görsel QA
 
 ### S-son — Açılış ❌

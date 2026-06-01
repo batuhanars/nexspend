@@ -1,6 +1,6 @@
 # Stitch Wallet App — Görev Takip Dosyası
 
-> Son güncelleme: 1 Haziran 2026 (Tema Sistemi S8 tamamlandı — subscriptions migrate; commit `604ffc3`, `origin/main`'e push edildi, analyze temiz + test 149 ✅)  
+> Son güncelleme: 1 Haziran 2026 (Tema Sistemi S9 tamamlandı — family migrate; commit `f6fe78e`, `origin/main`'e push edildi, analyze temiz + test 149 ✅)  
 > ✅ = Tamamlandı | 🔧 = Kısmen yapıldı | ❌ = Henüz başlanmadı  
 > ☑ = Kodda mevcut ancak migration henüz çalıştırılmadı
 
@@ -65,9 +65,14 @@
 - [x] `presentation/subscriptions/**` tamamı migrate (0 `AppColors`, hardcode renk yok)
 - [x] PM kapı denetimi: analyze temiz + test 149/149 ✅
 
-### S9..Sn — Feature migration ❌ (sıradaki: S9 = family)
-- [ ] family → receipt_scanner → reports/insights/inflation → settings(+switcher) (contract §7)
+### S9 — family ✅ (commit `f6fe78e`, 1 Haz 2026)
+- [x] `presentation/family/**` tamamı migrate (0 `AppColors`, hardcode renk yok)
+- [x] PM kapı denetimi: analyze temiz + test 149/149 ✅
+
+### S10..Sn — Feature migration ❌ (sıradaki: S10 = receipt_scanner)
+- [ ] receipt_scanner → reports/insights/inflation → settings(+switcher) (contract §7)
 - [ ] Her batch: `AppColors.X` → `context.colors.X`, analyze+test yeşil, light modda görsel QA
+- [ ] ⚠️ receipt_scanner: `corner_painter.dart` CustomPainter — renk constructor'dan (§8)
 
 ### S-son — Açılış ❌
 - [ ] Settings'e Light/Dark/Sistem seçici (contract §6), `AppColors` silinir (`grep AppColors lib/` → 0), tam QA

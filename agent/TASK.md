@@ -1,6 +1,6 @@
 # Stitch Wallet App — Görev Takip Dosyası
 
-> Son güncelleme: 1 Haziran 2026 (Tema Sistemi S2 tamamlandı — auth feature migrate + S1 artığı temizlendi; commit `0601c2a`, `origin/main`'e push edildi, analyze temiz + test 149 ✅)  
+> Son güncelleme: 1 Haziran 2026 (Tema Sistemi S3 tamamlandı — dashboard + home migrate; commit `c4961d0`, `origin/main`'e push edildi, analyze temiz + test 149 ✅)  
 > ✅ = Tamamlandı | 🔧 = Kısmen yapıldı | ❌ = Henüz başlanmadı  
 > ☑ = Kodda mevcut ancak migration henüz çalıştırılmadı
 
@@ -36,8 +36,12 @@
 - [x] `presentation/auth/**` tamamı `AppColors.X` → `context.colors.X` (0 kaldı)
 - [x] PM kapı denetimi: analyze temiz + test 149/149 ✅
 
-### S3..Sn — Feature migration ❌ (sıradaki: S3 = dashboard + home)
-- [ ] dashboard+home → transactions → budgets → accounts → debts → subscriptions → family → receipt_scanner → reports/insights/inflation → settings(+switcher) (contract §7)
+### S3 — dashboard + home ✅ (commit `c4961d0`, 1 Haz 2026)
+- [x] `presentation/dashboard/**` + `presentation/home/**` tamamı `context.colors`'a geçti (0 kaldı)
+- [x] PM kapı denetimi: analyze temiz + test 149/149 ✅
+
+### S4..Sn — Feature migration ❌ (sıradaki: S4 = transactions)
+- [ ] transactions → budgets → accounts → debts → subscriptions → family → receipt_scanner → reports/insights/inflation → settings(+switcher) (contract §7)
 - [ ] Her batch: `AppColors.X` → `context.colors.X`, analyze+test yeşil, light modda görsel QA
 
 ### S-son — Açılış ❌

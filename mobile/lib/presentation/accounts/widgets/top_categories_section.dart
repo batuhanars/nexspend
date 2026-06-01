@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
 import '../../../core/l10n/app_strings.dart';
+import '../../../core/theme/app_palette.dart';
 import '../../../core/utils/category_extensions.dart';
 import '../../../core/utils/currency_formatter.dart';
 import '../../../data/models/account_analytics_model.dart';
@@ -51,7 +51,7 @@ class CategoryBreakdownRow extends StatelessWidget {
           Text(
             CurrencyFormatter.format(category.amount),
             style: AppTypography.bodyMd.copyWith(
-              color: AppColors.tertiary,
+              color: context.colors.expense,
               fontWeight: FontWeight.w600,
             ),
           ),

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
 import '../../../core/l10n/app_strings.dart';
+import '../../../core/theme/app_palette.dart';
 import '../../../data/models/account_model.dart';
 import '../bloc/account_bloc.dart';
 
@@ -13,6 +13,7 @@ class ArchivedAccountTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return BlocBuilder<AccountBloc, AccountState>(
       builder: (context, state) {
         final isLoading = state is AccountSubmitting;
@@ -27,7 +28,7 @@ class ArchivedAccountTile extends StatelessWidget {
               vertical: AppSpacing.md,
             ),
             decoration: BoxDecoration(
-              color: AppColors.surfaceContainerHigh,
+              color: colors.surfaceContainerHigh,
               borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
             ),
             child: Row(
@@ -55,7 +56,7 @@ class ArchivedAccountTile extends StatelessWidget {
                       Text(
                         account.type.labelOf(context),
                         style: AppTypography.bodySm
-                            .copyWith(color: AppColors.onSurfaceVariant),
+                            .copyWith(color: colors.onSurfaceVariant),
                       ),
                     ],
                   ),
@@ -68,7 +69,7 @@ class ArchivedAccountTile extends StatelessWidget {
                           ),
                   child: Text(
                     AppStrings.of(context).restoreBtn,
-                    style: TextStyle(color: AppColors.primary),
+                    style: TextStyle(color: colors.primary),
                   ),
                 ),
               ],

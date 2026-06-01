@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
 import '../../../core/l10n/app_strings.dart';
+import '../../../core/theme/app_palette.dart';
 import '../../../core/utils/currency_formatter.dart';
 import '../../../data/models/account_model.dart';
 import 'credit_bar.dart';
@@ -13,6 +13,7 @@ class AccountHeaderCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     final isCC = account.type == AccountType.CREDIT_CARD;
 
     return Container(
@@ -49,7 +50,7 @@ class AccountHeaderCard extends StatelessWidget {
                     Text(
                       account.type.labelOf(context),
                       style: AppTypography.bodySm
-                          .copyWith(color: AppColors.onSurfaceVariant),
+                          .copyWith(color: colors.onSurfaceVariant),
                     ),
                   ],
                 ),
@@ -61,18 +62,18 @@ class AccountHeaderCard extends StatelessWidget {
                     vertical: 4,
                   ),
                   decoration: BoxDecoration(
-                    color: AppColors.primary.withValues(alpha: 0.12),
+                    color: colors.primary.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.star_rounded, size: 12, color: AppColors.primary),
+                      Icon(Icons.star_rounded, size: 12, color: colors.primary),
                       const SizedBox(width: 4),
                       Text(
                         AppStrings.of(context).defaultBadge,
                         style: AppTypography.labelSm.copyWith(
-                          color: AppColors.primary,
+                          color: colors.primary,
                           fontSize: 10,
                         ),
                       ),
@@ -85,7 +86,7 @@ class AccountHeaderCard extends StatelessWidget {
           Text(
             isCC ? AppStrings.of(context).usedLabel : AppStrings.of(context).balanceLabel,
             style: AppTypography.labelSm
-                .copyWith(color: AppColors.onSurfaceVariant),
+                .copyWith(color: colors.onSurfaceVariant),
           ),
           const SizedBox(height: AppSpacing.xs),
           Text(
@@ -93,7 +94,7 @@ class AccountHeaderCard extends StatelessWidget {
               isCC ? account.creditUsed : account.balance,
             ),
             style: AppTypography.displayMd.copyWith(
-              color: AppColors.onSurface,
+              color: colors.onSurface,
               fontWeight: FontWeight.w700,
             ),
           ),

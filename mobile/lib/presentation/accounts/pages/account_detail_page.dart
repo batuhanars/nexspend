@@ -1,10 +1,10 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:wallet_app/core/l10n/app_strings.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
+import '../../../core/theme/app_palette.dart';
 import '../../../data/models/account_analytics_model.dart';
 import '../../../data/models/account_model.dart';
 import '../../../data/models/transaction_model.dart';
@@ -101,30 +101,33 @@ class _AccountDetailPageState extends State<AccountDetailPage> {
   }) =>
       showDialog<bool>(
         context: context,
-        builder: (ctx) => AlertDialog(
-          backgroundColor: AppColors.surfaceContainerHigh,
-          title: Text(title, style: AppTypography.titleSm),
-          content: Text(
-            content,
-            style: AppTypography.bodyMd
-                .copyWith(color: AppColors.onSurfaceVariant),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(ctx).pop(false),
-              child: Text(AppStrings.of(context).cancel),
+        builder: (ctx) {
+          final colors = ctx.colors;
+          return AlertDialog(
+            backgroundColor: colors.surfaceContainerHigh,
+            title: Text(title, style: AppTypography.titleSm),
+            content: Text(
+              content,
+              style: AppTypography.bodyMd
+                  .copyWith(color: colors.onSurfaceVariant),
             ),
-            TextButton(
-              onPressed: () => Navigator.of(ctx).pop(true),
-              child: Text(
-                confirm,
-                style: TextStyle(
-                  color: isDanger ? AppColors.error : AppColors.primary,
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(ctx).pop(false),
+                child: Text(AppStrings.of(ctx).cancel),
+              ),
+              TextButton(
+                onPressed: () => Navigator.of(ctx).pop(true),
+                child: Text(
+                  confirm,
+                  style: TextStyle(
+                    color: isDanger ? colors.error : colors.primary,
+                  ),
                 ),
               ),
-            ),
-          ],
-        ),
+            ],
+          );
+        },
       );
 
   @override
@@ -144,10 +147,11 @@ class _AccountDetailPageState extends State<AccountDetailPage> {
         ),
         BlocListener<AccountBloc, AccountState>(
           listener: (context, state) {
+            final colors = context.colors;
             if (state is AccountDeleted) {
               ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                 content: Text(AppStrings.of(context).accountDeleted),
-                backgroundColor: AppColors.secondary,
+                backgroundColor: colors.secondary,
               ));
               context.pop();
             } else if (state is AccountActionDone) {
@@ -162,7 +166,7 @@ class _AccountDetailPageState extends State<AccountDetailPage> {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(state.message),
-                  backgroundColor: AppColors.error,
+                  backgroundColor: colors.error,
                 ),
               );
             }
@@ -177,8 +181,8 @@ class _AccountDetailPageState extends State<AccountDetailPage> {
 
           return Scaffold(
             body: RefreshIndicator(
-              color: AppColors.primary,
-              backgroundColor: AppColors.surfaceContainerHigh,
+              color: context.colors.primary,
+              backgroundColor: context.colors.surfaceContainerHigh,
               onRefresh: () async {
                 context.read<AccountDetailBloc>().add(
                       AccountDetailRefreshRequested(
@@ -211,9 +215,10 @@ class _AccountDetailPageState extends State<AccountDetailPage> {
   }
 
   SliverAppBar _buildAppBar(BuildContext context, AccountModel? account) {
+    final colors = context.colors;
     return SliverAppBar(
       pinned: true,
-      backgroundColor: AppColors.surface,
+      backgroundColor: colors.surface,
       surfaceTintColor: Colors.transparent,
       leading: IconButton(
         icon: const Icon(Icons.arrow_back_rounded),
@@ -226,31 +231,32 @@ class _AccountDetailPageState extends State<AccountDetailPage> {
       actions: [
         if (account != null)
           IconButton(
-            icon: const Icon(Icons.add_rounded, color: AppColors.primary),
+            icon: Icon(Icons.add_rounded, color: colors.primary),
             onPressed: _addTransaction,
           ),
         if (account != null)
           BlocBuilder<AccountBloc, AccountState>(
             builder: (context, state) {
+              final colors = context.colors;
               final isLoading = state is AccountSubmitting;
               if (isLoading) {
-                return const Padding(
-                  padding: EdgeInsets.all(12),
+                return Padding(
+                  padding: const EdgeInsets.all(12),
                   child: SizedBox(
                     width: 20,
                     height: 20,
                     child: CircularProgressIndicator(
                       strokeWidth: 2,
-                      color: AppColors.primary,
+                      color: colors.primary,
                     ),
                   ),
                 );
               }
               return PopupMenuButton<String>(
-                color: AppColors.surfaceContainerHigh,
-                icon: const Icon(
+                color: colors.surfaceContainerHigh,
+                icon: Icon(
                   Icons.more_vert_rounded,
-                  color: AppColors.onSurface,
+                  color: colors.onSurface,
                 ),
                 onSelected: (value) => _handleMenuAction(value, account),
                 itemBuilder: (_) => [
@@ -258,9 +264,9 @@ class _AccountDetailPageState extends State<AccountDetailPage> {
                     value: 'edit',
                     child: Row(
                       children: [
-                        const Icon(Icons.edit_outlined,
+                        Icon(Icons.edit_outlined,
                             size: 18,
-                            color: AppColors.onSurfaceVariant),
+                            color: colors.onSurfaceVariant),
                         const SizedBox(width: AppSpacing.md),
                         Text(AppStrings.of(context).edit),
                       ],
@@ -271,9 +277,9 @@ class _AccountDetailPageState extends State<AccountDetailPage> {
                       value: 'set_default',
                       child: Row(
                         children: [
-                          const Icon(Icons.star_outline_rounded,
+                          Icon(Icons.star_outline_rounded,
                               size: 18,
-                              color: AppColors.onSurfaceVariant),
+                              color: colors.onSurfaceVariant),
                           const SizedBox(width: AppSpacing.md),
                           Text(AppStrings.of(context).setAsDefault),
                         ],
@@ -283,9 +289,9 @@ class _AccountDetailPageState extends State<AccountDetailPage> {
                     value: 'archive',
                     child: Row(
                       children: [
-                        const Icon(Icons.archive_outlined,
+                        Icon(Icons.archive_outlined,
                             size: 18,
-                            color: AppColors.onSurfaceVariant),
+                            color: colors.onSurfaceVariant),
                         const SizedBox(width: AppSpacing.md),
                         Text(AppStrings.of(context).archive),
                       ],
@@ -295,12 +301,12 @@ class _AccountDetailPageState extends State<AccountDetailPage> {
                     value: 'delete',
                     child: Row(
                       children: [
-                        const Icon(Icons.delete_outline_rounded,
-                            size: 18, color: AppColors.error),
+                        Icon(Icons.delete_outline_rounded,
+                            size: 18, color: colors.error),
                         const SizedBox(width: AppSpacing.md),
                         Text(
                           AppStrings.of(context).deleteAccountTitle,
-                          style: const TextStyle(color: AppColors.error),
+                          style: TextStyle(color: colors.error),
                         ),
                       ],
                     ),

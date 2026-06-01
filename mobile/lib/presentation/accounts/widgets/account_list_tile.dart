@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
 import '../../../core/l10n/app_strings.dart';
+import '../../../core/theme/app_palette.dart';
 import '../../../core/utils/currency_formatter.dart';
 import '../../../data/models/account_model.dart';
 import 'credit_bar.dart';
@@ -14,12 +14,13 @@ class AccountListTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return GestureDetector(
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.all(AppSpacing.lg),
         decoration: BoxDecoration(
-          color: AppColors.surfaceContainerHigh,
+          color: colors.surfaceContainerHigh,
           borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
         ),
         child: Column(
@@ -60,7 +61,7 @@ class AccountListTile extends StatelessWidget {
                       Text(
                         account.type.labelOf(context),
                         style: AppTypography.bodySm
-                            .copyWith(color: AppColors.onSurfaceVariant),
+                            .copyWith(color: colors.onSurfaceVariant),
                       ),
                     ],
                   ),
@@ -72,15 +73,15 @@ class AccountListTile extends StatelessWidget {
                       CurrencyFormatter.format(account.balance),
                       style: AppTypography.titleSm.copyWith(
                         color: account.balance >= 0
-                            ? AppColors.onSurface
-                            : AppColors.error,
+                            ? colors.onSurface
+                            : colors.error,
                         fontFeatures: const [FontFeature.tabularFigures()],
                       ),
                     ),
                     Text(
                       account.currency,
                       style: AppTypography.bodySm
-                          .copyWith(color: AppColors.onSurfaceVariant),
+                          .copyWith(color: colors.onSurfaceVariant),
                     ),
                   ],
                 ),
@@ -103,16 +104,17 @@ class AccountDefaultBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: 2),
       decoration: BoxDecoration(
-        color: AppColors.primary.withValues(alpha: 0.15),
+        color: colors.primary.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
       ),
       child: Text(
         AppStrings.of(context).defaultBadge,
         style: AppTypography.labelSm
-            .copyWith(color: AppColors.primary, fontSize: 10),
+            .copyWith(color: colors.primary, fontSize: 10),
       ),
     );
   }

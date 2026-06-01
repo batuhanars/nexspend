@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/l10n/app_strings.dart';
+import '../../../../core/theme/app_palette.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../../../../core/utils/date_formatter.dart';
 import '../../../../data/models/statement_model.dart';
@@ -19,26 +19,28 @@ class CreditCardStatementsSection extends StatelessWidget {
     return BlocConsumer<StatementsBloc, StatementsState>(
       listener: (context, state) {
         if (state is StatementsLoaded) {
+          final colors = context.colors;
           if (state.paymentSuccess) {
             ScaffoldMessenger.of(context).showSnackBar(SnackBar(
               content:
                   Text(AppStrings.of(context).paymentSuccessSnackbar),
-              backgroundColor: AppColors.secondary,
+              backgroundColor: colors.secondary,
             ));
           } else if (state.payError != null) {
             ScaffoldMessenger.of(context).showSnackBar(SnackBar(
               content: Text(state.payError!),
-              backgroundColor: AppColors.error,
+              backgroundColor: colors.error,
             ));
           }
         }
       },
       builder: (context, state) {
+        final colors = context.colors;
         if (state is StatementsLoading || state is StatementsInitial) {
-          return const Padding(
-            padding: EdgeInsets.symmetric(vertical: AppSpacing.xl),
+          return Padding(
+            padding: const EdgeInsets.symmetric(vertical: AppSpacing.xl),
             child: Center(
-              child: CircularProgressIndicator(color: AppColors.primary),
+              child: CircularProgressIndicator(color: colors.primary),
             ),
           );
         }
@@ -49,7 +51,7 @@ class CreditCardStatementsSection extends StatelessWidget {
             child: Text(
               state.message,
               style:
-                  AppTypography.bodySm.copyWith(color: AppColors.error),
+                  AppTypography.bodySm.copyWith(color: colors.error),
             ),
           );
         }
@@ -88,7 +90,7 @@ class CreditCardStatementsSection extends StatelessWidget {
                 child: Text(
                   AppStrings.of(context).noStatementsYet,
                   style: AppTypography.bodySm
-                      .copyWith(color: AppColors.onSurfaceVariant),
+                      .copyWith(color: colors.onSurfaceVariant),
                 ),
               ),
             ],
@@ -138,13 +140,14 @@ class _CurrentPeriodCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     final s = AppStrings.of(context);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.pagePadding),
       child: Container(
         padding: const EdgeInsets.all(AppSpacing.lg),
         decoration: BoxDecoration(
-          color: AppColors.surfaceContainerHigh,
+          color: colors.surfaceContainerHigh,
           borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
         ),
         child: Column(
@@ -157,7 +160,7 @@ class _CurrentPeriodCard extends StatelessWidget {
                 Text(
                   '${DateFormatter.formatMini(period.periodStart, context)} – ${DateFormatter.formatMini(period.periodEnd, context)}',
                   style: AppTypography.labelSm
-                      .copyWith(color: AppColors.onSurfaceVariant),
+                      .copyWith(color: colors.onSurfaceVariant),
                 ),
               ],
             ),
@@ -165,13 +168,13 @@ class _CurrentPeriodCard extends StatelessWidget {
             Text(
               CurrencyFormatter.format(period.spentAmount),
               style: AppTypography.headlineSm
-                  .copyWith(color: AppColors.tertiary),
+                  .copyWith(color: colors.expense),
             ),
             const SizedBox(height: AppSpacing.xs),
             Text(
               '${s.spentThisPeriod} · ${s.txCountLabel(period.transactionCount)}',
               style: AppTypography.bodySm
-                  .copyWith(color: AppColors.onSurfaceVariant),
+                  .copyWith(color: colors.onSurfaceVariant),
             ),
           ],
         ),
@@ -187,6 +190,7 @@ class _StatementTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     final s = AppStrings.of(context);
     return Padding(
       padding: const EdgeInsets.symmetric(
@@ -196,7 +200,7 @@ class _StatementTile extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(AppSpacing.lg),
         decoration: BoxDecoration(
-          color: AppColors.surfaceContainerHigh,
+          color: colors.surfaceContainerHigh,
           borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
         ),
         child: Column(
@@ -239,7 +243,7 @@ class _StatementTile extends StatelessWidget {
                 Text(
                   '${s.dueDateLabel}: ${DateFormatter.formatMini(statement.dueDate, context)}',
                   style: AppTypography.labelSm
-                      .copyWith(color: AppColors.onSurfaceVariant),
+                      .copyWith(color: colors.onSurfaceVariant),
                 ),
                 if (onPay != null && !statement.status.isPaid)
                   TextButton(
@@ -247,7 +251,7 @@ class _StatementTile extends StatelessWidget {
                     child: Text(
                       s.payButton,
                       style: AppTypography.labelMd.copyWith(
-                        color: AppColors.primary,
+                        color: colors.primary,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -274,6 +278,7 @@ class _AmountColumn extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return Expanded(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -281,7 +286,7 @@ class _AmountColumn extends StatelessWidget {
           Text(
             label,
             style: AppTypography.labelSm
-                .copyWith(color: AppColors.onSurfaceVariant),
+                .copyWith(color: colors.onSurfaceVariant),
           ),
           const SizedBox(height: 2),
           Text(
@@ -289,8 +294,8 @@ class _AmountColumn extends StatelessWidget {
             style: AppTypography.bodyMd.copyWith(
               fontWeight: FontWeight.w600,
               color: emphasize
-                  ? AppColors.tertiary
-                  : AppColors.onSurface,
+                  ? colors.expense
+                  : colors.onSurface,
             ),
           ),
         ],

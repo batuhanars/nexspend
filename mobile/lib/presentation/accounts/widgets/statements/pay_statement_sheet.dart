@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/l10n/app_strings.dart';
+import '../../../../core/theme/app_palette.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../../../../data/models/account_model.dart';
 import '../../../../data/models/statement_model.dart';
@@ -57,7 +57,7 @@ class _PayStatementSheetState extends State<PayStatementSheet> {
 
   void _showError(String msg) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(msg), backgroundColor: AppColors.error),
+      SnackBar(content: Text(msg), backgroundColor: context.colors.error),
     );
   }
 
@@ -85,6 +85,7 @@ class _PayStatementSheetState extends State<PayStatementSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     final s = AppStrings.of(context);
     final stmt = widget.statement;
     final hasPayable = widget.payableAccounts.isNotEmpty;
@@ -95,9 +96,9 @@ class _PayStatementSheetState extends State<PayStatementSheet> {
         bottom: MediaQuery.of(context).viewInsets.bottom,
       ),
       child: Container(
-        decoration: const BoxDecoration(
-          color: AppColors.surfaceContainerHigh,
-          borderRadius: BorderRadius.vertical(
+        decoration: BoxDecoration(
+          color: colors.surfaceContainerHigh,
+          borderRadius: const BorderRadius.vertical(
             top: Radius.circular(AppSpacing.radiusLg),
           ),
         ),
@@ -116,7 +117,7 @@ class _PayStatementSheetState extends State<PayStatementSheet> {
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: AppColors.onSurfaceVariant.withValues(alpha: 0.4),
+                  color: colors.onSurfaceVariant.withValues(alpha: 0.4),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -127,7 +128,7 @@ class _PayStatementSheetState extends State<PayStatementSheet> {
             Text(
               '${s.remainingLabel}: ${CurrencyFormatter.format(stmt.remainingAmount)}',
               style: AppTypography.bodySm.copyWith(
-                color: AppColors.onSurfaceVariant,
+                color: colors.onSurfaceVariant,
               ),
             ),
             const SizedBox(height: AppSpacing.lg),
@@ -152,18 +153,18 @@ class _PayStatementSheetState extends State<PayStatementSheet> {
                 onTap: () => setState(() => _choice = _PayChoice.full),
               ),
               const SizedBox(height: AppSpacing.lg),
-              _label(s.fromAccountLabel),
+              _label(s.fromAccountLabel, colors),
               const SizedBox(height: AppSpacing.sm),
               DropdownButtonFormField<String>(
                 initialValue: _selectedAccountId,
-                dropdownColor: AppColors.surfaceContainerHigh,
-                style: const TextStyle(
-                  color: AppColors.onSurface,
+                dropdownColor: colors.surfaceContainerHigh,
+                style: TextStyle(
+                  color: colors.onSurface,
                   fontSize: 14,
                 ),
                 decoration: InputDecoration(
                   filled: true,
-                  fillColor: AppColors.surfaceContainerHighest,
+                  fillColor: colors.surfaceContainerHighest,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
                     borderSide: BorderSide.none,
@@ -204,9 +205,9 @@ class _PayStatementSheetState extends State<PayStatementSheet> {
     );
   }
 
-  Widget _label(String text) => Text(
+  Widget _label(String text, AppPalette colors) => Text(
     text,
-    style: AppTypography.labelSm.copyWith(color: AppColors.onSurfaceVariant),
+    style: AppTypography.labelSm.copyWith(color: colors.onSurfaceVariant),
   );
 }
 
@@ -227,10 +228,11 @@ class _PayChoiceTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = selected ? AppColors.primary : AppColors.onSurfaceVariant;
+    final colors = context.colors;
+    final color = selected ? colors.primary : colors.onSurfaceVariant;
     final bg = selected
-        ? AppColors.primary.withValues(alpha: 0.12)
-        : AppColors.surfaceContainerHighest;
+        ? colors.primary.withValues(alpha: 0.12)
+        : colors.surfaceContainerHighest;
     return Opacity(
       opacity: enabled ? 1 : 0.45,
       child: Material(
@@ -258,9 +260,7 @@ class _PayChoiceTile extends StatelessWidget {
                   child: Text(
                     label,
                     style: AppTypography.bodyMd.copyWith(
-                      color: selected
-                          ? AppColors.onSurface
-                          : AppColors.onSurface,
+                      color: colors.onSurface,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
@@ -268,7 +268,7 @@ class _PayChoiceTile extends StatelessWidget {
                 Text(
                   CurrencyFormatter.format(amount),
                   style: AppTypography.bodyMd.copyWith(
-                    color: selected ? AppColors.primary : AppColors.onSurface,
+                    color: selected ? colors.primary : colors.onSurface,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -287,15 +287,16 @@ class _Warning extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return Container(
       padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
-        color: AppColors.warning.withValues(alpha: 0.10),
+        color: colors.warning.withValues(alpha: 0.10),
         borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
       ),
       child: Text(
         message,
-        style: AppTypography.bodySm.copyWith(color: AppColors.warning),
+        style: AppTypography.bodySm.copyWith(color: colors.warning),
       ),
     );
   }

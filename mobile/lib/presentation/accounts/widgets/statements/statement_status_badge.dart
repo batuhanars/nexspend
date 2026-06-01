@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/l10n/app_strings.dart';
+import '../../../../core/theme/app_palette.dart';
 import '../../../../data/models/statement_model.dart';
 
 class StatementStatusBadge extends StatelessWidget {
@@ -11,15 +11,16 @@ class StatementStatusBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     final s = AppStrings.of(context);
     final (label, color) = switch (status) {
-      StatementStatus.PAID => (s.statementStatusPaid, AppColors.secondary),
-      StatementStatus.DUE => (s.statementStatusDue, AppColors.primary),
+      StatementStatus.PAID => (s.statementStatusPaid, colors.secondary),
+      StatementStatus.DUE => (s.statementStatusDue, colors.primary),
       StatementStatus.PARTIALLY_PAID => (
           s.statementStatusPartiallyPaid,
-          AppColors.warning,
+          colors.warning,
         ),
-      StatementStatus.OVERDUE => (s.statementStatusOverdue, AppColors.error),
+      StatementStatus.OVERDUE => (s.statementStatusOverdue, colors.error),
     };
     return Container(
       padding: const EdgeInsets.symmetric(

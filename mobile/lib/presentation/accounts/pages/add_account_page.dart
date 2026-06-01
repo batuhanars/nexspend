@@ -1,11 +1,11 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../core/l10n/app_strings.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
+import '../../../core/theme/app_palette.dart';
 import '../../../data/models/account_model.dart';
 import '../../shared/widgets/split_amount_field.dart';
 import '../bloc/account_bloc.dart';
@@ -137,7 +137,7 @@ class _AddAccountPageState extends State<AddAccountPage> {
     if (isCreditCard && creditLimit <= 0) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text(AppStrings.of(context).creditLimitRequired),
-        backgroundColor: AppColors.error,
+        backgroundColor: context.colors.error,
       ));
       return;
     }
@@ -164,13 +164,14 @@ class _AddAccountPageState extends State<AddAccountPage> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return BlocListener<AccountBloc, AccountState>(
       listener: (context, state) {
         if (state is AccountSuccess) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(AppStrings.of(context).accountCreatedSuccess),
-              backgroundColor: AppColors.secondary,
+              backgroundColor: colors.secondary,
             ),
           );
           context.pop(state.account);
@@ -178,7 +179,7 @@ class _AddAccountPageState extends State<AddAccountPage> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(state.message),
-              backgroundColor: AppColors.error,
+              backgroundColor: colors.error,
             ),
           );
         }
@@ -261,7 +262,7 @@ class _AddAccountPageState extends State<AddAccountPage> {
                 SplitAmountField(
                   key: ValueKey('balance-${_type.name}'),
                   autofocus: false,
-                  color: AppColors.primary,
+                  color: colors.primary,
                   initialValue: _splitBalance,
                   onChanged: (v) => _splitBalance = v,
                 ),
@@ -359,6 +360,7 @@ class _AddAccountPageState extends State<AddAccountPage> {
   }
 
   Widget _buildBankPicker() {
+    final colors = context.colors;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -368,8 +370,8 @@ class _AddAccountPageState extends State<AddAccountPage> {
           spacing: AppSpacing.sm,
           runSpacing: AppSpacing.sm,
           children: [
-            ..._turkishBanks.map((bank) => _bankChip(bank)),
-            _bankChip(AppStrings.of(context).otherBankOption, key: 'other'),
+            ..._turkishBanks.map((bank) => _bankChip(bank, colors)),
+            _bankChip(AppStrings.of(context).otherBankOption, colors, key: 'other'),
           ],
         ),
         if (_selectedBank == 'other') ...[
@@ -390,7 +392,7 @@ class _AddAccountPageState extends State<AddAccountPage> {
     );
   }
 
-  Widget _bankChip(String name, {String? key}) {
+  Widget _bankChip(String name, AppPalette colors, {String? key}) {
     final chipKey = key ?? name;
     final isSelected = _selectedBank == chipKey;
     return GestureDetector(
@@ -409,18 +411,18 @@ class _AddAccountPageState extends State<AddAccountPage> {
         ),
         decoration: BoxDecoration(
           color: isSelected
-              ? AppColors.primary.withValues(alpha: 0.15)
-              : AppColors.surfaceContainerHighest,
+              ? colors.primary.withValues(alpha: 0.15)
+              : colors.surfaceContainerHighest,
           borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
           border: Border.all(
-            color: isSelected ? AppColors.primary : Colors.transparent,
+            color: isSelected ? colors.primary : Colors.transparent,
             width: 1.5,
           ),
         ),
         child: Text(
           name,
           style: AppTypography.bodyMd.copyWith(
-            color: isSelected ? AppColors.primary : AppColors.onSurface,
+            color: isSelected ? colors.primary : colors.onSurface,
           ),
         ),
       ),
@@ -430,6 +432,6 @@ class _AddAccountPageState extends State<AddAccountPage> {
   Widget _label(String text) => Text(
         text,
         style: AppTypography.labelMd
-            .copyWith(color: AppColors.onSurfaceVariant),
+            .copyWith(color: context.colors.onSurfaceVariant),
       );
 }

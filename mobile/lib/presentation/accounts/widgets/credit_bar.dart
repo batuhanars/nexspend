@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
 import '../../../core/l10n/app_strings.dart';
+import '../../../core/theme/app_palette.dart';
 import '../../../core/utils/currency_formatter.dart';
 import '../../../data/models/account_model.dart';
 
@@ -13,12 +13,13 @@ class CreditBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     final pct = account.creditUsagePercent;
     final barColor = pct > 0.8
-        ? AppColors.error
+        ? colors.error
         : compact
-            ? (pct > 0.5 ? AppColors.tertiary : AppColors.secondary)
-            : (pct > 0.6 ? AppColors.warning : AppColors.secondary);
+            ? (pct > 0.5 ? colors.expense : colors.income)
+            : (pct > 0.6 ? colors.warning : colors.income);
 
     if (compact) {
       return Column(
@@ -28,7 +29,7 @@ class CreditBar extends StatelessWidget {
             borderRadius: BorderRadius.circular(2),
             child: LinearProgressIndicator(
               value: pct,
-              backgroundColor: AppColors.surfaceContainerHighest,
+              backgroundColor: colors.surfaceContainerHighest,
               valueColor: AlwaysStoppedAnimation<Color>(barColor),
               minHeight: 4,
             ),
@@ -39,11 +40,11 @@ class CreditBar extends StatelessWidget {
             children: [
               Text(
                 AppStrings.of(context).usedAmount(CurrencyFormatter.format(account.creditUsed)),
-                style: AppTypography.bodySm.copyWith(color: AppColors.onSurfaceVariant),
+                style: AppTypography.bodySm.copyWith(color: colors.onSurfaceVariant),
               ),
               Text(
                 AppStrings.of(context).limitAmount(CurrencyFormatter.format(account.creditLimit!)),
-                style: AppTypography.bodySm.copyWith(color: AppColors.onSurfaceVariant),
+                style: AppTypography.bodySm.copyWith(color: colors.onSurfaceVariant),
               ),
             ],
           ),
@@ -59,7 +60,7 @@ class CreditBar extends StatelessWidget {
           children: [
             Text(
               AppStrings.of(context).usedSlashLimit,
-              style: AppTypography.bodySm.copyWith(color: AppColors.onSurfaceVariant),
+              style: AppTypography.bodySm.copyWith(color: colors.onSurfaceVariant),
             ),
             Text(
               '${(pct * 100).toStringAsFixed(0)}%',
@@ -72,7 +73,7 @@ class CreditBar extends StatelessWidget {
           borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
           child: LinearProgressIndicator(
             value: pct,
-            backgroundColor: AppColors.surfaceContainerHighest,
+            backgroundColor: colors.surfaceContainerHighest,
             valueColor: AlwaysStoppedAnimation<Color>(barColor),
             minHeight: 6,
           ),
@@ -83,11 +84,11 @@ class CreditBar extends StatelessWidget {
           children: [
             Text(
               CurrencyFormatter.format(account.creditUsed),
-              style: AppTypography.bodySm.copyWith(color: AppColors.onSurfaceVariant),
+              style: AppTypography.bodySm.copyWith(color: colors.onSurfaceVariant),
             ),
             Text(
               CurrencyFormatter.format(account.creditLimit!),
-              style: AppTypography.bodySm.copyWith(color: AppColors.onSurfaceVariant),
+              style: AppTypography.bodySm.copyWith(color: colors.onSurfaceVariant),
             ),
           ],
         ),

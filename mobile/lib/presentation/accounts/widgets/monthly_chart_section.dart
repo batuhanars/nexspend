@@ -1,10 +1,10 @@
 import 'dart:math';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
-import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
 import '../../../core/l10n/app_strings.dart';
+import '../../../core/theme/app_palette.dart';
 import '../../../core/utils/currency_formatter.dart';
 import '../../../data/models/account_analytics_model.dart';
 
@@ -24,6 +24,7 @@ class MonthlyChartSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     final s = AppStrings.of(context);
     final maxVal = months.fold<double>(
       1,
@@ -34,6 +35,8 @@ class MonthlyChartSection extends StatelessWidget {
 
     final primaryLabel = isCreditCard ? s.paymentLabel : s.incomeChartLabel;
     final secondaryLabel = isCreditCard ? s.spendChartLabel : s.expenseChartLabel;
+    final tooltipBg = colors.surfaceContainerHighest;
+    final labelColor = colors.onSurfaceVariant;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.pagePadding),
@@ -44,9 +47,9 @@ class MonthlyChartSection extends StatelessWidget {
             children: [
               Text(s.lastSixMonths, style: AppTypography.titleSm),
               const Spacer(),
-              ChartLegendDot(color: AppColors.secondary, label: primaryLabel),
+              ChartLegendDot(color: colors.income, label: primaryLabel),
               const SizedBox(width: AppSpacing.md),
-              ChartLegendDot(color: AppColors.tertiary, label: secondaryLabel),
+              ChartLegendDot(color: colors.expense, label: secondaryLabel),
             ],
           ),
           const SizedBox(height: AppSpacing.md),
@@ -67,14 +70,14 @@ class MonthlyChartSection extends StatelessWidget {
                       BarChartRodData(
                         fromY: 0,
                         toY: primaryVal,
-                        color: AppColors.secondary,
+                        color: colors.income,
                         width: 8,
                         borderRadius: BorderRadius.circular(4),
                       ),
                       BarChartRodData(
                         fromY: 0,
                         toY: secondaryVal,
-                        color: AppColors.tertiary,
+                        color: colors.expense,
                         width: 8,
                         borderRadius: BorderRadius.circular(4),
                       ),
@@ -103,7 +106,7 @@ class MonthlyChartSection extends StatelessWidget {
                         return Text(
                           _abbr(months[i].month, context),
                           style: AppTypography.labelSm.copyWith(
-                            color: AppColors.onSurfaceVariant,
+                            color: labelColor,
                             fontSize: 10,
                           ),
                         );
@@ -115,7 +118,7 @@ class MonthlyChartSection extends StatelessWidget {
                 borderData: FlBorderData(show: false),
                 barTouchData: BarTouchData(
                   touchTooltipData: BarTouchTooltipData(
-                    getTooltipColor: (_) => AppColors.surfaceContainerHighest,
+                    getTooltipColor: (_) => tooltipBg,
                     getTooltipItem: (group, groupIndex, rod, rodIndex) {
                       final label =
                           rodIndex == 0 ? primaryLabel : secondaryLabel;
@@ -153,7 +156,7 @@ class ChartLegendDot extends StatelessWidget {
         Text(
           label,
           style: AppTypography.labelSm.copyWith(
-            color: AppColors.onSurfaceVariant,
+            color: context.colors.onSurfaceVariant,
             fontSize: 10,
           ),
         ),

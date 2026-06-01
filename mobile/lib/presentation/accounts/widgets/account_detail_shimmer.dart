@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
+import '../../../core/theme/app_palette.dart';
 import '../../../data/models/account_model.dart';
 import 'account_header_card.dart';
 
@@ -10,6 +10,7 @@ class AccountDetailShimmer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -22,7 +23,7 @@ class AccountDetailShimmer extends StatelessWidget {
             ),
             height: 140,
             decoration: BoxDecoration(
-              color: AppColors.surfaceContainerHigh,
+              color: colors.surfaceContainerHigh,
               borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
             ),
           ),
@@ -37,7 +38,7 @@ class AccountDetailShimmer extends StatelessWidget {
                 child: Container(
                   height: 70,
                   decoration: BoxDecoration(
-                    color: AppColors.surfaceContainerHigh,
+                    color: colors.surfaceContainerHigh,
                     borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
                   ),
                 ),
@@ -47,7 +48,7 @@ class AccountDetailShimmer extends StatelessWidget {
                 child: Container(
                   height: 70,
                   decoration: BoxDecoration(
-                    color: AppColors.surfaceContainerHigh,
+                    color: colors.surfaceContainerHigh,
                     borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
                   ),
                 ),
@@ -63,7 +64,7 @@ class AccountDetailShimmer extends StatelessWidget {
           child: Container(
             height: 160,
             decoration: BoxDecoration(
-              color: AppColors.surfaceContainerHigh,
+              color: colors.surfaceContainerHigh,
               borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
             ),
           ),

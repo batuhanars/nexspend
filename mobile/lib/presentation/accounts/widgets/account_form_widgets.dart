@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
 import '../../../core/l10n/app_strings.dart';
+import '../../../core/theme/app_palette.dart';
 import '../../../data/models/account_model.dart';
 
 // ── Account type grid selector ─────────────────────────────────────────────
@@ -20,6 +20,7 @@ class AccountTypeSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return GridView.count(
       crossAxisCount: 2,
       shrinkWrap: true,
@@ -37,7 +38,7 @@ class AccountTypeSelector extends StatelessWidget {
             decoration: BoxDecoration(
               color: isSelected
                   ? accent.withValues(alpha: 0.14)
-                  : AppColors.surfaceContainerHigh,
+                  : colors.surfaceContainerHigh,
               borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
               border: isSelected
                   ? Border.all(color: accent, width: 1.5)
@@ -49,13 +50,13 @@ class AccountTypeSelector extends StatelessWidget {
                 Icon(
                   type.defaultIcon,
                   size: 20,
-                  color: isSelected ? accent : AppColors.onSurfaceVariant,
+                  color: isSelected ? accent : colors.onSurfaceVariant,
                 ),
                 const SizedBox(width: AppSpacing.sm),
                 Text(
                   type.labelOf(context),
                   style: AppTypography.bodyMd.copyWith(
-                    color: isSelected ? accent : AppColors.onSurfaceVariant,
+                    color: isSelected ? accent : colors.onSurfaceVariant,
                     fontWeight:
                         isSelected ? FontWeight.w600 : FontWeight.w400,
                   ),
@@ -97,6 +98,7 @@ class AccountFormField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return TextFormField(
       controller: controller,
       focusNode: focusNode,
@@ -105,16 +107,16 @@ class AccountFormField extends StatelessWidget {
       onFieldSubmitted: onFieldSubmitted,
       inputFormatters: inputFormatters,
       validator: validator,
-      style: AppTypography.bodyMd.copyWith(color: AppColors.onSurface),
+      style: AppTypography.bodyMd.copyWith(color: colors.onSurface),
       decoration: InputDecoration(
         hintText: hintText,
         hintStyle: AppTypography.bodyMd
-            .copyWith(color: AppColors.onSurfaceVariant),
+            .copyWith(color: colors.onSurfaceVariant),
         prefixIcon: prefixIcon != null
-            ? Icon(prefixIcon, size: 20, color: AppColors.onSurfaceVariant)
+            ? Icon(prefixIcon, size: 20, color: colors.onSurfaceVariant)
             : null,
         filled: true,
-        fillColor: AppColors.surfaceContainerHighest,
+        fillColor: colors.surfaceContainerHighest,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
           borderSide: BorderSide.none,
@@ -125,17 +127,17 @@ class AccountFormField extends StatelessWidget {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-          borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
+          borderSide: BorderSide(color: colors.primary, width: 1.5),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-          borderSide: const BorderSide(color: AppColors.error, width: 1.5),
+          borderSide: BorderSide(color: colors.error, width: 1.5),
         ),
         focusedErrorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-          borderSide: const BorderSide(color: AppColors.error, width: 1.5),
+          borderSide: BorderSide(color: colors.error, width: 1.5),
         ),
-        errorStyle: AppTypography.bodySm.copyWith(color: AppColors.error),
+        errorStyle: AppTypography.bodySm.copyWith(color: colors.error),
         contentPadding: const EdgeInsets.symmetric(
           horizontal: AppSpacing.lg,
           vertical: AppSpacing.lg,
@@ -161,28 +163,29 @@ class AccountDayDropdown extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           label,
           style: AppTypography.bodySm
-              .copyWith(color: AppColors.onSurfaceVariant),
+              .copyWith(color: colors.onSurfaceVariant),
         ),
         const SizedBox(height: AppSpacing.xs),
         DropdownButtonFormField<int>(
           initialValue: value,
-          dropdownColor: AppColors.surfaceContainerHigh,
+          dropdownColor: colors.surfaceContainerHigh,
           style:
-              AppTypography.bodyMd.copyWith(color: AppColors.onSurface),
-          icon: const Icon(
+              AppTypography.bodyMd.copyWith(color: colors.onSurface),
+          icon: Icon(
             Icons.expand_more_rounded,
-            color: AppColors.onSurfaceVariant,
+            color: colors.onSurfaceVariant,
             size: 20,
           ),
           decoration: InputDecoration(
             filled: true,
-            fillColor: AppColors.surfaceContainerHighest,
+            fillColor: colors.surfaceContainerHighest,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
               borderSide: BorderSide.none,
@@ -193,8 +196,7 @@ class AccountDayDropdown extends StatelessWidget {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-              borderSide:
-                  const BorderSide(color: AppColors.primary, width: 1.5),
+              borderSide: BorderSide(color: colors.primary, width: 1.5),
             ),
             contentPadding: const EdgeInsets.symmetric(
               horizontal: AppSpacing.lg,
@@ -229,6 +231,7 @@ class AccountDefaultToggle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return GestureDetector(
       onTap: () => onChanged(!value),
       child: Container(
@@ -237,15 +240,15 @@ class AccountDefaultToggle extends StatelessWidget {
           vertical: AppSpacing.md,
         ),
         decoration: BoxDecoration(
-          color: AppColors.surfaceContainerHigh,
+          color: colors.surfaceContainerHigh,
           borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
         ),
         child: Row(
           children: [
-            const Icon(
+            Icon(
               Icons.star_outline_rounded,
               size: 22,
-              color: AppColors.onSurfaceVariant,
+              color: colors.onSurfaceVariant,
             ),
             const SizedBox(width: AppSpacing.md),
             Expanded(
@@ -255,14 +258,14 @@ class AccountDefaultToggle extends StatelessWidget {
                   Text(
                     AppStrings.of(context).defaultAccountLabel,
                     style: AppTypography.bodyMd.copyWith(
-                      color: AppColors.onSurface,
+                      color: colors.onSurface,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
                   Text(
                     AppStrings.of(context).defaultAccountSubtitle,
                     style: AppTypography.bodySm.copyWith(
-                      color: AppColors.onSurfaceVariant,
+                      color: colors.onSurfaceVariant,
                     ),
                   ),
                 ],
@@ -271,7 +274,7 @@ class AccountDefaultToggle extends StatelessWidget {
             Switch(
               value: value,
               onChanged: onChanged,
-              activeThumbColor: AppColors.primary,
+              activeThumbColor: colors.primary,
             ),
           ],
         ),

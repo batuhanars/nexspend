@@ -1,10 +1,10 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import '../../../core/l10n/app_strings.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
 import '../../../core/di/injection.dart';
+import '../../../core/theme/app_palette.dart';
 import '../../../data/models/account_model.dart';
 import '../../../data/repositories/account_repository.dart';
 import '../bloc/account_bloc.dart';
@@ -26,6 +26,7 @@ class _ArchivedAccountsPageState extends State<ArchivedAccountsPage> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return BlocListener<AccountBloc, AccountState>(
       listener: (context, state) {
         if (state is AccountActionDone) {
@@ -37,7 +38,7 @@ class _ArchivedAccountsPageState extends State<ArchivedAccountsPage> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(state.message),
-              backgroundColor: AppColors.error,
+              backgroundColor: colors.error,
             ),
           );
         }
@@ -45,7 +46,7 @@ class _ArchivedAccountsPageState extends State<ArchivedAccountsPage> {
       child: Scaffold(
         appBar: AppBar(
           title: Text(AppStrings.of(context).archivedAccounts),
-          backgroundColor: AppColors.surface,
+          backgroundColor: colors.surface,
           surfaceTintColor: Colors.transparent,
         ),
         body: FutureBuilder<List<AccountModel>>(
@@ -53,8 +54,8 @@ class _ArchivedAccountsPageState extends State<ArchivedAccountsPage> {
           future: _load(),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(
-                child: CircularProgressIndicator(color: AppColors.primary),
+              return Center(
+                child: CircularProgressIndicator(color: colors.primary),
               );
             }
             if (snapshot.hasError) {
@@ -62,7 +63,7 @@ class _ArchivedAccountsPageState extends State<ArchivedAccountsPage> {
                 child: Text(
                   AppStrings.of(context).loadFailed,
                   style: AppTypography.bodyMd
-                      .copyWith(color: AppColors.onSurfaceVariant),
+                      .copyWith(color: colors.onSurfaceVariant),
                 ),
               );
             }
@@ -75,7 +76,7 @@ class _ArchivedAccountsPageState extends State<ArchivedAccountsPage> {
                     Icon(
                       Icons.archive_outlined,
                       size: 64,
-                      color: AppColors.onSurfaceVariant.withValues(alpha: 0.4),
+                      color: colors.onSurfaceVariant.withValues(alpha: 0.4),
                     ),
                     const SizedBox(height: AppSpacing.lg),
                     Text(AppStrings.of(context).noArchivedAccounts,
@@ -84,7 +85,7 @@ class _ArchivedAccountsPageState extends State<ArchivedAccountsPage> {
                     Text(
                       AppStrings.of(context).archiveHint,
                       style: AppTypography.bodyMd
-                          .copyWith(color: AppColors.onSurfaceVariant),
+                          .copyWith(color: colors.onSurfaceVariant),
                     ),
                   ],
                 ),

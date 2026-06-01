@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
 import '../../../core/l10n/app_strings.dart';
+import '../../../core/theme/app_palette.dart';
 import '../../../core/utils/category_extensions.dart';
 import '../../../core/utils/currency_formatter.dart';
 import '../../../core/utils/date_formatter.dart';
@@ -20,6 +20,7 @@ class AccountTransactionsSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -38,13 +39,13 @@ class AccountTransactionsSection extends StatelessWidget {
                   Icon(
                     Icons.receipt_long_outlined,
                     size: 48,
-                    color: AppColors.onSurfaceVariant.withValues(alpha: 0.3),
+                    color: colors.onSurfaceVariant.withValues(alpha: 0.3),
                   ),
                   const SizedBox(height: AppSpacing.md),
                   Text(
                     AppStrings.of(context).noTransactions,
                     style: AppTypography.bodyMd
-                        .copyWith(color: AppColors.onSurfaceVariant),
+                        .copyWith(color: colors.onSurfaceVariant),
                   ),
                   const SizedBox(height: AppSpacing.lg),
                   FilledButton.icon(
@@ -52,8 +53,8 @@ class AccountTransactionsSection extends StatelessWidget {
                     icon: const Icon(Icons.add_rounded, size: 18),
                     label: Text(AppStrings.of(context).addTransactionBtn),
                     style: FilledButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      foregroundColor: AppColors.surface,
+                      backgroundColor: colors.primary,
+                      foregroundColor: colors.surface,
                       shape: RoundedRectangleBorder(
                         borderRadius:
                             BorderRadius.circular(AppSpacing.radiusXl),
@@ -78,16 +79,17 @@ class AccountTransactionTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     final isIncome = transaction.type == TransactionType.INCOME;
     final isTransfer = transaction.type == TransactionType.TRANSFER;
     final amountColor = isTransfer
-        ? AppColors.onSurfaceVariant
+        ? colors.onSurfaceVariant
         : isIncome
-            ? AppColors.secondary
-            : AppColors.tertiary;
+            ? colors.income
+            : colors.expense;
 
     final categoryColor = transaction.category?.color != null
-        ? _hexColor(transaction.category!.color!)
+        ? _hexColor(transaction.category!.color!, colors.onSurfaceVariant)
         : amountColor;
 
     final iconData = transaction.category?.icon != null
@@ -131,7 +133,7 @@ class AccountTransactionTile extends StatelessWidget {
                 Text(
                   DateFormatter.formatShort(transaction.date, context),
                   style: AppTypography.bodySm
-                      .copyWith(color: AppColors.onSurfaceVariant),
+                      .copyWith(color: colors.onSurfaceVariant),
                 ),
               ],
             ),
@@ -148,11 +150,11 @@ class AccountTransactionTile extends StatelessWidget {
     );
   }
 
-  Color _hexColor(String hex) {
+  Color _hexColor(String hex, Color fallback) {
     try {
       return Color(int.parse('FF${hex.replaceAll('#', '')}', radix: 16));
     } catch (_) {
-      return AppColors.onSurfaceVariant;
+      return fallback;
     }
   }
 }

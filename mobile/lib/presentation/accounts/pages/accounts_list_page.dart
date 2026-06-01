@@ -1,10 +1,10 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:wallet_app/core/l10n/app_strings.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/di/injection.dart';
+import '../../../core/theme/app_palette.dart';
 import '../../../data/models/account_model.dart';
 import '../../../data/repositories/account_repository.dart';
 import '../../../navigation/route_names.dart';
@@ -56,6 +56,7 @@ class _AccountsListPageState extends State<AccountsListPage> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     final accounts = _accounts ?? [];
     final showFab = !_isLoading && !_hasError && accounts.isNotEmpty;
 
@@ -77,27 +78,27 @@ class _AccountsListPageState extends State<AccountsListPage> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(state.message),
-              backgroundColor: AppColors.error,
+              backgroundColor: colors.error,
             ),
           );
         }
       },
       child: Scaffold(
-        backgroundColor: AppColors.surface,
+        backgroundColor: colors.surface,
         appBar: AppBar(
           title: Text(AppStrings.of(context).myAccountsTitle),
-          backgroundColor: AppColors.surface,
+          backgroundColor: colors.surface,
           surfaceTintColor: Colors.transparent,
           actions: [
             if (_isLoading)
-              const Padding(
-                padding: EdgeInsets.only(right: AppSpacing.lg),
+              Padding(
+                padding: const EdgeInsets.only(right: AppSpacing.lg),
                 child: SizedBox(
                   width: 20,
                   height: 20,
                   child: CircularProgressIndicator(
                     strokeWidth: 2,
-                    color: AppColors.primary,
+                    color: colors.primary,
                   ),
                 ),
               )
@@ -112,8 +113,8 @@ class _AccountsListPageState extends State<AccountsListPage> {
         floatingActionButton: showFab
             ? FloatingActionButton(
                 onPressed: _goToAdd,
-                backgroundColor: AppColors.primary,
-                foregroundColor: AppColors.onPrimary,
+                backgroundColor: colors.primary,
+                foregroundColor: colors.onPrimary,
                 child: const Icon(Icons.add_rounded),
               )
             : null,
@@ -123,9 +124,10 @@ class _AccountsListPageState extends State<AccountsListPage> {
   }
 
   Widget _buildBody(List<AccountModel> accounts) {
+    final colors = context.colors;
     if (_isLoading && _accounts == null) {
-      return const Center(
-        child: CircularProgressIndicator(color: AppColors.primary),
+      return Center(
+        child: CircularProgressIndicator(color: colors.primary),
       );
     }
     if (_hasError) {

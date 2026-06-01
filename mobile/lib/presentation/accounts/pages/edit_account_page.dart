@@ -1,10 +1,10 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import '../../../core/l10n/app_strings.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
+import '../../../core/theme/app_palette.dart';
 import '../../../data/models/account_model.dart';
 import '../bloc/account_bloc.dart';
 import '../widgets/account_form_widgets.dart';
@@ -69,13 +69,14 @@ class _EditAccountPageState extends State<EditAccountPage> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return BlocListener<AccountBloc, AccountState>(
       listener: (context, state) {
         if (state is AccountSuccess) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(AppStrings.of(context).accountUpdatedSuccess),
-              backgroundColor: AppColors.secondary,
+              backgroundColor: colors.secondary,
             ),
           );
           Navigator.of(context).pop(state.account);
@@ -83,7 +84,7 @@ class _EditAccountPageState extends State<EditAccountPage> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(state.message),
-              backgroundColor: AppColors.error,
+              backgroundColor: colors.error,
             ),
           );
         }
@@ -229,6 +230,6 @@ class _EditAccountPageState extends State<EditAccountPage> {
   Widget _label(String text) => Text(
         text,
         style: AppTypography.labelMd
-            .copyWith(color: AppColors.onSurfaceVariant),
+            .copyWith(color: context.colors.onSurfaceVariant),
       );
 }

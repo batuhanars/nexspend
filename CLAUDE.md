@@ -16,14 +16,16 @@ This file provides guidance to Claude Code (claude.ai/code) when working with th
 
 ## Referans Dosyaları
 
+> Tüm plan/contract/task/schema/prompt dokümanları `agent/` klasörü altında toplandı.
+
 | Dosya | İçerik |
 |---|---|
-| `TASK.md` | Sprint görev takibi (canlı durum) |
-| `SCHEMA.md` | Veritabanı şeması (27 model, 13 enum) |
-| `DEVELOPMENT_PLAN_V1.md` | Sprint 0-8 mimarisi (tamamlandı) |
-| `DEVELOPMENT_PLAN_V2.md` | Sprint 9-12 mimarisi (sıradaki odak) |
-| `SPRINT_X_CONTRACT.md` | Aktif sprint için backend↔frontend sözleşmesi (varsa) |
-| `STITCH_PROMPTS.md` | UI tasarım promptları (Stitch project ID `5496994793442531801`) |
+| `agent/TASK.md` | Sprint görev takibi (canlı durum) |
+| `agent/SCHEMA.md` | Veritabanı şeması (27 model, 12 enum) |
+| `agent/DEVELOPMENT_PLAN_V1.md` | Sprint 0-8 mimarisi (tamamlandı) |
+| `agent/DEVELOPMENT_PLAN_V2.md` | Sprint 9-12 mimarisi (sıradaki odak) |
+| `agent/SPRINT_X_CONTRACT.md` | Aktif sprint için backend↔frontend sözleşmesi (varsa) |
+| `agent/STITCH_PROMPTS.md` | UI tasarım promptları (Stitch project ID `5496994793442531801`) |
 
 ---
 

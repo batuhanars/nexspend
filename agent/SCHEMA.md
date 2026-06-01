@@ -82,11 +82,6 @@ enum SubscriptionPeriod {
   YEARLY
 }
 
-enum SubscriptionKind {
-  SUBSCRIPTION  /// oto-kesintili, sabit tutar (Netflix, Spotify)
-  BILL          /// manuel ödenen, değişken tutarlı fatura (elektrik, su, telefon)
-}
-
 enum RecurrenceFrequency {
   DAILY
   WEEKLY
@@ -425,13 +420,12 @@ model Subscription {
   icon        String?            @db.VarChar(50)
   color       String?            @db.VarChar(7)
   startDate   DateTime           @map("start_date") @db.Date
-  nextRenewal DateTime           @map("next_renewal") @db.Date /// SUBSCRIPTION: yenilenme; BILL: son ödeme tarihi (dueDate)
+  nextRenewal DateTime           @map("next_renewal") @db.Date /// bir sonraki yenileme tarihi
   accountId   String             @map("account_id") @db.VarChar(36) /// hangi hesaptan düşülecek
   categoryId  String?            @map("category_id") @db.VarChar(36)
   isActive    Boolean            @default(true) @map("is_active")
-  autoDeduct  Boolean            @default(true) @map("auto_deduct") /// otomatik işlem oluştursun mu (BILL'de daima false)
-  kind        SubscriptionKind   @default(SUBSCRIPTION) @map("kind") /// SUBSCRIPTION (oto, sabit) | BILL (manuel, değişken, son ödemeli)
-  reminderDaysBefore Int         @default(3) @map("reminder_days_before") /// BILL: son ödemeden kaç gün önce hatırlat
+  autoDeduct  Boolean            @default(true) @map("auto_deduct") /// otomatik işlem oluştursun mu (daima true)
+  reminderDaysBefore Int         @default(3) @map("reminder_days_before") /// yenileme tarihinden kaç gün önce hatırlat
   createdAt   DateTime           @default(now()) @map("created_at") @db.Timestamp(0)
   updatedAt   DateTime           @updatedAt @map("updated_at") @db.Timestamp(0)
 
@@ -781,7 +775,7 @@ FamilyGroup ─┬─< FamilyMember ──> User
              └─< FamilyInvite
 ```
 
-> **Toplam: 27 model, 13 enum**
+> **Toplam: 27 model, 12 enum**
 
 ### 2.2 Prisma Kullanım Notları
 

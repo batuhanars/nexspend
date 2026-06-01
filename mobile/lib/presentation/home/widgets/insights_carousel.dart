@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
 import '../../../core/di/injection.dart';
 import '../../../core/l10n/app_strings.dart';
+import '../../../core/theme/app_palette.dart';
 import '../../../data/repositories/insights_repository.dart';
 import '../../../navigation/route_names.dart';
 import '../../insights/bloc/insights_bloc.dart';
@@ -55,6 +55,7 @@ class _InsightsCarouselView extends StatelessWidget {
   }) {
     final preview = insights.take(3).toList();
     final s = AppStrings.of(context);
+    final colors = context.colors;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.pagePadding),
@@ -72,14 +73,14 @@ class _InsightsCarouselView extends StatelessWidget {
                     vertical: 2,
                   ),
                   decoration: BoxDecoration(
-                    color: AppColors.tertiary,
+                    color: colors.tertiary,
                     borderRadius:
                         BorderRadius.circular(AppSpacing.radiusFull),
                   ),
                   child: Text(
                     '$unreadCount',
                     style: AppTypography.labelSm
-                        .copyWith(color: AppColors.onTertiary),
+                        .copyWith(color: colors.onTertiary),
                   ),
                 ),
               const Spacer(),
@@ -90,11 +91,11 @@ class _InsightsCarouselView extends StatelessWidget {
                     Text(
                       s.allOption,
                       style: AppTypography.bodySm
-                          .copyWith(color: AppColors.primary),
+                          .copyWith(color: colors.primary),
                     ),
                     const SizedBox(width: 2),
-                    const Icon(Icons.arrow_forward_ios_rounded,
-                        size: 12, color: AppColors.primary),
+                    Icon(Icons.arrow_forward_ios_rounded,
+                        size: 12, color: colors.primary),
                   ],
                 ),
               ),
@@ -138,6 +139,7 @@ class _InsightsCarouselView extends StatelessWidget {
 class _EmptyCarousel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(
@@ -145,12 +147,12 @@ class _EmptyCarousel extends StatelessWidget {
         vertical: AppSpacing.md,
       ),
       decoration: BoxDecoration(
-        color: AppColors.surfaceContainerHigh,
+        color: colors.surfaceContainerHigh,
         borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
       ),
       child: Text(
         AppStrings.of(context).noSuggestionsEmpty,
-        style: AppTypography.bodyMd.copyWith(color: AppColors.onSurfaceVariant),
+        style: AppTypography.bodyMd.copyWith(color: colors.onSurfaceVariant),
         textAlign: TextAlign.center,
       ),
     );
@@ -168,7 +170,7 @@ class _CarouselShimmer extends StatelessWidget {
       child: Container(
         height: 80,
         decoration: BoxDecoration(
-          color: AppColors.surfaceContainerHigh,
+          color: context.colors.surfaceContainerHigh,
           borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
         ),
       ),

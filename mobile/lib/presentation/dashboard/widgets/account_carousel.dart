@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/l10n/app_strings.dart';
+import '../../../core/theme/app_palette.dart';
 import '../../../data/models/account_model.dart';
 import 'account_card.dart';
 
@@ -100,15 +100,16 @@ class _AddAccountCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return GestureDetector(
       onTap: onTap,
       child: Container(
         width: AccountCard.cardWidth,
         decoration: BoxDecoration(
-          color: AppColors.surfaceContainerHigh,
+          color: colors.surfaceContainerHigh,
           borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
           border: Border.all(
-            color: AppColors.outlineVariant.withValues(alpha: 0.2),
+            color: colors.outlineVariant.withValues(alpha: 0.2),
             width: 1.5,
             strokeAlign: BorderSide.strokeAlignInside,
           ),
@@ -120,10 +121,10 @@ class _AddAccountCard extends StatelessWidget {
               width: 40,
               height: 40,
               decoration: BoxDecoration(
-                color: AppColors.primary.withValues(alpha: 0.1),
+                color: colors.primary.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(Icons.add_rounded, color: AppColors.primary),
+              child: Icon(Icons.add_rounded, color: colors.primary),
             ),
             const SizedBox(height: AppSpacing.sm),
             Text(
@@ -131,7 +132,7 @@ class _AddAccountCard extends StatelessWidget {
               style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w500,
-                color: AppColors.primary,
+                color: colors.primary,
               ),
             ),
           ],
@@ -148,6 +149,7 @@ class _DotsIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: List.generate(count, (i) {
@@ -159,8 +161,8 @@ class _DotsIndicator extends StatelessWidget {
           height: 6,
           decoration: BoxDecoration(
             color: isActive
-                ? AppColors.primary
-                : AppColors.outlineVariant.withValues(alpha: 0.4),
+                ? colors.primary
+                : colors.outlineVariant.withValues(alpha: 0.4),
             borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
           ),
         );

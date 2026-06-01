@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
-import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
+import '../../../core/theme/app_palette.dart';
 
 class DashboardShimmer extends StatelessWidget {
   const DashboardShimmer({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return Shimmer.fromColors(
-      baseColor: AppColors.surfaceContainerHigh,
-      highlightColor: AppColors.surfaceContainerHighest,
+      baseColor: colors.surfaceContainerHigh,
+      highlightColor: colors.surfaceContainerHighest,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -21,7 +22,7 @@ class DashboardShimmer extends StatelessWidget {
             ),
             height: 160,
             decoration: BoxDecoration(
-              color: AppColors.surfaceContainerHigh,
+              color: colors.surfaceContainerHigh,
               borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
             ),
           ),
@@ -40,7 +41,7 @@ class DashboardShimmer extends StatelessWidget {
                       width: 56,
                       height: 56,
                       decoration: BoxDecoration(
-                        color: AppColors.surfaceContainerHigh,
+                        color: colors.surfaceContainerHigh,
                         shape: BoxShape.circle,
                       ),
                     ),
@@ -49,7 +50,7 @@ class DashboardShimmer extends StatelessWidget {
                       width: 40,
                       height: 12,
                       decoration: BoxDecoration(
-                        color: AppColors.surfaceContainerHigh,
+                        color: colors.surfaceContainerHigh,
                         borderRadius: BorderRadius.circular(4),
                       ),
                     ),
@@ -72,7 +73,7 @@ class DashboardShimmer extends StatelessWidget {
               itemBuilder: (_, index) => Container(
                 width: 200,
                 decoration: BoxDecoration(
-                  color: AppColors.surfaceContainerHigh,
+                  color: colors.surfaceContainerHigh,
                   borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
                 ),
               ),
@@ -92,7 +93,7 @@ class DashboardShimmer extends StatelessWidget {
                     width: 44,
                     height: 44,
                     decoration: BoxDecoration(
-                      color: AppColors.surfaceContainerHigh,
+                      color: colors.surfaceContainerHigh,
                       shape: BoxShape.circle,
                     ),
                   ),
@@ -105,7 +106,7 @@ class DashboardShimmer extends StatelessWidget {
                           height: 14,
                           width: 120,
                           decoration: BoxDecoration(
-                            color: AppColors.surfaceContainerHigh,
+                            color: colors.surfaceContainerHigh,
                             borderRadius: BorderRadius.circular(4),
                           ),
                         ),
@@ -114,7 +115,7 @@ class DashboardShimmer extends StatelessWidget {
                           height: 10,
                           width: 80,
                           decoration: BoxDecoration(
-                            color: AppColors.surfaceContainerHigh,
+                            color: colors.surfaceContainerHigh,
                             borderRadius: BorderRadius.circular(4),
                           ),
                         ),
@@ -125,7 +126,7 @@ class DashboardShimmer extends StatelessWidget {
                     height: 14,
                     width: 70,
                     decoration: BoxDecoration(
-                      color: AppColors.surfaceContainerHigh,
+                      color: colors.surfaceContainerHigh,
                       borderRadius: BorderRadius.circular(4),
                     ),
                   ),

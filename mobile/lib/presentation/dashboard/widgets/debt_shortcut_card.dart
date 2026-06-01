@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
 import '../../../core/l10n/app_strings.dart';
+import '../../../core/theme/app_palette.dart';
 
 class DebtShortcutCard extends StatelessWidget {
   const DebtShortcutCard({super.key, required this.onTap});
@@ -11,6 +11,7 @@ class DebtShortcutCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final s = AppStrings.of(context);
+    final colors = context.colors;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.pagePadding),
       child: GestureDetector(
@@ -21,7 +22,7 @@ class DebtShortcutCard extends StatelessWidget {
             vertical: AppSpacing.md,
           ),
           decoration: BoxDecoration(
-            color: AppColors.surfaceContainerHigh,
+            color: colors.surfaceContainerHigh,
             borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
           ),
           child: Row(
@@ -30,12 +31,12 @@ class DebtShortcutCard extends StatelessWidget {
                 width: 40,
                 height: 40,
                 decoration: BoxDecoration(
-                  color: AppColors.primary.withValues(alpha: 0.12),
+                  color: colors.primary.withValues(alpha: 0.12),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.handshake_outlined,
-                  color: AppColors.primary,
+                  color: colors.primary,
                   size: 20,
                 ),
               ),
@@ -43,9 +44,9 @@ class DebtShortcutCard extends StatelessWidget {
               Expanded(
                 child: Text(s.myDebts, style: AppTypography.titleSm),
               ),
-              const Icon(
+              Icon(
                 Icons.arrow_forward_ios_rounded,
-                color: AppColors.onSurfaceVariant,
+                color: colors.onSurfaceVariant,
                 size: 16,
               ),
             ],

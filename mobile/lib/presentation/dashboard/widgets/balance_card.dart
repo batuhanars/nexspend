@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
 import '../../../core/l10n/app_strings.dart';
+import '../../../core/theme/app_palette.dart';
 import '../../../core/utils/currency_formatter.dart';
 import '../../../data/models/dashboard_model.dart';
 
@@ -21,6 +21,7 @@ class BalanceCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isPositive = dashboard.monthlyChange >= 0;
+    final colors = context.colors;
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: AppSpacing.pagePadding),
@@ -82,13 +83,15 @@ class BalanceCard extends StatelessWidget {
                 change: dashboard.monthlyChange,
                 percent: dashboard.monthlyChangePercent,
                 isPositive: isPositive,
+                incomeColor: colors.income,
+                expenseColor: colors.expense,
               ),
               const Spacer(),
               Row(
                 children: [
                   Icon(
                     Icons.arrow_upward_rounded,
-                    color: const Color(0xFF70D8C8),
+                    color: colors.income,
                     size: 14,
                   ),
                   const SizedBox(width: 2),
@@ -103,7 +106,7 @@ class BalanceCard extends StatelessWidget {
                   const SizedBox(width: AppSpacing.md),
                   Icon(
                     Icons.arrow_downward_rounded,
-                    color: const Color(0xFFFFB68F),
+                    color: colors.expense,
                     size: 14,
                   ),
                   const SizedBox(width: 2),
@@ -141,7 +144,7 @@ class BalanceCard extends StatelessWidget {
                   value: isBalanceHidden
                       ? '₺ ••••'
                       : CurrencyFormatter.format(dashboard.creditCardDebt),
-                  valueColor: AppColors.tertiary,
+                  valueColor: colors.expense,
                 ),
               ],
             ),
@@ -157,11 +160,15 @@ class _ChangePill extends StatelessWidget {
     required this.change,
     required this.percent,
     required this.isPositive,
+    required this.incomeColor,
+    required this.expenseColor,
   });
 
   final double change;
   final double percent;
   final bool isPositive;
+  final Color incomeColor;
+  final Color expenseColor;
 
   @override
   Widget build(BuildContext context) {
@@ -179,7 +186,7 @@ class _ChangePill extends StatelessWidget {
         children: [
           Icon(
             isPositive ? Icons.trending_up : Icons.trending_down,
-            color: isPositive ? const Color(0xFF70D8C8) : const Color(0xFFFFB68F),
+            color: isPositive ? incomeColor : expenseColor,
             size: 14,
           ),
           const SizedBox(width: 4),

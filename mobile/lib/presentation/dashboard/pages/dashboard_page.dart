@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
 import '../../../core/l10n/app_strings.dart';
 import '../../../core/di/injection.dart';
 import '../../../core/services/app_events.dart';
+import '../../../core/theme/app_palette.dart';
 import '../../../core/utils/coach_mark_keys.dart';
 import '../../../data/models/budget_model.dart';
 import '../../../data/models/family_model.dart';
@@ -88,12 +88,13 @@ class _DashboardViewState extends State<_DashboardView> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return Scaffold(
       body: BlocBuilder<DashboardBloc, DashboardState>(
         builder: (context, state) {
           return RefreshIndicator(
-            color: AppColors.primary,
-            backgroundColor: AppColors.surfaceContainerHigh,
+            color: colors.primary,
+            backgroundColor: colors.surfaceContainerHigh,
             onRefresh: () async {
               context
                   .read<DashboardBloc>()
@@ -120,6 +121,7 @@ class _DashboardViewState extends State<_DashboardView> {
 
   Widget _buildAppBar(BuildContext context, DashboardState state) {
     final s = AppStrings.of(context);
+    final colors = context.colors;
     final String greeting;
     if (state is DashboardLoaded && state.dashboard.userFirstName != null) {
       greeting = s.helloName(state.dashboard.userFirstName!);
@@ -129,18 +131,18 @@ class _DashboardViewState extends State<_DashboardView> {
 
     return SliverAppBar(
       floating: true,
-      backgroundColor: AppColors.surface,
+      backgroundColor: colors.surface,
       surfaceTintColor: Colors.transparent,
       title: Text(greeting, style: AppTypography.headlineSm),
       actions: [
         IconButton(
-          icon: const Icon(Icons.analytics_outlined, color: AppColors.onSurface),
+          icon: Icon(Icons.analytics_outlined, color: colors.onSurface),
           tooltip: s.reportsTitle,
           onPressed: () => context.push(RouteNames.reports),
         ),
         IconButton(
           key: CoachMarkKeys.settings,
-          icon: const Icon(Icons.settings_outlined, color: AppColors.onSurface),
+          icon: Icon(Icons.settings_outlined, color: colors.onSurface),
           onPressed: () => context.push(RouteNames.settings),
         ),
         const SizedBox(width: AppSpacing.xs),
@@ -193,7 +195,7 @@ class _DashboardViewState extends State<_DashboardView> {
                       child: Text(
                         AppStrings.of(context).addAccount,
                         style: AppTypography.bodySm
-                            .copyWith(color: AppColors.primary),
+                            .copyWith(color: context.colors.primary),
                       ),
                     ),
                 ],

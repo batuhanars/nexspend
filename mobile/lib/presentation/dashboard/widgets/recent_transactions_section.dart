@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
 import '../../../core/l10n/app_strings.dart';
+import '../../../core/theme/app_palette.dart';
 import '../../../core/utils/category_extensions.dart';
 import '../../../core/utils/currency_formatter.dart';
 import '../../../core/utils/date_formatter.dart';
@@ -68,7 +68,7 @@ class RecentTransactionsSection extends StatelessWidget {
                 ),
                 child: Text(
                   s.viewAll,
-                  style: AppTypography.bodySm.copyWith(color: AppColors.primary),
+                  style: AppTypography.bodySm.copyWith(color: context.colors.primary),
                 ),
               ),
             ],
@@ -97,21 +97,30 @@ class _TransactionTile extends StatelessWidget {
   final AppStrings s;
   final String? budgetLabel;
 
+  static Color _colorFromHex(String hex, Color fallback) {
+    try {
+      return Color(int.parse('FF${hex.replaceAll('#', '')}', radix: 16));
+    } catch (_) {
+      return fallback;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     final isIncome = transaction.type == TransactionType.INCOME;
     final isTransfer = transaction.type == TransactionType.TRANSFER;
     final amountColor = isTransfer
-        ? AppColors.onSurfaceVariant
+        ? colors.onSurfaceVariant
         : isIncome
-            ? AppColors.secondary
-            : AppColors.tertiary;
+            ? colors.income
+            : colors.expense;
 
     final categoryColor = transaction.category?.color != null
-        ? _colorFromHex(transaction.category!.color!)
+        ? _colorFromHex(transaction.category!.color!, colors.onSurfaceVariant)
         : isIncome
-            ? AppColors.secondary
-            : AppColors.tertiary;
+            ? colors.income
+            : colors.expense;
 
     final iconData = transaction.category?.icon != null
         ? IconMapper.fromString(transaction.category!.icon)
@@ -185,14 +194,6 @@ class _TransactionTile extends StatelessWidget {
       ),
     );
   }
-
-  Color _colorFromHex(String hex) {
-    try {
-      return Color(int.parse('FF${hex.replaceAll('#', '')}', radix: 16));
-    } catch (_) {
-      return AppColors.onSurfaceVariant;
-    }
-  }
 }
 
 class _BudgetBadge extends StatelessWidget {
@@ -202,26 +203,27 @@ class _BudgetBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       decoration: BoxDecoration(
-        color: AppColors.primary.withValues(alpha: 0.12),
+        color: colors.primary.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(
+          Icon(
             Icons.account_balance_wallet_outlined,
             size: 10,
-            color: AppColors.primary,
+            color: colors.primary,
           ),
           const SizedBox(width: 4),
           Flexible(
             child: Text(
               label,
               style: AppTypography.labelSm.copyWith(
-                color: AppColors.primary,
+                color: colors.primary,
                 fontSize: 10,
               ),
               maxLines: 1,
@@ -247,7 +249,7 @@ class _SourceBadge extends StatelessWidget {
       TransactionSource.DEBT_COLLECTION => Icons.handshake_outlined,
       TransactionSource.MANUAL => Icons.edit_outlined,
     };
-    return Icon(icon, size: 12, color: AppColors.onSurfaceVariant);
+    return Icon(icon, size: 12, color: context.colors.onSurfaceVariant);
   }
 }
 
@@ -257,6 +259,7 @@ class _EmptyTransactions extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return Padding(
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.pagePadding,
@@ -273,13 +276,13 @@ class _EmptyTransactions extends StatelessWidget {
           Icon(
             Icons.receipt_long_outlined,
             size: 48,
-            color: AppColors.onSurfaceVariant.withValues(alpha: 0.4),
+            color: colors.onSurfaceVariant.withValues(alpha: 0.4),
           ),
           const SizedBox(height: AppSpacing.md),
           Text(
             s.noTransactionsYet,
             style: AppTypography.bodyMd.copyWith(
-              color: AppColors.onSurfaceVariant,
+              color: colors.onSurfaceVariant,
             ),
           ),
           const SizedBox(height: AppSpacing.sm),

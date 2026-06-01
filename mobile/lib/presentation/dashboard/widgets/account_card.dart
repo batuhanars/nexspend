@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
 import '../../../core/l10n/app_strings.dart';
+import '../../../core/theme/app_palette.dart';
 import '../../../core/utils/currency_formatter.dart';
 import '../../../data/models/account_model.dart';
 
@@ -22,13 +22,14 @@ class AccountCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return GestureDetector(
       onTap: onTap,
       child: Container(
         width: cardWidth,
         padding: const EdgeInsets.all(AppSpacing.cardPadding),
         decoration: BoxDecoration(
-          color: AppColors.surfaceContainerHigh,
+          color: colors.surfaceContainerHigh,
           borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
         ),
         child: Column(
@@ -45,13 +46,13 @@ class AccountCard extends StatelessWidget {
                       vertical: 2,
                     ),
                     decoration: BoxDecoration(
-                      color: AppColors.primary.withValues(alpha: 0.12),
+                      color: colors.primary.withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
                     ),
                     child: Text(
                       AppStrings.of(context).defaultBadge,
                       style: AppTypography.labelSm.copyWith(
-                        color: AppColors.primary,
+                        color: colors.primary,
                         fontSize: 9,
                       ),
                     ),
@@ -62,7 +63,7 @@ class AccountCard extends StatelessWidget {
             Text(
               account.name,
               style: AppTypography.labelMd.copyWith(
-                color: AppColors.onSurfaceVariant,
+                color: colors.onSurfaceVariant,
               ),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
@@ -72,14 +73,14 @@ class AccountCard extends StatelessWidget {
                 ? Text(
                     '₺ ••••',
                     style: AppTypography.titleSm.copyWith(
-                      color: AppColors.onSurface,
+                      color: colors.onSurface,
                       fontWeight: FontWeight.w700,
                     ),
                   )
                 : Text(
                     CurrencyFormatter.format(account.balance),
                     style: AppTypography.titleSm.copyWith(
-                      color: AppColors.onSurface,
+                      color: colors.onSurface,
                       fontWeight: FontWeight.w700,
                     ),
                     maxLines: 1,
@@ -121,12 +122,13 @@ class _CreditLimitBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     final percent = account.creditUsagePercent;
     final barColor = percent > 0.8
-        ? AppColors.error
+        ? colors.error
         : percent > 0.6
-            ? AppColors.warning
-            : AppColors.secondary;
+            ? colors.warning
+            : colors.secondary;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -135,7 +137,7 @@ class _CreditLimitBar extends StatelessWidget {
           borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
           child: LinearProgressIndicator(
             value: percent,
-            backgroundColor: AppColors.surfaceContainerHighest,
+            backgroundColor: colors.surfaceContainerHighest,
             valueColor: AlwaysStoppedAnimation<Color>(barColor),
             minHeight: 4,
           ),
@@ -145,7 +147,7 @@ class _CreditLimitBar extends StatelessWidget {
           '${CurrencyFormatter.formatCompact(account.creditUsed)} / '
           '${CurrencyFormatter.formatCompact(account.creditLimit!)}',
           style: AppTypography.labelSm.copyWith(
-            color: AppColors.onSurfaceVariant,
+            color: colors.onSurfaceVariant,
             fontSize: 9,
           ),
         ),

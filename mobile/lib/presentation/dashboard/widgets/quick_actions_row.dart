@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
 import '../../../core/l10n/app_strings.dart';
+import '../../../core/theme/app_palette.dart';
 
 class QuickActionsRow extends StatelessWidget {
   const QuickActionsRow({
@@ -21,6 +21,7 @@ class QuickActionsRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final s = AppStrings.of(context);
+    final colors = context.colors;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.pagePadding),
       child: Row(
@@ -29,25 +30,25 @@ class QuickActionsRow extends StatelessWidget {
           _ActionButton(
             icon: Icons.add_rounded,
             label: s.income,
-            color: AppColors.secondary,
+            color: colors.secondary,
             onTap: onIncome,
           ),
           _ActionButton(
             icon: Icons.remove_rounded,
             label: s.expense,
-            color: AppColors.tertiary,
+            color: colors.tertiary,
             onTap: onExpense,
           ),
           _ActionButton(
             icon: Icons.swap_horiz_rounded,
             label: s.transfer,
-            color: AppColors.primary,
+            color: colors.primary,
             onTap: onTransfer,
           ),
           _ActionButton(
             icon: Icons.document_scanner_outlined,
             label: s.scanAction,
-            color: AppColors.onSurfaceVariant,
+            color: colors.onSurfaceVariant,
             onTap: onScan,
           ),
         ],
@@ -88,7 +89,7 @@ class _ActionButton extends StatelessWidget {
           const SizedBox(height: AppSpacing.xs),
           Text(
             label,
-            style: AppTypography.labelMd.copyWith(color: AppColors.onSurface),
+            style: AppTypography.labelMd.copyWith(color: context.colors.onSurface),
           ),
         ],
       ),

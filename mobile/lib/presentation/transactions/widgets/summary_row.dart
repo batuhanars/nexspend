@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
 import '../../../core/l10n/app_strings.dart';
+import '../../../core/theme/app_palette.dart';
 import '../../../core/utils/currency_formatter.dart';
 import '../bloc/transactions_bloc.dart';
 
@@ -13,6 +13,7 @@ class SummaryRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final s = AppStrings.of(context);
+    final colors = context.colors;
     return Padding(
       padding: const EdgeInsets.fromLTRB(
         AppSpacing.pagePadding,
@@ -26,7 +27,7 @@ class SummaryRow extends StatelessWidget {
             child: SummaryCard(
               label: s.income,
               amount: state.income,
-              color: AppColors.secondary,
+              color: colors.income,
               icon: Icons.arrow_downward_rounded,
             ),
           ),
@@ -35,7 +36,7 @@ class SummaryRow extends StatelessWidget {
             child: SummaryCard(
               label: s.expense,
               amount: state.expense,
-              color: AppColors.tertiary,
+              color: colors.expense,
               icon: Icons.arrow_upward_rounded,
             ),
           ),
@@ -44,7 +45,7 @@ class SummaryRow extends StatelessWidget {
             child: SummaryCard(
               label: s.summaryNet,
               amount: state.net,
-              color: state.net >= 0 ? AppColors.secondary : AppColors.tertiary,
+              color: state.net >= 0 ? colors.income : colors.expense,
               icon: Icons.account_balance_wallet_outlined,
             ),
           ),
@@ -75,7 +76,7 @@ class SummaryCard extends StatelessWidget {
         vertical: AppSpacing.md,
       ),
       decoration: BoxDecoration(
-        color: AppColors.surfaceContainerHigh,
+        color: context.colors.surfaceContainerHigh,
         borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
       ),
       child: Column(
@@ -95,7 +96,7 @@ class SummaryCard extends StatelessWidget {
           Text(
             CurrencyFormatter.formatCompact(amount),
             style: AppTypography.titleSm.copyWith(
-              color: AppColors.onSurface,
+              color: context.colors.onSurface,
               fontSize: 13,
             ),
             maxLines: 1,

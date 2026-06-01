@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
 import '../../../core/l10n/app_strings.dart';
+import '../../../core/theme/app_palette.dart';
 
 class TransactionTypeSelector extends StatelessWidget {
   const TransactionTypeSelector({
@@ -16,15 +16,16 @@ class TransactionTypeSelector extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final s = AppStrings.of(context);
+    final colors = context.colors;
     final types = [
-      (label: s.expense, value: 'EXPENSE', color: AppColors.tertiary),
-      (label: s.income, value: 'INCOME', color: AppColors.secondary),
-      (label: s.transfer, value: 'TRANSFER', color: AppColors.primary),
+      (label: s.expense, value: 'EXPENSE', color: colors.expense),
+      (label: s.income, value: 'INCOME', color: colors.income),
+      (label: s.transfer, value: 'TRANSFER', color: colors.primary),
     ];
 
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.surfaceContainerHighest,
+        color: colors.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
       ),
       padding: const EdgeInsets.all(4),
@@ -48,7 +49,7 @@ class TransactionTypeSelector extends StatelessWidget {
                   child: Text(
                     t.label,
                     style: AppTypography.bodyMd.copyWith(
-                      color: isSelected ? t.color : AppColors.onSurfaceVariant,
+                      color: isSelected ? t.color : colors.onSurfaceVariant,
                       fontWeight:
                           isSelected ? FontWeight.w600 : FontWeight.w400,
                     ),

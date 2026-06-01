@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
 import '../../../core/di/injection.dart';
 import '../../../core/l10n/app_strings.dart';
 import '../../../core/services/app_events.dart';
+import '../../../core/theme/app_palette.dart';
 import '../../../data/models/account_model.dart';
 import '../../../data/models/category_model.dart';
 import '../../../data/models/family_model.dart';
@@ -34,12 +34,7 @@ class AddTransactionPage extends StatefulWidget {
   final String? initialAccountId;
   final String? initialType;
   final String? initialCategoryId;
-
-  /// Ortak bütçe detayından açıldığında o ortak bütçenin id'si.
-  /// Kapsam chip'lerini kilitler (sadece o chip görünür).
   final String? initialSharedBudgetId;
-
-  /// Doluysa edit modu — formu prefill eder.
   final TransactionModel? editing;
 
   @override
@@ -60,10 +55,7 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
   bool _categoryInitialized = false;
 
   List<MySharedBudgetModel> _mySharedBudgets = const [];
-  // null = "Kişisel"; doluysa seçilen ortak bütçenin id'si.
   String? _selectedSharedBudgetId;
-
-  /// Form bir bütçe detayından açıldıysa true: kapsam chip'leri kilitli
   late bool _isBudgetLocked;
   bool _sharedBudgetInitialized = false;
 
@@ -78,7 +70,6 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
     super.initState();
     final editing = widget.editing;
     if (editing != null) {
-      // Edit modu: prefill
       _type = editing.type.name;
       _amount = editing.amount;
       _titleController.text = editing.description ?? '';
@@ -132,7 +123,6 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
 
   void _submit() {
     final amount = _amount;
-
     final s = AppStrings.of(context);
     if (amount == null || amount <= 0) {
       _showError(s.enterValidAmount);
@@ -162,7 +152,6 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
     final submitDate = isToday ? now : _date;
 
     if (_isEditMode) {
-      // Edit mode: hanya kirim field yang diizinkan PATCH
       final data = <String, dynamic>{
         'type': _type,
         'amount': amount,
@@ -201,7 +190,8 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
 
   void _showError(String msg) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(msg), backgroundColor: AppColors.error),
+      SnackBar(
+          content: Text(msg), backgroundColor: context.colors.error),
     );
   }
 
@@ -216,22 +206,23 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
 
   Widget _sectionLabel(String text) => Text(
         text,
-        style: AppTypography.labelMd.copyWith(color: AppColors.onSurfaceVariant),
+        style: AppTypography.labelMd
+            .copyWith(color: context.colors.onSurfaceVariant),
       );
 
   @override
   Widget build(BuildContext context) {
     final s = AppStrings.of(context);
+    final colors = context.colors;
     return BlocListener<AddTransactionBloc, AddTransactionState>(
       listener: (context, state) {
         if (state is AddTransactionSuccess) {
           if (state.isEditMode) {
-            // Edit: liste refresh için aynı event yeterli
             getIt<AppEvents>().transactionAdded();
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(s.transactionUpdatedSuccess),
-                backgroundColor: AppColors.secondary,
+                backgroundColor: colors.income,
               ),
             );
           } else {
@@ -239,7 +230,7 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(s.transactionCreatedSuccess),
-                backgroundColor: AppColors.secondary,
+                backgroundColor: colors.income,
               ),
             );
           }
@@ -260,8 +251,8 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
           builder: (context, state) {
             if (state is AddTransactionDataLoading ||
                 state is AddTransactionInitial) {
-              return const Center(
-                child: CircularProgressIndicator(color: AppColors.primary),
+              return Center(
+                child: CircularProgressIndicator(color: colors.primary),
               );
             }
 
@@ -271,7 +262,6 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
             if (!_accountsInitialized && accounts.isNotEmpty) {
               final editing = widget.editing;
               if (editing != null && !_accountsInitialized) {
-                // Edit modunda mevcut hesabı prefill et
                 final match = accounts
                     .where((a) => a.id == editing.account?.id)
                     .toList();
@@ -424,7 +414,6 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                 ),
                 const SizedBox(height: AppSpacing.md),
                 TransactionNoteField(controller: _noteController),
-                // Tekrarlayan toggle: yalnız create modunda göster
                 if (!_isEditMode) ...[
                   const SizedBox(height: AppSpacing.xl),
                   RecurringSection(
@@ -469,7 +458,7 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                           height: 24,
                           child: CircularProgressIndicator(strokeWidth: 2.5),
                         )
-                      : Text(_isEditMode ? s.save : s.save),
+                      : Text(s.save),
                 );
               },
             ),
@@ -558,6 +547,7 @@ class _Chip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
@@ -568,14 +558,14 @@ class _Chip extends StatelessWidget {
         ),
         decoration: BoxDecoration(
           color: selected
-              ? AppColors.primary
-              : AppColors.surfaceContainerHighest,
+              ? colors.primary
+              : colors.surfaceContainerHighest,
           borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
         ),
         child: Text(
           label,
           style: AppTypography.bodySm.copyWith(
-            color: selected ? AppColors.onPrimary : AppColors.onSurface,
+            color: selected ? colors.onPrimary : colors.onSurface,
             fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
           ),
         ),

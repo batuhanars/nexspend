@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:wallet_app/core/l10n/app_strings.dart';
-import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
+import '../../../core/theme/app_palette.dart';
 
 class TransactionDatePicker extends StatelessWidget {
   const TransactionDatePicker({
@@ -15,6 +15,7 @@ class TransactionDatePicker extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final s = AppStrings.of(context);
+    final colors = context.colors;
     final now = DateTime.now();
     final isToday =
         date.year == now.year && date.month == now.month && date.day == now.day;
@@ -32,8 +33,8 @@ class TransactionDatePicker extends StatelessWidget {
           builder: (ctx, child) => Theme(
             data: Theme.of(ctx).copyWith(
               colorScheme: Theme.of(ctx).colorScheme.copyWith(
-                    primary: AppColors.primary,
-                    surface: AppColors.surfaceContainerHigh,
+                    primary: ctx.colors.primary,
+                    surface: ctx.colors.surfaceContainerHigh,
                   ),
             ),
             child: child!,
@@ -47,17 +48,17 @@ class TransactionDatePicker extends StatelessWidget {
           vertical: AppSpacing.lg,
         ),
         decoration: BoxDecoration(
-          color: AppColors.surfaceContainerHighest,
+          color: colors.surfaceContainerHighest,
           borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
         ),
         child: Row(
           children: [
-            const Icon(Icons.calendar_today_outlined,
-                size: 20, color: AppColors.onSurfaceVariant),
+            Icon(Icons.calendar_today_outlined,
+                size: 20, color: colors.onSurfaceVariant),
             const SizedBox(width: AppSpacing.md),
             Text(
               label,
-              style: const TextStyle(color: AppColors.onSurface, fontSize: 14),
+              style: TextStyle(color: colors.onSurface, fontSize: 14),
             ),
           ],
         ),

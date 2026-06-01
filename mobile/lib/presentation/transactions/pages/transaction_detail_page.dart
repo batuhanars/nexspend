@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
 import '../../../core/di/injection.dart';
 import '../../../core/l10n/app_strings.dart';
+import '../../../core/theme/app_palette.dart';
 import '../../../core/utils/category_extensions.dart';
 import '../../../core/utils/currency_formatter.dart';
 import '../../../core/utils/date_formatter.dart';
@@ -23,20 +23,29 @@ class TransactionDetailPage extends StatelessWidget {
   const TransactionDetailPage({super.key, required this.transaction});
   final TransactionModel transaction;
 
+  static Color _hexColor(String hex, Color fallback) {
+    try {
+      return Color(int.parse('FF${hex.replaceAll('#', '')}', radix: 16));
+    } catch (_) {
+      return fallback;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final s = AppStrings.of(context);
+    final colors = context.colors;
     final isIncome = transaction.type == TransactionType.INCOME;
     final isTransfer = transaction.type == TransactionType.TRANSFER;
 
     final amountColor = isTransfer
-        ? AppColors.onSurfaceVariant
+        ? colors.onSurfaceVariant
         : isIncome
-            ? AppColors.secondary
-            : AppColors.tertiary;
+            ? colors.income
+            : colors.expense;
 
     final categoryColor = transaction.category?.color != null
-        ? _hexColor(transaction.category!.color!)
+        ? _hexColor(transaction.category!.color!, amountColor)
         : amountColor;
 
     final iconData = transaction.category?.icon != null
@@ -54,9 +63,9 @@ class TransactionDetailPage extends StatelessWidget {
             (isTransfer ? s.transfer : s.transactionFallback);
 
     return Scaffold(
-      backgroundColor: AppColors.surface,
+      backgroundColor: colors.surface,
       appBar: AppBar(
-        backgroundColor: AppColors.surface,
+        backgroundColor: colors.surface,
         elevation: 0,
         scrolledUnderElevation: 0,
         leading: IconButton(
@@ -73,7 +82,7 @@ class TransactionDetailPage extends StatelessWidget {
             ),
           if (transaction.source == TransactionSource.MANUAL)
             IconButton(
-              icon: const Icon(Icons.delete_outline_rounded, color: AppColors.error),
+              icon: Icon(Icons.delete_outline_rounded, color: colors.error),
               onPressed: () => _confirmDelete(context, s),
             ),
         ],
@@ -115,20 +124,20 @@ class TransactionDetailPage extends StatelessWidget {
       ),
     );
     if (edited == true && context.mounted) {
-      // Detay sayfasını kapat, liste refresh eventi AppEvents üzerinden zaten tetiklendi
       context.pop(true);
     }
   }
 
   Future<void> _confirmDelete(BuildContext context, AppStrings s) async {
+    final colors = context.colors;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: AppColors.surfaceContainerHigh,
+        backgroundColor: colors.surfaceContainerHigh,
         title: Text(s.deleteTransactionTitle, style: AppTypography.titleSm),
         content: Text(
           s.deleteTransactionContent,
-          style: AppTypography.bodyMd.copyWith(color: AppColors.onSurfaceVariant),
+          style: AppTypography.bodyMd.copyWith(color: colors.onSurfaceVariant),
         ),
         actions: [
           TextButton(
@@ -137,7 +146,7 @@ class TransactionDetailPage extends StatelessWidget {
           ),
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(true),
-            child: Text(s.delete, style: const TextStyle(color: AppColors.error)),
+            child: Text(s.delete, style: TextStyle(color: colors.error)),
           ),
         ],
       ),
@@ -146,20 +155,14 @@ class TransactionDetailPage extends StatelessWidget {
     if (confirmed == true && context.mounted) {
       final messenger = ScaffoldMessenger.of(context);
       final deleteMsg = AppStrings.of(context).transactionDeletedSuccess;
-      context.read<TransactionsBloc>().add(TransactionDeleteRequested(transaction.id));
+      context
+          .read<TransactionsBloc>()
+          .add(TransactionDeleteRequested(transaction.id));
       context.pop(true);
       messenger.showSnackBar(SnackBar(
         content: Text(deleteMsg),
-        backgroundColor: AppColors.secondary,
+        backgroundColor: colors.income,
       ));
-    }
-  }
-
-  Color _hexColor(String hex) {
-    try {
-      return Color(int.parse('FF${hex.replaceAll('#', '')}', radix: 16));
-    } catch (_) {
-      return AppColors.onSurfaceVariant;
     }
   }
 }
@@ -187,17 +190,17 @@ class _ReceiptCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     final amountText =
         '${isIncome ? '+' : isTransfer ? '' : '-'}${CurrencyFormatter.format(transaction.amount)}';
 
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.surfaceContainerHigh,
+        color: colors.surfaceContainerHigh,
         borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
       ),
       child: Column(
         children: [
-          // ── Header section ─────────────────────────────────────────
           Padding(
             padding: const EdgeInsets.fromLTRB(
               AppSpacing.xl, AppSpacing.xl, AppSpacing.xl, AppSpacing.lg,
@@ -237,9 +240,7 @@ class _ReceiptCard extends StatelessWidget {
               ],
             ),
           ),
-          // ── Perforation ────────────────────────────────────────────
-          const _PerforationLine(),
-          // ── Details section ────────────────────────────────────────
+          _PerforationLine(lineColor: colors.surfaceContainerHighest),
           Padding(
             padding: const EdgeInsets.fromLTRB(
               AppSpacing.xl, AppSpacing.lg, AppSpacing.xl, AppSpacing.xl,
@@ -281,8 +282,8 @@ class _ReceiptCard extends StatelessWidget {
                     value: transaction.note!,
                   ),
                 const SizedBox(height: AppSpacing.md),
-                const Divider(
-                  color: AppColors.surfaceContainerHighest,
+                Divider(
+                  color: colors.surfaceContainerHighest,
                   thickness: 1,
                   height: 1,
                 ),
@@ -293,7 +294,7 @@ class _ReceiptCard extends StatelessWidget {
                     Text(
                       '${s.transactionIdLabel}: ',
                       style: AppTypography.labelSm.copyWith(
-                        color: AppColors.onSurfaceVariant,
+                        color: colors.onSurfaceVariant,
                         letterSpacing: 0.5,
                       ),
                     ),
@@ -301,8 +302,7 @@ class _ReceiptCard extends StatelessWidget {
                       child: Text(
                         transaction.id,
                         style: AppTypography.labelSm.copyWith(
-                          color: AppColors.onSurfaceVariant
-                              .withValues(alpha: 0.5),
+                          color: colors.onSurfaceVariant.withValues(alpha: 0.5),
                           letterSpacing: 0.5,
                         ),
                         overflow: TextOverflow.ellipsis,
@@ -351,11 +351,14 @@ class _TypeBadge extends StatelessWidget {
   }
 }
 
+// §8 — CustomPainter context'siz: renk constructor üzerinden geçilir.
 class _PerforationLine extends StatelessWidget {
-  const _PerforationLine();
+  const _PerforationLine({required this.lineColor});
+  final Color lineColor;
 
   @override
   Widget build(BuildContext context) {
+    final surfaceColor = context.colors.surface;
     return SizedBox(
       height: 20,
       child: Row(
@@ -364,9 +367,9 @@ class _PerforationLine extends StatelessWidget {
           Container(
             width: 10,
             height: 20,
-            decoration: const BoxDecoration(
-              color: AppColors.surface,
-              borderRadius: BorderRadius.only(
+            decoration: BoxDecoration(
+              color: surfaceColor,
+              borderRadius: const BorderRadius.only(
                 topRight: Radius.circular(10),
                 bottomRight: Radius.circular(10),
               ),
@@ -374,16 +377,16 @@ class _PerforationLine extends StatelessWidget {
           ),
           Expanded(
             child: CustomPaint(
-              painter: _DashedLinePainter(),
+              painter: _DashedLinePainter(lineColor: lineColor),
               child: const SizedBox.expand(),
             ),
           ),
           Container(
             width: 10,
             height: 20,
-            decoration: const BoxDecoration(
-              color: AppColors.surface,
-              borderRadius: BorderRadius.only(
+            decoration: BoxDecoration(
+              color: surfaceColor,
+              borderRadius: const BorderRadius.only(
                 topLeft: Radius.circular(10),
                 bottomLeft: Radius.circular(10),
               ),
@@ -396,12 +399,15 @@ class _PerforationLine extends StatelessWidget {
 }
 
 class _DashedLinePainter extends CustomPainter {
+  const _DashedLinePainter({required this.lineColor});
+  final Color lineColor;
+
   @override
   void paint(Canvas canvas, Size size) {
     const dashWidth = 5.0;
     const dashGap = 4.0;
     final paint = Paint()
-      ..color = AppColors.surfaceContainerHighest
+      ..color = lineColor
       ..strokeWidth = 1.5
       ..strokeCap = StrokeCap.round;
 
@@ -414,7 +420,7 @@ class _DashedLinePainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(_DashedLinePainter old) => false;
+  bool shouldRepaint(_DashedLinePainter old) => old.lineColor != lineColor;
 }
 
 class _DetailRow extends StatelessWidget {
@@ -434,7 +440,7 @@ class _DetailRow extends StatelessWidget {
             child: Text(
               label,
               style: AppTypography.bodyMd.copyWith(
-                color: AppColors.onSurfaceVariant,
+                color: context.colors.onSurfaceVariant,
               ),
             ),
           ),

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
 import '../../../core/l10n/app_strings.dart';
+import '../../../core/theme/app_palette.dart';
 import '../../../core/utils/category_extensions.dart';
 import '../../../core/utils/icon_mapper.dart';
 import '../../../data/models/category_model.dart';
@@ -25,7 +25,6 @@ class TransactionCategoryGrid extends StatelessWidget {
     if (categories.length <= _previewCount) return categories;
     final first = categories.take(_previewCount).toList();
     if (selected == null || first.any((c) => c.id == selected!.id)) return first;
-    // seçili kategori ilk 8'de yoksa son slotu onunla değiştir
     return [...categories.take(_previewCount - 1), selected!];
   }
 
@@ -64,7 +63,8 @@ class TransactionCategoryGrid extends StatelessWidget {
               ),
               child: Text(
                 '${AppStrings.of(context).viewAll} (${categories.length})',
-                style: AppTypography.bodySm.copyWith(color: AppColors.primary),
+                style: AppTypography.bodySm
+                    .copyWith(color: context.colors.primary),
               ),
             ),
           ),
@@ -74,10 +74,11 @@ class TransactionCategoryGrid extends StatelessWidget {
   }
 
   void _showAll(BuildContext context) {
+    final colors = context.colors;
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
-      backgroundColor: AppColors.surfaceContainerHigh,
+      backgroundColor: colors.surfaceContainerHigh,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(
           top: Radius.circular(AppSpacing.radiusLg),
@@ -95,7 +96,7 @@ class TransactionCategoryGrid extends StatelessWidget {
               height: 4,
               margin: const EdgeInsets.symmetric(vertical: AppSpacing.md),
               decoration: BoxDecoration(
-                color: AppColors.onSurfaceVariant.withValues(alpha: 0.3),
+                color: ctx.colors.onSurfaceVariant.withValues(alpha: 0.3),
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -160,6 +161,7 @@ class _CategoryTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     final color = category.cardColor;
     return GestureDetector(
       onTap: onTap,
@@ -168,7 +170,7 @@ class _CategoryTile extends StatelessWidget {
         decoration: BoxDecoration(
           color: isSelected
               ? color.withValues(alpha: 0.15)
-              : AppColors.surfaceContainerHigh,
+              : colors.surfaceContainerHigh,
           borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
           border: isSelected ? Border.all(color: color, width: 1.5) : null,
         ),
@@ -178,13 +180,13 @@ class _CategoryTile extends StatelessWidget {
             Icon(
               IconMapper.fromString(category.icon),
               size: 24,
-              color: isSelected ? color : AppColors.onSurfaceVariant,
+              color: isSelected ? color : colors.onSurfaceVariant,
             ),
             const SizedBox(height: AppSpacing.xs),
             Text(
               category.localizedName(context),
               style: AppTypography.labelSm.copyWith(
-                color: isSelected ? color : AppColors.onSurfaceVariant,
+                color: isSelected ? color : colors.onSurfaceVariant,
                 fontSize: 10,
               ),
               textAlign: TextAlign.center,

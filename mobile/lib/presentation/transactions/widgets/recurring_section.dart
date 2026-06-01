@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:wallet_app/core/l10n/app_strings.dart';
-import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
+import '../../../core/theme/app_palette.dart';
 
 class RecurringSection extends StatelessWidget {
   const RecurringSection({
@@ -34,11 +34,12 @@ class RecurringSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final s = AppStrings.of(context);
+    final colors = context.colors;
     final freqs = _frequencies(context);
 
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.surfaceContainerHigh,
+        color: colors.surfaceContainerHigh,
         borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
       ),
       child: Column(
@@ -50,8 +51,8 @@ class RecurringSection extends StatelessWidget {
             ),
             child: Row(
               children: [
-                const Icon(Icons.repeat_rounded,
-                    size: 20, color: AppColors.onSurfaceVariant),
+                Icon(Icons.repeat_rounded,
+                    size: 20, color: colors.onSurfaceVariant),
                 const SizedBox(width: AppSpacing.md),
                 Expanded(
                   child: Text(
@@ -62,16 +63,14 @@ class RecurringSection extends StatelessWidget {
                 Switch(
                   value: isRecurring,
                   onChanged: onToggle,
-                  activeThumbColor: AppColors.primary,
-                  activeTrackColor:
-                      AppColors.primary.withValues(alpha: 0.4),
+                  activeThumbColor: colors.primary,
+                  activeTrackColor: colors.primary.withValues(alpha: 0.4),
                 ),
               ],
             ),
           ),
           if (isRecurring) ...[
-            const Divider(
-                height: 1, color: AppColors.surfaceContainerHighest),
+            Divider(height: 1, color: colors.surfaceContainerHighest),
             Padding(
               padding: const EdgeInsets.fromLTRB(
                   AppSpacing.lg, AppSpacing.md, AppSpacing.lg, AppSpacing.sm),
@@ -81,7 +80,7 @@ class RecurringSection extends StatelessWidget {
                   Text(
                     s.recurringFrequencyLabel,
                     style: AppTypography.labelSm
-                        .copyWith(color: AppColors.onSurfaceVariant),
+                        .copyWith(color: colors.onSurfaceVariant),
                   ),
                   const SizedBox(height: AppSpacing.sm),
                   Row(
@@ -100,13 +99,13 @@ class RecurringSection extends StatelessWidget {
                               alignment: Alignment.center,
                               decoration: BoxDecoration(
                                 color: isActive
-                                    ? AppColors.primary.withValues(alpha: 0.15)
-                                    : AppColors.surfaceContainerHighest,
+                                    ? colors.primary.withValues(alpha: 0.15)
+                                    : colors.surfaceContainerHighest,
                                 borderRadius:
                                     BorderRadius.circular(AppSpacing.radiusMd),
                                 border: isActive
                                     ? Border.all(
-                                        color: AppColors.primary, width: 1.5)
+                                        color: colors.primary, width: 1.5)
                                     : null,
                               ),
                               child: Text(
@@ -118,8 +117,8 @@ class RecurringSection extends StatelessWidget {
                                       ? FontWeight.w600
                                       : FontWeight.w400,
                                   color: isActive
-                                      ? AppColors.primary
-                                      : AppColors.onSurfaceVariant,
+                                      ? colors.primary
+                                      : colors.onSurfaceVariant,
                                   height: 1.0,
                                 ),
                               ),
@@ -140,8 +139,8 @@ class RecurringSection extends StatelessWidget {
                         builder: (ctx, child) => Theme(
                           data: Theme.of(ctx).copyWith(
                             colorScheme: Theme.of(ctx).colorScheme.copyWith(
-                                  primary: AppColors.primary,
-                                  surface: AppColors.surfaceContainerHigh,
+                                  primary: ctx.colors.primary,
+                                  surface: ctx.colors.surfaceContainerHigh,
                                 ),
                           ),
                           child: child!,
@@ -155,16 +154,15 @@ class RecurringSection extends StatelessWidget {
                         vertical: AppSpacing.sm,
                       ),
                       decoration: BoxDecoration(
-                        color: AppColors.surfaceContainerHighest,
+                        color: colors.surfaceContainerHighest,
                         borderRadius:
                             BorderRadius.circular(AppSpacing.radiusMd),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Icon(Icons.event_outlined,
-                              size: 16,
-                              color: AppColors.onSurfaceVariant),
+                          Icon(Icons.event_outlined,
+                              size: 16, color: colors.onSurfaceVariant),
                           const SizedBox(width: AppSpacing.sm),
                           Text(
                             endDate == null
@@ -174,17 +172,16 @@ class RecurringSection extends StatelessWidget {
                               fontFamily: 'Inter',
                               fontSize: 12,
                               color: endDate == null
-                                  ? AppColors.onSurfaceVariant
-                                  : AppColors.onSurface,
+                                  ? colors.onSurfaceVariant
+                                  : colors.onSurface,
                             ),
                           ),
                           if (endDate != null) ...[
                             const SizedBox(width: AppSpacing.sm),
                             GestureDetector(
                               onTap: () => onEndDateChanged(null),
-                              child: const Icon(Icons.close_rounded,
-                                  size: 14,
-                                  color: AppColors.onSurfaceVariant),
+                              child: Icon(Icons.close_rounded,
+                                  size: 14, color: colors.onSurfaceVariant),
                             ),
                           ],
                         ],

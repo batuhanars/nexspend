@@ -3,12 +3,12 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
 import '../../../core/di/injection.dart';
 import '../../../core/l10n/app_strings.dart';
 import '../../../core/services/app_events.dart';
+import '../../../core/theme/app_palette.dart';
 import '../../../data/models/account_model.dart';
 import '../../../data/models/budget_model.dart';
 import '../../../data/models/category_model.dart';
@@ -52,7 +52,6 @@ class _TransactionsViewState extends State<_TransactionsView> {
   List<CategoryModel> _categories = const [];
   List<AccountModel> _accounts = const [];
 
-  // Arama
   bool _searchActive = false;
   final _searchController = TextEditingController();
   Timer? _searchDebounce;
@@ -89,9 +88,7 @@ class _TransactionsViewState extends State<_TransactionsView> {
         _categories = results[2] as List<CategoryModel>;
         _accounts = results[3] as List<AccountModel>;
       });
-    } catch (_) {
-      // Bütçe/kategori/hesap yüklenemezse sessizce devam et
-    }
+    } catch (_) {}
   }
 
   void _onTransactionAdded() {
@@ -114,8 +111,8 @@ class _TransactionsViewState extends State<_TransactionsView> {
   }
 
   void _onTypeChipChanged(String? type, TransactionFilter current) {
-    final newFilter = current.copyWith(type: type);
-    context.read<TransactionsBloc>().add(TransactionsFilterChanged(newFilter));
+    context.read<TransactionsBloc>().add(
+        TransactionsFilterChanged(current.copyWith(type: type)));
   }
 
   void _openFilterSheet(TransactionFilter current) {
@@ -141,10 +138,9 @@ class _TransactionsViewState extends State<_TransactionsView> {
     _searchDebounce = Timer(const Duration(milliseconds: 350), () {
       if (!mounted) return;
       final search = q.trim().isEmpty ? null : q.trim();
-      final newFilter = current.copyWith(search: search);
       context
           .read<TransactionsBloc>()
-          .add(TransactionsFilterChanged(newFilter));
+          .add(TransactionsFilterChanged(current.copyWith(search: search)));
     });
   }
 
@@ -171,15 +167,16 @@ class _TransactionsViewState extends State<_TransactionsView> {
     int count,
     AppStrings s,
   ) async {
+    final colors = context.colors;
     final bloc = context.read<TransactionsBloc>();
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: AppColors.surfaceContainerHigh,
+        backgroundColor: colors.surfaceContainerHigh,
         title: Text(s.bulkDeleteTitle, style: AppTypography.titleSm),
         content: Text(
           s.bulkDeleteContent(count),
-          style: AppTypography.bodyMd.copyWith(color: AppColors.onSurfaceVariant),
+          style: AppTypography.bodyMd.copyWith(color: colors.onSurfaceVariant),
         ),
         actions: [
           TextButton(
@@ -188,8 +185,7 @@ class _TransactionsViewState extends State<_TransactionsView> {
           ),
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(true),
-            child: Text(s.delete,
-                style: const TextStyle(color: AppColors.error)),
+            child: Text(s.delete, style: TextStyle(color: colors.error)),
           ),
         ],
       ),
@@ -202,10 +198,11 @@ class _TransactionsViewState extends State<_TransactionsView> {
   @override
   Widget build(BuildContext context) {
     final s = AppStrings.of(context);
+    final colors = context.colors;
     return Scaffold(
       body: RefreshIndicator(
-        color: AppColors.primary,
-        backgroundColor: AppColors.surfaceContainerHigh,
+        color: colors.primary,
+        backgroundColor: colors.surfaceContainerHigh,
         onRefresh: () async {
           context
               .read<TransactionsBloc>()
@@ -228,14 +225,12 @@ class _TransactionsViewState extends State<_TransactionsView> {
               physics: const AlwaysScrollableScrollPhysics(),
               slivers: [
                 if (selectionMode)
-                  // Contextual AppBar — seçim modu
                   SliverAppBar(
                     floating: true,
-                    backgroundColor: AppColors.surfaceContainerHigh,
+                    backgroundColor: colors.surfaceContainerHigh,
                     surfaceTintColor: Colors.transparent,
                     leading: IconButton(
-                      icon: const Icon(Icons.close_rounded,
-                          color: AppColors.onSurface),
+                      icon: Icon(Icons.close_rounded, color: colors.onSurface),
                       onPressed: () => context
                           .read<TransactionsBloc>()
                           .add(SelectionCleared()),
@@ -247,8 +242,8 @@ class _TransactionsViewState extends State<_TransactionsView> {
                     centerTitle: false,
                     actions: [
                       IconButton(
-                        icon: const Icon(Icons.delete_outline_rounded,
-                            color: AppColors.error),
+                        icon: Icon(Icons.delete_outline_rounded,
+                            color: colors.error),
                         onPressed: selectedCount == 0
                             ? null
                             : () => _confirmBulkDelete(context, selectedCount, s),
@@ -256,10 +251,9 @@ class _TransactionsViewState extends State<_TransactionsView> {
                     ],
                   )
                 else
-                  // Normal AppBar
                   SliverAppBar(
                     floating: true,
-                    backgroundColor: AppColors.surface,
+                    backgroundColor: colors.surface,
                     surfaceTintColor: Colors.transparent,
                     title: _searchActive
                         ? TextField(
@@ -269,14 +263,13 @@ class _TransactionsViewState extends State<_TransactionsView> {
                             decoration: InputDecoration(
                               hintText: s.searchLabel,
                               hintStyle: AppTypography.bodyMd
-                                  .copyWith(color: AppColors.onSurfaceVariant),
-                              prefixIcon: const Icon(Icons.search_rounded,
-                                  size: 20,
-                                  color: AppColors.onSurfaceVariant),
+                                  .copyWith(color: colors.onSurfaceVariant),
+                              prefixIcon: Icon(Icons.search_rounded,
+                                  size: 20, color: colors.onSurfaceVariant),
                               prefixIconConstraints: const BoxConstraints(
                                   minWidth: 40, minHeight: 40),
                               filled: true,
-                              fillColor: AppColors.surfaceContainerHighest,
+                              fillColor: colors.surfaceContainerHighest,
                               isDense: true,
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(
@@ -294,38 +287,34 @@ class _TransactionsViewState extends State<_TransactionsView> {
                             style: AppTypography.headlineSm),
                     centerTitle: false,
                     actions: [
-                      // Arama aç/kapat
                       IconButton(
                         icon: Icon(
                           _searchActive
                               ? Icons.close_rounded
                               : Icons.search_rounded,
                           color: _searchActive
-                              ? AppColors.primary
-                              : AppColors.onSurface,
+                              ? colors.primary
+                              : colors.onSurface,
                         ),
                         onPressed: () {
                           setState(() => _searchActive = !_searchActive);
                           if (!_searchActive) {
                             _searchController.clear();
                             _searchDebounce?.cancel();
-                            // Arama filtresi kaldır
-                            final newFilter = filter.copyWith(search: null);
-                            context
-                                .read<TransactionsBloc>()
-                                .add(TransactionsFilterChanged(newFilter));
+                            context.read<TransactionsBloc>().add(
+                                TransactionsFilterChanged(
+                                    filter.copyWith(search: null)));
                           }
                         },
                       ),
-                      // Filtre butonu + rozet
                       Stack(
                         children: [
                           IconButton(
                             icon: Icon(
                               Icons.tune_rounded,
                               color: filter.activeCount > 0
-                                  ? AppColors.primary
-                                  : AppColors.onSurface,
+                                  ? colors.primary
+                                  : colors.onSurface,
                             ),
                             onPressed: () => _openFilterSheet(filter),
                           ),
@@ -336,18 +325,18 @@ class _TransactionsViewState extends State<_TransactionsView> {
                               child: Container(
                                 width: 16,
                                 height: 16,
-                                decoration: const BoxDecoration(
-                                  color: AppColors.primary,
+                                decoration: BoxDecoration(
+                                  color: colors.primary,
                                   shape: BoxShape.circle,
                                 ),
                                 alignment: Alignment.center,
                                 child: Text(
                                   '${filter.activeCount}',
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     fontFamily: 'Inter',
                                     fontSize: 10,
                                     fontWeight: FontWeight.w700,
-                                    color: AppColors.onPrimary,
+                                    color: colors.onPrimary,
                                     height: 1.0,
                                   ),
                                 ),
@@ -355,10 +344,8 @@ class _TransactionsViewState extends State<_TransactionsView> {
                             ),
                         ],
                       ),
-                      // İşlem ekle
                       IconButton(
-                        icon: const Icon(Icons.add_rounded,
-                            color: AppColors.primary),
+                        icon: Icon(Icons.add_rounded, color: colors.primary),
                         onPressed: () async {
                           final bloc = context.read<TransactionsBloc>();
                           final added =
@@ -387,7 +374,6 @@ class _TransactionsViewState extends State<_TransactionsView> {
                 else if (state is TransactionsLoaded) ...[
                   if (!selectionMode) ...[
                     SliverToBoxAdapter(child: SummaryRow(state: state)),
-                    // Tip chip bar + filtre ikonu
                     SliverToBoxAdapter(
                       child: FilterChipBar(
                         filters: [
@@ -400,7 +386,6 @@ class _TransactionsViewState extends State<_TransactionsView> {
                         onChanged: (v) => _onTypeChipChanged(v, filter),
                       ),
                     ),
-                    // Aktif filtre özet chip'leri
                     if (filter.activeCount > 0)
                       SliverToBoxAdapter(
                         child: _ActiveFilterChips(
@@ -439,16 +424,16 @@ class _TransactionsViewState extends State<_TransactionsView> {
                       selectedIds: selectedIds,
                     ),
                     if (state.isLoadingMore)
-                      const SliverToBoxAdapter(
+                      SliverToBoxAdapter(
                         child: Padding(
-                          padding: EdgeInsets.symmetric(vertical: 16),
+                          padding: const EdgeInsets.symmetric(vertical: 16),
                           child: Center(
                             child: SizedBox(
                               width: 24,
                               height: 24,
                               child: CircularProgressIndicator(
                                 strokeWidth: 2,
-                                color: AppColors.primary,
+                                color: colors.primary,
                               ),
                             ),
                           ),
@@ -465,7 +450,6 @@ class _TransactionsViewState extends State<_TransactionsView> {
   }
 }
 
-/// Aktif filtre boyutlarını kaldırılabilir chip olarak gösterir.
 class _ActiveFilterChips extends StatelessWidget {
   const _ActiveFilterChips({
     required this.filter,
@@ -524,9 +508,6 @@ class _ActiveFilterChips extends StatelessWidget {
     );
   }
 
-  /// Tarih filtresi özet etiketi: preset'e denk geliyorsa preset adı
-  /// (Bu Ay / Son 3 Ay / Bu Yıl), aksi halde "Özel" tarih aralığı.
-  /// Eşleştirme, filtre sheet'indeki `_detectPreset` ile aynı mantığı izler.
   String _dateLabel(DateTime? start, DateTime? end) {
     final now = DateTime.now();
     if (start != null) {
@@ -550,7 +531,6 @@ class _ActiveFilterChips extends StatelessWidget {
         return s.thisYearLabel;
       }
     }
-    // Özel / kısmi aralık
     if (start != null && end != null) {
       return '${start.day}.${start.month} – ${end.day}.${end.month}';
     } else if (start != null) {
@@ -567,10 +547,11 @@ class _RemovableChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return Container(
       padding: const EdgeInsets.only(left: 12, right: 4),
       decoration: BoxDecoration(
-        color: AppColors.primary.withValues(alpha: 0.12),
+        color: colors.primary.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
       ),
       child: Row(
@@ -579,17 +560,17 @@ class _RemovableChip extends StatelessWidget {
           Text(
             label,
             style: AppTypography.labelMd.copyWith(
-              color: AppColors.primary,
+              color: colors.primary,
               fontWeight: FontWeight.w500,
             ),
           ),
           const SizedBox(width: 2),
           GestureDetector(
             onTap: onRemove,
-            child: const Icon(
+            child: Icon(
               Icons.close_rounded,
               size: 16,
-              color: AppColors.primary,
+              color: colors.primary,
             ),
           ),
         ],

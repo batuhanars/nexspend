@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
+import '../../../core/theme/app_palette.dart';
 import '../../../core/utils/date_formatter.dart';
 import '../../../data/models/budget_model.dart';
 import '../../../data/models/family_model.dart';
@@ -36,13 +36,8 @@ class TransactionList extends StatelessWidget {
     return map;
   }
 
-  /// Transaction'in bagli oldugu butce icin gosterilecek kisa etiket:
-  /// - Ortak butce -> "Ev · Market" (grup adi · butce adi)
-  /// - Kisisel butce -> "Market" (butce adi)
-  /// - Bagsiz -> null (etiket cikmaz)
   String? _budgetLabel(TransactionModel tx) {
     if (tx.type != TransactionType.EXPENSE) return null;
-
     if (tx.sharedBudgetId != null) {
       final match =
           sharedBudgets.where((b) => b.id == tx.sharedBudgetId).toList();
@@ -50,7 +45,6 @@ class TransactionList extends StatelessWidget {
       final b = match.first;
       return b.groupName.isNotEmpty ? '${b.groupName} · ${b.name}' : b.name;
     }
-
     final catId = tx.category?.id;
     if (catId == null) return null;
     for (final b in personalBudgets) {
@@ -85,7 +79,7 @@ class TransactionList extends StatelessWidget {
                 child: Text(
                   entry.key,
                   style: AppTypography.labelSm.copyWith(
-                    color: AppColors.onSurfaceVariant,
+                    color: context.colors.onSurfaceVariant,
                     letterSpacing: 1.2,
                   ),
                 ),

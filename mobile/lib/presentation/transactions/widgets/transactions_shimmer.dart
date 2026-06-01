@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
-import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
+import '../../../core/theme/app_palette.dart';
 import '../../shared/widgets/shimmer_box.dart';
 
 class TransactionsShimmer extends StatelessWidget {
@@ -9,9 +9,10 @@ class TransactionsShimmer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return Shimmer.fromColors(
-      baseColor: AppColors.surfaceContainerHigh,
-      highlightColor: AppColors.surfaceContainerHighest,
+      baseColor: colors.surfaceContainerHigh,
+      highlightColor: colors.surfaceContainerHighest,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -20,8 +21,8 @@ class TransactionsShimmer extends StatelessWidget {
               horizontal: AppSpacing.pagePadding,
               vertical: AppSpacing.md,
             ),
-            child: Row(
-              children: const [
+            child: const Row(
+              children: [
                 Expanded(child: ShimmerBox(height: 72)),
                 SizedBox(width: AppSpacing.md),
                 Expanded(child: ShimmerBox(height: 72)),
@@ -33,8 +34,8 @@ class TransactionsShimmer extends StatelessWidget {
               horizontal: AppSpacing.pagePadding,
               vertical: AppSpacing.sm,
             ),
-            child: Row(
-              children: const [
+            child: const Row(
+              children: [
                 ShimmerBox(height: 32, width: 72),
                 SizedBox(width: AppSpacing.sm),
                 ShimmerBox(height: 32, width: 60),
@@ -49,7 +50,7 @@ class TransactionsShimmer extends StatelessWidget {
             ),
             child: ShimmerBox(height: 12, width: 100),
           ),
-          ...List.generate(5, (_) => _row()),
+          ...List.generate(5, (_) => _row(colors)),
           const SizedBox(height: AppSpacing.md),
           const Padding(
             padding: EdgeInsets.fromLTRB(
@@ -57,13 +58,13 @@ class TransactionsShimmer extends StatelessWidget {
             ),
             child: ShimmerBox(height: 12, width: 80),
           ),
-          ...List.generate(3, (_) => _row()),
+          ...List.generate(3, (_) => _row(colors)),
         ],
       ),
     );
   }
 
-  Widget _row() => Padding(
+  Widget _row(AppPalette colors) => Padding(
         padding: const EdgeInsets.symmetric(
           horizontal: AppSpacing.pagePadding,
           vertical: AppSpacing.xs,
@@ -71,24 +72,24 @@ class TransactionsShimmer extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.all(AppSpacing.md),
           decoration: BoxDecoration(
-            color: AppColors.surfaceContainerHigh,
+            color: colors.surfaceContainerHigh,
             borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
           ),
-          child: Row(
+          child: const Row(
             children: [
-              const ShimmerBox(height: 36, width: 36, shape: BoxShape.circle),
-              const SizedBox(width: AppSpacing.md),
+              ShimmerBox(height: 36, width: 36, shape: BoxShape.circle),
+              SizedBox(width: AppSpacing.md),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: const [
+                  children: [
                     ShimmerBox(height: 13, width: 110),
                     SizedBox(height: 5),
                     ShimmerBox(height: 10, width: 70),
                   ],
                 ),
               ),
-              const ShimmerBox(height: 13, width: 60),
+              ShimmerBox(height: 13, width: 60),
             ],
           ),
         ),

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
 import '../../../core/l10n/app_strings.dart';
+import '../../../core/theme/app_palette.dart';
 import '../../../data/models/account_model.dart';
 
 class AccountChips extends StatelessWidget {
@@ -18,11 +18,11 @@ class AccountChips extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     if (accounts.isEmpty) {
       return Text(
         AppStrings.of(context).noAccountsFound,
-        style: AppTypography.bodySm
-            .copyWith(color: AppColors.onSurfaceVariant),
+        style: AppTypography.bodySm.copyWith(color: colors.onSurfaceVariant),
       );
     }
     return Wrap(
@@ -40,19 +40,17 @@ class AccountChips extends StatelessWidget {
             ),
             decoration: BoxDecoration(
               color: isSelected
-                  ? AppColors.primary.withValues(alpha: 0.15)
-                  : AppColors.surfaceContainerHigh,
+                  ? colors.primary.withValues(alpha: 0.15)
+                  : colors.surfaceContainerHigh,
               borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
               border: isSelected
-                  ? Border.all(color: AppColors.primary, width: 1.5)
+                  ? Border.all(color: colors.primary, width: 1.5)
                   : null,
             ),
             child: Text(
               a.name,
               style: AppTypography.bodyMd.copyWith(
-                color: isSelected
-                    ? AppColors.primary
-                    : AppColors.onSurfaceVariant,
+                color: isSelected ? colors.primary : colors.onSurfaceVariant,
                 fontWeight:
                     isSelected ? FontWeight.w600 : FontWeight.w400,
               ),

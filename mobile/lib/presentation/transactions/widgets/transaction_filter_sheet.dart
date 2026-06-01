@@ -1,18 +1,14 @@
 import 'package:flutter/material.dart';
-import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
 import '../../../core/l10n/app_strings.dart';
+import '../../../core/theme/app_palette.dart';
 import '../../../core/utils/icon_mapper.dart';
 import '../../../data/models/account_model.dart';
 import '../../../data/models/category_model.dart';
 import '../bloc/transaction_filter.dart';
 
 /// İşlemler listesi filtre paneli.
-///
-/// Tarih preset chip'leri (Bu Ay / Son 3 Ay / Bu Yıl / Özel),
-/// kategori tek-seçim, hesap tek-seçim.
-/// "Temizle" → panel filtrelerini sıfırlar. "Uygula" → callback.
 class TransactionFilterSheet extends StatefulWidget {
   const TransactionFilterSheet({
     super.key,
@@ -31,7 +27,6 @@ class TransactionFilterSheet extends StatefulWidget {
   State<TransactionFilterSheet> createState() => _TransactionFilterSheetState();
 }
 
-// Tarih preset enum
 enum _DatePreset { thisMonth, last3Months, thisYear, custom, none }
 
 class _TransactionFilterSheetState extends State<TransactionFilterSheet> {
@@ -97,7 +92,6 @@ class _TransactionFilterSheetState extends State<TransactionFilterSheet> {
           _startDate = DateTime(now.year, 1, 1);
           _endDate = DateTime(now.year, 12, 31);
         case _DatePreset.custom:
-          // showDateRangePicker aşağıda
           break;
         case _DatePreset.none:
           _startDate = null;
@@ -107,6 +101,7 @@ class _TransactionFilterSheetState extends State<TransactionFilterSheet> {
   }
 
   Future<void> _pickCustomRange() async {
+    final colors = context.colors;
     final range = await showDateRangePicker(
       context: context,
       firstDate: DateTime(2020),
@@ -116,11 +111,11 @@ class _TransactionFilterSheetState extends State<TransactionFilterSheet> {
           : null,
       builder: (ctx, child) => Theme(
         data: Theme.of(ctx).copyWith(
-          colorScheme: const ColorScheme.dark(
-            primary: AppColors.primary,
-            onPrimary: AppColors.onPrimary,
-            surface: AppColors.surfaceContainerHigh,
-            onSurface: AppColors.onSurface,
+          colorScheme: ColorScheme.dark(
+            primary: colors.primary,
+            onPrimary: colors.onPrimary,
+            surface: colors.surfaceContainerHigh,
+            onSurface: colors.onSurface,
           ),
         ),
         child: child!,
@@ -160,6 +155,7 @@ class _TransactionFilterSheetState extends State<TransactionFilterSheet> {
   @override
   Widget build(BuildContext context) {
     final s = AppStrings.of(context);
+    final colors = context.colors;
     return DraggableScrollableSheet(
       initialChildSize: 0.75,
       minChildSize: 0.5,
@@ -167,26 +163,24 @@ class _TransactionFilterSheetState extends State<TransactionFilterSheet> {
       expand: false,
       builder: (context, scrollController) {
         return Container(
-          decoration: const BoxDecoration(
-            color: AppColors.surfaceContainerHigh,
-            borderRadius: BorderRadius.vertical(
+          decoration: BoxDecoration(
+            color: colors.surfaceContainerHigh,
+            borderRadius: const BorderRadius.vertical(
               top: Radius.circular(AppSpacing.radiusLg),
             ),
           ),
           child: Column(
             children: [
-              // Handle
               const SizedBox(height: AppSpacing.sm),
               Container(
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: AppColors.surfaceContainerHighest,
+                  color: colors.surfaceContainerHighest,
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
               const SizedBox(height: AppSpacing.md),
-              // Title
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: AppSpacing.pagePadding),
                 child: Row(
@@ -198,7 +192,7 @@ class _TransactionFilterSheetState extends State<TransactionFilterSheet> {
                       child: Text(
                         s.clearLabel,
                         style: AppTypography.bodyMd
-                            .copyWith(color: AppColors.onSurfaceVariant),
+                            .copyWith(color: colors.onSurfaceVariant),
                       ),
                     ),
                   ],
@@ -211,7 +205,6 @@ class _TransactionFilterSheetState extends State<TransactionFilterSheet> {
                   padding: const EdgeInsets.symmetric(
                       horizontal: AppSpacing.pagePadding),
                   children: [
-                    // Tarih aralığı
                     _SectionLabel(s.dateRangeLabel),
                     const SizedBox(height: AppSpacing.sm),
                     _DatePresetChips(
@@ -233,12 +226,10 @@ class _TransactionFilterSheetState extends State<TransactionFilterSheet> {
                       Text(
                         '${_formatDate(_startDate!)} – ${_formatDate(_endDate!)}',
                         style: AppTypography.bodyMd
-                            .copyWith(color: AppColors.primary),
+                            .copyWith(color: colors.primary),
                       ),
                     ],
                     const SizedBox(height: AppSpacing.xl),
-
-                    // Kategori seçim
                     if (widget.categories.isNotEmpty) ...[
                       _SectionLabel(s.categoryLabel),
                       const SizedBox(height: AppSpacing.sm),
@@ -260,8 +251,6 @@ class _TransactionFilterSheetState extends State<TransactionFilterSheet> {
                       ),
                       const SizedBox(height: AppSpacing.xl),
                     ],
-
-                    // Hesap seçim
                     if (widget.accounts.isNotEmpty) ...[
                       _SectionLabel(s.accountLabel),
                       const SizedBox(height: AppSpacing.sm),
@@ -281,12 +270,10 @@ class _TransactionFilterSheetState extends State<TransactionFilterSheet> {
                       ),
                       const SizedBox(height: AppSpacing.xl),
                     ],
-
                     const SizedBox(height: AppSpacing.xxxl),
                   ],
                 ),
               ),
-              // Bottom buttons
               SafeArea(
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(
@@ -315,7 +302,8 @@ class _TransactionFilterSheetState extends State<TransactionFilterSheet> {
     );
   }
 
-  String _formatDate(DateTime d) => '${d.day.toString().padLeft(2, '0')}.${d.month.toString().padLeft(2, '0')}.${d.year}';
+  String _formatDate(DateTime d) =>
+      '${d.day.toString().padLeft(2, '0')}.${d.month.toString().padLeft(2, '0')}.${d.year}';
 }
 
 class _SectionLabel extends StatelessWidget {
@@ -327,7 +315,7 @@ class _SectionLabel extends StatelessWidget {
     return Text(
       text.toUpperCase(),
       style: AppTypography.labelSm.copyWith(
-        color: AppColors.onSurfaceVariant,
+        color: context.colors.onSurfaceVariant,
         letterSpacing: 1.0,
       ),
     );
@@ -347,6 +335,7 @@ class _DatePresetChips extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     final chips = [
       (preset: _DatePreset.thisMonth, label: s.thisMonthLabel),
       (preset: _DatePreset.last3Months, label: s.last3MonthsLabel),
@@ -368,17 +357,17 @@ class _DatePresetChips extends StatelessWidget {
             ),
             decoration: BoxDecoration(
               color: isActive
-                  ? AppColors.primary.withValues(alpha: 0.15)
-                  : AppColors.surfaceContainerHighest,
+                  ? colors.primary.withValues(alpha: 0.15)
+                  : colors.surfaceContainerHighest,
               borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
               border: isActive
-                  ? Border.all(color: AppColors.primary, width: 1.5)
+                  ? Border.all(color: colors.primary, width: 1.5)
                   : null,
             ),
             child: Text(
               c.label,
               style: AppTypography.labelMd.copyWith(
-                color: isActive ? AppColors.primary : AppColors.onSurfaceVariant,
+                color: isActive ? colors.primary : colors.onSurfaceVariant,
                 fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
               ),
             ),
@@ -406,7 +395,8 @@ class _FilterChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final effectiveColor = color ?? AppColors.primary;
+    final colors = context.colors;
+    final effectiveColor = color ?? colors.primary;
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
@@ -418,7 +408,7 @@ class _FilterChip extends StatelessWidget {
         decoration: BoxDecoration(
           color: selected
               ? effectiveColor.withValues(alpha: 0.15)
-              : AppColors.surfaceContainerHighest,
+              : colors.surfaceContainerHighest,
           borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
           border: selected
               ? Border.all(color: effectiveColor, width: 1.5)
@@ -431,15 +421,14 @@ class _FilterChip extends StatelessWidget {
               Icon(
                 icon,
                 size: 14,
-                color: selected ? effectiveColor : AppColors.onSurfaceVariant,
+                color: selected ? effectiveColor : colors.onSurfaceVariant,
               ),
               const SizedBox(width: 4),
             ],
             Text(
               label,
               style: AppTypography.labelMd.copyWith(
-                color:
-                    selected ? effectiveColor : AppColors.onSurfaceVariant,
+                color: selected ? effectiveColor : colors.onSurfaceVariant,
                 fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
               ),
             ),

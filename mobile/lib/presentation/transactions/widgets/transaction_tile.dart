@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
 import '../../../core/l10n/app_strings.dart';
+import '../../../core/theme/app_palette.dart';
 import '../../../core/utils/category_extensions.dart';
 import '../../../core/utils/currency_formatter.dart';
 import '../../../core/utils/date_formatter.dart';
@@ -32,21 +32,30 @@ class TransactionTile extends StatelessWidget {
 
   bool get _isManual => transaction.source == TransactionSource.MANUAL;
 
+  static Color _hexColor(String hex, Color fallback) {
+    try {
+      return Color(int.parse('FF${hex.replaceAll('#', '')}', radix: 16));
+    } catch (_) {
+      return fallback;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     final isIncome = transaction.type == TransactionType.INCOME;
     final isTransfer = transaction.type == TransactionType.TRANSFER;
     final amountColor = isTransfer
-        ? AppColors.onSurfaceVariant
+        ? colors.onSurfaceVariant
         : isIncome
-            ? AppColors.secondary
-            : AppColors.tertiary;
+            ? colors.income
+            : colors.expense;
 
     final categoryColor = transaction.category?.color != null
-        ? _hexColor(transaction.category!.color!)
+        ? _hexColor(transaction.category!.color!, colors.onSurfaceVariant)
         : isIncome
-            ? AppColors.secondary
-            : AppColors.tertiary;
+            ? colors.income
+            : colors.expense;
 
     final iconData = transaction.category?.icon != null
         ? IconMapper.fromString(transaction.category!.icon)
@@ -56,9 +65,8 @@ class TransactionTile extends StatelessWidget {
                 ? Icons.swap_horiz_rounded
                 : Icons.arrow_upward_rounded;
 
-    // Seçim modundayken seçili tile'lara tonal vurgu uygula (1px border yok)
     final tileBackground = selectionMode && isSelected && _isManual
-        ? AppColors.primary.withValues(alpha: 0.10)
+        ? colors.primary.withValues(alpha: 0.10)
         : Colors.transparent;
 
     Widget tile = InkWell(
@@ -67,10 +75,9 @@ class TransactionTile extends StatelessWidget {
           if (_isManual) {
             onTapInSelection?.call();
           } else {
-            // Otomatik işlem seçilemez — snackbar
             ScaffoldMessenger.of(context).showSnackBar(SnackBar(
               content: Text(AppStrings.of(context).nonManualSelectError),
-              backgroundColor: AppColors.surfaceContainerHighest,
+              backgroundColor: colors.surfaceContainerHighest,
               duration: const Duration(seconds: 2),
             ));
           }
@@ -93,20 +100,19 @@ class TransactionTile extends StatelessWidget {
         ),
         child: Row(
           children: [
-            // Seçim modunda: check veya kategori ikonu
             if (selectionMode && _isManual)
               Container(
                 width: 44,
                 height: 44,
                 decoration: BoxDecoration(
                   color: isSelected
-                      ? AppColors.primary.withValues(alpha: 0.20)
-                      : AppColors.primary.withValues(alpha: 0.08),
+                      ? colors.primary.withValues(alpha: 0.20)
+                      : colors.primary.withValues(alpha: 0.08),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
                   isSelected ? Icons.check_rounded : iconData,
-                  color: isSelected ? AppColors.primary : categoryColor,
+                  color: isSelected ? colors.primary : categoryColor,
                   size: 20,
                 ),
               )
@@ -143,7 +149,7 @@ class TransactionTile extends StatelessWidget {
                         child: Text(
                           '${transaction.account?.name ?? ''}  •  ${DateFormatter.formatShort(transaction.date, context)}, ${DateFormatter.formatTime(transaction.date)}',
                           style: AppTypography.bodySm.copyWith(
-                              color: AppColors.onSurfaceVariant),
+                              color: colors.onSurfaceVariant),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -153,8 +159,7 @@ class TransactionTile extends StatelessWidget {
                         Icon(
                           _sourceIcon(transaction.source),
                           size: 12,
-                          color: AppColors.onSurfaceVariant
-                              .withValues(alpha: 0.6),
+                          color: colors.onSurfaceVariant.withValues(alpha: 0.6),
                         ),
                       ],
                     ],
@@ -179,10 +184,7 @@ class TransactionTile extends StatelessWidget {
       ),
     );
 
-    // Seçim modunda swipe-to-delete devre dışı
     if (selectionMode) return tile;
-    // Otomatik işlemler (tekrarlayan/abonelik/borç/tahsilat) salt-okunur:
-    // swipe ile silinemez — düzenleme ve toplu silmedeki MANUAL-only kuralıyla tutarlı.
     if (transaction.source != TransactionSource.MANUAL) return tile;
 
     return Dismissible(
@@ -191,8 +193,8 @@ class TransactionTile extends StatelessWidget {
       background: Container(
         alignment: Alignment.centerRight,
         padding: const EdgeInsets.only(right: AppSpacing.xl),
-        color: AppColors.errorContainer,
-        child: const Icon(Icons.delete_outline_rounded, color: AppColors.error),
+        color: colors.errorContainer,
+        child: Icon(Icons.delete_outline_rounded, color: colors.error),
       ),
       confirmDismiss: (_) => _confirmDelete(context),
       onDismissed: (_) {
@@ -201,7 +203,7 @@ class TransactionTile extends StatelessWidget {
             .add(TransactionDeleteRequested(transaction.id));
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: Text(AppStrings.of(context).transactionDeletedSuccess),
-          backgroundColor: AppColors.secondary,
+          backgroundColor: colors.income,
         ));
       },
       child: tile,
@@ -217,15 +219,17 @@ class TransactionTile extends StatelessWidget {
       };
 
   Future<bool?> _confirmDelete(BuildContext context) {
+    final colors = context.colors;
     return showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: AppColors.surfaceContainerHigh,
-        title: Text(AppStrings.of(context).deleteTransactionTitle, style: AppTypography.titleSm),
+        backgroundColor: colors.surfaceContainerHigh,
+        title: Text(AppStrings.of(context).deleteTransactionTitle,
+            style: AppTypography.titleSm),
         content: Text(
           AppStrings.of(context).deleteTransactionContent,
           style: AppTypography.bodyMd
-              .copyWith(color: AppColors.onSurfaceVariant),
+              .copyWith(color: colors.onSurfaceVariant),
         ),
         actions: [
           TextButton(
@@ -235,19 +239,11 @@ class TransactionTile extends StatelessWidget {
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(true),
             child: Text(AppStrings.of(context).delete,
-                style: const TextStyle(color: AppColors.error)),
+                style: TextStyle(color: colors.error)),
           ),
         ],
       ),
     );
-  }
-
-  Color _hexColor(String hex) {
-    try {
-      return Color(int.parse('FF${hex.replaceAll('#', '')}', radix: 16));
-    } catch (_) {
-      return AppColors.onSurfaceVariant;
-    }
   }
 }
 
@@ -258,26 +254,27 @@ class _BudgetBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       decoration: BoxDecoration(
-        color: AppColors.primary.withValues(alpha: 0.12),
+        color: colors.primary.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(
+          Icon(
             Icons.account_balance_wallet_outlined,
             size: 10,
-            color: AppColors.primary,
+            color: colors.primary,
           ),
           const SizedBox(width: 4),
           Flexible(
             child: Text(
               label,
               style: AppTypography.labelSm.copyWith(
-                color: AppColors.primary,
+                color: colors.primary,
                 fontSize: 10,
               ),
               maxLines: 1,

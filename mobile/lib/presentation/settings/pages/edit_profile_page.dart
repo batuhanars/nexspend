@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:wallet_app/core/theme/app_palette.dart';
 import 'package:wallet_app/core/l10n/app_strings.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../core/constants/api_endpoints.dart';
-import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
 import '../../../core/di/injection.dart';
@@ -49,7 +49,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(state.errorMessage!),
-                backgroundColor: AppColors.error,
+                backgroundColor: context.colors.error,
               ),
             );
           }
@@ -58,7 +58,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
           if (state is SettingsLoading || state is SettingsInitial) {
             return const Scaffold(
               body: Center(
-                child: CircularProgressIndicator(color: AppColors.primary),
+                child: CircularProgressIndicator(color: context.colors.primary),
               ),
             );
           }
@@ -78,7 +78,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
           return Scaffold(
             appBar: AppBar(
               title: Text(AppStrings.of(context).editProfile),
-              backgroundColor: AppColors.surface,
+              backgroundColor: context.colors.surface,
               surfaceTintColor: Colors.transparent,
               actions: [
                 if (isSaving)
@@ -88,7 +88,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                       width: 20,
                       height: 20,
                       child: CircularProgressIndicator(
-                          strokeWidth: 2, color: AppColors.primary),
+                          strokeWidth: 2, color: context.colors.primary),
                     ),
                   )
                 else
@@ -97,7 +97,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                     child: Text(
                       AppStrings.of(context).save,
                       style: AppTypography.bodyMd.copyWith(
-                        color: AppColors.primary,
+                        color: context.colors.primary,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -117,7 +117,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                         width: 96,
                         height: 96,
                         decoration: BoxDecoration(
-                          color: AppColors.primary.withValues(alpha: 0.15),
+                          color: context.colors.primary.withValues(alpha: 0.15),
                           shape: BoxShape.circle,
                         ),
                         child: _buildAvatar(user, initials),
@@ -131,15 +131,15 @@ class _EditProfilePageState extends State<EditProfilePage> {
                             width: 30,
                             height: 30,
                             decoration: BoxDecoration(
-                              color: AppColors.primary,
+                              color: context.colors.primary,
                               shape: BoxShape.circle,
                               border: Border.all(
-                                  color: AppColors.surface, width: 2),
+                                  color: context.colors.surface, width: 2),
                             ),
                             child: const Icon(
                               Icons.camera_alt_outlined,
                               size: 16,
-                              color: AppColors.onPrimary,
+                              color: context.colors.onPrimary,
                             ),
                           ),
                         ),
@@ -158,7 +158,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                               .add(const SettingsAvatarDeleted()),
                       child: Text(
                         AppStrings.of(context).removePhoto,
-                        style: const TextStyle(color: AppColors.error),
+                        style: const TextStyle(color: context.colors.error),
                       ),
                     ),
                   ),
@@ -171,15 +171,15 @@ class _EditProfilePageState extends State<EditProfilePage> {
                   controller: _nameController,
                   enabled: !isSaving,
                   style: const TextStyle(
-                      color: AppColors.onSurface, fontSize: 14),
+                      color: context.colors.onSurface, fontSize: 14),
                   decoration: InputDecoration(
                     hintText: AppStrings.of(context).fullNameHint,
                     hintStyle: const TextStyle(
-                        color: AppColors.onSurfaceVariant, fontSize: 14),
+                        color: context.colors.onSurfaceVariant, fontSize: 14),
                     prefixIcon: const Icon(Icons.person_outline_rounded,
-                        size: 20, color: AppColors.onSurfaceVariant),
+                        size: 20, color: context.colors.onSurfaceVariant),
                     filled: true,
-                    fillColor: AppColors.surfaceContainerHighest,
+                    fillColor: context.colors.surfaceContainerHighest,
                     border: OutlineInputBorder(
                       borderRadius:
                           BorderRadius.circular(AppSpacing.radiusMd),
@@ -194,7 +194,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                       borderRadius:
                           BorderRadius.circular(AppSpacing.radiusMd),
                       borderSide: const BorderSide(
-                          color: AppColors.primary, width: 1.5),
+                          color: context.colors.primary, width: 1.5),
                     ),
                   ),
                 ),
@@ -207,19 +207,19 @@ class _EditProfilePageState extends State<EditProfilePage> {
                     vertical: AppSpacing.lg,
                   ),
                   decoration: BoxDecoration(
-                    color: AppColors.surfaceContainerHighest.withValues(alpha: 0.5),
+                    color: context.colors.surfaceContainerHighest.withValues(alpha: 0.5),
                     borderRadius:
                         BorderRadius.circular(AppSpacing.radiusMd),
                   ),
                   child: Row(
                     children: [
                       const Icon(Icons.email_outlined,
-                          size: 20, color: AppColors.onSurfaceVariant),
+                          size: 20, color: context.colors.onSurfaceVariant),
                       const SizedBox(width: AppSpacing.md),
                       Text(
                         user.email,
                         style: TextStyle(
-                          color: AppColors.onSurfaceVariant,
+                          color: context.colors.onSurfaceVariant,
                           fontSize: 14,
                         ),
                       ),
@@ -230,7 +230,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                 Text(
                   AppStrings.of(context).emailNotEditable,
                   style: AppTypography.bodySm
-                      .copyWith(color: AppColors.onSurfaceVariant),
+                      .copyWith(color: context.colors.onSurfaceVariant),
                 ),
                 const SizedBox(height: AppSpacing.xxxl),
               ],
@@ -254,7 +254,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
     final source = await showDialog<ImageSource>(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: AppColors.surfaceContainerHigh,
+        backgroundColor: context.colors.surfaceContainerHigh,
         title: Text(AppStrings.of(context).selectPhotoTitle, style: AppTypography.titleSm),
         actions: [
           TextButton(
@@ -279,7 +279,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
   Widget _label(String text) => Text(
         text,
         style: AppTypography.labelSm
-            .copyWith(color: AppColors.onSurfaceVariant),
+            .copyWith(color: context.colors.onSurfaceVariant),
       );
 
   Widget _buildAvatar(UserModel user, String initials) {
@@ -302,7 +302,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
           placeholder: const Center(
             child: CircularProgressIndicator(
               strokeWidth: 2,
-              color: AppColors.primary,
+              color: context.colors.primary,
             ),
           ),
           errorWidget: _InitialsWidget(initials: initials),
@@ -328,7 +328,7 @@ class _InitialsWidget extends StatelessWidget {
     return Center(
       child: Text(
         initials,
-        style: AppTypography.headlineSm.copyWith(color: AppColors.primary),
+        style: AppTypography.headlineSm.copyWith(color: context.colors.primary),
       ),
     );
   }

@@ -1,6 +1,5 @@
 // ignore_for_file: constant_identifier_names
 import 'package:flutter/material.dart';
-import '../../../core/constants/app_colors.dart';
 
 enum DebtType { LENT, BORROWED }
 
@@ -8,7 +7,6 @@ enum DebtStatus { PENDING, PAID, OVERDUE }
 
 extension DebtTypeX on DebtType {
   String get label => this == DebtType.LENT ? 'Alacak' : 'Borç';
-  Color get color => this == DebtType.LENT ? AppColors.secondary : AppColors.tertiary;
   IconData get icon => this == DebtType.LENT ? Icons.arrow_downward_rounded : Icons.arrow_upward_rounded;
 }
 
@@ -17,12 +15,6 @@ extension DebtStatusX on DebtStatus {
         DebtStatus.PENDING => 'Beklemede',
         DebtStatus.PAID => 'Ödendi',
         DebtStatus.OVERDUE => 'Gecikmiş',
-      };
-
-  Color get color => switch (this) {
-        DebtStatus.PENDING => AppColors.warning,
-        DebtStatus.PAID => AppColors.secondary,
-        DebtStatus.OVERDUE => AppColors.error,
       };
 }
 

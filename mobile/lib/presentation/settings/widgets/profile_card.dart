@@ -1,7 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:wallet_app/core/theme/app_palette.dart';
 import 'package:wallet_app/core/constants/api_endpoints.dart';
-import 'package:wallet_app/core/constants/app_colors.dart';
 import 'package:wallet_app/core/constants/app_spacing.dart';
 import 'package:wallet_app/core/constants/app_typography.dart';
 import 'package:wallet_app/core/widgets/authenticated_image.dart';
@@ -28,7 +28,7 @@ class ProfileCard extends StatelessWidget {
         margin: const EdgeInsets.symmetric(horizontal: AppSpacing.pagePadding),
         padding: const EdgeInsets.all(AppSpacing.lg),
         decoration: BoxDecoration(
-          color: AppColors.surfaceContainerHigh,
+          color: context.colors.surfaceContainerHigh,
           borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
         ),
         child: Row(
@@ -39,7 +39,7 @@ class ProfileCard extends StatelessWidget {
                   width: 56,
                   height: 56,
                   decoration: BoxDecoration(
-                    color: AppColors.primary.withValues(alpha: 0.15),
+                    color: context.colors.primary.withValues(alpha: 0.15),
                     shape: BoxShape.circle,
                   ),
                   child: _buildAvatar(user, initials),
@@ -48,7 +48,7 @@ class ProfileCard extends StatelessWidget {
                   const Positioned.fill(
                     child: CircularProgressIndicator(
                       strokeWidth: 2,
-                      color: AppColors.primary,
+                      color: context.colors.primary,
                     ),
                   ),
               ],
@@ -62,7 +62,7 @@ class ProfileCard extends StatelessWidget {
                   Text(
                     user.email,
                     style: AppTypography.bodySm.copyWith(
-                      color: AppColors.onSurfaceVariant,
+                      color: context.colors.onSurfaceVariant,
                     ),
                   ),
                 ],
@@ -71,7 +71,7 @@ class ProfileCard extends StatelessWidget {
             Icon(
               Icons.edit_outlined,
               size: 18,
-              color: AppColors.onSurfaceVariant.withValues(alpha: 0.6),
+              color: context.colors.onSurfaceVariant.withValues(alpha: 0.6),
             ),
           ],
         ),
@@ -88,7 +88,7 @@ class ProfileCard extends StatelessWidget {
           fit: BoxFit.cover,
           placeholder: (context, _) => const CircularProgressIndicator(
             strokeWidth: 2,
-            color: AppColors.primary,
+            color: context.colors.primary,
           ),
           errorWidget: (context, _, error) => _initialsWidget(initials),
         ),
@@ -103,7 +103,7 @@ class ProfileCard extends StatelessWidget {
           placeholder: const Center(
             child: CircularProgressIndicator(
               strokeWidth: 2,
-              color: AppColors.primary,
+              color: context.colors.primary,
             ),
           ),
           errorWidget: _initialsWidget(initials),
@@ -117,7 +117,7 @@ class ProfileCard extends StatelessWidget {
     return Center(
       child: Text(
         initials,
-        style: AppTypography.titleSm.copyWith(color: AppColors.primary),
+        style: AppTypography.titleSm.copyWith(color: context.colors.primary),
       ),
     );
   }

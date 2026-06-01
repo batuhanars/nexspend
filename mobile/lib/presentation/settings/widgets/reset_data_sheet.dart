@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:wallet_app/core/theme/app_palette.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:wallet_app/core/constants/app_colors.dart';
 import 'package:wallet_app/core/constants/app_spacing.dart';
 import 'package:wallet_app/core/constants/app_typography.dart';
 import 'package:wallet_app/core/l10n/app_strings.dart';
@@ -67,7 +67,7 @@ class _ResetDataSheetState extends State<ResetDataSheet> {
                   children: [
                     Icon(
                       Icons.warning_amber_rounded,
-                      color: AppColors.error,
+                      color: context.colors.error,
                       size: 24,
                     ),
                     const SizedBox(width: AppSpacing.sm),
@@ -75,7 +75,7 @@ class _ResetDataSheetState extends State<ResetDataSheet> {
                       child: Text(
                         s.resetConfirmTitle,
                         style: AppTypography.titleSm.copyWith(
-                          color: AppColors.error,
+                          color: context.colors.error,
                         ),
                       ),
                     ),
@@ -85,7 +85,7 @@ class _ResetDataSheetState extends State<ResetDataSheet> {
                 Text(
                   s.resetConfirmBody,
                   style: AppTypography.bodyMd.copyWith(
-                    color: AppColors.onSurfaceVariant,
+                    color: context.colors.onSurfaceVariant,
                     height: 1.5,
                   ),
                 ),
@@ -93,17 +93,17 @@ class _ResetDataSheetState extends State<ResetDataSheet> {
                 TextField(
                   controller: _controller,
                   style: AppTypography.bodyMd.copyWith(
-                    color: AppColors.onSurface,
+                    color: context.colors.onSurface,
                     fontWeight: FontWeight.w600,
                     letterSpacing: 1.5,
                   ),
                   decoration: InputDecoration(
                     hintText: s.resetConfirmInputHint,
                     hintStyle: AppTypography.bodyMd.copyWith(
-                      color: AppColors.onSurfaceVariant,
+                      color: context.colors.onSurfaceVariant,
                     ),
                     filled: true,
-                    fillColor: AppColors.surfaceContainerHighest,
+                    fillColor: context.colors.surfaceContainerHighest,
                     border: OutlineInputBorder(
                       borderRadius:
                           BorderRadius.circular(AppSpacing.radiusMd),
@@ -127,8 +127,8 @@ class _ResetDataSheetState extends State<ResetDataSheet> {
                       child: FilledButton(
                         style: FilledButton.styleFrom(
                           backgroundColor: _canConfirm && !isLoading
-                              ? AppColors.error
-                              : AppColors.error.withAlpha(80),
+                              ? context.colors.error
+                              : context.colors.error.withAlpha(80),
                           shape: RoundedRectangleBorder(
                             borderRadius:
                                 BorderRadius.circular(AppSpacing.radiusXl),
@@ -176,7 +176,7 @@ class _ResetDataSheetState extends State<ResetDataSheet> {
                     child: Text(
                       AppStrings.of(context).cancel,
                       style: AppTypography.bodyMd.copyWith(
-                        color: AppColors.onSurfaceVariant,
+                        color: context.colors.onSurfaceVariant,
                       ),
                     ),
                   ),

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:wallet_app/core/constants/app_colors.dart';
+import 'package:wallet_app/core/theme/app_palette.dart';
 import 'package:wallet_app/core/constants/app_spacing.dart';
 import 'package:wallet_app/core/constants/app_typography.dart';
 
@@ -19,7 +19,7 @@ class SectionHeader extends StatelessWidget {
       child: Text(
         title.toUpperCase(),
         style: AppTypography.labelSm.copyWith(
-          color: AppColors.onSurfaceVariant,
+          color: context.colors.onSurfaceVariant,
           letterSpacing: 1.2,
         ),
       ),

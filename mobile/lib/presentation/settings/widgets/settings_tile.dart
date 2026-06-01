@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:wallet_app/core/constants/app_colors.dart';
+import 'package:wallet_app/core/theme/app_palette.dart';
 import 'package:wallet_app/core/constants/app_spacing.dart';
 import 'package:wallet_app/core/constants/app_typography.dart';
 
@@ -30,20 +30,20 @@ class SettingsTile extends StatelessWidget {
       ),
       leading: Icon(
         icon,
-        color: iconColor ?? AppColors.onSurfaceVariant,
+        color: iconColor ?? context.colors.onSurfaceVariant,
         size: 22,
       ),
       title: Text(
         label,
         style: AppTypography.bodyMd.copyWith(
-          color: labelColor ?? AppColors.onSurface,
+          color: labelColor ?? context.colors.onSurface,
         ),
       ),
       subtitle: subtitle != null
           ? Text(
               subtitle!,
               style: AppTypography.labelSm.copyWith(
-                color: AppColors.onSurfaceVariant,
+                color: context.colors.onSurfaceVariant,
                 letterSpacing: 0,
               ),
             )
@@ -51,7 +51,7 @@ class SettingsTile extends StatelessWidget {
       trailing: showChevron
           ? Icon(
               Icons.chevron_right_rounded,
-              color: AppColors.onSurfaceVariant.withValues(alpha: 0.6),
+              color: context.colors.onSurfaceVariant.withValues(alpha: 0.6),
               size: 20,
             )
           : null,

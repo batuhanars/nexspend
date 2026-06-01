@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:wallet_app/data/models/account_model.dart';
+import 'package:wallet_app/data/models/debt_model.dart';
 
 @immutable
 class AppPalette extends ThemeExtension<AppPalette> {
@@ -305,4 +307,28 @@ class AppPalette extends ThemeExtension<AppPalette> {
 extension AppPaletteX on BuildContext {
   AppPalette get colors =>
       Theme.of(this).extension<AppPalette>() ?? AppPalette.dark;
+
+  Color getColorForAccountType(AccountType type) {
+    final palette = colors;
+    return switch (type) {
+      AccountType.BANK => palette.primary,
+      AccountType.CASH => palette.secondary,
+      AccountType.CREDIT_CARD => palette.warning,
+      AccountType.INVESTMENT => palette.tertiary,
+    };
+  }
+
+  Color getColorForDebtType(DebtType type) {
+    final palette = colors;
+    return type == DebtType.LENT ? palette.secondary : palette.tertiary;
+  }
+
+  Color getColorForDebtStatus(DebtStatus status) {
+    final palette = colors;
+    return switch (status) {
+      DebtStatus.PENDING => palette.warning,
+      DebtStatus.PAID => palette.secondary,
+      DebtStatus.OVERDUE => palette.error,
+    };
+  }
 }

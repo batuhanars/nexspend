@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../core/constants/app_colors.dart';
 import '../../core/utils/icon_mapper.dart';
 
 class MonthlyFlowModel {
@@ -48,7 +47,7 @@ class CategoryBreakdownModel {
     try {
       return Color(int.parse('FF${color.replaceAll('#', '')}', radix: 16));
     } catch (_) {
-      return AppColors.onSurfaceVariant;
+      return const Color(0xFFC6C5D4); // fallback: dark onSurfaceVariant
     }
   }
 

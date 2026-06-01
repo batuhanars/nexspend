@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../constants/app_colors.dart';
 import '../constants/app_spacing.dart';
 import 'app_palette.dart';
 
@@ -25,65 +24,66 @@ class AppTheme {
   }
 
   static ThemeData get dark {
-    final textTheme = _buildTextTheme(AppColors.onSurface, AppColors.onSurfaceVariant);
+    const p = AppPalette.dark;
+    final textTheme = _buildTextTheme(p.onSurface, p.onSurfaceVariant);
 
     return ThemeData(
       useMaterial3: true,
       brightness: Brightness.dark,
 
-      colorScheme: const ColorScheme(
+      colorScheme: ColorScheme(
         brightness: Brightness.dark,
-        surface: AppColors.surface,
-        onSurface: AppColors.onSurface,
-        primary: AppColors.primary,
-        onPrimary: AppColors.onPrimary,
-        primaryContainer: AppColors.primaryContainer,
-        onPrimaryContainer: AppColors.onPrimaryContainer,
-        secondary: AppColors.secondary,
-        onSecondary: AppColors.onSecondary,
-        secondaryContainer: AppColors.secondaryContainer,
-        onSecondaryContainer: AppColors.onSurface,
-        tertiary: AppColors.tertiary,
-        onTertiary: AppColors.onTertiary,
-        tertiaryContainer: AppColors.tertiaryContainer,
-        onTertiaryContainer: AppColors.onSurface,
-        error: AppColors.error,
-        onError: AppColors.onError,
-        errorContainer: AppColors.errorContainer,
-        onErrorContainer: AppColors.onSurface,
-        outline: AppColors.outline,
-        outlineVariant: AppColors.outlineVariant,
-        inverseSurface: AppColors.inverseSurface,
-        onInverseSurface: AppColors.inverseOnSurface,
-        inversePrimary: AppColors.inversePrimary,
-        surfaceContainerLowest: AppColors.surfaceContainerLowest,
-        surfaceContainerLow: AppColors.surfaceContainerLow,
-        surfaceContainer: AppColors.surfaceContainer,
-        surfaceContainerHigh: AppColors.surfaceContainerHigh,
-        surfaceContainerHighest: AppColors.surfaceContainerHighest,
+        surface: p.surface,
+        onSurface: p.onSurface,
+        primary: p.primary,
+        onPrimary: p.onPrimary,
+        primaryContainer: p.primaryContainer,
+        onPrimaryContainer: p.onPrimaryContainer,
+        secondary: p.secondary,
+        onSecondary: p.onSecondary,
+        secondaryContainer: p.secondaryContainer,
+        onSecondaryContainer: p.onSurface,
+        tertiary: p.tertiary,
+        onTertiary: p.onTertiary,
+        tertiaryContainer: p.tertiaryContainer,
+        onTertiaryContainer: p.onSurface,
+        error: p.error,
+        onError: p.onError,
+        errorContainer: p.errorContainer,
+        onErrorContainer: p.onSurface,
+        outline: p.outline,
+        outlineVariant: p.outlineVariant,
+        inverseSurface: p.inverseSurface,
+        onInverseSurface: p.inverseOnSurface,
+        inversePrimary: p.inversePrimary,
+        surfaceContainerLowest: p.surfaceContainerLowest,
+        surfaceContainerLow: p.surfaceContainerLow,
+        surfaceContainer: p.surfaceContainer,
+        surfaceContainerHigh: p.surfaceContainerHigh,
+        surfaceContainerHighest: p.surfaceContainerHighest,
       ),
 
-      scaffoldBackgroundColor: AppColors.surface,
+      scaffoldBackgroundColor: p.surface,
       textTheme: textTheme,
       extensions: const [AppPalette.dark],
 
       appBarTheme: AppBarTheme(
-        backgroundColor: AppColors.surface,
-        foregroundColor: AppColors.onSurface,
+        backgroundColor: p.surface,
+        foregroundColor: p.onSurface,
         elevation: 0,
         scrolledUnderElevation: 0,
         centerTitle: false,
         systemOverlayStyle: const SystemUiOverlayStyle(
           statusBarColor: Colors.transparent,
           statusBarIconBrightness: Brightness.light,
-          systemNavigationBarColor: AppColors.surface,
+          systemNavigationBarColor: Colors.transparent,
           systemNavigationBarIconBrightness: Brightness.light,
         ),
         titleTextStyle: textTheme.headlineSmall,
       ),
 
       cardTheme: CardThemeData(
-        color: AppColors.surfaceContainerHigh,
+        color: p.surfaceContainerHigh,
         elevation: 0,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
@@ -93,8 +93,8 @@ class AppTheme {
 
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.primary,
-          foregroundColor: AppColors.onPrimary,
+          backgroundColor: p.primary,
+          foregroundColor: p.onPrimary,
           elevation: 0,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
@@ -110,9 +110,9 @@ class AppTheme {
 
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
-          foregroundColor: AppColors.primary,
+          foregroundColor: p.primary,
           side: BorderSide(
-            color: AppColors.outlineVariant.withValues(alpha: 0.2),
+            color: p.outlineVariant.withValues(alpha: 0.2),
           ),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
@@ -128,14 +128,14 @@ class AppTheme {
 
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
-          foregroundColor: AppColors.primary,
+          foregroundColor: p.primary,
           textStyle: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w400),
         ),
       ),
 
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: AppColors.surfaceContainerHighest,
+        fillColor: p.surfaceContainerHighest,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
           borderSide: BorderSide.none,
@@ -146,24 +146,24 @@ class AppTheme {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-          borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
+          borderSide: BorderSide(color: p.primary, width: 1.5),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-          borderSide: const BorderSide(color: AppColors.error, width: 1.5),
+          borderSide: BorderSide(color: p.error, width: 1.5),
         ),
         focusedErrorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-          borderSide: const BorderSide(color: AppColors.error, width: 1.5),
+          borderSide: BorderSide(color: p.error, width: 1.5),
         ),
         labelStyle: GoogleFonts.inter(
           fontSize: 12,
           fontWeight: FontWeight.w500,
-          color: AppColors.onSurfaceVariant,
+          color: p.onSurfaceVariant,
         ),
         hintStyle: GoogleFonts.inter(
           fontSize: 14,
-          color: AppColors.onSurfaceVariant,
+          color: p.onSurfaceVariant,
         ),
         contentPadding: const EdgeInsets.symmetric(
           horizontal: AppSpacing.lg,
@@ -172,12 +172,12 @@ class AppTheme {
       ),
 
       chipTheme: ChipThemeData(
-        backgroundColor: AppColors.surfaceContainerHigh,
-        selectedColor: AppColors.primaryContainer,
+        backgroundColor: p.surfaceContainerHigh,
+        selectedColor: p.primaryContainer,
         labelStyle: GoogleFonts.inter(
           fontSize: 12,
           fontWeight: FontWeight.w500,
-          color: AppColors.onSurface,
+          color: p.onSurface,
         ),
         side: BorderSide.none,
         shape: RoundedRectangleBorder(
@@ -189,19 +189,19 @@ class AppTheme {
         ),
       ),
 
-      bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+      bottomNavigationBarTheme: BottomNavigationBarThemeData(
         backgroundColor: Colors.transparent,
-        selectedItemColor: AppColors.primary,
-        unselectedItemColor: AppColors.onSurfaceVariant,
+        selectedItemColor: p.primary,
+        unselectedItemColor: p.onSurfaceVariant,
         type: BottomNavigationBarType.fixed,
         elevation: 0,
       ),
 
-      floatingActionButtonTheme: const FloatingActionButtonThemeData(
-        backgroundColor: AppColors.primary,
-        foregroundColor: AppColors.onPrimary,
+      floatingActionButtonTheme: FloatingActionButtonThemeData(
+        backgroundColor: p.primary,
+        foregroundColor: p.onPrimary,
         elevation: 0,
-        shape: CircleBorder(),
+        shape: const CircleBorder(),
       ),
 
       dividerTheme: const DividerThemeData(
@@ -209,8 +209,8 @@ class AppTheme {
         thickness: 0,
       ),
 
-      progressIndicatorTheme: const ProgressIndicatorThemeData(
-        color: AppColors.primary,
+      progressIndicatorTheme: ProgressIndicatorThemeData(
+        color: p.primary,
       ),
     );
   }

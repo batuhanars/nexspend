@@ -1,6 +1,5 @@
 // ignore_for_file: constant_identifier_names
 import 'package:flutter/material.dart';
-import '../../../core/constants/app_colors.dart';
 import '../../../core/l10n/app_strings.dart';
 
 enum BillingCycle { DAILY, WEEKLY, MONTHLY, YEARLY }
@@ -55,7 +54,7 @@ class SubscriptionModel {
         return Color(int.parse('FF${color!.replaceAll('#', '')}', radix: 16));
       } catch (_) {}
     }
-    return AppColors.primary;
+    return const Color(0xFFBAC3FF); // fallback: dark primary
   }
 
   SubscriptionModel copyWith({

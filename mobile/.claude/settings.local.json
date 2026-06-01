@@ -15,7 +15,12 @@
       "Bash(flutter build *)",
       "Bash(python3 -c ' *)",
       "Bash(gh pr *)",
-      "PowerShell(New-Item *)"
+      "PowerShell(New-Item *)",
+      "Bash(dir \"C:\\\\Users\\\\batuh\\\\dev\\\\projects\\\\wallet-app\\\\mobile\\\\lib\\\\features\" /b /s)",
+      "PowerShell(Get-Content *)",
+      "mcp__filesystem__directory_tree",
+      "Bash(sed -i 's/const IconThemeData\\(color:/IconThemeData\\(color:/g' lib/presentation/legal/pages/terms_of_service_page.dart lib/presentation/onboarding/pages/onboarding_page.dart lib/presentation/settings/pages/edit_profile_page.dart lib/presentation/settings/widgets/*.dart)",
+      "Bash(sed -i 's/const CircularProgressIndicator\\(color:/CircularProgressIndicator\\(color:/g' lib/presentation/settings/pages/*.dart lib/presentation/settings/widgets/*.dart)"
     ]
   }
 }

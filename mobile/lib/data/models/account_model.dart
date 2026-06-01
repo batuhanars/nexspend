@@ -1,6 +1,5 @@
 // ignore_for_file: constant_identifier_names
 import 'package:flutter/material.dart';
-import '../../core/constants/app_colors.dart';
 import '../../core/l10n/app_strings.dart';
 import '../../core/utils/icon_mapper.dart';
 
@@ -22,13 +21,6 @@ extension AccountTypeX on AccountType {
         AccountType.CASH => Icons.account_balance_wallet_outlined,
         AccountType.CREDIT_CARD => Icons.credit_card_outlined,
         AccountType.INVESTMENT => Icons.trending_up,
-      };
-
-  Color get defaultColor => switch (this) {
-        AccountType.BANK => AppColors.primary,
-        AccountType.CASH => AppColors.secondary,
-        AccountType.CREDIT_CARD => AppColors.warning,
-        AccountType.INVESTMENT => AppColors.tertiary,
       };
 }
 
@@ -70,7 +62,7 @@ class AccountModel {
         return Color(int.parse('FF${color!.replaceAll('#', '')}', radix: 16));
       } catch (_) {}
     }
-    return type.defaultColor;
+    throw UnsupportedError('cardColor requires context; use context.getColorForAccountType(type)');
   }
 
   double get creditUsed {

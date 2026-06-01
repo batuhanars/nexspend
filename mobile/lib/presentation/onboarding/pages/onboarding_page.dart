@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:wallet_app/core/theme/app_palette.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
@@ -50,7 +51,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.surface,
+      backgroundColor: context.colors.surface,
       body: SafeArea(
         child: Column(
           children: [
@@ -112,7 +113,7 @@ class _OnboardingView extends StatelessWidget {
           Text(
             _title,
             style: AppTypography.headlineMd.copyWith(
-              color: AppColors.onSurface,
+              color: context.colors.onSurface,
               height: 1.25,
             ),
             textAlign: TextAlign.center,
@@ -121,7 +122,7 @@ class _OnboardingView extends StatelessWidget {
           Text(
             _body,
             style: AppTypography.bodyMd.copyWith(
-              color: AppColors.onSurfaceVariant,
+              color: context.colors.onSurfaceVariant,
               height: 1.6,
             ),
             textAlign: TextAlign.center,
@@ -137,11 +138,11 @@ class _OnboardingView extends StatelessWidget {
       _Type.features => _FeaturesIllustration(),
       _Type.inflation => _IconIllustration(
           icon: Icons.trending_up_rounded,
-          color: AppColors.primary,
+          color: context.colors.primary,
         ),
       _Type.family => _IconIllustration(
           icon: Icons.group_rounded,
-          color: AppColors.secondary,
+          color: context.colors.secondary,
         ),
     };
   }
@@ -180,7 +181,7 @@ class _WelcomeIllustration extends StatelessWidget {
             shape: BoxShape.circle,
             boxShadow: [
               BoxShadow(
-                color: AppColors.primary.withValues(alpha: 0.12),
+                color: context.colors.primary.withValues(alpha: 0.12),
                 blurRadius: 80,
                 spreadRadius: 40,
               ),
@@ -198,21 +199,24 @@ class _WelcomeIllustration extends StatelessWidget {
 }
 
 class _FeaturesIllustration extends StatelessWidget {
-  static const _items = [
-    (Icons.account_balance_wallet_rounded, AppColors.primary, 'Hesaplar'),
-    (Icons.receipt_long_rounded, AppColors.secondary, 'İşlemler'),
-    (Icons.pie_chart_rounded, AppColors.tertiary, 'Bütçeler'),
-    (Icons.handshake_rounded, Color(0xFF9C8FFF), 'Borçlar'),
-    (Icons.subscriptions_rounded, Color(0xFFFF9898), 'Abonelikler'),
-  ];
+  const _FeaturesIllustration({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
+    final items = [
+      (Icons.account_balance_wallet_rounded, colors.primary, 'Hesaplar'),
+      (Icons.receipt_long_rounded, colors.secondary, 'İşlemler'),
+      (Icons.pie_chart_rounded, colors.tertiary, 'Bütçeler'),
+      (Icons.handshake_rounded, const Color(0xFF9C8FFF), 'Borçlar'),
+      (Icons.subscriptions_rounded, const Color(0xFFFF9898), 'Abonelikler'),
+    ];
+
     return Wrap(
       spacing: AppSpacing.md,
       runSpacing: AppSpacing.md,
       alignment: WrapAlignment.center,
-      children: _items
+      children: items
           .map(
             (item) => _FeatureChip(icon: item.$1, color: item.$2, label: item.$3),
           )
@@ -250,7 +254,7 @@ class _FeatureChip extends StatelessWidget {
         Text(
           label,
           style: AppTypography.labelSm.copyWith(
-            color: AppColors.onSurfaceVariant,
+            color: context.colors.onSurfaceVariant,
             letterSpacing: 0,
           ),
         ),
@@ -328,7 +332,7 @@ class _SkipBar extends StatelessWidget {
                   child: Text(
                     'Atla',
                     style: AppTypography.bodyMd.copyWith(
-                      color: AppColors.onSurfaceVariant,
+                      color: context.colors.onSurfaceVariant,
                     ),
                   ),
                 ),
@@ -358,8 +362,8 @@ class _DotsRow extends StatelessWidget {
           height: 8,
           decoration: BoxDecoration(
             color: active
-                ? AppColors.primary
-                : AppColors.onSurfaceVariant.withValues(alpha: 0.3),
+                ? context.colors.primary
+                : context.colors.onSurfaceVariant.withValues(alpha: 0.3),
             borderRadius: BorderRadius.circular(4),
           ),
         );
@@ -382,7 +386,7 @@ class _NextButton extends StatelessWidget {
       child: FilledButton(
         onPressed: onTap,
         style: FilledButton.styleFrom(
-          backgroundColor: AppColors.primary,
+          backgroundColor: context.colors.primary,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
           ),
@@ -391,7 +395,7 @@ class _NextButton extends StatelessWidget {
           label,
           style: AppTypography.bodyMd.copyWith(
             fontWeight: FontWeight.w600,
-            color: AppColors.surface,
+            color: context.colors.surface,
           ),
         ),
       ),

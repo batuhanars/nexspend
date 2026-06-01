@@ -47,6 +47,11 @@ abstract class AppStrings {
   String get currencyUSD;
   String get currencyEUR;
   String get currencyGBP;
+  String get theme;
+  String get selectTheme;
+  String get themeLight;
+  String get themeDark;
+  String get themeSystem;
 
   // Dialogs / common
   String get cancel;
@@ -670,6 +675,16 @@ class _Tr extends AppStrings {
   String get currencyEUR => 'Euro';
   @override
   String get currencyGBP => 'İngiliz Sterlini';
+  @override
+  String get theme => 'Tema';
+  @override
+  String get selectTheme => 'Tema Seç';
+  @override
+  String get themeLight => 'Açık';
+  @override
+  String get themeDark => 'Koyu';
+  @override
+  String get themeSystem => 'Sistem';
 
   @override
   String get cancel => 'İptal';
@@ -1786,6 +1801,16 @@ class _En extends AppStrings {
   String get currencyEUR => 'Euro';
   @override
   String get currencyGBP => 'British Pound';
+  @override
+  String get theme => 'Theme';
+  @override
+  String get selectTheme => 'Select Theme';
+  @override
+  String get themeLight => 'Light';
+  @override
+  String get themeDark => 'Dark';
+  @override
+  String get themeSystem => 'System';
 
   @override
   String get cancel => 'Cancel';

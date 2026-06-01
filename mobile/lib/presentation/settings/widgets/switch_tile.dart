@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:wallet_app/core/constants/app_colors.dart';
+import 'package:wallet_app/core/theme/app_palette.dart';
 import 'package:wallet_app/core/constants/app_spacing.dart';
 import 'package:wallet_app/core/constants/app_typography.dart';
 
@@ -22,13 +22,13 @@ class SwitchTile extends StatelessWidget {
       contentPadding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.pagePadding,
       ),
-      leading: Icon(icon, color: AppColors.onSurfaceVariant, size: 22),
+      leading: Icon(icon, color: context.colors.onSurfaceVariant, size: 22),
       title: Text(label, style: AppTypography.bodyMd),
       trailing: Switch(
         value: value,
         onChanged: onChanged,
-        activeThumbColor: AppColors.primary,
-        activeTrackColor: AppColors.primary.withValues(alpha: 0.4),
+        activeThumbColor: context.colors.primary,
+        activeTrackColor: context.colors.primary.withValues(alpha: 0.4),
       ),
     );
   }

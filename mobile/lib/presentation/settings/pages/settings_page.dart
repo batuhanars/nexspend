@@ -1,14 +1,15 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:wallet_app/core/theme/app_palette.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:wallet_app/core/constants/app_colors.dart';
 import 'package:wallet_app/core/constants/app_spacing.dart';
 import 'package:wallet_app/core/constants/app_typography.dart';
 import 'package:wallet_app/core/di/injection.dart';
 import 'package:wallet_app/core/l10n/app_strings.dart';
 import 'package:wallet_app/core/storage/secure_storage.dart';
 import 'package:wallet_app/core/utils/locale_notifier.dart';
+import 'package:wallet_app/core/utils/theme_notifier.dart';
 import 'package:wallet_app/data/models/user_model.dart';
 import 'package:wallet_app/data/repositories/auth_repository.dart';
 import 'package:wallet_app/presentation/settings/widgets/change_password_sheet.dart';
@@ -44,6 +45,12 @@ class _SettingsView extends StatelessWidget {
     ('en', 'English'),
   ];
 
+  static final _themes = [
+    (ThemeMode.light, 'light'),
+    (ThemeMode.dark, 'dark'),
+    (ThemeMode.system, 'system'),
+  ];
+
   @override
   Widget build(BuildContext context) {
     final s = AppStrings.of(context);
@@ -54,7 +61,7 @@ class _SettingsView extends StatelessWidget {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(state.errorMessage!),
-              backgroundColor: AppColors.error,
+              backgroundColor: context.colors.error,
             ),
           );
         }
@@ -75,7 +82,7 @@ class _SettingsView extends StatelessWidget {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(state.message),
-              backgroundColor: AppColors.error,
+              backgroundColor: context.colors.error,
             ),
           );
         }
@@ -84,7 +91,7 @@ class _SettingsView extends StatelessWidget {
         appBar: AppBar(
           title: Text(s.settings, style: AppTypography.headlineSm),
           centerTitle: false,
-          backgroundColor: AppColors.surface,
+          backgroundColor: context.colors.surface,
           surfaceTintColor: Colors.transparent,
           leading: IconButton(
             icon: const Icon(Icons.close_rounded),
@@ -97,7 +104,7 @@ class _SettingsView extends StatelessWidget {
                 state is SettingsInitial ||
                 state is SettingsResetSuccess) {
               return const Center(
-                child: CircularProgressIndicator(color: AppColors.primary),
+                child: CircularProgressIndicator(color: context.colors.primary),
               );
             }
             if (state is SettingsError) {
@@ -108,7 +115,7 @@ class _SettingsView extends StatelessWidget {
                     Text(
                       state.message,
                       style: AppTypography.bodyMd.copyWith(
-                        color: AppColors.onSurfaceVariant,
+                        color: context.colors.onSurfaceVariant,
                       ),
                     ),
                     const SizedBox(height: AppSpacing.lg),
@@ -198,6 +205,12 @@ class _SettingsView extends StatelessWidget {
                   subtitle: _languageSubtitle(user.language),
                   onTap: () => _showLanguagePicker(context, s, user),
                 ),
+                SettingsTile(
+                  icon: Icons.palette_outlined,
+                  label: s.theme,
+                  subtitle: _themeSubtitle(context),
+                  onTap: () => _showThemePicker(context, s),
+                ),
                 const SizedBox(height: AppSpacing.lg),
                 SectionHeader(s.familyGroupsSection),
                 SettingsTile(
@@ -239,16 +252,16 @@ class _SettingsView extends StatelessWidget {
                 SettingsTile(
                   icon: Icons.logout_rounded,
                   label: s.logout,
-                  labelColor: AppColors.error,
-                  iconColor: AppColors.error,
+                  labelColor: context.colors.error,
+                  iconColor: context.colors.error,
                   showChevron: false,
                   onTap: () => _confirmLogout(context, s),
                 ),
                 SettingsTile(
                   icon: Icons.delete_forever_rounded,
                   label: s.deleteAccountTitle,
-                  labelColor: AppColors.error,
-                  iconColor: AppColors.error,
+                  labelColor: context.colors.error,
+                  iconColor: context.colors.error,
                   showChevron: false,
                   onTap: () => _confirmDeleteAccount(context),
                 ),
@@ -270,6 +283,16 @@ class _SettingsView extends StatelessWidget {
     return language;
   }
 
+  String _themeSubtitle(BuildContext context) {
+    final s = AppStrings.of(context);
+    final mode = getIt<ThemeNotifier>().value;
+    return mode == ThemeMode.light
+        ? s.themeLight
+        : mode == ThemeMode.dark
+            ? s.themeDark
+            : s.themeSystem;
+  }
+
   void _showLanguagePicker(
     BuildContext context,
     AppStrings s,
@@ -278,7 +301,7 @@ class _SettingsView extends StatelessWidget {
     final bloc = context.read<SettingsBloc>();
     showModalBottomSheet<void>(
       context: context,
-      backgroundColor: AppColors.surfaceContainerHigh,
+      backgroundColor: context.colors.surfaceContainerHigh,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(
           top: Radius.circular(AppSpacing.radiusXl),
@@ -308,7 +331,7 @@ class _SettingsView extends StatelessWidget {
                 trailing: user.language == l.$1
                     ? const Icon(
                         Icons.check_rounded,
-                        color: AppColors.primary,
+                        color: context.colors.primary,
                         size: 20,
                       )
                     : null,
@@ -329,11 +352,72 @@ class _SettingsView extends StatelessWidget {
     );
   }
 
+  void _showThemePicker(BuildContext context, AppStrings s) {
+    final notifier = getIt<ThemeNotifier>();
+    final currentMode = notifier.value;
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: context.colors.surfaceContainerHigh,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(AppSpacing.radiusXl),
+        ),
+      ),
+      builder: (ctx) => Padding(
+        padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                AppSpacing.pagePadding,
+                0,
+                AppSpacing.pagePadding,
+                AppSpacing.lg,
+              ),
+              child: Text(s.selectTheme, style: AppTypography.titleSm),
+            ),
+            ..._themes.map((t) {
+              final (mode, modeStr) = t;
+              final label = mode == ThemeMode.light
+                  ? s.themeLight
+                  : mode == ThemeMode.dark
+                      ? s.themeDark
+                      : s.themeSystem;
+              return ListTile(
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.pagePadding,
+                ),
+                title: Text(label, style: AppTypography.bodyMd),
+                trailing: currentMode == mode
+                    ? Icon(
+                        Icons.check_rounded,
+                        color: context.colors.primary,
+                        size: 20,
+                      )
+                    : null,
+                onTap: () {
+                  Navigator.of(ctx).pop();
+                  if (currentMode != mode) {
+                    notifier.setMode(mode);
+                    getIt<SecureStorage>().saveThemeMode(modeStr);
+                  }
+                },
+              );
+            }),
+            const SizedBox(height: AppSpacing.md),
+          ],
+        ),
+      ),
+    );
+  }
+
   void _showChangePasswordSheet(BuildContext context) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: AppColors.surfaceContainerHigh,
+      backgroundColor: context.colors.surfaceContainerHigh,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(
           top: Radius.circular(AppSpacing.radiusXl),
@@ -351,11 +435,11 @@ class _SettingsView extends StatelessWidget {
     showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: AppColors.surfaceContainerHigh,
+        backgroundColor: context.colors.surfaceContainerHigh,
         title: Text(s.deleteAccountTitle, style: AppTypography.titleSm),
         content: Text(
           s.deleteUserAccountContent,
-          style: AppTypography.bodyMd.copyWith(color: AppColors.onSurfaceVariant),
+          style: AppTypography.bodyMd.copyWith(color: context.colors.onSurfaceVariant),
         ),
         actions: [
           TextButton(
@@ -365,7 +449,7 @@ class _SettingsView extends StatelessWidget {
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(true),
             child: Text(s.deleteAccountTitle,
-                style: TextStyle(color: AppColors.error)),
+                style: TextStyle(color: context.colors.error)),
           ),
         ],
       ),
@@ -386,7 +470,7 @@ class _SettingsView extends StatelessWidget {
               }
             }
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(msg), backgroundColor: AppColors.error),
+              SnackBar(content: Text(msg), backgroundColor: context.colors.error),
             );
           }
         }
@@ -398,12 +482,12 @@ class _SettingsView extends StatelessWidget {
     showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: AppColors.surfaceContainerHigh,
+        backgroundColor: context.colors.surfaceContainerHigh,
         title: Text(s.logoutConfirmTitle, style: AppTypography.titleSm),
         content: Text(
           s.logoutConfirmContent,
           style: AppTypography.bodyMd.copyWith(
-            color: AppColors.onSurfaceVariant,
+            color: context.colors.onSurfaceVariant,
           ),
         ),
         actions: [
@@ -415,7 +499,7 @@ class _SettingsView extends StatelessWidget {
             onPressed: () => Navigator.of(ctx).pop(true),
             child: Text(
               s.logout,
-              style: TextStyle(color: AppColors.error),
+              style: TextStyle(color: context.colors.error),
             ),
           ),
         ],
@@ -445,7 +529,7 @@ class _DangerZoneSection extends StatelessWidget {
           margin: const EdgeInsets.symmetric(horizontal: AppSpacing.pagePadding),
           padding: const EdgeInsets.all(AppSpacing.md),
           decoration: BoxDecoration(
-            color: AppColors.error.withAlpha(20),
+            color: context.colors.error.withAlpha(20),
             borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
           ),
           child: Column(
@@ -459,7 +543,7 @@ class _DangerZoneSection extends StatelessWidget {
                 child: Text(
                   s.sectionDangerZone.toUpperCase(),
                   style: AppTypography.labelSm.copyWith(
-                    color: AppColors.error,
+                    color: context.colors.error,
                     letterSpacing: 1.0,
                   ),
                 ),
@@ -480,7 +564,7 @@ class _DangerZoneSection extends StatelessWidget {
                       children: [
                         Icon(
                           Icons.delete_forever_outlined,
-                          color: AppColors.error,
+                          color: context.colors.error,
                           size: 22,
                         ),
                         const SizedBox(width: AppSpacing.md),
@@ -491,7 +575,7 @@ class _DangerZoneSection extends StatelessWidget {
                               Text(
                                 s.resetAllDataTitle,
                                 style: AppTypography.bodyMd.copyWith(
-                                  color: AppColors.error,
+                                  color: context.colors.error,
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),
@@ -499,7 +583,7 @@ class _DangerZoneSection extends StatelessWidget {
                               Text(
                                 s.resetAllDataSubtitle,
                                 style: AppTypography.bodyMd.copyWith(
-                                  color: AppColors.error.withAlpha(180),
+                                  color: context.colors.error.withAlpha(180),
                                   fontSize: 12,
                                 ),
                               ),
@@ -511,7 +595,7 @@ class _DangerZoneSection extends StatelessWidget {
                             width: 20,
                             height: 20,
                             child: CircularProgressIndicator(
-                              color: AppColors.error,
+                              color: context.colors.error,
                               strokeWidth: 2,
                             ),
                           ),
@@ -532,7 +616,7 @@ class _DangerZoneSection extends StatelessWidget {
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
-      backgroundColor: AppColors.surfaceContainerHigh,
+      backgroundColor: context.colors.surfaceContainerHigh,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(
           top: Radius.circular(AppSpacing.radiusXl),

@@ -14,15 +14,6 @@ extension BillingCycleX on BillingCycle {
       };
 }
 
-enum SubscriptionKind { SUBSCRIPTION, BILL }
-
-extension SubscriptionKindX on SubscriptionKind {
-  String label(AppStrings s) => switch (this) {
-        SubscriptionKind.SUBSCRIPTION => s.kindSubscription,
-        SubscriptionKind.BILL => s.kindBill,
-      };
-}
-
 class SubscriptionModel {
   const SubscriptionModel({
     required this.id,
@@ -31,7 +22,6 @@ class SubscriptionModel {
     required this.billingCycle,
     required this.isActive,
     required this.autoDeduct,
-    this.kind = SubscriptionKind.SUBSCRIPTION,
     this.reminderDaysBefore = 3,
     this.description,
     this.icon,
@@ -49,7 +39,6 @@ class SubscriptionModel {
   final BillingCycle billingCycle;
   final bool isActive;
   final bool autoDeduct;
-  final SubscriptionKind kind;
   final int reminderDaysBefore;
   final String? description;
   final String? icon;
@@ -59,8 +48,6 @@ class SubscriptionModel {
   final DateTime? nextRenewalDate;
   final String? categoryId;
   final String? categoryName;
-
-  bool get isBill => kind == SubscriptionKind.BILL;
 
   Color get cardColor {
     if (color != null) {
@@ -77,7 +64,6 @@ class SubscriptionModel {
     BillingCycle? billingCycle,
     bool? isActive,
     bool? autoDeduct,
-    SubscriptionKind? kind,
     int? reminderDaysBefore,
     String? description,
     String? icon,
@@ -95,7 +81,6 @@ class SubscriptionModel {
         billingCycle: billingCycle ?? this.billingCycle,
         isActive: isActive ?? this.isActive,
         autoDeduct: autoDeduct ?? this.autoDeduct,
-        kind: kind ?? this.kind,
         reminderDaysBefore: reminderDaysBefore ?? this.reminderDaysBefore,
         description: description ?? this.description,
         icon: icon ?? this.icon,
@@ -124,10 +109,6 @@ class SubscriptionModel {
         ),
         isActive: json['isActive'] as bool? ?? true,
         autoDeduct: json['autoDeduct'] as bool? ?? true,
-        kind: SubscriptionKind.values.firstWhere(
-          (e) => e.name == json['kind'],
-          orElse: () => SubscriptionKind.SUBSCRIPTION,
-        ),
         reminderDaysBefore: json['reminderDaysBefore'] as int? ?? 3,
         description: json['description'] as String?,
         icon: json['icon'] as String?,

@@ -12,22 +12,16 @@ import {
   Matches,
   MaxLength,
 } from 'class-validator';
-import { SubscriptionPeriod, SubscriptionKind } from '@prisma/client';
+import { SubscriptionPeriod } from '@prisma/client';
 
 export class CreateSubscriptionDto {
   @IsString()
   @MaxLength(100)
   name: string;
 
-  // BILL için tahmini tutar; gönderilmezse 0 kabul edilir (gerçek tutar ödeme anında girilir)
   @IsNumber()
   @IsPositive()
-  @IsOptional()
-  amount?: number;
-
-  @IsEnum(SubscriptionKind)
-  @IsOptional()
-  kind?: SubscriptionKind;
+  amount: number;
 
   @IsInt()
   @Min(0)

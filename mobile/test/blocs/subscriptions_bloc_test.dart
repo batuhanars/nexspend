@@ -11,14 +11,13 @@ class MockSubscriptionRepository extends Mock
 final _summary =
     const SubscriptionSummaryModel(totalMonthly: 300, activeCount: 1);
 
-final _bill = const SubscriptionModel(
+final _subscription = const SubscriptionModel(
   id: 'sub-1',
-  name: 'Elektrik',
-  amount: 300,
+  name: 'Netflix',
+  amount: 149.99,
   billingCycle: BillingCycle.MONTHLY,
   isActive: true,
-  autoDeduct: false,
-  kind: SubscriptionKind.BILL,
+  autoDeduct: true,
   reminderDaysBefore: 3,
 );
 
@@ -31,39 +30,23 @@ void main() {
       SubscriptionsBloc(subscriptionRepository: repo);
 
   void stubFetch() {
-    when(() => repo.getAll()).thenAnswer((_) async => [_bill]);
+    when(() => repo.getAll()).thenAnswer((_) async => [_subscription]);
     when(() => repo.getSummary()).thenAnswer((_) async => _summary);
   }
 
-  group('SubscriptionPayRequested', () {
+  group('SubscriptionsLoadRequested', () {
     blocTest<SubscriptionsBloc, SubscriptionsState>(
-      'ödeme sonrası repo.pay çağrılır ve liste yeniden yüklenir',
+      'yükleme sonrası SubscriptionsLoaded emit edilir',
       build: () {
         stubFetch();
-        when(() => repo.pay(any(), any()))
-            .thenAnswer((_) async => _bill);
         return buildBloc();
       },
-      act: (bloc) => bloc.add(
-        const SubscriptionPayRequested(id: 'sub-1', amount: 427.5),
-      ),
-      expect: () => [isA<SubscriptionsLoaded>()],
+      act: (bloc) => bloc.add(const SubscriptionsLoadRequested()),
+      expect: () => [isA<SubscriptionsLoading>(), isA<SubscriptionsLoaded>()],
       verify: (_) {
-        verify(() => repo.pay('sub-1', {'amount': 427.5})).called(1);
         verify(() => repo.getAll()).called(1);
+        verify(() => repo.getSummary()).called(1);
       },
-    );
-
-    blocTest<SubscriptionsBloc, SubscriptionsState>(
-      'ödeme başarısızsa Error döner',
-      build: () {
-        when(() => repo.pay(any(), any())).thenThrow(Exception('fail'));
-        return buildBloc();
-      },
-      act: (bloc) => bloc.add(
-        const SubscriptionPayRequested(id: 'sub-1', amount: 100),
-      ),
-      expect: () => [isA<SubscriptionsError>()],
     );
   });
 }

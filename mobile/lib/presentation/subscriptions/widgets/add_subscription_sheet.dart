@@ -6,7 +6,6 @@ import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
 import '../../../core/di/injection.dart';
 import '../../../data/models/account_model.dart';
-import '../../../data/models/subscription_model.dart';
 import '../../../data/repositories/account_repository.dart';
 import '../../shared/widgets/split_amount_field.dart';
 import '../bloc/subscriptions_bloc.dart';
@@ -23,13 +22,10 @@ class _AddSubscriptionSheetState extends State<AddSubscriptionSheet> {
 
   double? _amount;
   String _period = 'MONTHLY';
-  SubscriptionKind _kind = SubscriptionKind.SUBSCRIPTION;
   int _reminderDaysBefore = 3;
   DateTime? _dueDate;
   String? _selectedAccountId;
   late final Future<List<AccountModel>> _accountsFuture;
-
-  bool get _isBill => _kind == SubscriptionKind.BILL;
 
   List<({String label, String value})> _cycles(BuildContext context) {
     final s = AppStrings.of(context);
@@ -43,7 +39,6 @@ class _AddSubscriptionSheetState extends State<AddSubscriptionSheet> {
   void initState() {
     super.initState();
     _accountsFuture = getIt<AccountRepository>().getAccounts();
-    // Abonelik için yenileme tarihi akıllı varsayılanla ön-doldurulur (düzenlenebilir)
     _dueDate = _defaultRenewalDate();
   }
 
@@ -77,8 +72,7 @@ class _AddSubscriptionSheetState extends State<AddSubscriptionSheet> {
       _showError(s.enterSubscriptionName);
       return;
     }
-    // Abonelikte tutar zorunlu; faturada tahmini tutar opsiyonel
-    if (!_isBill && (amount == null || amount <= 0)) {
+    if (amount == null || amount <= 0) {
       _showError(s.enterValidAmount);
       return;
     }
@@ -86,21 +80,14 @@ class _AddSubscriptionSheetState extends State<AddSubscriptionSheet> {
       _showError(s.selectAccount);
       return;
     }
-    // Faturada son ödeme tarihi manuel seçilmeli
-    if (_isBill && _dueDate == null) {
-      _showError(s.selectDueDate);
-      return;
-    }
 
     final now = DateTime.now();
     context.read<SubscriptionsBloc>().add(
       SubscriptionCreated({
         'name': name,
-        if (amount != null && amount > 0) 'amount': amount,
-        'kind': _kind.name,
-        'period': _isBill ? 'MONTHLY' : _period,
-        'autoDeduct': !_isBill,
-        if (_isBill) 'reminderDaysBefore': _reminderDaysBefore,
+        'amount': amount,
+        'period': _period,
+        'reminderDaysBefore': _reminderDaysBefore,
         'accountId': _selectedAccountId!,
         'startDate': _isoDate(now),
         'nextRenewal': _isoDate(_dueDate ?? _defaultRenewalDate()),
@@ -142,8 +129,6 @@ class _AddSubscriptionSheetState extends State<AddSubscriptionSheet> {
               ],
             ),
             const SizedBox(height: AppSpacing.xl),
-            _typeSelector(s),
-            const SizedBox(height: AppSpacing.xl),
             Center(
               child: SplitAmountField(
                 onChanged: (v) => setState(() => _amount = v),
@@ -153,10 +138,8 @@ class _AddSubscriptionSheetState extends State<AddSubscriptionSheet> {
             const SizedBox(height: AppSpacing.xl),
             _field(
               _nameController,
-              _isBill ? s.billNameHint : s.subscriptionNameHint,
-              _isBill
-                  ? Icons.receipt_long_outlined
-                  : Icons.subscriptions_outlined,
+              s.subscriptionNameHint,
+              Icons.subscriptions_outlined,
             ),
             const SizedBox(height: AppSpacing.lg),
             Text(
@@ -250,73 +233,70 @@ class _AddSubscriptionSheetState extends State<AddSubscriptionSheet> {
                 );
               },
             ),
-            if (!_isBill) ...[
-              const SizedBox(height: AppSpacing.lg),
-              Text(
-                s.billingCycleLabel,
-                style: AppTypography.labelSm.copyWith(
-                  color: AppColors.onSurfaceVariant,
-                ),
+            const SizedBox(height: AppSpacing.lg),
+            Text(
+              s.billingCycleLabel,
+              style: AppTypography.labelSm.copyWith(
+                color: AppColors.onSurfaceVariant,
               ),
-              const SizedBox(height: AppSpacing.sm),
-              Row(
-                children: _cycles(context).map((c) {
-                  final isActive = _period == c.value;
-                  final isLast = c == _cycles(context).last;
-                  return Expanded(
-                    child: Padding(
-                      padding: EdgeInsets.only(
-                        right: isLast ? 0 : AppSpacing.xs,
-                      ),
-                      child: GestureDetector(
-                        onTap: () => setState(() {
-                          // Tarih elle değiştirilmediyse döneme göre güncelle
-                          final stillDefault =
-                              _dueDate == _defaultRenewalDate();
-                          _period = c.value;
-                          if (_dueDate == null || stillDefault) {
-                            _dueDate = _defaultRenewalDate();
-                          }
-                        }),
-                        child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 150),
-                          height: 36,
-                          alignment: Alignment.center,
-                          decoration: BoxDecoration(
-                            color: isActive
-                                ? AppColors.primary.withValues(alpha: 0.15)
-                                : AppColors.surfaceContainerHighest,
-                            borderRadius: BorderRadius.circular(
-                              AppSpacing.radiusMd,
-                            ),
-                            border: isActive
-                                ? Border.all(
-                                    color: AppColors.primary,
-                                    width: 1.5,
-                                  )
-                                : null,
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            Row(
+              children: _cycles(context).map((c) {
+                final isActive = _period == c.value;
+                final isLast = c == _cycles(context).last;
+                return Expanded(
+                  child: Padding(
+                    padding: EdgeInsets.only(
+                      right: isLast ? 0 : AppSpacing.xs,
+                    ),
+                    child: GestureDetector(
+                      onTap: () => setState(() {
+                        // Tarih elle değiştirilmediyse döneme göre güncelle
+                        final stillDefault =
+                            _dueDate == _defaultRenewalDate();
+                        _period = c.value;
+                        if (_dueDate == null || stillDefault) {
+                          _dueDate = _defaultRenewalDate();
+                        }
+                      }),
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 150),
+                        height: 36,
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          color: isActive
+                              ? AppColors.primary.withValues(alpha: 0.15)
+                              : AppColors.surfaceContainerHighest,
+                          borderRadius: BorderRadius.circular(
+                            AppSpacing.radiusMd,
                           ),
-                          child: Text(
-                            c.label,
-                            style: AppTypography.labelSm.copyWith(
-                              fontWeight: isActive
-                                  ? FontWeight.w600
-                                  : FontWeight.w400,
-                              color: isActive
-                                  ? AppColors.primary
-                                  : AppColors.onSurfaceVariant,
-                              height: 1.0,
-                            ),
+                          border: isActive
+                              ? Border.all(
+                                  color: AppColors.primary,
+                                  width: 1.5,
+                                )
+                              : null,
+                        ),
+                        child: Text(
+                          c.label,
+                          style: AppTypography.labelSm.copyWith(
+                            fontWeight: isActive
+                                ? FontWeight.w600
+                                : FontWeight.w400,
+                            color: isActive
+                                ? AppColors.primary
+                                : AppColors.onSurfaceVariant,
+                            height: 1.0,
                           ),
                         ),
                       ),
                     ),
-                  );
-                }).toList(),
-              ),
-            ],
+                  ),
+                );
+              }).toList(),
+            ),
             const SizedBox(height: AppSpacing.md),
-            // Tarih + hatırlatma hem abonelik hem fatura için
             _dueDatePicker(s),
             const SizedBox(height: AppSpacing.lg),
             Text(
@@ -344,63 +324,14 @@ class _AddSubscriptionSheetState extends State<AddSubscriptionSheet> {
     );
   }
 
-  Widget _typeSelector(AppStrings s) {
-    final options = [
-      (kind: SubscriptionKind.SUBSCRIPTION, label: s.kindSubscription),
-      (kind: SubscriptionKind.BILL, label: s.kindBill),
-    ];
-    return Row(
-      children: options.map((o) {
-        final isActive = _kind == o.kind;
-        final isLast = o == options.last;
-        return Expanded(
-          child: Padding(
-            padding: EdgeInsets.only(right: isLast ? 0 : AppSpacing.xs),
-            child: GestureDetector(
-              onTap: () => setState(() {
-                _kind = o.kind;
-                // Faturada gerçek son ödeme günü seçilsin (boş); abonelikte akıllı varsayılan
-                _dueDate = _isBill ? null : _defaultRenewalDate();
-              }),
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 150),
-                height: 44,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: isActive
-                      ? AppColors.primary.withValues(alpha: 0.15)
-                      : AppColors.surfaceContainerHighest,
-                  borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-                  border: isActive
-                      ? Border.all(color: AppColors.primary, width: 1.5)
-                      : null,
-                ),
-                child: Text(
-                  o.label,
-                  style: AppTypography.bodyMd.copyWith(
-                    fontWeight: isActive ? FontWeight.w600 : FontWeight.w400,
-                    color: isActive
-                        ? AppColors.primary
-                        : AppColors.onSurfaceVariant,
-                  ),
-                ),
-              ),
-            ),
-          ),
-        );
-      }).toList(),
-    );
-  }
-
   Widget _dueDatePicker(AppStrings s) {
+    final now = DateTime.now();
     return GestureDetector(
       onTap: () async {
-        final now = DateTime.now();
         final picked = await showDatePicker(
           context: context,
           initialDate: _dueDate ?? now,
-          // Faturada geç ödeme için geçmişe izin ver; abonelikte yenileme tarihi gelecekte
-          firstDate: _isBill ? DateTime(now.year - 1) : now,
+          firstDate: now,
           lastDate: DateTime(2040),
           builder: (ctx, child) => Theme(
             data: Theme.of(ctx).copyWith(
@@ -434,8 +365,8 @@ class _AddSubscriptionSheetState extends State<AddSubscriptionSheet> {
             Expanded(
               child: Text(
                 _dueDate == null
-                    ? (_isBill ? s.selectDueDate : s.selectRenewalDate)
-                    : '${_isBill ? s.billDueDateLabel : s.nextRenewalLabel}: ${_isoDate(_dueDate!)}',
+                    ? s.selectDueDate
+                    : '${s.nextRenewalLabel}: ${_isoDate(_dueDate!)}',
                 style: AppTypography.bodyMd.copyWith(
                   color: _dueDate == null
                       ? AppColors.onSurfaceVariant

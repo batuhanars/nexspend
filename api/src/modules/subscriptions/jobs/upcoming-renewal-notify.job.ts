@@ -8,15 +8,15 @@ export class UpcomingRenewalNotifyJob {
 
   constructor(private readonly subscriptionsService: SubscriptionsService) {}
 
-  /// Her gün 09:00. Abonelik: yarın yenilenecekler. Fatura: reminderDaysBefore
-  /// günü / son ödeme günü / gecikme (-1, -3). Cron günde bir çalıştığı için
-  /// her eşik bir kez bildirim üretir; ek state tutulmaz (statement job deseni).
+  /// Her gün 09:00. Abonelik: reminderDaysBefore günü + yenileme günü.
+  /// Cron günde bir çalıştığı için her eşik bir kez bildirim üretir;
+  /// ek state tutulmaz (statement job deseni).
   @Cron('0 9 * * *')
   async run() {
     try {
       const sent = await this.subscriptionsService.notifyUpcoming();
       if (sent > 0) {
-        this.logger.log(`${sent} abonelik/fatura bildirimi gönderildi`);
+        this.logger.log(`${sent} abonelik bildirimi gönderildi`);
       }
     } catch (err) {
       this.logger.error(

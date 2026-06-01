@@ -52,7 +52,7 @@ class SubscriptionDetailsCard extends StatelessWidget {
           if (sub.nextRenewalDate != null) ...[
             const Divider(color: AppColors.surfaceContainerHighest, height: 1),
             SubscriptionDetailRow(
-              label: sub.isBill ? s.billDueDateLabel : s.nextRenewalLabel,
+              label: s.nextRenewalLabel,
               value: _formatDate(sub.nextRenewalDate!),
               valueColor: sub.isRenewingSoon ? AppColors.warning : null,
             ),

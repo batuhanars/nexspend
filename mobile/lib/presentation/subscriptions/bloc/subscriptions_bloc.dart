@@ -15,7 +15,6 @@ class SubscriptionsBloc extends Bloc<SubscriptionsEvent, SubscriptionsState> {
     on<SubscriptionDeleteRequested>(_onDelete);
     on<SubscriptionCreated>(_onCreate);
     on<SubscriptionUpdateRequested>(_onUpdate);
-    on<SubscriptionPayRequested>(_onPay);
   }
 
   final SubscriptionRepository _repo;
@@ -119,19 +118,6 @@ class SubscriptionsBloc extends Bloc<SubscriptionsEvent, SubscriptionsState> {
       await _repo.update(event.id, {'name': event.name, 'amount': event.amount});
     } catch (_) {
       if (current is SubscriptionsLoaded) emit(current);
-    }
-  }
-
-  Future<void> _onPay(
-      SubscriptionPayRequested event, Emitter<SubscriptionsState> emit) async {
-    try {
-      await _repo.pay(event.id, {
-        'amount': event.amount,
-        if (event.paidDate != null) 'paidDate': event.paidDate,
-      });
-      await _fetch(emit);
-    } catch (e) {
-      emit(SubscriptionsError(_parseError(e)));
     }
   }
 

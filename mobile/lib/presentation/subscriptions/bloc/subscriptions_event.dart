@@ -38,13 +38,3 @@ class SubscriptionUpdateRequested extends SubscriptionsEvent {
   final double amount;
 }
 
-class SubscriptionPayRequested extends SubscriptionsEvent {
-  const SubscriptionPayRequested({
-    required this.id,
-    required this.amount,
-    this.paidDate,
-  });
-  final String id;
-  final double amount;
-  final String? paidDate;
-}

@@ -54,11 +54,4 @@ class SubscriptionRepository {
   Future<void> toggle(String id) async {
     await _dio.patch(ApiEndpoints.subscriptionToggle(id));
   }
-
-  Future<SubscriptionModel> pay(String id, Map<String, dynamic> data) async {
-    final response =
-        await _dio.post(ApiEndpoints.subscriptionPay(id), data: data);
-    return SubscriptionModel.fromJson(
-        response.data['data'] as Map<String, dynamic>);
-  }
 }

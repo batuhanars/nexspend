@@ -2,7 +2,6 @@
 import { NotFoundException, BadRequestException } from '@nestjs/common';
 import {
   SubscriptionPeriod,
-  SubscriptionKind,
   TransactionType,
 } from '@prisma/client';
 import { EventEmitter2 } from '@nestjs/event-emitter';
@@ -180,7 +179,6 @@ describe('SubscriptionsService', () => {
       categoryId: 'cat-1',
       startDate: '2026-01-01',
       nextRenewal: '2026-02-01',
-      autoDeduct: true,
     };
 
     it('autoDeduct=true olsa bile oluşturmada işlem YARATMAZ (ilk kesinti yenileme tarihinde)', async () => {
@@ -197,15 +195,14 @@ describe('SubscriptionsService', () => {
       expect(mockEventEmitter.emit).not.toHaveBeenCalled();
     });
 
-    it('abonelikte autoDeduct daima true olur (dto.autoDeduct yok sayılır)', async () => {
+    it('abonelikte autoDeduct daima true olur', async () => {
       mockPrisma.subscription.create.mockResolvedValue({ ...baseSub });
 
-      await service.create(USER_ID, { ...dto, autoDeduct: false });
+      await service.create(USER_ID, dto);
 
       expect(mockPrisma.subscription.create).toHaveBeenCalledWith(
         expect.objectContaining({
           data: expect.objectContaining({
-            kind: SubscriptionKind.SUBSCRIPTION,
             autoDeduct: true,
           }),
         }),
@@ -213,92 +210,13 @@ describe('SubscriptionsService', () => {
       expect(mockPrisma.$transaction).not.toHaveBeenCalled();
     });
 
-    it('kind=BILL ise autoDeduct false zorlanır ve ilk işlem oluşmaz', async () => {
-      mockPrisma.subscription.create.mockResolvedValue({
-        ...baseSub,
-        name: 'Elektrik',
-        kind: SubscriptionKind.BILL,
-        autoDeduct: false,
-      });
-
-      await service.create(USER_ID, {
-        ...dto,
-        kind: SubscriptionKind.BILL,
-        autoDeduct: true, // gönderilse bile yoksayılmalı
-      });
-
-      expect(mockPrisma.subscription.create).toHaveBeenCalledWith(
-        expect.objectContaining({
-          data: expect.objectContaining({
-            kind: SubscriptionKind.BILL,
-            autoDeduct: false,
-          }),
-        }),
-      );
-      expect(mockPrisma.$transaction).not.toHaveBeenCalled();
-    });
-
-    it('SUBSCRIPTION türünde tutar yoksa BadRequestException fırlatır', async () => {
+    it('tutar yoksa BadRequestException fırlatır', async () => {
       const { amount, ...noAmount } = dto;
 
       await expect(service.create(USER_ID, noAmount as any)).rejects.toThrow(
         BadRequestException,
       );
       expect(mockPrisma.subscription.create).not.toHaveBeenCalled();
-    });
-  });
-
-  // ─── markPaid ────────────────────────────────────────────────────────────────
-
-  describe('markPaid()', () => {
-    const billSub = {
-      ...baseSub,
-      name: 'Elektrik',
-      kind: SubscriptionKind.BILL,
-      autoDeduct: false,
-      amount: 300,
-    };
-
-    it('gerçek tutarla işlem oluşturur, son ödeme tarihini ilerletir ve tahmini günceller', async () => {
-      mockPrisma.subscription.findFirst.mockResolvedValue(billSub);
-      mockPrisma.$transaction.mockImplementation(async (fn: any) => {
-        const tx = {
-          transaction: {
-            create: jest
-              .fn()
-              .mockResolvedValue({ id: 'tx-1', type: TransactionType.EXPENSE }),
-          },
-        };
-        return fn(tx);
-      });
-      mockPrisma.subscription.update.mockResolvedValue(billSub);
-
-      await service.markPaid(USER_ID, SUB_ID, { amount: 427.5 });
-
-      // gerçek tutar (427.5) bakiyeye uygulanmalı, tahmini (300) değil
-      expect(mockBalanceService.apply).toHaveBeenCalledWith(
-        expect.anything(),
-        ACCOUNT_ID,
-        TransactionType.EXPENSE,
-        427.5,
-      );
-      expect(mockEventEmitter.emit).toHaveBeenCalledWith(
-        'transaction.created',
-        expect.any(Object),
-      );
-      expect(mockPrisma.subscription.update).toHaveBeenCalledWith(
-        expect.objectContaining({
-          data: expect.objectContaining({ amount: 427.5 }),
-        }),
-      );
-    });
-
-    it('sahip değilse NotFoundException fırlatır', async () => {
-      mockPrisma.subscription.findFirst.mockResolvedValue(null);
-
-      await expect(
-        service.markPaid(USER_ID, 'bad-id', { amount: 100 }),
-      ).rejects.toThrow(NotFoundException);
     });
   });
 
@@ -354,58 +272,11 @@ describe('SubscriptionsService', () => {
       );
     });
 
-    it('fatura, reminderDaysBefore gününde "yaklaşıyor" bildirimi gönderir', async () => {
-      mockPrisma.subscription.findMany.mockResolvedValue([
-        {
-          ...baseSub,
-          name: 'Su',
-          kind: SubscriptionKind.BILL,
-          autoDeduct: false,
-          reminderDaysBefore: 3,
-          nextRenewal: daysFromNow(3),
-        },
-      ]);
-
-      const sent = await service.notifyUpcoming();
-
-      expect(sent).toBe(1);
-      expect(mockNotifications.sendToUser).toHaveBeenCalledWith(
-        USER_ID,
-        'Son ödeme yaklaşıyor',
-        expect.any(String),
-        expect.objectContaining({ type: 'subscription_bill' }),
-      );
-    });
-
-    it('faturanın son ödemesi geçmişse gecikme bildirimi gönderir', async () => {
-      mockPrisma.subscription.findMany.mockResolvedValue([
-        {
-          ...baseSub,
-          name: 'Doğalgaz',
-          kind: SubscriptionKind.BILL,
-          autoDeduct: false,
-          reminderDaysBefore: 3,
-          nextRenewal: daysFromNow(-1),
-        },
-      ]);
-
-      const sent = await service.notifyUpcoming();
-
-      expect(sent).toBe(1);
-      expect(mockNotifications.sendToUser).toHaveBeenCalledWith(
-        USER_ID,
-        'Ödeme gecikti',
-        expect.any(String),
-        expect.objectContaining({ type: 'subscription_bill' }),
-      );
-    });
-
     it('eşik dışındaki kayıtlar için bildirim göndermez', async () => {
       mockPrisma.subscription.findMany.mockResolvedValue([
         {
           ...baseSub,
-          kind: SubscriptionKind.BILL,
-          autoDeduct: false,
+          autoDeduct: true,
           reminderDaysBefore: 3,
           nextRenewal: daysFromNow(10),
         },

@@ -59,11 +59,18 @@ class _SubscriptionDetailPageState extends State<SubscriptionDetailPage> {
     });
   }
 
+  String _isoDate(DateTime d) =>
+      '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
+
   Future<void> _showEditSheet() async {
     _editNameCtrl.text = _sub.name;
     double? pendingAmount = _sub.amount;
+    DateTime pickedDate = _sub.nextRenewalDate ?? DateTime.now().add(const Duration(days: 30));
+    int pickedReminder = _sub.reminderDaysBefore;
     String? savedName;
     double? savedAmount;
+    DateTime? savedDate;
+    int? savedReminder;
 
     await showModalBottomSheet<void>(
       context: context,
@@ -77,7 +84,9 @@ class _SubscriptionDetailPageState extends State<SubscriptionDetailPage> {
       builder: (sheetCtx) {
         return StatefulBuilder(
           builder: (ctx, setSheetState) {
-            return Padding(
+            final s = AppStrings.of(ctx);
+            const reminderDays = [1, 3, 7];
+            return SingleChildScrollView(
               padding: EdgeInsets.fromLTRB(
                 AppSpacing.pagePadding,
                 AppSpacing.xl,
@@ -153,6 +162,117 @@ class _SubscriptionDetailPageState extends State<SubscriptionDetailPage> {
                       ),
                     ),
                   ),
+                  const SizedBox(height: AppSpacing.lg),
+                  // Date picker row
+                  GestureDetector(
+                    onTap: () async {
+                      final now = DateTime.now();
+                      final initial = pickedDate.isBefore(now) ? now : pickedDate;
+                      final picked = await showDatePicker(
+                        context: ctx,
+                        initialDate: initial,
+                        firstDate: now,
+                        lastDate: DateTime(2040),
+                        builder: (dCtx, child) => Theme(
+                          data: Theme.of(dCtx).copyWith(
+                            colorScheme: Theme.of(dCtx).colorScheme.copyWith(
+                              primary: AppColors.primary,
+                              surface: AppColors.surfaceContainerHigh,
+                            ),
+                          ),
+                          child: child!,
+                        ),
+                      );
+                      if (picked != null) {
+                        setSheetState(() => pickedDate = picked);
+                      }
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.lg,
+                        vertical: AppSpacing.md,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppColors.surfaceContainerHighest,
+                        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(
+                            Icons.event_outlined,
+                            size: 20,
+                            color: AppColors.onSurfaceVariant,
+                          ),
+                          const SizedBox(width: AppSpacing.md),
+                          Expanded(
+                            child: Text(
+                              '${s.nextRenewalLabel}: ${_isoDate(pickedDate)}',
+                              style: AppTypography.bodyMd.copyWith(
+                                color: AppColors.onSurface,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.lg),
+                  // Reminder selector
+                  Text(
+                    s.reminderDaysBeforeLabel,
+                    style: AppTypography.labelSm.copyWith(
+                      color: AppColors.onSurfaceVariant,
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.sm),
+                  Row(
+                    children: reminderDays.map((d) {
+                      final isActive = pickedReminder == d;
+                      final isLast = d == reminderDays.last;
+                      return Expanded(
+                        child: Padding(
+                          padding: EdgeInsets.only(
+                            right: isLast ? 0 : AppSpacing.xs,
+                          ),
+                          child: GestureDetector(
+                            onTap: () =>
+                                setSheetState(() => pickedReminder = d),
+                            child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 150),
+                              height: 36,
+                              alignment: Alignment.center,
+                              decoration: BoxDecoration(
+                                color: isActive
+                                    ? AppColors.primary.withValues(alpha: 0.15)
+                                    : AppColors.surfaceContainerHighest,
+                                borderRadius: BorderRadius.circular(
+                                  AppSpacing.radiusMd,
+                                ),
+                                border: isActive
+                                    ? Border.all(
+                                        color: AppColors.primary,
+                                        width: 1.5,
+                                      )
+                                    : null,
+                              ),
+                              child: Text(
+                                s.reminderDaysOption(d),
+                                style: AppTypography.labelSm.copyWith(
+                                  fontWeight: isActive
+                                      ? FontWeight.w600
+                                      : FontWeight.w400,
+                                  color: isActive
+                                      ? AppColors.primary
+                                      : AppColors.onSurfaceVariant,
+                                  height: 1.0,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                  ),
                   const SizedBox(height: AppSpacing.xl),
                   FilledButton(
                     onPressed: () {
@@ -160,9 +280,7 @@ class _SubscriptionDetailPageState extends State<SubscriptionDetailPage> {
                       if (name.isEmpty) {
                         ScaffoldMessenger.of(ctx).showSnackBar(
                           SnackBar(
-                            content: Text(
-                              AppStrings.of(ctx).enterSubscriptionName,
-                            ),
+                            content: Text(s.enterSubscriptionName),
                             backgroundColor: AppColors.error,
                           ),
                         );
@@ -171,7 +289,7 @@ class _SubscriptionDetailPageState extends State<SubscriptionDetailPage> {
                       if (pendingAmount == null || pendingAmount! <= 0) {
                         ScaffoldMessenger.of(ctx).showSnackBar(
                           SnackBar(
-                            content: Text(AppStrings.of(ctx).enterValidAmount),
+                            content: Text(s.enterValidAmount),
                             backgroundColor: AppColors.error,
                           ),
                         );
@@ -179,6 +297,8 @@ class _SubscriptionDetailPageState extends State<SubscriptionDetailPage> {
                       }
                       savedName = name;
                       savedAmount = pendingAmount;
+                      savedDate = pickedDate;
+                      savedReminder = pickedReminder;
                       Navigator.of(ctx).pop();
                     },
                     style: FilledButton.styleFrom(
@@ -189,7 +309,7 @@ class _SubscriptionDetailPageState extends State<SubscriptionDetailPage> {
                         ),
                       ),
                     ),
-                    child: Text(AppStrings.of(ctx).save),
+                    child: Text(s.save),
                   ),
                 ],
               ),
@@ -199,16 +319,23 @@ class _SubscriptionDetailPageState extends State<SubscriptionDetailPage> {
       },
     );
 
-    if (savedName != null && savedAmount != null && mounted) {
+    if (savedName != null && savedAmount != null && savedDate != null && savedReminder != null && mounted) {
       context.read<SubscriptionsBloc>().add(
         SubscriptionUpdateRequested(
           id: _sub.id,
           name: savedName!,
           amount: savedAmount!,
+          nextRenewal: savedDate!,
+          reminderDaysBefore: savedReminder!,
         ),
       );
       setState(() {
-        _sub = _sub.copyWith(name: savedName, amount: savedAmount);
+        _sub = _sub.copyWith(
+          name: savedName,
+          amount: savedAmount,
+          nextRenewalDate: savedDate,
+          reminderDaysBefore: savedReminder,
+        );
       });
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(

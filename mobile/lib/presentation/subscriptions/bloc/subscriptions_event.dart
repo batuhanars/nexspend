@@ -32,9 +32,13 @@ class SubscriptionUpdateRequested extends SubscriptionsEvent {
     required this.id,
     required this.name,
     required this.amount,
+    required this.nextRenewal,
+    required this.reminderDaysBefore,
   });
   final String id;
   final String name;
   final double amount;
+  final DateTime nextRenewal;
+  final int reminderDaysBefore;
 }
 

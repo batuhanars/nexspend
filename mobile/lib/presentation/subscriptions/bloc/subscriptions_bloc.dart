@@ -109,17 +109,32 @@ class SubscriptionsBloc extends Bloc<SubscriptionsEvent, SubscriptionsState> {
     final current = state;
     if (current is SubscriptionsLoaded) {
       final updated = current.subscriptions.map((s) {
-        if (s.id == event.id) return s.copyWith(name: event.name, amount: event.amount);
+        if (s.id == event.id) {
+          return s.copyWith(
+            name: event.name,
+            amount: event.amount,
+            nextRenewalDate: event.nextRenewal,
+            reminderDaysBefore: event.reminderDaysBefore,
+          );
+        }
         return s;
       }).toList();
       emit(current.copyWith(subscriptions: updated));
     }
     try {
-      await _repo.update(event.id, {'name': event.name, 'amount': event.amount});
+      await _repo.update(event.id, {
+        'name': event.name,
+        'amount': event.amount,
+        'nextRenewal': _isoDate(event.nextRenewal),
+        'reminderDaysBefore': event.reminderDaysBefore,
+      });
     } catch (_) {
       if (current is SubscriptionsLoaded) emit(current);
     }
   }
+
+  String _isoDate(DateTime d) =>
+      '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
 
   String _parseError(Object e) {
     final msg = e.toString();

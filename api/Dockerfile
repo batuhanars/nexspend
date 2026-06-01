@@ -33,7 +33,9 @@ FROM node:24-bookworm-slim AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
-ENV PORT=3000
+# PORT sabitlenmez: Railway gibi platformlar dinamik PORT enjekte eder; sabit 3000
+# onu ezerse healthcheck/routing 502 verir. Lokal'de docker-compose PORT=3000 verir,
+# yoksa uygulama app.config'te 3000'e düşer.
 
 # Prisma şema motoru için runtime openssl.
 RUN apt-get update \

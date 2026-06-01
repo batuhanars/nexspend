@@ -6,11 +6,11 @@ import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart
 import 'package:image_picker/image_picker.dart';
 import 'package:wallet_app/core/l10n/app_strings.dart';
 import 'package:wallet_app/core/services/app_events.dart';
+import 'package:wallet_app/core/theme/app_palette.dart';
 import 'package:wallet_app/presentation/receipt_scanner/widgets/scanner/capture_button.dart';
 import 'package:wallet_app/presentation/receipt_scanner/widgets/scanner/circle_button.dart';
 import 'package:wallet_app/presentation/receipt_scanner/widgets/scanner/error_view.dart';
 
-import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
 import '../../../core/di/injection.dart';
@@ -120,9 +120,9 @@ class _ReceiptScannerPageState extends State<ReceiptScannerPage>
       await _processImage(file.path);
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(AppStrings.of(context).photoCaptureError(e.toString()))));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(AppStrings.of(context).photoCaptureError(e.toString()))),
+        );
       }
     } finally {
       if (mounted) setState(() => _isProcessing = false);
@@ -177,15 +177,9 @@ class _ReceiptScannerPageState extends State<ReceiptScannerPage>
 
       if (!mounted) return;
       if (confirmed == true) {
-        // Snackbar ÖNCE göster (context hâlâ geçerli), sonra pop et.
-        // Snackbar MaterialApp root ScaffoldMessenger'a bağlı olduğundan
-        // pop sonrasında home ekranında görünmeye devam eder.
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(AppStrings.of(context).transactionCreatedSuccess)),
         );
-        // AppEvents singleton aracılığıyla DashboardPage'e refresh sinyali.
-        // parentNavigatorKey route'undan BlocProvider scope'una erişilemediği
-        // için doğrudan context.read<DashboardBloc>() çalışmaz.
         getIt<AppEvents>().transactionAdded();
         context.pop();
       }
@@ -228,8 +222,7 @@ class _ReceiptScannerPageState extends State<ReceiptScannerPage>
   double _estimateConfidence(String text) {
     if (text.isEmpty) return 0.0;
     final hasAmount = RegExp(r'\d+[.,]\d{2}').hasMatch(text);
-    final hasDate =
-        RegExp(r'\d{2}[./]\d{2}[./]\d{4}').hasMatch(text);
+    final hasDate = RegExp(r'\d{2}[./]\d{2}[./]\d{4}').hasMatch(text);
     if (hasAmount && hasDate) return 0.7;
     if (hasAmount) return 0.5;
     return 0.3;
@@ -237,6 +230,7 @@ class _ReceiptScannerPageState extends State<ReceiptScannerPage>
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return Scaffold(
       backgroundColor: Colors.black,
       body: Stack(
@@ -244,8 +238,8 @@ class _ReceiptScannerPageState extends State<ReceiptScannerPage>
         children: [
           // Camera preview
           if (_isInitializing)
-            const Center(
-              child: CircularProgressIndicator(color: AppColors.primary),
+            Center(
+              child: CircularProgressIndicator(color: colors.primary),
             )
           else if (_cameraNotFound)
             ErrorView(error: AppStrings.of(context).cameraNotFound, onRetry: _initCamera)
@@ -271,9 +265,7 @@ class _ReceiptScannerPageState extends State<ReceiptScannerPage>
                     IconButton(
                       onPressed: () => context.pop(),
                       icon: const Icon(Icons.close, color: Colors.white),
-                      style: IconButton.styleFrom(
-                        backgroundColor: Colors.black38,
-                      ),
+                      style: IconButton.styleFrom(backgroundColor: Colors.black38),
                     ),
                     Text(
                       AppStrings.of(context).scanReceiptTitle,
@@ -285,9 +277,7 @@ class _ReceiptScannerPageState extends State<ReceiptScannerPage>
                         _flashOn ? Icons.flash_on : Icons.flash_off,
                         color: _flashOn ? Colors.yellow : Colors.white,
                       ),
-                      style: IconButton.styleFrom(
-                        backgroundColor: Colors.black38,
-                      ),
+                      style: IconButton.styleFrom(backgroundColor: Colors.black38),
                     ),
                   ],
                 ),
@@ -318,18 +308,15 @@ class _ReceiptScannerPageState extends State<ReceiptScannerPage>
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  // Gallery button
                   CircleButton(
                     icon: Icons.photo_library_outlined,
                     onTap: _isProcessing ? null : _pickFromGallery,
                     label: AppStrings.of(context).gallery,
                   ),
-                  // Capture button
                   CaptureButton(
                     isProcessing: _isProcessing,
                     onTap: _captureAndProcess,
                   ),
-                  // Spacer to balance gallery
                   const SizedBox(width: 64),
                 ],
               ),
@@ -344,7 +331,7 @@ class _ReceiptScannerPageState extends State<ReceiptScannerPage>
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const CircularProgressIndicator(color: AppColors.primary),
+                    CircularProgressIndicator(color: colors.primary),
                     const SizedBox(height: AppSpacing.md),
                     Text(
                       AppStrings.of(context).receiptAnalyzing,

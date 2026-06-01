@@ -1,10 +1,10 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:wallet_app/core/l10n/app_strings.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:wallet_app/core/constants/app_colors.dart';
 import 'package:wallet_app/core/constants/app_spacing.dart';
 import 'package:wallet_app/core/constants/app_typography.dart';
 import 'package:wallet_app/core/di/injection.dart';
+import 'package:wallet_app/core/theme/app_palette.dart';
 import 'package:wallet_app/data/repositories/receipt_repository.dart';
 import 'package:wallet_app/presentation/receipt_scanner/bloc/receipt_history_bloc.dart';
 import 'package:wallet_app/presentation/receipt_scanner/widgets/receipt_history_tile.dart';
@@ -28,10 +28,11 @@ class _ReceiptHistoryView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return Scaffold(
-      backgroundColor: AppColors.surface,
+      backgroundColor: colors.surface,
       appBar: AppBar(
-        backgroundColor: AppColors.surface,
+        backgroundColor: colors.surface,
         surfaceTintColor: Colors.transparent,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_rounded),
@@ -42,8 +43,8 @@ class _ReceiptHistoryView extends StatelessWidget {
       ),
       body: BlocBuilder<ReceiptHistoryBloc, ReceiptHistoryState>(
         builder: (context, state) => switch (state) {
-          ReceiptHistoryLoading() => const Center(
-              child: CircularProgressIndicator(color: AppColors.primary),
+          ReceiptHistoryLoading() => Center(
+              child: CircularProgressIndicator(color: colors.primary),
             ),
           ReceiptHistoryError(:final message) => Center(
               child: Column(
@@ -51,8 +52,7 @@ class _ReceiptHistoryView extends StatelessWidget {
                 children: [
                   Text(
                     message,
-                    style: AppTypography.bodyMd
-                        .copyWith(color: AppColors.onSurfaceVariant),
+                    style: AppTypography.bodyMd.copyWith(color: colors.onSurfaceVariant),
                   ),
                   const SizedBox(height: AppSpacing.lg),
                   FilledButton.tonal(
@@ -72,27 +72,25 @@ class _ReceiptHistoryView extends StatelessWidget {
                   Icon(
                     Icons.receipt_long_outlined,
                     size: 56,
-                    color: AppColors.onSurfaceVariant,
+                    color: colors.onSurfaceVariant,
                   ),
                   const SizedBox(height: AppSpacing.lg),
                   Text(
                     AppStrings.of(context).noReceiptsYet,
-                    style: AppTypography.bodyMd
-                        .copyWith(color: AppColors.onSurfaceVariant),
+                    style: AppTypography.bodyMd.copyWith(color: colors.onSurfaceVariant),
                   ),
                 ],
               ),
             ),
           ReceiptHistoryLoaded(:final receipts) => RefreshIndicator(
-              color: AppColors.primary,
+              color: colors.primary,
               onRefresh: () async => context
                   .read<ReceiptHistoryBloc>()
                   .add(ReceiptHistoryRefreshRequested()),
               child: ListView.builder(
                 padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
                 itemCount: receipts.length,
-                itemBuilder: (_, i) =>
-                    ReceiptHistoryTile(receipt: receipts[i]),
+                itemBuilder: (_, i) => ReceiptHistoryTile(receipt: receipts[i]),
               ),
             ),
           _ => const SizedBox.shrink(),

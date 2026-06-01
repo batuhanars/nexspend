@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:wallet_app/core/constants/app_colors.dart';
 import 'package:wallet_app/core/constants/app_spacing.dart';
+import 'package:wallet_app/core/theme/app_palette.dart';
 import 'package:wallet_app/core/utils/date_formatter.dart';
 import 'package:wallet_app/presentation/receipt_scanner/bloc/receipt_preview_bloc.dart';
 
@@ -11,6 +11,7 @@ class DateField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return InkWell(
       onTap: () async {
         final picked = await showDatePicker(
@@ -20,11 +21,11 @@ class DateField extends StatelessWidget {
           lastDate: DateTime.now(),
           builder: (ctx, child) => Theme(
             data: Theme.of(ctx).copyWith(
-              colorScheme: const ColorScheme.dark(
-                primary: AppColors.primary,
-                onPrimary: AppColors.onPrimary,
-                surface: AppColors.surfaceContainerHigh,
-                onSurface: AppColors.onSurface,
+              colorScheme: ColorScheme.dark(
+                primary: ctx.colors.primary,
+                onPrimary: ctx.colors.onPrimary,
+                surface: ctx.colors.surfaceContainerHigh,
+                onSurface: ctx.colors.onSurface,
               ),
             ),
             child: child!,
@@ -43,27 +44,19 @@ class DateField extends StatelessWidget {
           vertical: AppSpacing.lg,
         ),
         decoration: BoxDecoration(
-          color: AppColors.surfaceContainerHighest,
+          color: colors.surfaceContainerHighest,
           borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
         ),
         child: Row(
           children: [
-            const Icon(
-              Icons.calendar_today_outlined,
-              size: 20,
-              color: AppColors.onSurfaceVariant,
-            ),
+            Icon(Icons.calendar_today_outlined, size: 20, color: colors.onSurfaceVariant),
             const SizedBox(width: AppSpacing.md),
             Text(
               DateFormatter.formatLong(state.effectiveDate, context),
-              style: const TextStyle(color: AppColors.onSurface, fontSize: 14),
+              style: TextStyle(color: colors.onSurface, fontSize: 14),
             ),
             const Spacer(),
-            const Icon(
-              Icons.chevron_right,
-              size: 20,
-              color: AppColors.onSurfaceVariant,
-            ),
+            Icon(Icons.chevron_right, size: 20, color: colors.onSurfaceVariant),
           ],
         ),
       ),

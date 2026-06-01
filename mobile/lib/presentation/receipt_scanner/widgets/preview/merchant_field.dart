@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:wallet_app/core/constants/app_colors.dart';
 import 'package:wallet_app/core/l10n/app_strings.dart';
+import 'package:wallet_app/core/theme/app_palette.dart';
 import 'package:wallet_app/presentation/receipt_scanner/bloc/receipt_preview_bloc.dart';
 import 'package:wallet_app/presentation/receipt_scanner/helper/input_decoration.dart';
 
@@ -16,18 +16,20 @@ class MerchantField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return TextField(
       controller: controller,
-      style: const TextStyle(color: AppColors.onSurface, fontSize: 14),
+      style: TextStyle(color: colors.onSurface, fontSize: 14),
       onChanged: (v) => context.read<ReceiptPreviewBloc>().add(
         ReceiptPreviewFieldUpdated(merchantName: v),
       ),
       decoration: inputDecoration(
         hint: AppStrings.of(context).merchantNameHint,
-        prefix: const Icon(
+        colors: colors,
+        prefix: Icon(
           Icons.storefront_outlined,
           size: 20,
-          color: AppColors.onSurfaceVariant,
+          color: colors.onSurfaceVariant,
         ),
       ),
     );

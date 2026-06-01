@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:wallet_app/core/constants/app_colors.dart';
 import 'package:wallet_app/core/constants/app_spacing.dart';
 import 'package:wallet_app/core/constants/app_typography.dart';
 import 'package:wallet_app/core/l10n/app_strings.dart';
+import 'package:wallet_app/core/theme/app_palette.dart';
 import 'package:wallet_app/data/models/receipt_model.dart';
 import 'package:wallet_app/presentation/receipt_scanner/widgets/preview/item_row.dart';
 
@@ -12,19 +12,18 @@ class ItemsSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           AppStrings.of(context).productsLabel,
-          style: AppTypography.labelSm.copyWith(
-            color: AppColors.onSurfaceVariant,
-          ),
+          style: AppTypography.labelSm.copyWith(color: colors.onSurfaceVariant),
         ),
         const SizedBox(height: AppSpacing.sm),
         Container(
           decoration: BoxDecoration(
-            color: AppColors.surfaceContainerHigh,
+            color: colors.surfaceContainerHigh,
             borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
           ),
           child: Column(

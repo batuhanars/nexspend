@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:wallet_app/core/constants/api_endpoints.dart';
-import 'package:wallet_app/core/constants/app_colors.dart';
+import 'package:wallet_app/core/theme/app_palette.dart';
 import 'package:wallet_app/core/widgets/authenticated_image.dart';
 
 class ReceiptImageViewerPage extends StatelessWidget {
@@ -10,6 +10,7 @@ class ReceiptImageViewerPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
@@ -30,8 +31,8 @@ class ReceiptImageViewerPage extends StatelessWidget {
               urlPath: ApiEndpoints.receiptImage(receiptId),
               cacheKey: receiptId,
               fit: BoxFit.contain,
-              placeholder: const Center(
-                child: CircularProgressIndicator(color: AppColors.primary),
+              placeholder: Center(
+                child: CircularProgressIndicator(color: colors.primary),
               ),
               errorWidget: const Center(
                 child: Icon(

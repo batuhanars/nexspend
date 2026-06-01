@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:wallet_app/core/theme/app_palette.dart';
 import 'package:wallet_app/presentation/receipt_scanner/utils/corner_painter.dart';
 
 class CornerMarks extends StatelessWidget {
@@ -11,7 +12,7 @@ class CornerMarks extends StatelessWidget {
     return SizedBox(
       width: width,
       height: height,
-      child: CustomPaint(painter: CornerPainter()),
+      child: CustomPaint(painter: CornerPainter(color: context.colors.primary)),
     );
   }
 }

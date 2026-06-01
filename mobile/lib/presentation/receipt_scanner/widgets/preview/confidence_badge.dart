@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:wallet_app/core/constants/app_colors.dart';
 import 'package:wallet_app/core/constants/app_typography.dart';
 import 'package:wallet_app/core/l10n/app_strings.dart';
+import 'package:wallet_app/core/theme/app_palette.dart';
 
 class ConfidenceBadge extends StatelessWidget {
   const ConfidenceBadge({super.key, required this.confidence});
@@ -9,12 +9,13 @@ class ConfidenceBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     final pct = (confidence * 100).round();
     final color = pct >= 70
-        ? AppColors.secondary
+        ? colors.success
         : pct >= 40
-        ? AppColors.tertiary
-        : AppColors.error;
+        ? colors.warning
+        : colors.error;
 
     return Row(
       children: [

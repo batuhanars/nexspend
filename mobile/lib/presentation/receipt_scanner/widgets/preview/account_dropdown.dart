@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:wallet_app/core/constants/app_colors.dart';
 import 'package:wallet_app/core/constants/app_spacing.dart';
 import 'package:wallet_app/core/constants/app_typography.dart';
 import 'package:wallet_app/core/l10n/app_strings.dart';
+import 'package:wallet_app/core/theme/app_palette.dart';
 import 'package:wallet_app/data/models/account_model.dart';
 import 'package:wallet_app/navigation/route_names.dart';
 import 'package:wallet_app/presentation/receipt_scanner/bloc/receipt_preview_bloc.dart';
@@ -16,6 +16,7 @@ class AccountDropdown extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     final hint = state.result.suggestedAccountHint;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -23,14 +24,15 @@ class AccountDropdown extends StatelessWidget {
         if (state.accounts.isNotEmpty)
           DropdownButtonFormField<String>(
             initialValue: state.selectedAccountId,
-            dropdownColor: AppColors.surfaceContainerHigh,
-            style: const TextStyle(color: AppColors.onSurface, fontSize: 14),
+            dropdownColor: colors.surfaceContainerHigh,
+            style: TextStyle(color: colors.onSurface, fontSize: 14),
             decoration: inputDecoration(
               hint: AppStrings.of(context).selectAccountHint,
-              prefix: const Icon(
+              colors: colors,
+              prefix: Icon(
                 Icons.account_balance_wallet_outlined,
                 size: 20,
-                color: AppColors.onSurfaceVariant,
+                color: colors.onSurfaceVariant,
               ),
             ),
             items: state.accounts
@@ -54,10 +56,7 @@ class AccountDropdown extends StatelessWidget {
     );
   }
 
-  Future<void> _openAddAccount(
-    BuildContext context,
-    String? paymentMethod,
-  ) async {
+  Future<void> _openAddAccount(BuildContext context, String? paymentMethod) async {
     final bloc = context.read<ReceiptPreviewBloc>();
     final result = await GoRouter.of(context).push<AccountModel>(
       RouteNames.addAccount,
@@ -89,8 +88,9 @@ class _AddAccountCta extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return Material(
-      color: AppColors.primary.withValues(alpha: 0.10),
+      color: colors.primary.withValues(alpha: 0.10),
       borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
       child: InkWell(
         borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
@@ -102,26 +102,18 @@ class _AddAccountCta extends StatelessWidget {
           ),
           child: Row(
             children: [
-              const Icon(
-                Icons.add_circle_outline_rounded,
-                size: 18,
-                color: AppColors.primary,
-              ),
+              Icon(Icons.add_circle_outline_rounded, size: 18, color: colors.primary),
               const SizedBox(width: AppSpacing.sm),
               Expanded(
                 child: Text(
                   label,
                   style: AppTypography.bodySm.copyWith(
-                    color: AppColors.primary,
+                    color: colors.primary,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
               ),
-              const Icon(
-                Icons.chevron_right_rounded,
-                size: 18,
-                color: AppColors.primary,
-              ),
+              Icon(Icons.chevron_right_rounded, size: 18, color: colors.primary),
             ],
           ),
         ),

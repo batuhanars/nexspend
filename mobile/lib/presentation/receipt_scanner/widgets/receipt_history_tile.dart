@@ -1,11 +1,11 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:wallet_app/core/l10n/app_strings.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:wallet_app/core/constants/api_endpoints.dart';
-import 'package:wallet_app/core/constants/app_colors.dart';
 import 'package:wallet_app/core/constants/app_spacing.dart';
 import 'package:wallet_app/core/constants/app_typography.dart';
+import 'package:wallet_app/core/theme/app_palette.dart';
 import 'package:wallet_app/core/utils/currency_formatter.dart';
 import 'package:wallet_app/core/widgets/authenticated_image.dart';
 import 'package:wallet_app/data/models/receipt_model.dart';
@@ -16,16 +16,33 @@ class ReceiptHistoryTile extends StatelessWidget {
   const ReceiptHistoryTile({super.key, required this.receipt});
   final ReceiptHistoryModel receipt;
 
+  Color _statusColor(AppPalette colors) => switch (receipt.status) {
+        ReceiptStatus.CONFIRMED => colors.success,
+        ReceiptStatus.PARSED => colors.primary,
+        ReceiptStatus.PROCESSING => colors.warning,
+        ReceiptStatus.FAILED => colors.error,
+      };
+
+  IconData get _statusIcon => switch (receipt.status) {
+        ReceiptStatus.CONFIRMED => Icons.check_circle_outline_rounded,
+        ReceiptStatus.PARSED => Icons.receipt_long_outlined,
+        ReceiptStatus.PROCESSING => Icons.hourglass_empty_rounded,
+        ReceiptStatus.FAILED => Icons.error_outline_rounded,
+      };
+
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
+    final statusColor = _statusColor(colors);
+
     return Dismissible(
       key: ValueKey(receipt.id),
       direction: DismissDirection.endToStart,
       background: Container(
         alignment: Alignment.centerRight,
         padding: const EdgeInsets.only(right: AppSpacing.xl),
-        color: AppColors.errorContainer,
-        child: const Icon(Icons.delete_outline_rounded, color: AppColors.error),
+        color: colors.errorContainer,
+        child: Icon(Icons.delete_outline_rounded, color: colors.error),
       ),
       confirmDismiss: (_) => _confirmDelete(context),
       onDismissed: (_) => context
@@ -37,7 +54,7 @@ class ReceiptHistoryTile extends StatelessWidget {
           vertical: AppSpacing.xs,
         ),
         child: Material(
-          color: AppColors.surfaceContainerHigh,
+          color: colors.surfaceContainerHigh,
           borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
           child: InkWell(
             borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
@@ -48,7 +65,7 @@ class ReceiptHistoryTile extends StatelessWidget {
               padding: const EdgeInsets.all(AppSpacing.lg),
               child: Row(
                 children: [
-                  _buildLeading(),
+                  _buildLeading(statusColor),
                   const SizedBox(width: AppSpacing.md),
                   Expanded(
                     child: Column(
@@ -65,7 +82,7 @@ class ReceiptHistoryTile extends StatelessWidget {
                               ? _formatDate(receipt.date!)
                               : AppStrings.of(context).unknownDate,
                           style: AppTypography.bodySm
-                              .copyWith(color: AppColors.onSurfaceVariant),
+                              .copyWith(color: colors.onSurfaceVariant),
                         ),
                       ],
                     ),
@@ -77,7 +94,7 @@ class ReceiptHistoryTile extends StatelessWidget {
                         Text(
                           CurrencyFormatter.format(receipt.amount!),
                           style: AppTypography.titleSm
-                              .copyWith(color: AppColors.tertiary),
+                              .copyWith(color: colors.expense),
                         ),
                       const SizedBox(height: AppSpacing.xs),
                       _StatusBadge(status: receipt.status),
@@ -92,15 +109,15 @@ class ReceiptHistoryTile extends StatelessWidget {
     );
   }
 
-  Widget _buildLeading() {
+  Widget _buildLeading(Color statusColor) {
     final placeholder = Container(
       width: 44,
       height: 44,
       decoration: BoxDecoration(
-        color: _statusColor.withValues(alpha: 0.12),
+        color: statusColor.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
       ),
-      child: Icon(_statusIcon, color: _statusColor, size: 22),
+      child: Icon(_statusIcon, color: statusColor, size: 22),
     );
     if (!receipt.hasImage) return placeholder;
     return ClipRRect(
@@ -119,45 +136,33 @@ class ReceiptHistoryTile extends StatelessWidget {
     );
   }
 
-  Color get _statusColor => switch (receipt.status) {
-        ReceiptStatus.CONFIRMED => AppColors.secondary,
-        ReceiptStatus.PARSED => AppColors.primary,
-        ReceiptStatus.PROCESSING => AppColors.warning,
-        ReceiptStatus.FAILED => AppColors.error,
-      };
-
-  IconData get _statusIcon => switch (receipt.status) {
-        ReceiptStatus.CONFIRMED => Icons.check_circle_outline_rounded,
-        ReceiptStatus.PARSED => Icons.receipt_long_outlined,
-        ReceiptStatus.PROCESSING => Icons.hourglass_empty_rounded,
-        ReceiptStatus.FAILED => Icons.error_outline_rounded,
-      };
-
   String _formatDate(DateTime d) =>
       '${d.day.toString().padLeft(2, '0')}.${d.month.toString().padLeft(2, '0')}.${d.year}';
 
   Future<bool?> _confirmDelete(BuildContext context) {
     return showDialog<bool>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: AppColors.surfaceContainerHigh,
-        title: Text(AppStrings.of(context).deleteReceiptTitle, style: AppTypography.titleSm),
-        content: Text(
-          AppStrings.of(context).receiptDeleteContent,
-          style:
-              AppTypography.bodyMd.copyWith(color: AppColors.onSurfaceVariant),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(false),
-            child: Text(AppStrings.of(context).cancel),
+      builder: (ctx) {
+        final colors = ctx.colors;
+        return AlertDialog(
+          backgroundColor: colors.surfaceContainerHigh,
+          title: Text(AppStrings.of(context).deleteReceiptTitle, style: AppTypography.titleSm),
+          content: Text(
+            AppStrings.of(context).receiptDeleteContent,
+            style: AppTypography.bodyMd.copyWith(color: colors.onSurfaceVariant),
           ),
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(true),
-            child: Text(AppStrings.of(context).delete, style: TextStyle(color: AppColors.error)),
-          ),
-        ],
-      ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(false),
+              child: Text(AppStrings.of(context).cancel),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(true),
+              child: Text(AppStrings.of(context).delete, style: TextStyle(color: colors.error)),
+            ),
+          ],
+        );
+      },
     );
   }
 }
@@ -168,16 +173,16 @@ class _StatusBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     final s = AppStrings.of(context);
     final (label, color) = switch (status) {
-      ReceiptStatus.CONFIRMED => (s.receiptStatusConfirmed, AppColors.secondary),
-      ReceiptStatus.PARSED => (s.receiptStatusParsed, AppColors.primary),
-      ReceiptStatus.PROCESSING => (s.receiptStatusProcessing, AppColors.warning),
-      ReceiptStatus.FAILED => (s.receiptStatusFailed, AppColors.error),
+      ReceiptStatus.CONFIRMED => (s.receiptStatusConfirmed, colors.success),
+      ReceiptStatus.PARSED => (s.receiptStatusParsed, colors.primary),
+      ReceiptStatus.PROCESSING => (s.receiptStatusProcessing, colors.warning),
+      ReceiptStatus.FAILED => (s.receiptStatusFailed, colors.error),
     };
     return Container(
-      padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.sm, vertical: 2),
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: 2),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(AppSpacing.radiusSm),

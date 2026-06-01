@@ -1,29 +1,30 @@
 import 'package:flutter/material.dart';
-import 'package:wallet_app/core/constants/app_colors.dart';
 import 'package:wallet_app/core/constants/app_spacing.dart';
+import 'package:wallet_app/core/theme/app_palette.dart';
 
 InputDecoration inputDecoration({
   required String hint,
+  required AppPalette colors,
   Widget? prefix,
   String? prefixText,
 }) =>
     InputDecoration(
       hintText: hint,
-      hintStyle: const TextStyle(
-        color: AppColors.onSurfaceVariant,
+      hintStyle: TextStyle(
+        color: colors.onSurfaceVariant,
         fontSize: 14,
       ),
       prefixIcon: prefix,
       prefixText: prefixText,
       prefixStyle: prefixText != null
-          ? const TextStyle(
-              color: AppColors.onSurfaceVariant,
+          ? TextStyle(
+              color: colors.onSurfaceVariant,
               fontSize: 16,
               fontWeight: FontWeight.w500,
             )
           : null,
       filled: true,
-      fillColor: AppColors.surfaceContainerHighest,
+      fillColor: colors.surfaceContainerHighest,
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
         borderSide: BorderSide.none,
@@ -34,6 +35,6 @@ InputDecoration inputDecoration({
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-        borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
+        borderSide: BorderSide(color: colors.primary, width: 1.5),
       ),
     );

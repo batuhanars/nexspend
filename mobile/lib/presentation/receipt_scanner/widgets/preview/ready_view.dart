@@ -1,6 +1,9 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:wallet_app/core/l10n/app_strings.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:wallet_app/core/constants/app_spacing.dart';
+import 'package:wallet_app/core/constants/app_typography.dart';
+import 'package:wallet_app/core/theme/app_palette.dart';
 import 'package:wallet_app/presentation/receipt_scanner/bloc/receipt_preview_bloc.dart';
 import 'package:wallet_app/presentation/receipt_scanner/widgets/preview/account_dropdown.dart';
 import 'package:wallet_app/presentation/receipt_scanner/widgets/preview/amount_field.dart';
@@ -13,9 +16,6 @@ import 'package:wallet_app/presentation/receipt_scanner/widgets/preview/field_la
 import 'package:wallet_app/presentation/receipt_scanner/widgets/preview/image_thumbnail.dart';
 import 'package:wallet_app/presentation/receipt_scanner/widgets/preview/items_section.dart';
 import 'package:wallet_app/presentation/receipt_scanner/widgets/preview/merchant_field.dart';
-import '../../../../core/constants/app_colors.dart';
-import '../../../../core/constants/app_spacing.dart';
-import '../../../../core/constants/app_typography.dart';
 
 class ReadyView extends StatefulWidget {
   const ReadyView({super.key, required this.imagePath, required this.state});
@@ -57,25 +57,26 @@ class _ReadyViewState extends State<ReadyView> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     _syncControllers(widget.state);
     final s = widget.state;
 
     return Scaffold(
-      backgroundColor: AppColors.surface,
+      backgroundColor: colors.surface,
       appBar: AppBar(
         title: Text(AppStrings.of(context).receiptPreviewTitle),
-        backgroundColor: AppColors.surface,
+        backgroundColor: colors.surface,
         surfaceTintColor: Colors.transparent,
         actions: [
           if (s.isSubmitting)
-            const Padding(
-              padding: EdgeInsets.only(right: AppSpacing.lg),
+            Padding(
+              padding: const EdgeInsets.only(right: AppSpacing.lg),
               child: SizedBox(
                 width: 20,
                 height: 20,
                 child: CircularProgressIndicator(
                   strokeWidth: 2,
-                  color: AppColors.primary,
+                  color: colors.primary,
                 ),
               ),
             )
@@ -87,7 +88,7 @@ class _ReadyViewState extends State<ReadyView> {
               child: Text(
                 AppStrings.of(context).save,
                 style: AppTypography.bodyMd.copyWith(
-                  color: AppColors.primary,
+                  color: colors.primary,
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -138,10 +139,7 @@ class _ReadyViewState extends State<ReadyView> {
           CategoryDropdown(state: s),
           const SizedBox(height: AppSpacing.lg),
 
-          // Budget scope (Kişisel / ortak bütçe):
-          // - Kilitliyse her zaman göster (tek chip kullanıcının nereden geldiğini belirtir).
-          // - Kilitli değilse sadece eşleşen ortak bütçe varsa göster; yoksa
-          //   etiketiyle birlikte komple gizle.
+          // Budget scope
           if (s.isBudgetLocked || s.sharedBudgetsForSelectedCategory.isNotEmpty) ...[
             FieldLabel(text: AppStrings.of(context).budgetScopeLabel),
             const SizedBox(height: AppSpacing.sm),
@@ -172,8 +170,8 @@ class _ReadyViewState extends State<ReadyView> {
                       const ReceiptPreviewConfirmed(),
                     ),
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                foregroundColor: AppColors.onPrimary,
+                backgroundColor: colors.primary,
+                foregroundColor: colors.onPrimary,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
                 ),
@@ -182,7 +180,7 @@ class _ReadyViewState extends State<ReadyView> {
                 AppStrings.of(context).addTransactionBtn,
                 style: AppTypography.titleSm.copyWith(
                   fontWeight: FontWeight.w600,
-                  color: AppColors.onPrimary,
+                  color: colors.onPrimary,
                 ),
               ),
             ),
@@ -196,8 +194,8 @@ class _ReadyViewState extends State<ReadyView> {
             child: OutlinedButton(
               onPressed: () => Navigator.of(context).pop(),
               style: OutlinedButton.styleFrom(
-                foregroundColor: AppColors.onSurface,
-                side: const BorderSide(color: AppColors.onSurfaceVariant),
+                foregroundColor: colors.onSurface,
+                side: BorderSide(color: colors.onSurfaceVariant),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
                 ),

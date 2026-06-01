@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:wallet_app/core/constants/app_colors.dart';
+import 'package:wallet_app/core/theme/app_palette.dart';
 import 'package:wallet_app/presentation/receipt_scanner/bloc/receipt_preview_bloc.dart';
 import 'package:wallet_app/presentation/receipt_scanner/helper/input_decoration.dart';
 
@@ -11,10 +11,11 @@ class AmountField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return TextField(
       controller: controller,
       keyboardType: const TextInputType.numberWithOptions(decimal: true),
-      style: const TextStyle(color: AppColors.onSurface, fontSize: 14),
+      style: TextStyle(color: colors.onSurface, fontSize: 14),
       onChanged: (v) {
         final amount = double.tryParse(v.replaceAll(',', '.'));
         if (amount != null) {
@@ -25,13 +26,14 @@ class AmountField extends StatelessWidget {
       },
       decoration: inputDecoration(
         hint: '0,00',
+        colors: colors,
         prefix: SizedBox(
           width: 40,
           child: Center(
             child: Text(
               '₺',
               style: TextStyle(
-                color: AppColors.onSurfaceVariant,
+                color: colors.onSurfaceVariant,
                 fontSize: 16,
                 fontWeight: FontWeight.w500,
               ),

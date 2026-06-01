@@ -1,8 +1,8 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:wallet_app/core/l10n/app_strings.dart';
-import 'package:wallet_app/core/constants/app_colors.dart';
 import 'package:wallet_app/core/constants/app_spacing.dart';
 import 'package:wallet_app/core/constants/app_typography.dart';
+import 'package:wallet_app/core/theme/app_palette.dart';
 
 class ErrorView extends StatelessWidget {
   const ErrorView({super.key, required this.error, required this.onRetry});
@@ -11,28 +11,27 @@ class ErrorView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.xl),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(
+            Icon(
               Icons.camera_alt_outlined,
-              color: AppColors.onSurfaceVariant,
+              color: colors.onSurfaceVariant,
               size: 48,
             ),
             const SizedBox(height: AppSpacing.lg),
             Text(
               AppStrings.of(context).cameraStartFailed,
-              style: AppTypography.titleSm.copyWith(color: AppColors.onSurface),
+              style: AppTypography.titleSm.copyWith(color: colors.onSurface),
             ),
             const SizedBox(height: AppSpacing.sm),
             Text(
               error,
-              style: AppTypography.bodySm.copyWith(
-                color: AppColors.onSurfaceVariant,
-              ),
+              style: AppTypography.bodySm.copyWith(color: colors.onSurfaceVariant),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: AppSpacing.xl),

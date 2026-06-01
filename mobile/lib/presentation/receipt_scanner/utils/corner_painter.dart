@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 
-import '../../../core/constants/app_colors.dart';
-
 class CornerPainter extends CustomPainter {
+  const CornerPainter({required this.color});
+  final Color color;
+
   @override
   void paint(Canvas canvas, Size size) {
     const len = 24.0;
     const r = 8.0;
     final paint = Paint()
-      ..color = AppColors.primary
+      ..color = color
       ..strokeWidth = 3
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round;
@@ -75,5 +76,5 @@ class CornerPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(_) => false;
+  bool shouldRepaint(CornerPainter old) => old.color != color;
 }

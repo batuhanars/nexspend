@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/l10n/app_strings.dart';
+import '../../../../core/theme/app_palette.dart';
 import '../../../../data/models/family_model.dart';
 import '../../bloc/receipt_preview_bloc.dart';
 
@@ -80,6 +80,7 @@ class _Chip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
@@ -89,15 +90,13 @@ class _Chip extends StatelessWidget {
           vertical: AppSpacing.sm,
         ),
         decoration: BoxDecoration(
-          color: selected
-              ? AppColors.primary
-              : AppColors.surfaceContainerHighest,
+          color: selected ? colors.primary : colors.surfaceContainerHighest,
           borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
         ),
         child: Text(
           label,
           style: AppTypography.bodySm.copyWith(
-            color: selected ? AppColors.onPrimary : AppColors.onSurface,
+            color: selected ? colors.onPrimary : colors.onSurface,
             fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
           ),
         ),

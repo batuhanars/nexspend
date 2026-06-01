@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:wallet_app/core/constants/app_colors.dart';
 import 'package:wallet_app/core/constants/app_typography.dart';
+import 'package:wallet_app/core/theme/app_palette.dart';
 
 class FieldLabel extends StatelessWidget {
   const FieldLabel({super.key, required this.text});
@@ -9,6 +9,6 @@ class FieldLabel extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Text(
     text,
-    style: AppTypography.labelSm.copyWith(color: AppColors.onSurfaceVariant),
+    style: AppTypography.labelSm.copyWith(color: context.colors.onSurfaceVariant),
   );
 }

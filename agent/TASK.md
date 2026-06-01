@@ -1,6 +1,6 @@
 # Stitch Wallet App — Görev Takip Dosyası
 
-> Son güncelleme: 1 Haziran 2026 (Tema Sistemi S7 tamamlandı — debts migrate, status + alacak/borç renkleri korundu; commit `10d622a`, `origin/main`'e push edildi, analyze temiz + test 149 ✅)  
+> Son güncelleme: 1 Haziran 2026 (Tema Sistemi S8 tamamlandı — subscriptions migrate; commit `604ffc3`, `origin/main`'e push edildi, analyze temiz + test 149 ✅)  
 > ✅ = Tamamlandı | 🔧 = Kısmen yapıldı | ❌ = Henüz başlanmadı  
 > ☑ = Kodda mevcut ancak migration henüz çalıştırılmadı
 
@@ -61,8 +61,12 @@
 - [x] Borç status (PAID/PENDING/OVERDUE) + alacak/borç renk ayrımı korundu
 - [x] PM kapı denetimi: analyze temiz + test 149/149 ✅
 
-### S8..Sn — Feature migration ❌ (sıradaki: S8 = subscriptions)
-- [ ] subscriptions → family → receipt_scanner → reports/insights/inflation → settings(+switcher) (contract §7)
+### S8 — subscriptions ✅ (commit `604ffc3`, 1 Haz 2026)
+- [x] `presentation/subscriptions/**` tamamı migrate (0 `AppColors`, hardcode renk yok)
+- [x] PM kapı denetimi: analyze temiz + test 149/149 ✅
+
+### S9..Sn — Feature migration ❌ (sıradaki: S9 = family)
+- [ ] family → receipt_scanner → reports/insights/inflation → settings(+switcher) (contract §7)
 - [ ] Her batch: `AppColors.X` → `context.colors.X`, analyze+test yeşil, light modda görsel QA
 
 ### S-son — Açılış ❌

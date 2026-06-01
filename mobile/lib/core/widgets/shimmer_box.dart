@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
-import '../constants/app_colors.dart';
 import '../constants/app_spacing.dart';
+import '../theme/app_palette.dart';
 
 /// Tek bir shimmer dikdörtgen bloğu.
 class ShimmerBox extends StatelessWidget {
@@ -18,14 +18,15 @@ class ShimmerBox extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return Shimmer.fromColors(
-      baseColor: AppColors.surfaceContainerHigh,
-      highlightColor: AppColors.surfaceContainerHighest,
+      baseColor: colors.surfaceContainerHigh,
+      highlightColor: colors.surfaceContainerHighest,
       child: Container(
         width: width,
         height: height,
         decoration: BoxDecoration(
-          color: AppColors.surfaceContainerHigh,
+          color: colors.surfaceContainerHigh,
           borderRadius: BorderRadius.circular(borderRadius),
         ),
       ),
@@ -40,9 +41,10 @@ class ShimmerCardRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return Shimmer.fromColors(
-      baseColor: AppColors.surfaceContainerHigh,
-      highlightColor: AppColors.surfaceContainerHighest,
+      baseColor: colors.surfaceContainerHigh,
+      highlightColor: colors.surfaceContainerHighest,
       child: Container(
         margin: const EdgeInsets.symmetric(
           horizontal: AppSpacing.pagePadding,
@@ -50,7 +52,7 @@ class ShimmerCardRow extends StatelessWidget {
         ),
         padding: const EdgeInsets.all(AppSpacing.lg),
         decoration: BoxDecoration(
-          color: AppColors.surfaceContainerHigh,
+          color: colors.surfaceContainerHigh,
           borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
         ),
         child: Row(
@@ -58,8 +60,8 @@ class ShimmerCardRow extends StatelessWidget {
             Container(
               width: 40,
               height: 40,
-              decoration: const BoxDecoration(
-                color: AppColors.surfaceContainerHighest,
+              decoration: BoxDecoration(
+                color: colors.surfaceContainerHighest,
                 shape: BoxShape.circle,
               ),
             ),
@@ -72,7 +74,7 @@ class ShimmerCardRow extends StatelessWidget {
                     height: 14,
                     width: 120,
                     decoration: BoxDecoration(
-                      color: AppColors.surfaceContainerHighest,
+                      color: colors.surfaceContainerHighest,
                       borderRadius: BorderRadius.circular(4),
                     ),
                   ),
@@ -82,7 +84,7 @@ class ShimmerCardRow extends StatelessWidget {
                       height: 10,
                       width: 80,
                       decoration: BoxDecoration(
-                        color: AppColors.surfaceContainerHighest,
+                        color: colors.surfaceContainerHighest,
                         borderRadius: BorderRadius.circular(4),
                       ),
                     ),
@@ -94,7 +96,7 @@ class ShimmerCardRow extends StatelessWidget {
               height: 14,
               width: 64,
               decoration: BoxDecoration(
-                color: AppColors.surfaceContainerHighest,
+                color: colors.surfaceContainerHighest,
                 borderRadius: BorderRadius.circular(4),
               ),
             ),

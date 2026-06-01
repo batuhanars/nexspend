@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
+import '../../../core/theme/app_palette.dart';
 
 class EmptyStateView extends StatelessWidget {
   const EmptyStateView({
@@ -24,6 +24,7 @@ class EmptyStateView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return Center(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: AppSpacing.pagePadding),
@@ -33,7 +34,7 @@ class EmptyStateView extends StatelessWidget {
             Icon(
               icon,
               size: 64,
-              color: AppColors.onSurfaceVariant.withValues(alpha: 0.4),
+              color: colors.onSurfaceVariant.withValues(alpha: 0.4),
             ),
             const SizedBox(height: AppSpacing.lg),
             Text(title, style: AppTypography.titleSm),
@@ -41,7 +42,7 @@ class EmptyStateView extends StatelessWidget {
             Text(
               subtitle,
               style: AppTypography.bodyMd.copyWith(
-                color: AppColors.onSurfaceVariant,
+                color: colors.onSurfaceVariant,
               ),
               textAlign: TextAlign.center,
             ),
@@ -55,8 +56,8 @@ class EmptyStateView extends StatelessWidget {
                   icon: const Icon(Icons.add_rounded, size: 20),
                   label: Text(buttonLabel!),
                   style: FilledButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    foregroundColor: AppColors.surface,
+                    backgroundColor: colors.primary,
+                    foregroundColor: colors.surface,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
                     ),

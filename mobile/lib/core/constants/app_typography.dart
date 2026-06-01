@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'app_colors.dart';
 
 class AppTypography {
   AppTypography._();
@@ -9,7 +8,6 @@ class AppTypography {
   static TextStyle get displayLg => GoogleFonts.inter(
         fontSize: 56,
         fontWeight: FontWeight.w700,
-        color: AppColors.onSurface,
         height: 1.1,
         letterSpacing: -1.0,
       );
@@ -18,7 +16,6 @@ class AppTypography {
   static TextStyle get displayMd => GoogleFonts.inter(
         fontSize: 45,
         fontWeight: FontWeight.w700,
-        color: AppColors.onSurface,
         height: 1.15,
         letterSpacing: -0.5,
       );
@@ -27,7 +24,6 @@ class AppTypography {
   static TextStyle get headlineMd => GoogleFonts.inter(
         fontSize: 28,
         fontWeight: FontWeight.w600,
-        color: AppColors.onSurface,
         height: 1.25,
         letterSpacing: -0.25,
       );
@@ -36,7 +32,6 @@ class AppTypography {
   static TextStyle get headlineSm => GoogleFonts.inter(
         fontSize: 24,
         fontWeight: FontWeight.w600,
-        color: AppColors.onSurface,
         height: 1.3,
       );
 
@@ -44,7 +39,6 @@ class AppTypography {
   static TextStyle get titleSm => GoogleFonts.inter(
         fontSize: 16,
         fontWeight: FontWeight.w600,
-        color: AppColors.onSurface,
         height: 1.4,
         letterSpacing: 0.1,
       );
@@ -53,7 +47,6 @@ class AppTypography {
   static TextStyle get bodyMd => GoogleFonts.inter(
         fontSize: 14,
         fontWeight: FontWeight.w400,
-        color: AppColors.onSurface,
         height: 1.5,
         letterSpacing: 0.1,
       );
@@ -62,7 +55,6 @@ class AppTypography {
   static TextStyle get bodySm => GoogleFonts.inter(
         fontSize: 12,
         fontWeight: FontWeight.w400,
-        color: AppColors.onSurfaceVariant,
         height: 1.5,
         letterSpacing: 0.2,
       );
@@ -71,7 +63,6 @@ class AppTypography {
   static TextStyle get labelSm => GoogleFonts.inter(
         fontSize: 11,
         fontWeight: FontWeight.w500,
-        color: AppColors.onSurfaceVariant,
         height: 1.45,
         letterSpacing: 1.0,
       );
@@ -80,7 +71,6 @@ class AppTypography {
   static TextStyle get labelMd => GoogleFonts.inter(
         fontSize: 12,
         fontWeight: FontWeight.w500,
-        color: AppColors.onSurfaceVariant,
         height: 1.45,
         letterSpacing: 0.5,
       );

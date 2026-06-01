@@ -64,6 +64,16 @@ class SecureStorage {
     return val ?? 'TRY';
   }
 
+  static const _themeKey = 'theme_mode';
+
+  Future<void> saveThemeMode(String mode) =>
+      _storage.write(key: _themeKey, value: mode);
+
+  Future<String> getThemeMode() async {
+    final val = await _storage.read(key: _themeKey);
+    return val ?? 'dark';
+  }
+
   static const _onboardingCompleteKey = 'onboarding_complete';
 
   Future<void> saveOnboardingComplete() =>

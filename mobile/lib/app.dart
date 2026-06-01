@@ -6,6 +6,7 @@ import 'core/di/injection.dart';
 import 'core/theme/app_theme.dart';
 import 'core/utils/currency_notifier.dart';
 import 'core/utils/locale_notifier.dart';
+import 'core/utils/theme_notifier.dart';
 import 'navigation/app_router.dart';
 
 class WalletApp extends StatefulWidget {
@@ -26,24 +27,29 @@ class _WalletAppState extends State<WalletApp> {
     }
     getIt<LocaleNotifier>().addListener(_onLocaleChanged);
     getIt<CurrencyNotifier>().addListener(_onCurrencyChanged);
+    getIt<ThemeNotifier>().addListener(_onThemeChanged);
   }
 
   @override
   void dispose() {
     getIt<LocaleNotifier>().removeListener(_onLocaleChanged);
     getIt<CurrencyNotifier>().removeListener(_onCurrencyChanged);
+    getIt<ThemeNotifier>().removeListener(_onThemeChanged);
     super.dispose();
   }
 
   void _onLocaleChanged() => setState(() {});
   void _onCurrencyChanged() => setState(() {});
+  void _onThemeChanged() => setState(() {});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp.router(
       title: 'NexSpend',
       debugShowCheckedModeBanner: false,
-      theme: AppTheme.dark,
+      theme: AppTheme.light,
+      darkTheme: AppTheme.dark,
+      themeMode: getIt<ThemeNotifier>().value,
       routerConfig: _router,
       locale: getIt<LocaleNotifier>().value,
       supportedLocales: const [

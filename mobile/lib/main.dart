@@ -11,6 +11,7 @@ import 'core/services/notification_service.dart';
 import 'core/storage/secure_storage.dart';
 import 'core/utils/currency_notifier.dart';
 import 'core/utils/locale_notifier.dart';
+import 'core/utils/theme_notifier.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
 void main() async {
@@ -41,6 +42,9 @@ void main() async {
   final currency = await getIt<SecureStorage>().getCurrency();
   getIt.registerSingleton<CurrencyNotifier>(CurrencyNotifier(currency));
 
+  final themeStr = await getIt<SecureStorage>().getThemeMode();
+  getIt.registerSingleton<ThemeNotifier>(ThemeNotifier(_parseThemeMode(themeStr)));
+
   await Future.wait([
     initializeDateFormatting('tr_TR', null),
     initializeDateFormatting('en_US', null),
@@ -51,4 +55,15 @@ void main() async {
   }
 
   runApp(const WalletApp());
+}
+
+ThemeMode _parseThemeMode(String value) {
+  switch (value) {
+    case 'light':
+      return ThemeMode.light;
+    case 'system':
+      return ThemeMode.system;
+    default:
+      return ThemeMode.dark;
+  }
 }

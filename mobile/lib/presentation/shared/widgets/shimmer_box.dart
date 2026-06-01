@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
+import '../../../core/theme/app_palette.dart';
 
 class ShimmerBox extends StatelessWidget {
   const ShimmerBox({
@@ -22,7 +22,7 @@ class ShimmerBox extends StatelessWidget {
       height: height,
       width: width,
       decoration: BoxDecoration(
-        color: AppColors.surfaceContainerHigh,
+        color: context.colors.surfaceContainerHigh,
         borderRadius: shape == BoxShape.circle
             ? null
             : BorderRadius.circular(radius ?? AppSpacing.radiusMd),

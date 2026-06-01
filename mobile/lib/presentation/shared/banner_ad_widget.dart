@@ -1,8 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
-import '../../core/constants/app_colors.dart';
 import '../../core/services/ads_service.dart';
+import '../../core/theme/app_palette.dart';
 
 class BannerAdWidget extends StatefulWidget {
   const BannerAdWidget({super.key});
@@ -68,7 +68,7 @@ class _BannerAdWidgetState extends State<BannerAdWidget> {
       return const SizedBox.shrink();
     }
     return Container(
-      color: AppColors.surfaceContainerLow.withValues(alpha: 0.95),
+      color: context.colors.surfaceContainerLow.withValues(alpha: 0.95),
       width: double.infinity,
       height: _bannerAd!.size.height.toDouble(),
       alignment: Alignment.center,

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
+import '../../../core/theme/app_palette.dart';
 
 class ThousandsFormatter extends TextInputFormatter {
   @override
@@ -102,12 +103,13 @@ class _SplitAmountFieldState extends State<SplitAmountField> {
   @override
   Widget build(BuildContext context) {
     final color = widget.color;
+    final colors = context.colors;
 
-    const numStyle = TextStyle(
+    final numStyle = TextStyle(
       fontFamily: 'Inter',
       fontSize: 56,
       fontWeight: FontWeight.w700,
-      color: AppColors.onSurface,
+      color: colors.onSurface,
       height: 1.0,
     );
 
@@ -115,7 +117,7 @@ class _SplitAmountFieldState extends State<SplitAmountField> {
       fontFamily: 'Inter',
       fontSize: 56,
       fontWeight: FontWeight.w300,
-      color: Colors.white.withValues(alpha: 0.2),
+      color: colors.onSurface.withValues(alpha: 0.15),
       height: 1.0,
     );
 
@@ -179,7 +181,7 @@ class _SplitAmountFieldState extends State<SplitAmountField> {
                   fontFamily: 'Inter',
                   fontSize: 48,
                   fontWeight: FontWeight.w300,
-                  color: AppColors.onSurfaceVariant.withValues(alpha: 0.45),
+                  color: colors.onSurfaceVariant.withValues(alpha: 0.45),
                   height: 1.0,
                 ),
               ),

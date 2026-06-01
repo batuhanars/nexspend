@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
+import '../../../core/theme/app_palette.dart';
 
 class FilterChipBar extends StatelessWidget {
   const FilterChipBar({
@@ -17,6 +17,7 @@ class FilterChipBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return Padding(
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.pagePadding,
@@ -37,11 +38,11 @@ class FilterChipBar extends StatelessWidget {
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
                     color: isActive
-                        ? AppColors.primary.withValues(alpha: 0.15)
-                        : AppColors.surfaceContainerHigh,
+                        ? colors.primary.withValues(alpha: 0.15)
+                        : colors.surfaceContainerHigh,
                     borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
                     border: isActive
-                        ? Border.all(color: AppColors.primary, width: 1.5)
+                        ? Border.all(color: colors.primary, width: 1.5)
                         : null,
                   ),
                   child: Text(
@@ -49,8 +50,8 @@ class FilterChipBar extends StatelessWidget {
                     style: AppTypography.labelMd.copyWith(
                       fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
                       color: isActive
-                          ? AppColors.primary
-                          : AppColors.onSurfaceVariant,
+                          ? colors.primary
+                          : colors.onSurfaceVariant,
                       height: 1.0,
                     ),
                   ),

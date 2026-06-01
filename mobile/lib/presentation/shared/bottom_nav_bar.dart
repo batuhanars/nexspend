@@ -2,13 +2,13 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:tutorial_coach_mark/tutorial_coach_mark.dart';
-import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_spacing.dart';
 import '../../core/constants/app_typography.dart';
 import '../../core/di/injection.dart';
 import '../../core/l10n/app_strings.dart';
 import '../../core/services/notification_service.dart';
 import '../../core/storage/secure_storage.dart';
+import '../../core/theme/app_palette.dart';
 import '../../core/utils/coach_mark_keys.dart';
 import '../../data/models/family_model.dart' show SharedBudgetModel;
 import '../../data/repositories/family_repository.dart';
@@ -136,7 +136,7 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
             SnackBar(
               content:
                   Text(AppStrings.of(context).budgetClosedSharedSnackbar),
-              backgroundColor: AppColors.primary,
+              backgroundColor: context.colors.primary,
             ),
           );
         }
@@ -197,7 +197,7 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(AppStrings.of(context).budgetClosedPersonalSnackbar),
-          backgroundColor: AppColors.primary,
+          backgroundColor: context.colors.primary,
         ),
       );
     });
@@ -209,7 +209,7 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(AppStrings.of(context).budgetClosedSharedSnackbar),
-          backgroundColor: AppColors.primary,
+          backgroundColor: context.colors.primary,
         ),
       );
     });
@@ -308,7 +308,7 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
                 left: AppSpacing.pagePadding,
                 right: AppSpacing.pagePadding,
               ),
-              builder: (_, controller) => Column(
+              builder: (btnCtx, controller) => Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -324,7 +324,7 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
                     child: FilledButton(
                       onPressed: controller.next,
                       style: FilledButton.styleFrom(
-                        backgroundColor: AppColors.primary,
+                        backgroundColor: btnCtx.colors.primary,
                         shape: RoundedRectangleBorder(
                           borderRadius:
                               BorderRadius.circular(AppSpacing.radiusXl),
@@ -334,7 +334,7 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
                         'Tamam',
                         style: AppTypography.bodyMd.copyWith(
                           fontWeight: FontWeight.w600,
-                          color: AppColors.surface,
+                          color: btnCtx.colors.surface,
                         ),
                       ),
                     ),
@@ -368,7 +368,7 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
   void _showAddSheet() {
     showModalBottomSheet(
       context: context,
-      backgroundColor: AppColors.surfaceContainerHigh,
+      backgroundColor: context.colors.surfaceContainerHigh,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(
           top: Radius.circular(AppSpacing.radiusXl),
@@ -426,6 +426,7 @@ class _AddActionSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final s = AppStrings.of(context);
+    final colors = context.colors;
     return Padding(
       padding: EdgeInsets.fromLTRB(
         AppSpacing.pagePadding,
@@ -440,7 +441,7 @@ class _AddActionSheet extends StatelessWidget {
             width: 36,
             height: 4,
             decoration: BoxDecoration(
-              color: AppColors.onSurfaceVariant.withValues(alpha: 0.3),
+              color: colors.onSurfaceVariant.withValues(alpha: 0.3),
               borderRadius: BorderRadius.circular(2),
             ),
           ),
@@ -451,7 +452,7 @@ class _AddActionSheet extends StatelessWidget {
                 child: _SheetAction(
                   icon: Icons.arrow_downward_rounded,
                   label: s.income,
-                  color: AppColors.secondary,
+                  color: colors.secondary,
                   onTap: onIncome,
                 ),
               ),
@@ -460,7 +461,7 @@ class _AddActionSheet extends StatelessWidget {
                 child: _SheetAction(
                   icon: Icons.arrow_upward_rounded,
                   label: s.expense,
-                  color: AppColors.tertiary,
+                  color: colors.tertiary,
                   onTap: onExpense,
                 ),
               ),
@@ -473,7 +474,7 @@ class _AddActionSheet extends StatelessWidget {
                 child: _SheetAction(
                   icon: Icons.swap_horiz_rounded,
                   label: s.transfer,
-                  color: AppColors.primary,
+                  color: colors.primary,
                   onTap: onTransfer,
                 ),
               ),
@@ -482,7 +483,7 @@ class _AddActionSheet extends StatelessWidget {
                 child: _SheetAction(
                   icon: Icons.document_scanner_outlined,
                   label: s.scanReceipt,
-                  color: AppColors.onSurfaceVariant,
+                  color: colors.onSurfaceVariant,
                   onTap: onScan,
                 ),
               ),
@@ -509,6 +510,7 @@ class _SheetAction extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -534,7 +536,7 @@ class _SheetAction extends StatelessWidget {
               label,
               style: AppTypography.bodyMd.copyWith(
                 fontWeight: FontWeight.w600,
-                color: AppColors.onSurface,
+                color: colors.onSurface,
               ),
             ),
           ],
@@ -559,6 +561,7 @@ class _BottomNavBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final s = AppStrings.of(context);
+    final colors = context.colors;
     final location = GoRouterState.of(context).matchedLocation;
     final currentIndex = _currentIndex(location);
 
@@ -594,10 +597,10 @@ class _BottomNavBar extends StatelessWidget {
 
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.surfaceContainerLow.withValues(alpha: 0.95),
+        color: colors.surfaceContainerLow.withValues(alpha: 0.95),
         border: Border(
           top: BorderSide(
-            color: AppColors.outlineVariant.withValues(alpha: 0.1),
+            color: colors.outlineVariant.withValues(alpha: 0.1),
           ),
         ),
       ),
@@ -621,19 +624,19 @@ class _BottomNavBar extends StatelessWidget {
                       width: 48,
                       height: 48,
                       decoration: BoxDecoration(
-                        color: AppColors.primary,
+                        color: colors.primary,
                         shape: BoxShape.circle,
                         boxShadow: [
                           BoxShadow(
-                            color: AppColors.primary.withValues(alpha: 0.4),
+                            color: colors.primary.withValues(alpha: 0.4),
                             blurRadius: 12,
                             offset: const Offset(0, 3),
                           ),
                         ],
                       ),
-                      child: const Icon(
+                      child: Icon(
                         Icons.add_rounded,
-                        color: AppColors.surface,
+                        color: colors.surface,
                         size: 26,
                       ),
                     ),
@@ -655,6 +658,7 @@ class _BottomNavBar extends StatelessWidget {
   }
 
   Widget _buildTabItem(BuildContext context, _TabItem tab, bool isActive) {
+    final colors = context.colors;
     return Expanded(
       child: InkWell(
         onTap: () => context.go(tab.route),
@@ -664,7 +668,7 @@ class _BottomNavBar extends StatelessWidget {
           children: [
             Icon(
               isActive ? tab.activeIcon : tab.icon,
-              color: isActive ? AppColors.primary : AppColors.onSurfaceVariant,
+              color: isActive ? colors.primary : colors.onSurfaceVariant,
               size: 22,
             ),
             const SizedBox(height: 4),
@@ -674,8 +678,8 @@ class _BottomNavBar extends StatelessWidget {
                 fontSize: 10,
                 fontWeight: isActive ? FontWeight.w600 : FontWeight.w400,
                 color: isActive
-                    ? AppColors.primary
-                    : AppColors.onSurfaceVariant,
+                    ? colors.primary
+                    : colors.onSurfaceVariant,
               ),
             ),
           ],
@@ -712,6 +716,7 @@ class _CoachContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -721,10 +726,10 @@ class _CoachContent extends StatelessWidget {
             width: 44,
             height: 44,
             decoration: BoxDecoration(
-              color: AppColors.primary.withValues(alpha: 0.2),
+              color: colors.primary.withValues(alpha: 0.2),
               shape: BoxShape.circle,
             ),
-            child: Icon(icon, color: AppColors.primary, size: 22),
+            child: Icon(icon, color: colors.primary, size: 22),
           ),
           const SizedBox(height: AppSpacing.md),
         ],

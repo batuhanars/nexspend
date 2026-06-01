@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
 import '../../../core/di/injection.dart';
 import '../../../core/l10n/app_strings.dart';
+import '../../../core/theme/app_palette.dart';
 import '../../../data/repositories/insights_repository.dart';
 import '../bloc/insights_bloc.dart';
 import '../bloc/insights_event.dart';
@@ -52,8 +52,7 @@ class _InsightsViewState extends State<_InsightsView>
     _tabController.addListener(() {
       if (!_tabController.indexIsChanging) return;
       context.read<InsightsBloc>().add(
-            InsightsFetchRequested(
-                period: _periodForIndex(_tabController.index)),
+            InsightsFetchRequested(period: _periodForIndex(_tabController.index)),
           );
     });
   }
@@ -66,14 +65,15 @@ class _InsightsViewState extends State<_InsightsView>
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return Scaffold(
-      backgroundColor: AppColors.surface,
+      backgroundColor: colors.surface,
       appBar: AppBar(
-        backgroundColor: AppColors.surface,
+        backgroundColor: colors.surface,
         surfaceTintColor: Colors.transparent,
         title: const Text('Akıllı Öneriler'),
         titleTextStyle: AppTypography.headlineSm,
-        iconTheme: const IconThemeData(color: AppColors.onSurface),
+        iconTheme: IconThemeData(color: colors.onSurface),
         actions: [
           BlocBuilder<InsightsBloc, InsightsState>(
             buildWhen: (prev, curr) =>
@@ -84,14 +84,11 @@ class _InsightsViewState extends State<_InsightsView>
               if (!hasUnread) return const SizedBox.shrink();
               return TextButton(
                 onPressed: () {
-                  context
-                      .read<InsightsBloc>()
-                      .add(const InsightsMarkAllReadRequested());
+                  context.read<InsightsBloc>().add(const InsightsMarkAllReadRequested());
                 },
                 child: Text(
                   'Tümünü Okundu İşaretle',
-                  style:
-                      AppTypography.bodySm.copyWith(color: AppColors.primary),
+                  style: AppTypography.bodySm.copyWith(color: colors.primary),
                 ),
               );
             },
@@ -99,9 +96,9 @@ class _InsightsViewState extends State<_InsightsView>
         ],
         bottom: TabBar(
           controller: _tabController,
-          labelColor: AppColors.primary,
-          unselectedLabelColor: AppColors.onSurfaceVariant,
-          indicatorColor: AppColors.primary,
+          labelColor: colors.primary,
+          unselectedLabelColor: colors.onSurfaceVariant,
+          indicatorColor: colors.primary,
           dividerColor: Colors.transparent,
           tabs: [
             Tab(text: AppStrings.of(context).periodThisMonth),
@@ -117,8 +114,7 @@ class _InsightsViewState extends State<_InsightsView>
                 message: message,
                 onRetry: () => context.read<InsightsBloc>().add(
                       InsightsFetchRequested(
-                          period:
-                              _periodForIndex(_tabController.index)),
+                          period: _periodForIndex(_tabController.index)),
                     ),
               ),
             InsightsLoaded(:final insights) ||
@@ -164,9 +160,7 @@ class _InsightsList extends StatelessWidget {
         final insight = insights[index];
         return GestureDetector(
           onTap: () {
-            if (!insight.isRead) {
-              onMarkRead(insight.id);
-            }
+            if (!insight.isRead) onMarkRead(insight.id);
           },
           child: InsightCard(
             insight: insight,
@@ -183,15 +177,14 @@ class _EmptyView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return Center(
       child: Padding(
-        padding:
-            const EdgeInsets.symmetric(horizontal: AppSpacing.pagePadding),
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.pagePadding),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.check_circle_outline_rounded,
-                size: 64, color: AppColors.secondary),
+            Icon(Icons.check_circle_outline_rounded, size: 64, color: colors.success),
             const SizedBox(height: AppSpacing.lg),
             Text(
               'Harika! Hiç öneriniz yok 🎉',
@@ -201,8 +194,7 @@ class _EmptyView extends StatelessWidget {
             const SizedBox(height: AppSpacing.sm),
             Text(
               'Bu dönem için finansal öneriniz bulunmuyor.',
-              style: AppTypography.bodyMd
-                  .copyWith(color: AppColors.onSurfaceVariant),
+              style: AppTypography.bodyMd.copyWith(color: colors.onSurfaceVariant),
               textAlign: TextAlign.center,
             ),
           ],
@@ -217,6 +209,7 @@ class _LoadingView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return ListView.separated(
       padding: const EdgeInsets.all(AppSpacing.pagePadding),
       itemCount: 4,
@@ -224,7 +217,7 @@ class _LoadingView extends StatelessWidget {
       itemBuilder: (context, i) => Container(
         height: 80,
         decoration: BoxDecoration(
-          color: AppColors.surfaceContainerHigh,
+          color: colors.surfaceContainerHigh,
           borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
         ),
       ),
@@ -240,26 +233,23 @@ class _ErrorView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return Center(
       child: Padding(
-        padding:
-            const EdgeInsets.symmetric(horizontal: AppSpacing.pagePadding),
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.pagePadding),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.error_outline_rounded,
-                size: 48, color: AppColors.onSurfaceVariant),
+            Icon(Icons.error_outline_rounded, size: 48, color: colors.onSurfaceVariant),
             const SizedBox(height: AppSpacing.lg),
             Text(message,
-                style: AppTypography.bodyMd
-                    .copyWith(color: AppColors.onSurfaceVariant),
+                style: AppTypography.bodyMd.copyWith(color: colors.onSurfaceVariant),
                 textAlign: TextAlign.center),
             const SizedBox(height: AppSpacing.lg),
             TextButton(
               onPressed: onRetry,
               child: Text('Tekrar Dene',
-                  style: AppTypography.bodyMd
-                      .copyWith(color: AppColors.primary)),
+                  style: AppTypography.bodyMd.copyWith(color: colors.primary)),
             ),
           ],
         ),

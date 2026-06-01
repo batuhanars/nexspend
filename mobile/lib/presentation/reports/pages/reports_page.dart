@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:wallet_app/core/l10n/app_strings.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:wallet_app/presentation/reports/widgets/cash_flow_chart.dart';
@@ -7,10 +7,10 @@ import 'package:wallet_app/presentation/reports/widgets/period_filter.dart';
 import 'package:wallet_app/presentation/reports/widgets/section_title.dart';
 import 'package:wallet_app/presentation/reports/widgets/trend_list.dart';
 import 'package:wallet_app/presentation/shared/widgets/empty_state_view.dart';
-import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
 import '../../../core/di/injection.dart';
+import '../../../core/theme/app_palette.dart';
 import '../../../data/repositories/inflation_repository.dart';
 import '../../../data/repositories/report_repository.dart';
 import '../../inflation/bloc/inflation_bloc.dart';
@@ -48,30 +48,27 @@ class _ReportsView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return DefaultTabController(
       length: 2,
       child: Scaffold(
-        backgroundColor: AppColors.surface,
+        backgroundColor: colors.surface,
         appBar: AppBar(
-          title: Text(
-            AppStrings.of(context).reportsTitle,
-            style: AppTypography.headlineSm,
-          ),
+          title: Text(AppStrings.of(context).reportsTitle, style: AppTypography.headlineSm),
           centerTitle: false,
-          backgroundColor: AppColors.surface,
+          backgroundColor: colors.surface,
           surfaceTintColor: Colors.transparent,
           leading: IconButton(
             icon: const Icon(Icons.close_rounded),
             onPressed: () => Navigator.of(context).pop(),
           ),
           bottom: TabBar(
-            indicatorColor: AppColors.primary,
-            labelColor: AppColors.primary,
-            unselectedLabelColor: AppColors.onSurfaceVariant,
-            labelStyle:
-                AppTypography.bodySm.copyWith(fontWeight: FontWeight.w600),
+            indicatorColor: colors.primary,
+            labelColor: colors.primary,
+            unselectedLabelColor: colors.onSurfaceVariant,
+            labelStyle: AppTypography.bodySm.copyWith(fontWeight: FontWeight.w600),
             unselectedLabelStyle: AppTypography.bodySm,
-            dividerColor: AppColors.surfaceContainerHighest,
+            dividerColor: colors.surfaceContainerHighest,
             tabs: const [
               Tab(text: 'Genel'),
               Tab(text: 'Enflasyon'),
@@ -92,11 +89,12 @@ class _ReportsView extends StatelessWidget {
 class _GeneralReportTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return BlocBuilder<ReportsBloc, ReportsState>(
       builder: (context, state) {
         if (state is ReportsLoading || state is ReportsInitial) {
-          return const Center(
-            child: CircularProgressIndicator(color: AppColors.primary),
+          return Center(
+            child: CircularProgressIndicator(color: colors.primary),
           );
         }
         if (state is ReportsError) {
@@ -107,20 +105,16 @@ class _GeneralReportTab extends StatelessWidget {
                 Icon(
                   Icons.wifi_off_rounded,
                   size: 48,
-                  color: AppColors.onSurfaceVariant.withValues(alpha: 0.5),
+                  color: colors.onSurfaceVariant.withValues(alpha: 0.5),
                 ),
                 const SizedBox(height: AppSpacing.lg),
                 Text(
                   state.message,
-                  style: AppTypography.bodyMd.copyWith(
-                    color: AppColors.onSurfaceVariant,
-                  ),
+                  style: AppTypography.bodyMd.copyWith(color: colors.onSurfaceVariant),
                 ),
                 const SizedBox(height: AppSpacing.lg),
                 FilledButton.tonal(
-                  onPressed: () => context
-                      .read<ReportsBloc>()
-                      .add(const ReportsLoadRequested()),
+                  onPressed: () => context.read<ReportsBloc>().add(const ReportsLoadRequested()),
                   child: Text(AppStrings.of(context).retry),
                 ),
               ],
@@ -136,9 +130,7 @@ class _GeneralReportTab extends StatelessWidget {
             children: [
               const SizedBox(height: AppSpacing.lg),
               Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.pagePadding,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.pagePadding),
                 child: PeriodFilter(activePeriod: loaded.period),
               ),
               Expanded(
@@ -152,9 +144,7 @@ class _GeneralReportTab extends StatelessWidget {
           );
         }
         return ListView(
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.pagePadding,
-          ),
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.pagePadding),
           children: [
             const SizedBox(height: AppSpacing.lg),
             PeriodFilter(activePeriod: loaded.period),
@@ -166,8 +156,7 @@ class _GeneralReportTab extends StatelessWidget {
               const SizedBox(height: AppSpacing.xl),
             ],
             if (loaded.distribution.isNotEmpty) ...[
-              SectionTitle(
-                  title: AppStrings.of(context).expenseDistributionTitle),
+              SectionTitle(title: AppStrings.of(context).expenseDistributionTitle),
               const SizedBox(height: AppSpacing.md),
               ExpenseDistributionSection(items: loaded.distribution),
               const SizedBox(height: AppSpacing.xl),
@@ -204,6 +193,7 @@ class _InflationReportTabState extends State<_InflationReportTab>
   @override
   Widget build(BuildContext context) {
     super.build(context);
+    final colors = context.colors;
     return BlocBuilder<InflationBloc, InflationState>(
       buildWhen: (_, curr) =>
           curr is InflationReportLoading ||
@@ -211,9 +201,7 @@ class _InflationReportTabState extends State<_InflationReportTab>
           curr is InflationReportError,
       builder: (context, state) {
         if (state is InflationReportLoading) {
-          return const Center(
-            child: CircularProgressIndicator(color: AppColors.primary),
-          );
+          return Center(child: CircularProgressIndicator(color: colors.primary));
         }
 
         if (state is InflationReportError) {
@@ -221,22 +209,14 @@ class _InflationReportTabState extends State<_InflationReportTab>
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(
-                  Icons.wifi_off_rounded,
-                  size: 48,
-                  color: AppColors.onSurfaceVariant.withValues(alpha: 0.5),
-                ),
+                Icon(Icons.wifi_off_rounded, size: 48,
+                    color: colors.onSurfaceVariant.withValues(alpha: 0.5)),
                 const SizedBox(height: AppSpacing.lg),
-                Text(
-                  state.message,
-                  style: AppTypography.bodyMd.copyWith(
-                    color: AppColors.onSurfaceVariant,
-                  ),
-                ),
+                Text(state.message,
+                    style: AppTypography.bodyMd.copyWith(color: colors.onSurfaceVariant)),
                 const SizedBox(height: AppSpacing.lg),
                 FilledButton.tonal(
-                  onPressed: () => context
-                      .read<InflationBloc>()
+                  onPressed: () => context.read<InflationBloc>()
                       .add(const InflationReportFetchRequested()),
                   child: Text(AppStrings.of(context).retry),
                 ),
@@ -246,18 +226,14 @@ class _InflationReportTabState extends State<_InflationReportTab>
         }
 
         if (state is! InflationReportLoaded) {
-          return const Center(
-            child: CircularProgressIndicator(color: AppColors.primary),
-          );
+          return Center(child: CircularProgressIndicator(color: colors.primary));
         }
 
         final comparison = state.comparison;
         final history = state.history;
 
         return ListView(
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.pagePadding,
-          ),
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.pagePadding),
           children: [
             const SizedBox(height: AppSpacing.lg),
             if (comparison.rows.isEmpty)
@@ -266,21 +242,15 @@ class _InflationReportTabState extends State<_InflationReportTab>
                   padding: const EdgeInsets.symmetric(vertical: AppSpacing.xxxl),
                   child: Text(
                     'Enflasyon verisi henüz hazir degil',
-                    style: AppTypography.bodyMd.copyWith(
-                      color: AppColors.onSurfaceVariant,
-                    ),
+                    style: AppTypography.bodyMd.copyWith(color: colors.onSurfaceVariant),
                   ),
                 ),
               )
             else ...[
               SectionTitle(title: 'Harcama vs Enflasyon'),
               const SizedBox(height: AppSpacing.xs),
-              Text(
-                comparison.period,
-                style: AppTypography.bodySm.copyWith(
-                  color: AppColors.onSurfaceVariant,
-                ),
-              ),
+              Text(comparison.period,
+                  style: AppTypography.bodySm.copyWith(color: colors.onSurfaceVariant)),
               const SizedBox(height: AppSpacing.md),
               InflationComparisonTable(comparison: comparison),
               const SizedBox(height: AppSpacing.xl),

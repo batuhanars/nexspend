@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
 import '../../../core/constants/insight_rules.dart';
+import '../../../core/theme/app_palette.dart';
 import '../../../data/models/insight_model.dart';
 
 class InsightCard extends StatelessWidget {
@@ -19,7 +19,8 @@ class InsightCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = _severityColor(insight.severity);
+    final colors = context.colors;
+    final color = _severityColor(insight.severity, colors);
 
     return Dismissible(
       key: Key(insight.id),
@@ -29,15 +30,15 @@ class InsightCard extends StatelessWidget {
         alignment: Alignment.centerRight,
         padding: const EdgeInsets.only(right: AppSpacing.lg),
         decoration: BoxDecoration(
-          color: AppColors.surfaceContainerHigh,
+          color: colors.surfaceContainerHigh,
           borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
         ),
-        child: const Icon(Icons.close_rounded, color: AppColors.onSurfaceVariant),
+        child: Icon(Icons.close_rounded, color: colors.onSurfaceVariant),
       ),
       child: Container(
         padding: EdgeInsets.all(compact ? AppSpacing.md : AppSpacing.lg),
         decoration: BoxDecoration(
-          color: AppColors.surfaceContainerHigh,
+          color: colors.surfaceContainerHigh,
           borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
         ),
         child: Row(
@@ -57,8 +58,7 @@ class InsightCard extends StatelessWidget {
                     const SizedBox(height: AppSpacing.xs),
                     Text(
                       insight.message,
-                      style: AppTypography.bodyMd
-                          .copyWith(color: AppColors.onSurfaceVariant),
+                      style: AppTypography.bodyMd.copyWith(color: colors.onSurfaceVariant),
                       maxLines: 3,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -70,8 +70,7 @@ class InsightCard extends StatelessWidget {
               const SizedBox(width: AppSpacing.sm),
               IconButton(
                 onPressed: onDismiss,
-                icon: const Icon(Icons.close_rounded,
-                    size: 18, color: AppColors.onSurfaceVariant),
+                icon: Icon(Icons.close_rounded, size: 18, color: colors.onSurfaceVariant),
                 padding: EdgeInsets.zero,
                 constraints: const BoxConstraints(),
               ),
@@ -82,14 +81,14 @@ class InsightCard extends StatelessWidget {
     );
   }
 
-  Color _severityColor(String severity) {
+  Color _severityColor(String severity, AppPalette colors) {
     return switch (InsightSeverity.values.firstWhere(
       (e) => e.name == severity,
       orElse: () => InsightSeverity.info,
     )) {
-      InsightSeverity.warning => AppColors.tertiary,
-      InsightSeverity.success => AppColors.secondary,
-      InsightSeverity.info => AppColors.primary,
+      InsightSeverity.warning => colors.warning,
+      InsightSeverity.success => colors.success,
+      InsightSeverity.info => colors.primary,
     };
   }
 }

@@ -1,16 +1,13 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
-import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
 import '../../../core/constants/inflation_keys.dart';
+import '../../../core/theme/app_palette.dart';
 import '../../../data/models/inflation_model.dart';
 
 class InflationTrendChart extends StatelessWidget {
-  const InflationTrendChart({
-    super.key,
-    required this.history,
-  });
+  const InflationTrendChart({super.key, required this.history});
 
   final Map<String, List<InflationRateModel>> history;
 
@@ -21,6 +18,7 @@ class InflationTrendChart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     final genelRates = history[InflationCategoryKey.genel] ?? [];
     final gidaRates = history[InflationCategoryKey.gida] ?? [];
 
@@ -28,15 +26,13 @@ class InflationTrendChart extends StatelessWidget {
       return Container(
         height: 180,
         decoration: BoxDecoration(
-          color: AppColors.surfaceContainerHigh,
+          color: colors.surfaceContainerHigh,
           borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
         ),
         child: Center(
           child: Text(
             'Trend verisi henüz hazır değil',
-            style: AppTypography.bodySm.copyWith(
-              color: AppColors.onSurfaceVariant,
-            ),
+            style: AppTypography.bodySm.copyWith(color: colors.onSurfaceVariant),
           ),
         ),
       );
@@ -62,6 +58,12 @@ class InflationTrendChart extends StatelessWidget {
     ];
     final maxY = allRates.isEmpty ? 10.0 : (allRates.reduce((a, b) => a > b ? a : b) * 1.3);
 
+    final tooltipBg = colors.surfaceContainerHighest;
+    final gridLineColor = colors.surfaceContainerHighest;
+    final labelColor = colors.onSurfaceVariant;
+    final primaryColor = colors.primary;
+    final gidaColor = colors.expense;
+
     return Container(
       padding: const EdgeInsets.fromLTRB(
         AppSpacing.md,
@@ -70,7 +72,7 @@ class InflationTrendChart extends StatelessWidget {
         AppSpacing.sm,
       ),
       decoration: BoxDecoration(
-        color: AppColors.surfaceContainerHigh,
+        color: colors.surfaceContainerHigh,
         borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
       ),
       child: Column(
@@ -78,10 +80,10 @@ class InflationTrendChart extends StatelessWidget {
         children: [
           Row(
             children: [
-              _LegendDot(color: AppColors.primary, label: 'Genel TÜFE'),
+              _LegendDot(color: primaryColor, label: 'Genel TÜFE'),
               if (gidaSpots.isNotEmpty) ...[
                 const SizedBox(width: AppSpacing.md),
-                _LegendDot(color: AppColors.tertiary, label: 'Gıda'),
+                _LegendDot(color: gidaColor, label: 'Gıda'),
               ],
             ],
           ),
@@ -94,13 +96,11 @@ class InflationTrendChart extends StatelessWidget {
                 maxY: maxY > 0 ? maxY : 10,
                 lineTouchData: LineTouchData(
                   touchTooltipData: LineTouchTooltipData(
-                    getTooltipColor: (_) => AppColors.surfaceContainerHighest,
+                    getTooltipColor: (_) => tooltipBg,
                     getTooltipItems: (spots) => spots
                         .map((s) => LineTooltipItem(
                               '%${s.y.toStringAsFixed(2)}',
-                              AppTypography.bodySm.copyWith(
-                                color: s.bar.color,
-                              ),
+                              AppTypography.bodySm.copyWith(color: s.bar.color),
                             ))
                         .toList(),
                   ),
@@ -121,7 +121,7 @@ class InflationTrendChart extends StatelessWidget {
                           child: Text(
                             _monthAbbr[rate.month - 1],
                             style: AppTypography.labelSm.copyWith(
-                              color: AppColors.onSurfaceVariant,
+                              color: labelColor,
                               fontSize: 9,
                             ),
                           ),
@@ -136,24 +136,20 @@ class InflationTrendChart extends StatelessWidget {
                       getTitlesWidget: (value, _) => Text(
                         '%${value.toStringAsFixed(1)}',
                         style: AppTypography.labelSm.copyWith(
-                          color: AppColors.onSurfaceVariant,
+                          color: labelColor,
                           fontSize: 9,
                         ),
                       ),
                     ),
                   ),
-                  topTitles: const AxisTitles(
-                    sideTitles: SideTitles(showTitles: false),
-                  ),
-                  rightTitles: const AxisTitles(
-                    sideTitles: SideTitles(showTitles: false),
-                  ),
+                  topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                  rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
                 ),
                 gridData: FlGridData(
                   show: true,
                   drawVerticalLine: false,
-                  getDrawingHorizontalLine: (_) => const FlLine(
-                    color: AppColors.surfaceContainerHighest,
+                  getDrawingHorizontalLine: (_) => FlLine(
+                    color: gridLineColor,
                     strokeWidth: 1,
                   ),
                 ),
@@ -162,19 +158,19 @@ class InflationTrendChart extends StatelessWidget {
                   LineChartBarData(
                     spots: spots,
                     isCurved: true,
-                    color: AppColors.primary,
+                    color: primaryColor,
                     barWidth: 2,
                     dotData: const FlDotData(show: false),
                     belowBarData: BarAreaData(
                       show: true,
-                      color: AppColors.primary.withValues(alpha: 0.08),
+                      color: primaryColor.withValues(alpha: 0.08),
                     ),
                   ),
                   if (gidaSpots.isNotEmpty)
                     LineChartBarData(
                       spots: gidaSpots,
                       isCurved: true,
-                      color: AppColors.tertiary,
+                      color: gidaColor,
                       barWidth: 2,
                       dotData: const FlDotData(show: false),
                       dashArray: [4, 4],
@@ -208,7 +204,7 @@ class _LegendDot extends StatelessWidget {
         Text(
           label,
           style: AppTypography.labelSm.copyWith(
-            color: AppColors.onSurfaceVariant,
+            color: context.colors.onSurfaceVariant,
           ),
         ),
       ],

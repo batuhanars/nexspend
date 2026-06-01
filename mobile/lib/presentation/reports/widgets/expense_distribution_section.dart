@@ -1,9 +1,9 @@
 import 'dart:math' as math;
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
-import 'package:wallet_app/core/constants/app_colors.dart';
 import 'package:wallet_app/core/constants/app_spacing.dart';
 import 'package:wallet_app/core/constants/app_typography.dart';
+import 'package:wallet_app/core/theme/app_palette.dart';
 import 'package:wallet_app/core/utils/currency_formatter.dart';
 import 'package:wallet_app/core/utils/icon_mapper.dart';
 import 'package:wallet_app/data/models/report_model.dart';
@@ -23,8 +23,9 @@ class _ExpenseDistributionSectionState
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     final items = widget.items.take(8).toList();
-    final colors = _generateColors(items.length);
+    final palette = _generateColors(items.length, colors);
 
     return Column(
       children: [
@@ -55,14 +56,14 @@ class _ExpenseDistributionSectionState
                   sections: List.generate(items.length, (i) {
                     final isTouched = i == _touchedIndex;
                     return PieChartSectionData(
-                      color: colors[i],
+                      color: palette[i],
                       value: items[i].percentage,
                       title: isTouched
                           ? '${items[i].percentage.toStringAsFixed(1)}%'
                           : '',
                       radius: isTouched ? 40 : 32,
                       titleStyle: AppTypography.labelSm.copyWith(
-                        color: AppColors.onSurface,
+                        color: colors.onSurface,
                         fontWeight: FontWeight.w700,
                         fontSize: 10,
                       ),
@@ -85,7 +86,7 @@ class _ExpenseDistributionSectionState
                           width: 10,
                           height: 10,
                           decoration: BoxDecoration(
-                            color: colors[i],
+                            color: palette[i],
                             shape: BoxShape.circle,
                           ),
                         ),
@@ -101,7 +102,7 @@ class _ExpenseDistributionSectionState
                         Text(
                           '${items[i].percentage.toStringAsFixed(1)}%',
                           style: AppTypography.labelSm.copyWith(
-                            color: AppColors.onSurfaceVariant,
+                            color: colors.onSurfaceVariant,
                           ),
                         ),
                       ],
@@ -123,34 +124,24 @@ class _ExpenseDistributionSectionState
                   width: 36,
                   height: 36,
                   decoration: BoxDecoration(
-                    color: colors[i].withValues(alpha: 0.15),
+                    color: palette[i].withValues(alpha: 0.15),
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(
-                    IconMapper.fromString(item.categoryIcon),
-                    size: 18,
-                    color: colors[i],
-                  ),
+                  child: Icon(IconMapper.fromString(item.categoryIcon), size: 18, color: palette[i]),
                 ),
                 const SizedBox(width: AppSpacing.md),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        item.categoryName,
-                        style: AppTypography.bodyMd.copyWith(
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
+                      Text(item.categoryName,
+                          style: AppTypography.bodyMd.copyWith(fontWeight: FontWeight.w500)),
                       ClipRRect(
-                        borderRadius: BorderRadius.circular(
-                          AppSpacing.radiusSm,
-                        ),
+                        borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
                         child: LinearProgressIndicator(
                           value: item.percentage / 100,
-                          backgroundColor: colors[i].withValues(alpha: 0.12),
-                          valueColor: AlwaysStoppedAnimation(colors[i]),
+                          backgroundColor: palette[i].withValues(alpha: 0.12),
+                          valueColor: AlwaysStoppedAnimation(palette[i]),
                           minHeight: 4,
                         ),
                       ),
@@ -161,18 +152,10 @@ class _ExpenseDistributionSectionState
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    Text(
-                      CurrencyFormatter.formatCompact(item.amount),
-                      style: AppTypography.bodyMd.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    Text(
-                      '${item.percentage.toStringAsFixed(1)}%',
-                      style: AppTypography.bodySm.copyWith(
-                        color: AppColors.onSurfaceVariant,
-                      ),
-                    ),
+                    Text(CurrencyFormatter.formatCompact(item.amount),
+                        style: AppTypography.bodyMd.copyWith(fontWeight: FontWeight.w600)),
+                    Text('${item.percentage.toStringAsFixed(1)}%',
+                        style: AppTypography.bodySm.copyWith(color: colors.onSurfaceVariant)),
                   ],
                 ),
               ],
@@ -183,16 +166,16 @@ class _ExpenseDistributionSectionState
     );
   }
 
-  List<Color> _generateColors(int count) {
-    const base = [
-      AppColors.primary,
-      AppColors.secondary,
-      AppColors.tertiary,
-      Color(0xFF7C9EFF),
-      Color(0xFF50C8A8),
-      Color(0xFFFFD580),
-      Color(0xFFF28BCA),
-      Color(0xFF95D5F5),
+  List<Color> _generateColors(int count, AppPalette colors) {
+    final base = [
+      colors.primary,
+      colors.secondary,
+      colors.tertiary,
+      const Color(0xFF7C9EFF),
+      const Color(0xFF50C8A8),
+      const Color(0xFFFFD580),
+      const Color(0xFFF28BCA),
+      const Color(0xFF95D5F5),
     ];
     return List.generate(count, (i) => base[i % base.length]);
   }

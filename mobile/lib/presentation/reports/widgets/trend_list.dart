@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:wallet_app/core/constants/app_colors.dart';
 import 'package:wallet_app/core/constants/app_spacing.dart';
 import 'package:wallet_app/core/constants/app_typography.dart';
 import 'package:wallet_app/core/l10n/app_strings.dart';
+import 'package:wallet_app/core/theme/app_palette.dart';
 import 'package:wallet_app/core/utils/currency_formatter.dart';
 import 'package:wallet_app/data/models/report_model.dart';
 
@@ -12,10 +12,11 @@ class TrendList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return Column(
       children: trends.take(6).map((trend) {
         final isIncrease = trend.isIncrease;
-        final color = isIncrease ? AppColors.tertiary : AppColors.secondary;
+        final color = isIncrease ? colors.expense : colors.income;
         return Padding(
           padding: const EdgeInsets.only(bottom: AppSpacing.sm),
           child: Container(
@@ -24,7 +25,7 @@ class TrendList extends StatelessWidget {
               vertical: AppSpacing.md,
             ),
             decoration: BoxDecoration(
-              color: AppColors.surfaceContainerHigh,
+              color: colors.surfaceContainerHigh,
               borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
             ),
             child: Row(
@@ -35,15 +36,11 @@ class TrendList extends StatelessWidget {
                     children: [
                       Text(
                         trend.categoryName,
-                        style: AppTypography.bodyMd.copyWith(
-                          fontWeight: FontWeight.w500,
-                        ),
+                        style: AppTypography.bodyMd.copyWith(fontWeight: FontWeight.w500),
                       ),
                       Text(
                         '${CurrencyFormatter.formatCompact(trend.currentAmount)} (${AppStrings.of(context).previousLabel}: ${CurrencyFormatter.formatCompact(trend.previousAmount)})',
-                        style: AppTypography.bodySm.copyWith(
-                          color: AppColors.onSurfaceVariant,
-                        ),
+                        style: AppTypography.bodySm.copyWith(color: colors.onSurfaceVariant),
                       ),
                     ],
                   ),
@@ -51,9 +48,7 @@ class TrendList extends StatelessWidget {
                 Row(
                   children: [
                     Icon(
-                      isIncrease
-                          ? Icons.trending_up_rounded
-                          : Icons.trending_down_rounded,
+                      isIncrease ? Icons.trending_up_rounded : Icons.trending_down_rounded,
                       color: color,
                       size: 18,
                     ),

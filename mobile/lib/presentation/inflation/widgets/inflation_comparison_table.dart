@@ -1,14 +1,11 @@
 import 'package:flutter/material.dart';
-import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
+import '../../../core/theme/app_palette.dart';
 import '../../../data/models/inflation_model.dart';
 
 class InflationComparisonTable extends StatelessWidget {
-  const InflationComparisonTable({
-    super.key,
-    required this.comparison,
-  });
+  const InflationComparisonTable({super.key, required this.comparison});
 
   final InflationComparisonModel comparison;
 
@@ -38,25 +35,14 @@ class _SummaryRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return Row(
       children: [
-        _SummaryChip(
-          count: summary.categoriesBelow,
-          label: 'Altında',
-          color: AppColors.secondary,
-        ),
+        _SummaryChip(count: summary.categoriesBelow, label: 'Altında', color: colors.income),
         const SizedBox(width: AppSpacing.sm),
-        _SummaryChip(
-          count: summary.categoriesEqual,
-          label: 'Dengede',
-          color: AppColors.onSurface,
-        ),
+        _SummaryChip(count: summary.categoriesEqual, label: 'Dengede', color: colors.onSurface),
         const SizedBox(width: AppSpacing.sm),
-        _SummaryChip(
-          count: summary.categoriesAbove,
-          label: 'Üstünde',
-          color: AppColors.tertiary,
-        ),
+        _SummaryChip(count: summary.categoriesAbove, label: 'Üstünde', color: colors.expense),
       ],
     );
   }
@@ -87,17 +73,9 @@ class _SummaryChip extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(
-            '$count',
-            style: AppTypography.titleSm.copyWith(color: color, fontSize: 14),
-          ),
+          Text('$count', style: AppTypography.titleSm.copyWith(color: color, fontSize: 14)),
           const SizedBox(width: 4),
-          Text(
-            label,
-            style: AppTypography.labelSm.copyWith(
-              color: color.withValues(alpha: 0.8),
-            ),
-          ),
+          Text(label, style: AppTypography.labelSm.copyWith(color: color.withValues(alpha: 0.8))),
         ],
       ),
     );
@@ -107,48 +85,34 @@ class _SummaryChip extends StatelessWidget {
 class _TableHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return Container(
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.md,
         vertical: AppSpacing.xs,
       ),
       decoration: BoxDecoration(
-        color: AppColors.surfaceContainerHighest,
+        color: colors.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
       ),
       child: Row(
         children: [
           Expanded(
             flex: 3,
-            child: Text(
-              'KATEGORİ',
-              style: AppTypography.labelSm.copyWith(
-                color: AppColors.onSurfaceVariant,
-                fontSize: 10,
-              ),
-            ),
+            child: Text('KATEGORİ',
+                style: AppTypography.labelSm.copyWith(color: colors.onSurfaceVariant, fontSize: 10)),
           ),
           SizedBox(
             width: 64,
-            child: Text(
-              'SENİN %',
-              style: AppTypography.labelSm.copyWith(
-                color: AppColors.onSurfaceVariant,
-                fontSize: 10,
-              ),
-              textAlign: TextAlign.right,
-            ),
+            child: Text('SENİN %',
+                style: AppTypography.labelSm.copyWith(color: colors.onSurfaceVariant, fontSize: 10),
+                textAlign: TextAlign.right),
           ),
           SizedBox(
             width: 64,
-            child: Text(
-              'TÜFE %',
-              style: AppTypography.labelSm.copyWith(
-                color: AppColors.onSurfaceVariant,
-                fontSize: 10,
-              ),
-              textAlign: TextAlign.right,
-            ),
+            child: Text('TÜFE %',
+                style: AppTypography.labelSm.copyWith(color: colors.onSurfaceVariant, fontSize: 10),
+                textAlign: TextAlign.right),
           ),
           const SizedBox(width: 44),
         ],
@@ -161,10 +125,10 @@ class _ComparisonRow extends StatelessWidget {
   const _ComparisonRow({required this.row});
   final InflationComparisonRowModel row;
 
-  Color get _statusColor => switch (row.status) {
-        InflationComparisonStatus.BELOW => AppColors.secondary,
-        InflationComparisonStatus.ABOVE => AppColors.tertiary,
-        InflationComparisonStatus.EQUAL => AppColors.onSurface,
+  Color _statusColor(AppPalette colors) => switch (row.status) {
+        InflationComparisonStatus.BELOW => colors.income,
+        InflationComparisonStatus.ABOVE => colors.expense,
+        InflationComparisonStatus.EQUAL => colors.onSurface,
       };
 
   String get _statusLabel => switch (row.status) {
@@ -175,6 +139,8 @@ class _ComparisonRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
+    final statusColor = _statusColor(colors);
     final userRate = row.userChangeRate;
 
     return Container(
@@ -183,18 +149,14 @@ class _ComparisonRow extends StatelessWidget {
         vertical: AppSpacing.sm,
       ),
       decoration: BoxDecoration(
-        color: AppColors.surfaceContainerHigh,
+        color: colors.surfaceContainerHigh,
         borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
       ),
       child: Row(
         children: [
           Expanded(
             flex: 3,
-            child: Text(
-              row.categoryName,
-              style: AppTypography.bodyMd,
-              overflow: TextOverflow.ellipsis,
-            ),
+            child: Text(row.categoryName, style: AppTypography.bodyMd, overflow: TextOverflow.ellipsis),
           ),
           SizedBox(
             width: 64,
@@ -202,10 +164,7 @@ class _ComparisonRow extends StatelessWidget {
               userRate != null
                   ? '${userRate >= 0 ? '+' : ''}${userRate.toStringAsFixed(1)}%'
                   : '—',
-              style: AppTypography.bodySm.copyWith(
-                color: _statusColor,
-                fontWeight: FontWeight.w600,
-              ),
+              style: AppTypography.bodySm.copyWith(color: statusColor, fontWeight: FontWeight.w600),
               textAlign: TextAlign.right,
             ),
           ),
@@ -213,9 +172,7 @@ class _ComparisonRow extends StatelessWidget {
             width: 64,
             child: Text(
               '+${row.inflationRate.toStringAsFixed(1)}%',
-              style: AppTypography.bodySm.copyWith(
-                color: AppColors.onSurfaceVariant,
-              ),
+              style: AppTypography.bodySm.copyWith(color: colors.onSurfaceVariant),
               textAlign: TextAlign.right,
             ),
           ),
@@ -224,15 +181,12 @@ class _ComparisonRow extends StatelessWidget {
             width: 36,
             padding: const EdgeInsets.symmetric(vertical: 2),
             decoration: BoxDecoration(
-              color: _statusColor.withValues(alpha: 0.12),
+              color: statusColor.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
             ),
             child: Text(
               _statusLabel,
-              style: AppTypography.labelSm.copyWith(
-                color: _statusColor,
-                fontSize: 9,
-              ),
+              style: AppTypography.labelSm.copyWith(color: statusColor, fontSize: 9),
               textAlign: TextAlign.center,
             ),
           ),

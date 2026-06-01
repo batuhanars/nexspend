@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
+import '../../../core/theme/app_palette.dart';
 import '../../../core/utils/currency_formatter.dart';
 import '../../../data/models/inflation_model.dart';
 
@@ -21,17 +21,15 @@ class InflationSuggestionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     final increase = suggestion.suggestedAmount - suggestion.currentAmount;
 
     return Container(
       padding: const EdgeInsets.all(AppSpacing.lg),
       decoration: BoxDecoration(
-        color: AppColors.surfaceContainerHigh,
+        color: colors.surfaceContainerHigh,
         borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-        border: Border.all(
-          color: AppColors.primary.withValues(alpha: 0.25),
-          width: 1,
-        ),
+        border: Border.all(color: colors.primary.withValues(alpha: 0.25), width: 1),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -39,41 +37,30 @@ class InflationSuggestionCard extends StatelessWidget {
           Row(
             children: [
               Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.sm,
-                  vertical: 3,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: 3),
                 decoration: BoxDecoration(
-                  color: AppColors.primary.withValues(alpha: 0.15),
+                  color: colors.primary.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
                 ),
                 child: Text(
                   'ENFLASYON ÖNERİSİ',
                   style: AppTypography.labelSm.copyWith(
-                    color: AppColors.primary,
+                    color: colors.primary,
                     letterSpacing: 0.8,
                   ),
                 ),
               ),
               const Spacer(),
-              Icon(
-                Icons.trending_up_rounded,
-                size: 16,
-                color: AppColors.primary.withValues(alpha: 0.7),
-              ),
+              Icon(Icons.trending_up_rounded, size: 16,
+                  color: colors.primary.withValues(alpha: 0.7)),
             ],
           ),
           const SizedBox(height: AppSpacing.md),
-          Text(
-            budgetName,
-            style: AppTypography.titleSm,
-          ),
+          Text(budgetName, style: AppTypography.titleSm),
           const SizedBox(height: AppSpacing.xs),
           Text(
             'Son ${suggestion.monthsSinceUpdate} ayda %${suggestion.cumulativeRate.toStringAsFixed(1)} kümülatif enflasyon',
-            style: AppTypography.bodySm.copyWith(
-              color: AppColors.onSurfaceVariant,
-            ),
+            style: AppTypography.bodySm.copyWith(color: colors.onSurfaceVariant),
           ),
           const SizedBox(height: AppSpacing.md),
           Row(
@@ -81,35 +68,28 @@ class InflationSuggestionCard extends StatelessWidget {
               _AmountCell(
                 label: 'Mevcut',
                 amount: suggestion.currentAmount,
-                color: AppColors.onSurfaceVariant,
+                color: colors.onSurfaceVariant,
               ),
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: AppSpacing.sm),
-                child: Icon(
-                  Icons.arrow_forward_rounded,
-                  size: 16,
-                  color: AppColors.onSurfaceVariant,
-                ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+                child: Icon(Icons.arrow_forward_rounded, size: 16, color: colors.onSurfaceVariant),
               ),
               _AmountCell(
                 label: 'Önerilen',
                 amount: suggestion.suggestedAmount,
-                color: AppColors.primary,
+                color: colors.primary,
               ),
               const Spacer(),
               Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.sm,
-                  vertical: 3,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: 3),
                 decoration: BoxDecoration(
-                  color: AppColors.tertiary.withValues(alpha: 0.15),
+                  color: colors.expense.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
                 ),
                 child: Text(
                   '+${CurrencyFormatter.formatNoDecimal(increase)}',
                   style: AppTypography.labelSm.copyWith(
-                    color: AppColors.tertiary,
+                    color: colors.expense,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -123,25 +103,25 @@ class InflationSuggestionCard extends StatelessWidget {
             child: FilledButton(
               onPressed: isApplying ? null : onApply,
               style: FilledButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                foregroundColor: AppColors.onPrimary,
+                backgroundColor: colors.primary,
+                foregroundColor: colors.onPrimary,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
                 ),
               ),
               child: isApplying
-                  ? const SizedBox(
+                  ? SizedBox(
                       width: 16,
                       height: 16,
                       child: CircularProgressIndicator(
                         strokeWidth: 2,
-                        color: AppColors.onPrimary,
+                        color: colors.onPrimary,
                       ),
                     )
                   : Text(
                       'Bütçeyi Güncelle  ${CurrencyFormatter.format(suggestion.suggestedAmount)}\'ye',
                       style: AppTypography.bodySm.copyWith(
-                        color: AppColors.onPrimary,
+                        color: colors.onPrimary,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -172,15 +152,12 @@ class _AmountCell extends StatelessWidget {
         Text(
           label,
           style: AppTypography.labelSm.copyWith(
-            color: AppColors.onSurfaceVariant,
+            color: context.colors.onSurfaceVariant,
             fontSize: 10,
           ),
         ),
         const SizedBox(height: 2),
-        Text(
-          CurrencyFormatter.format(amount),
-          style: AppTypography.titleSm.copyWith(color: color),
-        ),
+        Text(CurrencyFormatter.format(amount), style: AppTypography.titleSm.copyWith(color: color)),
       ],
     );
   }

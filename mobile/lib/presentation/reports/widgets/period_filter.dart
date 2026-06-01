@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:wallet_app/core/constants/app_colors.dart';
 import 'package:wallet_app/core/constants/app_spacing.dart';
 import 'package:wallet_app/core/constants/app_typography.dart';
 import 'package:wallet_app/core/l10n/app_strings.dart';
+import 'package:wallet_app/core/theme/app_palette.dart';
 import 'package:wallet_app/presentation/reports/bloc/reports_bloc.dart';
 
 class PeriodFilter extends StatelessWidget {
@@ -12,6 +12,7 @@ class PeriodFilter extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     final s = AppStrings.of(context);
     final periods = [
       (label: s.periodThisMonth, value: 'THIS_MONTH'),
@@ -36,20 +37,18 @@ class PeriodFilter extends StatelessWidget {
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
                   color: isActive
-                      ? AppColors.primary.withValues(alpha: 0.15)
-                      : AppColors.surfaceContainerHigh,
+                      ? colors.primary.withValues(alpha: 0.15)
+                      : colors.surfaceContainerHigh,
                   borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
                   border: isActive
-                      ? Border.all(color: AppColors.primary, width: 1.5)
+                      ? Border.all(color: colors.primary, width: 1.5)
                       : null,
                 ),
                 child: Text(
                   p.label,
                   style: AppTypography.labelMd.copyWith(
                     fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
-                    color: isActive
-                        ? AppColors.primary
-                        : AppColors.onSurfaceVariant,
+                    color: isActive ? colors.primary : colors.onSurfaceVariant,
                     height: 1.0,
                   ),
                 ),

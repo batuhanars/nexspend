@@ -1,6 +1,6 @@
 # Stitch Wallet App — Görev Takip Dosyası
 
-> Son güncelleme: 1 Haziran 2026 (Tema Sistemi S9 tamamlandı — family migrate; commit `f6fe78e`, `origin/main`'e push edildi, analyze temiz + test 149 ✅)  
+> Son güncelleme: 1 Haziran 2026 (Tema Sistemi S10 tamamlandı — receipt_scanner migrate, corner_painter §8 doğru; commit `f994c13`, `origin/main`'e push edildi, analyze temiz + test 149 ✅)  
 > ✅ = Tamamlandı | 🔧 = Kısmen yapıldı | ❌ = Henüz başlanmadı  
 > ☑ = Kodda mevcut ancak migration henüz çalıştırılmadı
 
@@ -69,10 +69,19 @@
 - [x] `presentation/family/**` tamamı migrate (0 `AppColors`, hardcode renk yok)
 - [x] PM kapı denetimi: analyze temiz + test 149/149 ✅
 
-### S10..Sn — Feature migration ❌ (sıradaki: S10 = receipt_scanner)
-- [ ] receipt_scanner → reports/insights/inflation → settings(+switcher) (contract §7)
-- [ ] Her batch: `AppColors.X` → `context.colors.X`, analyze+test yeşil, light modda görsel QA
-- [ ] ⚠️ receipt_scanner: `corner_painter.dart` CustomPainter — renk constructor'dan (§8)
+### S10 — receipt_scanner ✅ (commit `f994c13`, 1 Haz 2026)
+- [x] `presentation/receipt_scanner/**` (preview/ dahil) tamamı migrate (0 `AppColors`)
+- [x] `corner_painter.dart`: renk constructor'dan (`required this.color`) + `shouldRepaint` karşılaştırma, painter içinde context yok (§8 doğru) ✅
+- [x] PM kapı denetimi: analyze temiz + test 149/149 ✅
+
+### S11 — reports/insights/inflation ❌ (sıradaki)
+- [ ] `presentation/reports/**` + `insights/**` + `inflation/**` — `AppColors.X` → `context.colors.X`
+- [ ] ⚠️ fl_chart grafik renkleri (cash_flow_chart, inflation_trend_chart) — renkler `context.colors`'tan, chart'a build'de geçir
+- [ ] Kapı: analyze + test yeşil
+
+### S-son — settings + açılış ❌
+- [ ] `presentation/settings/**` + `legal/**` + `onboarding/**` migrate
+- [ ] Settings'e Light/Dark/Sistem seçici (contract §6), `AppColors` SİLİNİR (`grep AppColors lib/` → 0), tam QA
 
 ### S-son — Açılış ❌
 - [ ] Settings'e Light/Dark/Sistem seçici (contract §6), `AppColors` silinir (`grep AppColors lib/` → 0), tam QA

@@ -1,0 +1,23 @@
+# Bağımlılıklar imaj içinde npm ci ile yeniden kurulur
+node_modules
+
+# Build çıktısı imaj içinde yeniden üretilir
+dist
+coverage
+
+# Sırlar — asla imaja gömülmez (env compose'tan enjekte edilir)
+.env
+.env.*
+
+# Yerel yüklenen dosyalar (volume ile yönetilir)
+uploads
+
+# Geliştirme / VCS artıkları
+.git
+.gitignore
+*.log
+test
+**/*.spec.ts
+Dockerfile
+.dockerignore
+README.md

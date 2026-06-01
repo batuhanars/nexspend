@@ -37,11 +37,11 @@ class ArchivedAccountTile extends StatelessWidget {
                   width: 40,
                   height: 40,
                   decoration: BoxDecoration(
-                    color: account.cardColor.withValues(alpha: 0.12),
+                    color: context.colorForAccount(account).withValues(alpha: 0.12),
                     shape: BoxShape.circle,
                   ),
                   child: Icon(account.iconData,
-                      size: 20, color: account.cardColor),
+                      size: 20, color: context.colorForAccount(account)),
                 ),
                 const SizedBox(width: AppSpacing.md),
                 Expanded(

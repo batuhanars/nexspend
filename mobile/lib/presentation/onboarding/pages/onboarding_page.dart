@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:wallet_app/core/theme/app_palette.dart';
 import 'package:go_router/go_router.dart';
-import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
 import '../../../core/di/injection.dart';
@@ -108,7 +107,7 @@ class _OnboardingView extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          _buildIllustration(),
+          _buildIllustration(context),
           const SizedBox(height: AppSpacing.xxxl),
           Text(
             _title,
@@ -132,7 +131,7 @@ class _OnboardingView extends StatelessWidget {
     );
   }
 
-  Widget _buildIllustration() {
+  Widget _buildIllustration(BuildContext context) {
     return switch (data.type) {
       _Type.welcome => _WelcomeIllustration(),
       _Type.features => _FeaturesIllustration(),
@@ -199,7 +198,7 @@ class _WelcomeIllustration extends StatelessWidget {
 }
 
 class _FeaturesIllustration extends StatelessWidget {
-  const _FeaturesIllustration({super.key});
+  const _FeaturesIllustration();
 
   @override
   Widget build(BuildContext context) {

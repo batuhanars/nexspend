@@ -32,10 +32,10 @@ class AccountListTile extends StatelessWidget {
                   width: 44,
                   height: 44,
                   decoration: BoxDecoration(
-                    color: account.cardColor.withValues(alpha: 0.15),
+                    color: context.colorForAccount(account).withValues(alpha: 0.15),
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(account.iconData, size: 22, color: account.cardColor),
+                  child: Icon(account.iconData, size: 22, color: context.colorForAccount(account)),
                 ),
                 const SizedBox(width: AppSpacing.md),
                 Expanded(

@@ -21,14 +21,14 @@ class PasswordField extends StatelessWidget {
     return TextField(
       controller: ctrl,
       obscureText: obscure,
-      style: const TextStyle(color: context.colors.onSurface, fontSize: 14),
+      style: TextStyle(color: context.colors.onSurface, fontSize: 14),
       decoration: InputDecoration(
         hintText: hint,
-        hintStyle: const TextStyle(
+        hintStyle: TextStyle(
           color: context.colors.onSurfaceVariant,
           fontSize: 14,
         ),
-        prefixIcon: const Icon(
+        prefixIcon: Icon(
           Icons.lock_outline_rounded,
           size: 20,
           color: context.colors.onSurfaceVariant,
@@ -53,7 +53,7 @@ class PasswordField extends StatelessWidget {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-          borderSide: const BorderSide(color: context.colors.primary, width: 1.5),
+          borderSide: BorderSide(color: context.colors.primary, width: 1.5),
         ),
       ),
     );

@@ -20,10 +20,10 @@ class AccountHeaderCard extends StatelessWidget {
       margin: const EdgeInsets.symmetric(horizontal: AppSpacing.pagePadding),
       padding: const EdgeInsets.all(AppSpacing.xl),
       decoration: BoxDecoration(
-        color: account.cardColor.withValues(alpha: 0.12),
+        color: context.colorForAccount(account).withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
         border: Border.all(
-          color: account.cardColor.withValues(alpha: 0.2),
+          color: context.colorForAccount(account).withValues(alpha: 0.2),
           width: 1,
         ),
       ),
@@ -36,10 +36,10 @@ class AccountHeaderCard extends StatelessWidget {
                 width: 48,
                 height: 48,
                 decoration: BoxDecoration(
-                  color: account.cardColor.withValues(alpha: 0.2),
+                  color: context.colorForAccount(account).withValues(alpha: 0.2),
                   shape: BoxShape.circle,
                 ),
-                child: Icon(account.iconData, color: account.cardColor, size: 24),
+                child: Icon(account.iconData, color: context.colorForAccount(account), size: 24),
               ),
               const SizedBox(width: AppSpacing.md),
               Expanded(

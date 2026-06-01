@@ -56,13 +56,15 @@ class AccountModel {
   IconData get iconData =>
       icon != null ? IconMapper.fromString(icon) : type.defaultIcon;
 
-  Color get cardColor {
+  /// Kullanıcının seçtiği özel renk (hex); yoksa null.
+  /// Varsayılan tip rengi tema-duyarlıdır → `context.colorForAccount(account)` kullan.
+  Color? get customColor {
     if (color != null) {
       try {
         return Color(int.parse('FF${color!.replaceAll('#', '')}', radix: 16));
       } catch (_) {}
     }
-    throw UnsupportedError('cardColor requires context; use context.getColorForAccountType(type)');
+    return null;
   }
 
   double get creditUsed {

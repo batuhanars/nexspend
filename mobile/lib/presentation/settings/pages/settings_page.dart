@@ -103,7 +103,7 @@ class _SettingsView extends StatelessWidget {
             if (state is SettingsLoading ||
                 state is SettingsInitial ||
                 state is SettingsResetSuccess) {
-              return const Center(
+              return Center(
                 child: CircularProgressIndicator(color: context.colors.primary),
               );
             }
@@ -329,7 +329,7 @@ class _SettingsView extends StatelessWidget {
                 ),
                 title: Text(l.$2, style: AppTypography.bodyMd),
                 trailing: user.language == l.$1
-                    ? const Icon(
+                    ? Icon(
                         Icons.check_rounded,
                         color: context.colors.primary,
                         size: 20,
@@ -591,7 +591,7 @@ class _DangerZoneSection extends StatelessWidget {
                           ),
                         ),
                         if (isResetting)
-                          const SizedBox(
+                          SizedBox(
                             width: 20,
                             height: 20,
                             child: CircularProgressIndicator(

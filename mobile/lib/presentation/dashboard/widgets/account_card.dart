@@ -108,10 +108,10 @@ class _AccountIcon extends StatelessWidget {
       width: 40,
       height: 40,
       decoration: BoxDecoration(
-        color: account.cardColor.withValues(alpha: 0.15),
+        color: context.colorForAccount(account).withValues(alpha: 0.15),
         shape: BoxShape.circle,
       ),
-      child: Icon(account.iconData, color: account.cardColor, size: 20),
+      child: Icon(account.iconData, color: context.colorForAccount(account), size: 20),
     );
   }
 }

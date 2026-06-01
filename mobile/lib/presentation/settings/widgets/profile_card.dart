@@ -42,10 +42,10 @@ class ProfileCard extends StatelessWidget {
                     color: context.colors.primary.withValues(alpha: 0.15),
                     shape: BoxShape.circle,
                   ),
-                  child: _buildAvatar(user, initials),
+                  child: _buildAvatar(context, user, initials),
                 ),
                 if (isSaving)
-                  const Positioned.fill(
+                  Positioned.fill(
                     child: CircularProgressIndicator(
                       strokeWidth: 2,
                       color: context.colors.primary,
@@ -79,18 +79,18 @@ class ProfileCard extends StatelessWidget {
     );
   }
 
-  Widget _buildAvatar(UserModel user, String initials) {
+  Widget _buildAvatar(BuildContext context, UserModel user, String initials) {
     final googleUrl = user.googleAvatarUrl;
     if (googleUrl != null) {
       return ClipOval(
         child: CachedNetworkImage(
           imageUrl: googleUrl,
           fit: BoxFit.cover,
-          placeholder: (context, _) => const CircularProgressIndicator(
+          placeholder: (context, _) => CircularProgressIndicator(
             strokeWidth: 2,
             color: context.colors.primary,
           ),
-          errorWidget: (context, _, error) => _initialsWidget(initials),
+          errorWidget: (context, _, error) => _initialsWidget(context, initials),
         ),
       );
     }
@@ -100,20 +100,20 @@ class ProfileCard extends StatelessWidget {
           urlPath: ApiEndpoints.meAvatar,
           cacheKey: user.avatarUrl,
           fit: BoxFit.cover,
-          placeholder: const Center(
+          placeholder: Center(
             child: CircularProgressIndicator(
               strokeWidth: 2,
               color: context.colors.primary,
             ),
           ),
-          errorWidget: _initialsWidget(initials),
+          errorWidget: _initialsWidget(context, initials),
         ),
       );
     }
-    return _initialsWidget(initials);
+    return _initialsWidget(context, initials);
   }
 
-  Widget _initialsWidget(String initials) {
+  Widget _initialsWidget(BuildContext context, String initials) {
     return Center(
       child: Text(
         initials,

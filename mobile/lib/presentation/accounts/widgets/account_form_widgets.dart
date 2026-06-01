@@ -30,7 +30,7 @@ class AccountTypeSelector extends StatelessWidget {
       childAspectRatio: 2.6,
       children: AccountType.values.where((t) => t != AccountType.INVESTMENT).map((type) {
         final isSelected = type == selected;
-        final accent = type.defaultColor;
+        final accent = context.getColorForAccountType(type);
         return GestureDetector(
           onTap: () => onChanged(type),
           child: AnimatedContainer(

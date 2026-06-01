@@ -56,7 +56,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
         },
         builder: (context, state) {
           if (state is SettingsLoading || state is SettingsInitial) {
-            return const Scaffold(
+            return Scaffold(
               body: Center(
                 child: CircularProgressIndicator(color: context.colors.primary),
               ),
@@ -82,8 +82,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
               surfaceTintColor: Colors.transparent,
               actions: [
                 if (isSaving)
-                  const Padding(
-                    padding: EdgeInsets.only(right: AppSpacing.lg),
+                  Padding(
+                    padding: const EdgeInsets.only(right: AppSpacing.lg),
                     child: SizedBox(
                       width: 20,
                       height: 20,
@@ -136,7 +136,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                               border: Border.all(
                                   color: context.colors.surface, width: 2),
                             ),
-                            child: const Icon(
+                            child: Icon(
                               Icons.camera_alt_outlined,
                               size: 16,
                               color: context.colors.onPrimary,
@@ -158,7 +158,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                               .add(const SettingsAvatarDeleted()),
                       child: Text(
                         AppStrings.of(context).removePhoto,
-                        style: const TextStyle(color: context.colors.error),
+                        style: TextStyle(color: context.colors.error),
                       ),
                     ),
                   ),
@@ -170,13 +170,13 @@ class _EditProfilePageState extends State<EditProfilePage> {
                 TextField(
                   controller: _nameController,
                   enabled: !isSaving,
-                  style: const TextStyle(
+                  style: TextStyle(
                       color: context.colors.onSurface, fontSize: 14),
                   decoration: InputDecoration(
                     hintText: AppStrings.of(context).fullNameHint,
-                    hintStyle: const TextStyle(
+                    hintStyle: TextStyle(
                         color: context.colors.onSurfaceVariant, fontSize: 14),
-                    prefixIcon: const Icon(Icons.person_outline_rounded,
+                    prefixIcon: Icon(Icons.person_outline_rounded,
                         size: 20, color: context.colors.onSurfaceVariant),
                     filled: true,
                     fillColor: context.colors.surfaceContainerHighest,
@@ -193,7 +193,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                     focusedBorder: OutlineInputBorder(
                       borderRadius:
                           BorderRadius.circular(AppSpacing.radiusMd),
-                      borderSide: const BorderSide(
+                      borderSide: BorderSide(
                           color: context.colors.primary, width: 1.5),
                     ),
                   ),
@@ -213,7 +213,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                   ),
                   child: Row(
                     children: [
-                      const Icon(Icons.email_outlined,
+                      Icon(Icons.email_outlined,
                           size: 20, color: context.colors.onSurfaceVariant),
                       const SizedBox(width: AppSpacing.md),
                       Text(
@@ -299,7 +299,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
           urlPath: ApiEndpoints.meAvatar,
           cacheKey: user.avatarUrl,
           fit: BoxFit.cover,
-          placeholder: const Center(
+          placeholder: Center(
             child: CircularProgressIndicator(
               strokeWidth: 2,
               color: context.colors.primary,

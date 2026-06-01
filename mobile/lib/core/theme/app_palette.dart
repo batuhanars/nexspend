@@ -318,6 +318,10 @@ extension AppPaletteX on BuildContext {
     };
   }
 
+  /// Hesabın efektif rengi: özel hex rengi varsa onu, yoksa tema-duyarlı tip rengini döner.
+  Color colorForAccount(AccountModel account) =>
+      account.customColor ?? getColorForAccountType(account.type);
+
   Color getColorForDebtType(DebtType type) {
     final palette = colors;
     return type == DebtType.LENT ? palette.secondary : palette.tertiary;

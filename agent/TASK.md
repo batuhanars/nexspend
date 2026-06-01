@@ -1,6 +1,6 @@
 # Stitch Wallet App — Görev Takip Dosyası
 
-> Son güncelleme: 1 Haziran 2026 (Tema Sistemi S10 tamamlandı — receipt_scanner migrate, corner_painter §8 doğru; commit `f994c13`, `origin/main`'e push edildi, analyze temiz + test 149 ✅)  
+> Son güncelleme: 1 Haziran 2026 (Tema Sistemi S11 tamamlandı — reports/insights/inflation migrate; commit `5111f16`. Kalan tek adım: S-son = settings + switcher açılışı + AppColors silme. analyze temiz + test 149 ✅)  
 > ✅ = Tamamlandı | 🔧 = Kısmen yapıldı | ❌ = Henüz başlanmadı  
 > ☑ = Kodda mevcut ancak migration henüz çalıştırılmadı
 
@@ -74,10 +74,11 @@
 - [x] `corner_painter.dart`: renk constructor'dan (`required this.color`) + `shouldRepaint` karşılaştırma, painter içinde context yok (§8 doğru) ✅
 - [x] PM kapı denetimi: analyze temiz + test 149/149 ✅
 
-### S11 — reports/insights/inflation ❌ (sıradaki)
-- [ ] `presentation/reports/**` + `insights/**` + `inflation/**` — `AppColors.X` → `context.colors.X`
-- [ ] ⚠️ fl_chart grafik renkleri (cash_flow_chart, inflation_trend_chart) — renkler `context.colors`'tan, chart'a build'de geçir
-- [ ] Kapı: analyze + test yeşil
+### S11 — reports/insights/inflation ✅ (commit `5111f16`, 1 Haz 2026)
+- [x] `presentation/reports/**` + `insights/**` + `inflation/**` tamamı migrate (0 `AppColors`)
+- [x] Donut chart paleti (`expense_distribution_section`): `_generateColors` artık `AppPalette` param alıyor; ilk 3 renk `colors.primary/secondary/tertiary` (tema-duyarlı), kalan 5 = S11 öncesi var olan kategorik dilim paleti (dekoratif, AppColors değildi — istisna)
+- [x] PM kapı denetimi: analyze temiz + test 149/149 ✅
+- [ ] 📌 Final QA notu: donut'taki 5 sabit kategori rengi (#7C9EFF/#50C8A8/#FFD580/#F28BCA/#95D5F5) light modda kontrast açısından gözle kontrol edilsin
 
 ### S-son — settings + açılış ❌
 - [ ] `presentation/settings/**` + `legal/**` + `onboarding/**` migrate

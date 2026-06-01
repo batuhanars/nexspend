@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import '../../../core/l10n/app_strings.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
 import '../../../core/di/injection.dart';
+import '../../../core/theme/app_palette.dart';
 import '../../../data/models/account_model.dart';
 import '../../../data/repositories/account_repository.dart';
 import '../../shared/widgets/split_amount_field.dart';
@@ -60,7 +60,7 @@ class _AddSubscriptionSheetState extends State<AddSubscriptionSheet> {
 
   void _showError(String msg) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(msg), backgroundColor: AppColors.error),
+      SnackBar(content: Text(msg), backgroundColor: context.colors.error),
     );
   }
 
@@ -96,7 +96,7 @@ class _AddSubscriptionSheetState extends State<AddSubscriptionSheet> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(AppStrings.of(context).subscriptionCreatedSuccess),
-        backgroundColor: AppColors.secondary,
+        backgroundColor: context.colors.secondary,
       ),
     );
     Navigator.of(context).pop();
@@ -104,6 +104,7 @@ class _AddSubscriptionSheetState extends State<AddSubscriptionSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     final s = AppStrings.of(context);
     return Padding(
       padding: EdgeInsets.fromLTRB(
@@ -124,7 +125,7 @@ class _AddSubscriptionSheetState extends State<AddSubscriptionSheet> {
                 IconButton(
                   onPressed: () => Navigator.of(context).pop(),
                   icon: const Icon(Icons.close_rounded),
-                  color: AppColors.onSurfaceVariant,
+                  color: colors.onSurfaceVariant,
                 ),
               ],
             ),
@@ -132,20 +133,16 @@ class _AddSubscriptionSheetState extends State<AddSubscriptionSheet> {
             Center(
               child: SplitAmountField(
                 onChanged: (v) => setState(() => _amount = v),
-                color: AppColors.tertiary,
+                color: colors.expense,
               ),
             ),
             const SizedBox(height: AppSpacing.xl),
-            _field(
-              _nameController,
-              s.subscriptionNameHint,
-              Icons.subscriptions_outlined,
-            ),
+            _field(_nameController, s.subscriptionNameHint, Icons.subscriptions_outlined, colors),
             const SizedBox(height: AppSpacing.lg),
             Text(
               s.accountLabel,
               style: AppTypography.labelSm.copyWith(
-                color: AppColors.onSurfaceVariant,
+                color: colors.onSurfaceVariant,
               ),
             ),
             const SizedBox(height: AppSpacing.sm),
@@ -153,7 +150,7 @@ class _AddSubscriptionSheetState extends State<AddSubscriptionSheet> {
               future: _accountsFuture,
               builder: (context, snapshot) {
                 if (!snapshot.hasData) {
-                  return const SizedBox(
+                  return SizedBox(
                     height: 36,
                     child: Center(
                       child: SizedBox(
@@ -161,7 +158,7 @@ class _AddSubscriptionSheetState extends State<AddSubscriptionSheet> {
                         height: 20,
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
-                          color: AppColors.primary,
+                          color: colors.primary,
                         ),
                       ),
                     ),
@@ -174,7 +171,7 @@ class _AddSubscriptionSheetState extends State<AddSubscriptionSheet> {
                   return Text(
                     s.noAccountsFound,
                     style: AppTypography.bodySm.copyWith(
-                      color: AppColors.onSurfaceVariant,
+                      color: colors.onSurfaceVariant,
                     ),
                   );
                 }
@@ -203,24 +200,19 @@ class _AddSubscriptionSheetState extends State<AddSubscriptionSheet> {
                           ),
                           decoration: BoxDecoration(
                             color: isSelected
-                                ? AppColors.primary.withValues(alpha: 0.15)
-                                : AppColors.surfaceContainerHighest,
-                            borderRadius: BorderRadius.circular(
-                              AppSpacing.radiusMd,
-                            ),
+                                ? colors.primary.withValues(alpha: 0.15)
+                                : colors.surfaceContainerHighest,
+                            borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
                             border: isSelected
-                                ? Border.all(
-                                    color: AppColors.primary,
-                                    width: 1.5,
-                                  )
+                                ? Border.all(color: colors.primary, width: 1.5)
                                 : null,
                           ),
                           child: Text(
                             a.name,
                             style: AppTypography.labelSm.copyWith(
                               color: isSelected
-                                  ? AppColors.primary
-                                  : AppColors.onSurfaceVariant,
+                                  ? colors.primary
+                                  : colors.onSurfaceVariant,
                               fontWeight: isSelected
                                   ? FontWeight.w600
                                   : FontWeight.w400,
@@ -237,7 +229,7 @@ class _AddSubscriptionSheetState extends State<AddSubscriptionSheet> {
             Text(
               s.billingCycleLabel,
               style: AppTypography.labelSm.copyWith(
-                color: AppColors.onSurfaceVariant,
+                color: colors.onSurfaceVariant,
               ),
             ),
             const SizedBox(height: AppSpacing.sm),
@@ -247,14 +239,10 @@ class _AddSubscriptionSheetState extends State<AddSubscriptionSheet> {
                 final isLast = c == _cycles(context).last;
                 return Expanded(
                   child: Padding(
-                    padding: EdgeInsets.only(
-                      right: isLast ? 0 : AppSpacing.xs,
-                    ),
+                    padding: EdgeInsets.only(right: isLast ? 0 : AppSpacing.xs),
                     child: GestureDetector(
                       onTap: () => setState(() {
-                        // Tarih elle değiştirilmediyse döneme göre güncelle
-                        final stillDefault =
-                            _dueDate == _defaultRenewalDate();
+                        final stillDefault = _dueDate == _defaultRenewalDate();
                         _period = c.value;
                         if (_dueDate == null || stillDefault) {
                           _dueDate = _defaultRenewalDate();
@@ -266,27 +254,18 @@ class _AddSubscriptionSheetState extends State<AddSubscriptionSheet> {
                         alignment: Alignment.center,
                         decoration: BoxDecoration(
                           color: isActive
-                              ? AppColors.primary.withValues(alpha: 0.15)
-                              : AppColors.surfaceContainerHighest,
-                          borderRadius: BorderRadius.circular(
-                            AppSpacing.radiusMd,
-                          ),
+                              ? colors.primary.withValues(alpha: 0.15)
+                              : colors.surfaceContainerHighest,
+                          borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
                           border: isActive
-                              ? Border.all(
-                                  color: AppColors.primary,
-                                  width: 1.5,
-                                )
+                              ? Border.all(color: colors.primary, width: 1.5)
                               : null,
                         ),
                         child: Text(
                           c.label,
                           style: AppTypography.labelSm.copyWith(
-                            fontWeight: isActive
-                                ? FontWeight.w600
-                                : FontWeight.w400,
-                            color: isActive
-                                ? AppColors.primary
-                                : AppColors.onSurfaceVariant,
+                            fontWeight: isActive ? FontWeight.w600 : FontWeight.w400,
+                            color: isActive ? colors.primary : colors.onSurfaceVariant,
                             height: 1.0,
                           ),
                         ),
@@ -297,16 +276,14 @@ class _AddSubscriptionSheetState extends State<AddSubscriptionSheet> {
               }).toList(),
             ),
             const SizedBox(height: AppSpacing.md),
-            _dueDatePicker(s),
+            _dueDatePicker(s, colors),
             const SizedBox(height: AppSpacing.lg),
             Text(
               s.reminderDaysBeforeLabel,
-              style: AppTypography.labelSm.copyWith(
-                color: AppColors.onSurfaceVariant,
-              ),
+              style: AppTypography.labelSm.copyWith(color: colors.onSurfaceVariant),
             ),
             const SizedBox(height: AppSpacing.sm),
-            _reminderSelector(s),
+            _reminderSelector(s, colors),
             const SizedBox(height: AppSpacing.xl),
             FilledButton(
               onPressed: _submit,
@@ -324,7 +301,7 @@ class _AddSubscriptionSheetState extends State<AddSubscriptionSheet> {
     );
   }
 
-  Widget _dueDatePicker(AppStrings s) {
+  Widget _dueDatePicker(AppStrings s, AppPalette colors) {
     final now = DateTime.now();
     return GestureDetector(
       onTap: () async {
@@ -336,8 +313,8 @@ class _AddSubscriptionSheetState extends State<AddSubscriptionSheet> {
           builder: (ctx, child) => Theme(
             data: Theme.of(ctx).copyWith(
               colorScheme: Theme.of(ctx).colorScheme.copyWith(
-                primary: AppColors.primary,
-                surface: AppColors.surfaceContainerHigh,
+                primary: ctx.colors.primary,
+                surface: ctx.colors.surfaceContainerHigh,
               ),
             ),
             child: child!,
@@ -351,16 +328,12 @@ class _AddSubscriptionSheetState extends State<AddSubscriptionSheet> {
           vertical: AppSpacing.md,
         ),
         decoration: BoxDecoration(
-          color: AppColors.surfaceContainerHighest,
+          color: colors.surfaceContainerHighest,
           borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
         ),
         child: Row(
           children: [
-            const Icon(
-              Icons.event_outlined,
-              size: 20,
-              color: AppColors.onSurfaceVariant,
-            ),
+            Icon(Icons.event_outlined, size: 20, color: colors.onSurfaceVariant),
             const SizedBox(width: AppSpacing.md),
             Expanded(
               child: Text(
@@ -368,9 +341,7 @@ class _AddSubscriptionSheetState extends State<AddSubscriptionSheet> {
                     ? s.selectDueDate
                     : '${s.nextRenewalLabel}: ${_isoDate(_dueDate!)}',
                 style: AppTypography.bodyMd.copyWith(
-                  color: _dueDate == null
-                      ? AppColors.onSurfaceVariant
-                      : AppColors.onSurface,
+                  color: _dueDate == null ? colors.onSurfaceVariant : colors.onSurface,
                 ),
               ),
             ),
@@ -380,7 +351,7 @@ class _AddSubscriptionSheetState extends State<AddSubscriptionSheet> {
     );
   }
 
-  Widget _reminderSelector(AppStrings s) {
+  Widget _reminderSelector(AppStrings s, AppPalette colors) {
     const days = [1, 3, 7];
     return Row(
       children: days.map((d) {
@@ -397,20 +368,18 @@ class _AddSubscriptionSheetState extends State<AddSubscriptionSheet> {
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
                   color: isActive
-                      ? AppColors.primary.withValues(alpha: 0.15)
-                      : AppColors.surfaceContainerHighest,
+                      ? colors.primary.withValues(alpha: 0.15)
+                      : colors.surfaceContainerHighest,
                   borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
                   border: isActive
-                      ? Border.all(color: AppColors.primary, width: 1.5)
+                      ? Border.all(color: colors.primary, width: 1.5)
                       : null,
                 ),
                 child: Text(
                   s.reminderDaysOption(d),
                   style: AppTypography.labelSm.copyWith(
                     fontWeight: isActive ? FontWeight.w600 : FontWeight.w400,
-                    color: isActive
-                        ? AppColors.primary
-                        : AppColors.onSurfaceVariant,
+                    color: isActive ? colors.primary : colors.onSurfaceVariant,
                     height: 1.0,
                   ),
                 ),
@@ -422,19 +391,16 @@ class _AddSubscriptionSheetState extends State<AddSubscriptionSheet> {
     );
   }
 
-  Widget _field(TextEditingController ctrl, String hint, IconData icon) {
+  Widget _field(TextEditingController ctrl, String hint, IconData icon, AppPalette colors) {
     return TextField(
       controller: ctrl,
-      style: const TextStyle(color: AppColors.onSurface, fontSize: 14),
+      style: TextStyle(color: colors.onSurface, fontSize: 14),
       decoration: InputDecoration(
         hintText: hint,
-        hintStyle: const TextStyle(
-          color: AppColors.onSurfaceVariant,
-          fontSize: 14,
-        ),
-        prefixIcon: Icon(icon, size: 20, color: AppColors.onSurfaceVariant),
+        hintStyle: TextStyle(color: colors.onSurfaceVariant, fontSize: 14),
+        prefixIcon: Icon(icon, size: 20, color: colors.onSurfaceVariant),
         filled: true,
-        fillColor: AppColors.surfaceContainerHighest,
+        fillColor: colors.surfaceContainerHighest,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
           borderSide: BorderSide.none,
@@ -445,7 +411,7 @@ class _AddSubscriptionSheetState extends State<AddSubscriptionSheet> {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-          borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
+          borderSide: BorderSide(color: colors.primary, width: 1.5),
         ),
       ),
     );

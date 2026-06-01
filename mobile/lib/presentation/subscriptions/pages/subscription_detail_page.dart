@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:wallet_app/core/l10n/app_strings.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:wallet_app/core/constants/app_colors.dart';
 import 'package:wallet_app/core/constants/app_spacing.dart';
 import 'package:wallet_app/core/constants/app_typography.dart';
 import 'package:wallet_app/core/di/injection.dart';
+import 'package:wallet_app/core/theme/app_palette.dart';
 import 'package:wallet_app/data/models/subscription_model.dart';
 import 'package:wallet_app/data/repositories/subscription_repository.dart';
 import 'package:wallet_app/presentation/shared/widgets/split_amount_field.dart';
@@ -75,7 +75,7 @@ class _SubscriptionDetailPageState extends State<SubscriptionDetailPage> {
     await showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
-      backgroundColor: AppColors.surfaceContainerHigh,
+      backgroundColor: context.colors.surfaceContainerHigh,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(
           top: Radius.circular(AppSpacing.radiusLg),
@@ -84,6 +84,7 @@ class _SubscriptionDetailPageState extends State<SubscriptionDetailPage> {
       builder: (sheetCtx) {
         return StatefulBuilder(
           builder: (ctx, setSheetState) {
+            final colors = ctx.colors;
             final s = AppStrings.of(ctx);
             const reminderDays = [1, 3, 7];
             return SingleChildScrollView(
@@ -107,7 +108,7 @@ class _SubscriptionDetailPageState extends State<SubscriptionDetailPage> {
                       IconButton(
                         onPressed: () => Navigator.of(ctx).pop(),
                         icon: const Icon(Icons.close_rounded),
-                        color: AppColors.onSurfaceVariant,
+                        color: colors.onSurfaceVariant,
                       ),
                     ],
                   ),
@@ -116,49 +117,40 @@ class _SubscriptionDetailPageState extends State<SubscriptionDetailPage> {
                     child: SplitAmountField(
                       initialValue: _sub.amount,
                       onChanged: (v) => pendingAmount = v,
-                      color: AppColors.tertiary,
+                      color: colors.expense,
                     ),
                   ),
                   const SizedBox(height: AppSpacing.xl),
                   TextField(
                     controller: _editNameCtrl,
-                    style: const TextStyle(
-                      color: AppColors.onSurface,
+                    style: TextStyle(
+                      color: colors.onSurface,
                       fontSize: 14,
                     ),
                     decoration: InputDecoration(
                       hintText: 'Abonelik adı',
-                      hintStyle: const TextStyle(
-                        color: AppColors.onSurfaceVariant,
+                      hintStyle: TextStyle(
+                        color: colors.onSurfaceVariant,
                         fontSize: 14,
                       ),
-                      prefixIcon: const Icon(
+                      prefixIcon: Icon(
                         Icons.subscriptions_outlined,
                         size: 20,
-                        color: AppColors.onSurfaceVariant,
+                        color: colors.onSurfaceVariant,
                       ),
                       filled: true,
-                      fillColor: AppColors.surfaceContainerHighest,
+                      fillColor: colors.surfaceContainerHighest,
                       border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(
-                          AppSpacing.radiusMd,
-                        ),
+                        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
                         borderSide: BorderSide.none,
                       ),
                       enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(
-                          AppSpacing.radiusMd,
-                        ),
+                        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
                         borderSide: BorderSide.none,
                       ),
                       focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(
-                          AppSpacing.radiusMd,
-                        ),
-                        borderSide: const BorderSide(
-                          color: AppColors.primary,
-                          width: 1.5,
-                        ),
+                        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                        borderSide: BorderSide(color: colors.primary, width: 1.5),
                       ),
                     ),
                   ),
@@ -176,8 +168,8 @@ class _SubscriptionDetailPageState extends State<SubscriptionDetailPage> {
                         builder: (dCtx, child) => Theme(
                           data: Theme.of(dCtx).copyWith(
                             colorScheme: Theme.of(dCtx).colorScheme.copyWith(
-                              primary: AppColors.primary,
-                              surface: AppColors.surfaceContainerHigh,
+                              primary: dCtx.colors.primary,
+                              surface: dCtx.colors.surfaceContainerHigh,
                             ),
                           ),
                           child: child!,
@@ -193,22 +185,18 @@ class _SubscriptionDetailPageState extends State<SubscriptionDetailPage> {
                         vertical: AppSpacing.md,
                       ),
                       decoration: BoxDecoration(
-                        color: AppColors.surfaceContainerHighest,
+                        color: colors.surfaceContainerHighest,
                         borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
                       ),
                       child: Row(
                         children: [
-                          const Icon(
-                            Icons.event_outlined,
-                            size: 20,
-                            color: AppColors.onSurfaceVariant,
-                          ),
+                          Icon(Icons.event_outlined, size: 20, color: colors.onSurfaceVariant),
                           const SizedBox(width: AppSpacing.md),
                           Expanded(
                             child: Text(
                               '${s.nextRenewalLabel}: ${_isoDate(pickedDate)}',
                               style: AppTypography.bodyMd.copyWith(
-                                color: AppColors.onSurface,
+                                color: colors.onSurface,
                               ),
                             ),
                           ),
@@ -221,7 +209,7 @@ class _SubscriptionDetailPageState extends State<SubscriptionDetailPage> {
                   Text(
                     s.reminderDaysBeforeLabel,
                     style: AppTypography.labelSm.copyWith(
-                      color: AppColors.onSurfaceVariant,
+                      color: colors.onSurfaceVariant,
                     ),
                   ),
                   const SizedBox(height: AppSpacing.sm),
@@ -231,39 +219,27 @@ class _SubscriptionDetailPageState extends State<SubscriptionDetailPage> {
                       final isLast = d == reminderDays.last;
                       return Expanded(
                         child: Padding(
-                          padding: EdgeInsets.only(
-                            right: isLast ? 0 : AppSpacing.xs,
-                          ),
+                          padding: EdgeInsets.only(right: isLast ? 0 : AppSpacing.xs),
                           child: GestureDetector(
-                            onTap: () =>
-                                setSheetState(() => pickedReminder = d),
+                            onTap: () => setSheetState(() => pickedReminder = d),
                             child: AnimatedContainer(
                               duration: const Duration(milliseconds: 150),
                               height: 36,
                               alignment: Alignment.center,
                               decoration: BoxDecoration(
                                 color: isActive
-                                    ? AppColors.primary.withValues(alpha: 0.15)
-                                    : AppColors.surfaceContainerHighest,
-                                borderRadius: BorderRadius.circular(
-                                  AppSpacing.radiusMd,
-                                ),
+                                    ? colors.primary.withValues(alpha: 0.15)
+                                    : colors.surfaceContainerHighest,
+                                borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
                                 border: isActive
-                                    ? Border.all(
-                                        color: AppColors.primary,
-                                        width: 1.5,
-                                      )
+                                    ? Border.all(color: colors.primary, width: 1.5)
                                     : null,
                               ),
                               child: Text(
                                 s.reminderDaysOption(d),
                                 style: AppTypography.labelSm.copyWith(
-                                  fontWeight: isActive
-                                      ? FontWeight.w600
-                                      : FontWeight.w400,
-                                  color: isActive
-                                      ? AppColors.primary
-                                      : AppColors.onSurfaceVariant,
+                                  fontWeight: isActive ? FontWeight.w600 : FontWeight.w400,
+                                  color: isActive ? colors.primary : colors.onSurfaceVariant,
                                   height: 1.0,
                                 ),
                               ),
@@ -281,7 +257,7 @@ class _SubscriptionDetailPageState extends State<SubscriptionDetailPage> {
                         ScaffoldMessenger.of(ctx).showSnackBar(
                           SnackBar(
                             content: Text(s.enterSubscriptionName),
-                            backgroundColor: AppColors.error,
+                            backgroundColor: colors.error,
                           ),
                         );
                         return;
@@ -290,7 +266,7 @@ class _SubscriptionDetailPageState extends State<SubscriptionDetailPage> {
                         ScaffoldMessenger.of(ctx).showSnackBar(
                           SnackBar(
                             content: Text(s.enterValidAmount),
-                            backgroundColor: AppColors.error,
+                            backgroundColor: colors.error,
                           ),
                         );
                         return;
@@ -304,9 +280,7 @@ class _SubscriptionDetailPageState extends State<SubscriptionDetailPage> {
                     style: FilledButton.styleFrom(
                       minimumSize: const Size.fromHeight(56),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(
-                          AppSpacing.radiusXl,
-                        ),
+                        borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
                       ),
                     ),
                     child: Text(s.save),
@@ -340,7 +314,7 @@ class _SubscriptionDetailPageState extends State<SubscriptionDetailPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(AppStrings.of(context).subscriptionUpdatedSuccess),
-          backgroundColor: AppColors.secondary,
+          backgroundColor: context.colors.secondary,
         ),
       );
     }
@@ -349,32 +323,35 @@ class _SubscriptionDetailPageState extends State<SubscriptionDetailPage> {
   Future<void> _delete() async {
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: AppColors.surfaceContainerHigh,
-        title: Text(
-          AppStrings.of(context).deleteSubscriptionTitle,
-          style: AppTypography.titleSm,
-        ),
-        content: Text(
-          '${_sub.name} aboneliği silinecek. Gelecek ödemeler durur.',
-          style: AppTypography.bodyMd.copyWith(
-            color: AppColors.onSurfaceVariant,
+      builder: (ctx) {
+        final colors = ctx.colors;
+        return AlertDialog(
+          backgroundColor: colors.surfaceContainerHigh,
+          title: Text(
+            AppStrings.of(context).deleteSubscriptionTitle,
+            style: AppTypography.titleSm,
           ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(false),
-            child: Text(AppStrings.of(context).cancel),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(true),
-            child: Text(
-              AppStrings.of(context).delete,
-              style: TextStyle(color: AppColors.error),
+          content: Text(
+            '${_sub.name} aboneliği silinecek. Gelecek ödemeler durur.',
+            style: AppTypography.bodyMd.copyWith(
+              color: colors.onSurfaceVariant,
             ),
           ),
-        ],
-      ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(false),
+              child: Text(AppStrings.of(context).cancel),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(true),
+              child: Text(
+                AppStrings.of(context).delete,
+                style: TextStyle(color: colors.error),
+              ),
+            ),
+          ],
+        );
+      },
     );
     if (confirmed == true && mounted) {
       await getIt<SubscriptionRepository>().delete(_sub.id);
@@ -385,7 +362,7 @@ class _SubscriptionDetailPageState extends State<SubscriptionDetailPage> {
       messenger.showSnackBar(
         SnackBar(
           content: Text(deleteMsg),
-          backgroundColor: AppColors.secondary,
+          backgroundColor: context.colors.secondary,
         ),
       );
     }
@@ -393,10 +370,11 @@ class _SubscriptionDetailPageState extends State<SubscriptionDetailPage> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return Scaffold(
-      backgroundColor: AppColors.surface,
+      backgroundColor: colors.surface,
       appBar: AppBar(
-        backgroundColor: AppColors.surface,
+        backgroundColor: colors.surface,
         surfaceTintColor: Colors.transparent,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_rounded),
@@ -410,7 +388,7 @@ class _SubscriptionDetailPageState extends State<SubscriptionDetailPage> {
             onPressed: _showEditSheet,
           ),
           IconButton(
-            icon: Icon(Icons.delete_outline_rounded, color: AppColors.error),
+            icon: Icon(Icons.delete_outline_rounded, color: colors.error),
             onPressed: _delete,
           ),
         ],
@@ -427,11 +405,11 @@ class _SubscriptionDetailPageState extends State<SubscriptionDetailPage> {
             style: FilledButton.styleFrom(
               minimumSize: const Size.fromHeight(56),
               backgroundColor: _sub.isActive
-                  ? AppColors.surfaceContainerHighest
-                  : AppColors.primary,
+                  ? colors.surfaceContainerHighest
+                  : colors.primary,
               foregroundColor: _sub.isActive
-                  ? AppColors.onSurfaceVariant
-                  : AppColors.onPrimary,
+                  ? colors.onSurfaceVariant
+                  : colors.onPrimary,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
               ),
@@ -443,8 +421,8 @@ class _SubscriptionDetailPageState extends State<SubscriptionDetailPage> {
               style: AppTypography.bodyMd.copyWith(
                 fontWeight: FontWeight.w600,
                 color: _sub.isActive
-                    ? AppColors.onSurfaceVariant
-                    : AppColors.surface,
+                    ? colors.onSurfaceVariant
+                    : colors.surface,
               ),
             ),
           ),

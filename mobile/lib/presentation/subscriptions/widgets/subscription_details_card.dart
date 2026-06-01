@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
 import '../../../core/l10n/app_strings.dart';
+import '../../../core/theme/app_palette.dart';
 import '../../../data/models/subscription_model.dart';
 
 class SubscriptionDetailsCard extends StatelessWidget {
@@ -11,11 +11,12 @@ class SubscriptionDetailsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     final s = AppStrings.of(context);
     return Container(
       padding: const EdgeInsets.all(AppSpacing.lg),
       decoration: BoxDecoration(
-        color: AppColors.surfaceContainerHigh,
+        color: colors.surfaceContainerHigh,
         borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
       ),
       child: Column(
@@ -28,21 +29,21 @@ class SubscriptionDetailsCard extends StatelessWidget {
               label: s.descriptionLabel,
               value: sub.description!,
             ),
-            const Divider(color: AppColors.surfaceContainerHighest, height: 1),
+            Divider(color: colors.surfaceContainerHighest, height: 1),
           ],
           if (sub.categoryName != null) ...[
             SubscriptionDetailRow(
               label: s.categoryLabel,
               value: sub.categoryName!,
             ),
-            const Divider(color: AppColors.surfaceContainerHighest, height: 1),
+            Divider(color: colors.surfaceContainerHighest, height: 1),
           ],
           if (sub.accountName != null) ...[
             SubscriptionDetailRow(
               label: s.accountLabel,
               value: sub.accountName!,
             ),
-            const Divider(color: AppColors.surfaceContainerHighest, height: 1),
+            Divider(color: colors.surfaceContainerHighest, height: 1),
           ],
           // Hatırlatma her iki tür için
           SubscriptionDetailRow(
@@ -50,11 +51,11 @@ class SubscriptionDetailsCard extends StatelessWidget {
             value: s.reminderDaysOption(sub.reminderDaysBefore),
           ),
           if (sub.nextRenewalDate != null) ...[
-            const Divider(color: AppColors.surfaceContainerHighest, height: 1),
+            Divider(color: colors.surfaceContainerHighest, height: 1),
             SubscriptionDetailRow(
               label: s.nextRenewalLabel,
               value: _formatDate(sub.nextRenewalDate!),
-              valueColor: sub.isRenewingSoon ? AppColors.warning : null,
+              valueColor: sub.isRenewingSoon ? colors.warning : null,
             ),
           ],
         ],
@@ -79,6 +80,7 @@ class SubscriptionDetailRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
       child: Row(
@@ -87,14 +89,14 @@ class SubscriptionDetailRow extends StatelessWidget {
           Text(
             label,
             style: AppTypography.bodySm.copyWith(
-              color: AppColors.onSurfaceVariant,
+              color: colors.onSurfaceVariant,
             ),
           ),
           Text(
             value,
             style: AppTypography.bodyMd.copyWith(
               fontWeight: FontWeight.w600,
-              color: valueColor ?? AppColors.onSurface,
+              color: valueColor ?? colors.onSurface,
             ),
           ),
         ],

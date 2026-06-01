@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:wallet_app/core/l10n/app_strings.dart';
 import 'package:wallet_app/data/models/subscription_model.dart';
-import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
+import '../../../core/theme/app_palette.dart';
 
 class UpcomingBanner extends StatelessWidget {
   const UpcomingBanner({super.key, required this.renewals});
@@ -11,6 +11,7 @@ class UpcomingBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return Padding(
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.pagePadding,
@@ -22,21 +23,21 @@ class UpcomingBanner extends StatelessWidget {
           vertical: AppSpacing.md,
         ),
         decoration: BoxDecoration(
-          color: AppColors.warning.withValues(alpha: 0.12),
+          color: colors.warning.withValues(alpha: 0.12),
           borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
           border: Border.all(
-            color: AppColors.warning.withValues(alpha: 0.3),
+            color: colors.warning.withValues(alpha: 0.3),
             width: 1,
           ),
         ),
         child: Row(
           children: [
-            Icon(Icons.schedule_rounded, size: 18, color: AppColors.warning),
+            Icon(Icons.schedule_rounded, size: 18, color: colors.warning),
             const SizedBox(width: AppSpacing.sm),
             Expanded(
               child: Text(
                 AppStrings.of(context).upcomingRenewals(renewals.length),
-                style: AppTypography.bodySm.copyWith(color: AppColors.warning),
+                style: AppTypography.bodySm.copyWith(color: colors.warning),
               ),
             ),
           ],

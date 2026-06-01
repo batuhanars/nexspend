@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
 import '../../../core/l10n/app_strings.dart';
+import '../../../core/theme/app_palette.dart';
 import '../../../core/utils/currency_formatter.dart';
 import '../../../data/models/subscription_model.dart';
 
@@ -12,13 +12,14 @@ class SubscriptionHeaderCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     final color = sub.cardColor;
     final s = AppStrings.of(context);
 
     return Container(
       padding: const EdgeInsets.all(AppSpacing.xl),
       decoration: BoxDecoration(
-        color: AppColors.surfaceContainerHigh,
+        color: colors.surfaceContainerHigh,
         borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
       ),
       child: Column(
@@ -46,8 +47,8 @@ class SubscriptionHeaderCard extends StatelessWidget {
             ),
             decoration: BoxDecoration(
               color: sub.isActive
-                  ? AppColors.secondary.withValues(alpha: 0.12)
-                  : AppColors.onSurfaceVariant.withValues(alpha: 0.1),
+                  ? colors.success.withValues(alpha: 0.12)
+                  : colors.onSurfaceVariant.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
             ),
             child: Text(
@@ -55,8 +56,8 @@ class SubscriptionHeaderCard extends StatelessWidget {
               style: AppTypography.labelSm.copyWith(
                 fontWeight: FontWeight.w600,
                 color: sub.isActive
-                    ? AppColors.secondary
-                    : AppColors.onSurfaceVariant,
+                    ? colors.success
+                    : colors.onSurfaceVariant,
               ),
             ),
           ),

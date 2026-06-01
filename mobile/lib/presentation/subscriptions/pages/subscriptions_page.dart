@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
 import '../../../core/l10n/app_strings.dart';
+import '../../../core/theme/app_palette.dart';
 import '../bloc/subscriptions_bloc.dart';
 import '../widgets/add_subscription_sheet.dart';
 import '../../shared/widgets/empty_state_view.dart';
@@ -28,12 +28,13 @@ class _SubscriptionsView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     final s = AppStrings.of(context);
     return Scaffold(
       body: BlocBuilder<SubscriptionsBloc, SubscriptionsState>(
         builder: (context, state) {
           return RefreshIndicator(
-            color: AppColors.primary,
+            color: colors.primary,
             onRefresh: () async => context.read<SubscriptionsBloc>().add(
               const SubscriptionsRefreshRequested(),
             ),
@@ -43,11 +44,11 @@ class _SubscriptionsView extends StatelessWidget {
                   floating: true,
                   title: Text(s.subscriptionsTitle, style: AppTypography.headlineSm),
                   centerTitle: false,
-                  backgroundColor: AppColors.surface,
+                  backgroundColor: colors.surface,
                   surfaceTintColor: Colors.transparent,
                   actions: [
                     IconButton(
-                      icon: const Icon(Icons.add_rounded, color: AppColors.primary),
+                      icon: Icon(Icons.add_rounded, color: colors.primary),
                       onPressed: () => _showAddSheet(context),
                     ),
                   ],
@@ -97,7 +98,7 @@ class _SubscriptionsView extends StatelessWidget {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: AppColors.surfaceContainerHigh,
+      backgroundColor: context.colors.surfaceContainerHigh,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(
           top: Radius.circular(AppSpacing.radiusXl),

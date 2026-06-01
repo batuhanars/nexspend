@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
 import '../../../core/l10n/app_strings.dart';
+import '../../../core/theme/app_palette.dart';
 import '../../../core/utils/currency_formatter.dart';
 import '../bloc/subscriptions_bloc.dart';
 
@@ -12,6 +12,7 @@ class SummaryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     final s = AppStrings.of(context);
     return Padding(
       padding: const EdgeInsets.fromLTRB(
@@ -23,7 +24,7 @@ class SummaryCard extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(AppSpacing.xl),
         decoration: BoxDecoration(
-          color: AppColors.surfaceContainerHigh,
+          color: colors.surfaceContainerHigh,
           borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
         ),
         child: Row(
@@ -35,7 +36,7 @@ class SummaryCard extends StatelessWidget {
                   Text(
                     s.monthlyTotal,
                     style: AppTypography.labelSm.copyWith(
-                      color: AppColors.onSurfaceVariant,
+                      color: colors.onSurfaceVariant,
                       letterSpacing: 0.8,
                     ),
                   ),
@@ -43,7 +44,7 @@ class SummaryCard extends StatelessWidget {
                   Text(
                     CurrencyFormatter.format(state.summary.totalMonthly),
                     style: AppTypography.displayLg.copyWith(
-                      color: AppColors.tertiary,
+                      color: colors.expense,
                       fontSize: 32,
                     ),
                   ),
@@ -56,7 +57,7 @@ class SummaryCard extends StatelessWidget {
                 vertical: AppSpacing.md,
               ),
               decoration: BoxDecoration(
-                color: AppColors.primary.withValues(alpha: 0.12),
+                color: colors.primary.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
               ),
               child: Column(
@@ -64,13 +65,13 @@ class SummaryCard extends StatelessWidget {
                   Text(
                     '${state.summary.activeCount}',
                     style: AppTypography.headlineSm.copyWith(
-                      color: AppColors.primary,
+                      color: colors.primary,
                     ),
                   ),
                   Text(
                     s.activeLabel,
                     style: AppTypography.labelSm.copyWith(
-                      color: AppColors.primary,
+                      color: colors.primary,
                     ),
                   ),
                 ],

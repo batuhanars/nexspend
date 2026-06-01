@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
-import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
+import '../../../core/theme/app_palette.dart';
 import '../../shared/widgets/shimmer_box.dart';
 
 class SubscriptionsShimmer extends StatelessWidget {
@@ -9,9 +9,10 @@ class SubscriptionsShimmer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return Shimmer.fromColors(
-      baseColor: AppColors.surfaceContainerHigh,
-      highlightColor: AppColors.surfaceContainerHighest,
+      baseColor: colors.surfaceContainerHigh,
+      highlightColor: colors.surfaceContainerHighest,
       child: Column(
         children: [
           const Padding(
@@ -21,13 +22,13 @@ class SubscriptionsShimmer extends StatelessWidget {
             ),
             child: ShimmerBox(height: 100),
           ),
-          ...List.generate(4, (_) => _subscriptionCard()),
+          ...List.generate(4, (_) => _subscriptionCard(colors)),
         ],
       ),
     );
   }
 
-  Widget _subscriptionCard() => Padding(
+  Widget _subscriptionCard(AppPalette colors) => Padding(
         padding: const EdgeInsets.symmetric(
           horizontal: AppSpacing.pagePadding,
           vertical: AppSpacing.xs,
@@ -35,7 +36,7 @@ class SubscriptionsShimmer extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.all(AppSpacing.lg),
           decoration: BoxDecoration(
-            color: AppColors.surfaceContainerHigh,
+            color: colors.surfaceContainerHigh,
             borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
           ),
           child: Row(

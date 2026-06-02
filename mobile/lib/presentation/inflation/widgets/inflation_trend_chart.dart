@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
 import '../../../core/constants/inflation_keys.dart';
+import '../../../core/l10n/app_strings.dart';
 import '../../../core/theme/app_palette.dart';
 import '../../../data/models/inflation_model.dart';
 
@@ -11,14 +12,10 @@ class InflationTrendChart extends StatelessWidget {
 
   final Map<String, List<InflationRateModel>> history;
 
-  static const _monthAbbr = [
-    'Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz',
-    'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara',
-  ];
-
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final s = AppStrings.of(context);
     final genelRates = history[InflationCategoryKey.genel] ?? [];
     final gidaRates = history[InflationCategoryKey.gida] ?? [];
 
@@ -31,7 +28,7 @@ class InflationTrendChart extends StatelessWidget {
         ),
         child: Center(
           child: Text(
-            'Trend verisi henüz hazır değil',
+            s.inflationTrendNotReady,
             style: AppTypography.bodySm.copyWith(color: colors.onSurfaceVariant),
           ),
         ),
@@ -80,10 +77,10 @@ class InflationTrendChart extends StatelessWidget {
         children: [
           Row(
             children: [
-              _LegendDot(color: primaryColor, label: 'Genel TÜFE'),
+              _LegendDot(color: primaryColor, label: s.inflationLegendGeneralCpi),
               if (gidaSpots.isNotEmpty) ...[
                 const SizedBox(width: AppSpacing.md),
-                _LegendDot(color: gidaColor, label: 'Gıda'),
+                _LegendDot(color: gidaColor, label: s.inflationLegendFood),
               ],
             ],
           ),
@@ -119,7 +116,7 @@ class InflationTrendChart extends StatelessWidget {
                         return Padding(
                           padding: const EdgeInsets.only(top: 4),
                           child: Text(
-                            _monthAbbr[rate.month - 1],
+                            s.monthAbbr(rate.month),
                             style: AppTypography.labelSm.copyWith(
                               color: labelColor,
                               fontSize: 9,

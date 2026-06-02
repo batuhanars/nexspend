@@ -69,9 +69,9 @@ class _ReportsView extends StatelessWidget {
             labelStyle: AppTypography.bodySm.copyWith(fontWeight: FontWeight.w600),
             unselectedLabelStyle: AppTypography.bodySm,
             dividerColor: colors.surfaceContainerHighest,
-            tabs: const [
-              Tab(text: 'Genel'),
-              Tab(text: 'Enflasyon'),
+            tabs: [
+              Tab(text: AppStrings.of(context).inflationTabGeneral),
+              Tab(text: AppStrings.of(context).inflationTabInflation),
             ],
           ),
         ),
@@ -241,13 +241,13 @@ class _InflationReportTabState extends State<_InflationReportTab>
                 child: Padding(
                   padding: const EdgeInsets.symmetric(vertical: AppSpacing.xxxl),
                   child: Text(
-                    'Enflasyon verisi henüz hazir degil',
+                    AppStrings.of(context).inflationDataNotReady,
                     style: AppTypography.bodyMd.copyWith(color: colors.onSurfaceVariant),
                   ),
                 ),
               )
             else ...[
-              SectionTitle(title: 'Harcama vs Enflasyon'),
+              SectionTitle(title: AppStrings.of(context).spendingVsInflation),
               const SizedBox(height: AppSpacing.xs),
               Text(comparison.period,
                   style: AppTypography.bodySm.copyWith(color: colors.onSurfaceVariant)),
@@ -256,7 +256,7 @@ class _InflationReportTabState extends State<_InflationReportTab>
               const SizedBox(height: AppSpacing.xl),
             ],
             if (history.isNotEmpty) ...[
-              SectionTitle(title: 'Enflasyon Trendi'),
+              SectionTitle(title: AppStrings.of(context).inflationTrend),
               const SizedBox(height: AppSpacing.md),
               InflationTrendChart(history: history),
             ],

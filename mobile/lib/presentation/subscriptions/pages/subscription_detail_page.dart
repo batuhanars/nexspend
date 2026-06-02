@@ -102,7 +102,7 @@ class _SubscriptionDetailPageState extends State<SubscriptionDetailPage> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        'Aboneliği Düzenle',
+                        s.editSubscriptionTitle,
                         style: AppTypography.headlineSm,
                       ),
                       IconButton(
@@ -128,7 +128,7 @@ class _SubscriptionDetailPageState extends State<SubscriptionDetailPage> {
                       fontSize: 14,
                     ),
                     decoration: InputDecoration(
-                      hintText: 'Abonelik adı',
+                      hintText: s.subscriptionNameHint2,
                       hintStyle: TextStyle(
                         color: colors.onSurfaceVariant,
                         fontSize: 14,

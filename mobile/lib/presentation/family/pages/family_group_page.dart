@@ -38,7 +38,7 @@ class FamilyGroupPage extends StatelessWidget {
           backgroundColor: colors.surface,
           surfaceTintColor: Colors.transparent,
           title: Text(AppStrings.of(context).familyBudgetTitle),
-          titleTextStyle: AppTypography.headlineSm,
+          titleTextStyle: AppTypography.headlineSm.copyWith(color: colors.onSurface),
           iconTheme: IconThemeData(color: colors.onSurface),
         ),
         body: BlocBuilder<FamilyBloc, FamilyState>(

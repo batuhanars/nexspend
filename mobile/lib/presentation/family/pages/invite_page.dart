@@ -41,7 +41,7 @@ class _InvitePageState extends State<InvitePage> {
           surfaceTintColor: Colors.transparent,
           iconTheme: IconThemeData(color: colors.onSurface),
           title: const Text('Davet'),
-          titleTextStyle: AppTypography.headlineSm,
+          titleTextStyle: AppTypography.headlineSm.copyWith(color: colors.onSurface),
         ),
         body: BlocBuilder<FamilyBloc, FamilyState>(
           builder: (context, state) {

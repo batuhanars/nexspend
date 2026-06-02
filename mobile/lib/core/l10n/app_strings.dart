@@ -483,6 +483,39 @@ abstract class AppStrings {
   String get payMinimumButton;
   String get statementPeriodFmt;
 
+  // Contribution report
+  String get contributionReport;
+  String get selectPeriod;
+  String get periodUpperCase;
+  String get noContributionData;
+  String get inflationTabGeneral;
+  String get inflationTabInflation;
+  String get inflationDataNotReady;
+  String get spendingVsInflation;
+  String get inflationTrend;
+  String get editSubscriptionTitle;
+  String get subscriptionNameHint2;
+
+  // Inflation widgets — D1 comparison table
+  String get inflationCategoryHeader;
+  String get inflationYoursHeader;
+  String get inflationCpiHeader;
+  String get inflationStatusBelow;
+  String get inflationStatusOnTrack;
+  String get inflationStatusAbove;
+
+  // Inflation widgets — D2 trend chart
+  String get inflationTrendNotReady;
+  String get inflationLegendGeneralCpi;
+  String get inflationLegendFood;
+
+  // Inflation widgets — D3 suggestion card
+  String get inflationSuggestionBadge;
+  String inflationCumulativeText(int months, String rate);
+  String get inflationCurrentLabel;
+  String get inflationSuggestedLabel;
+  String inflationUpdateBudgetBtn(String amount);
+
   // Family module
   String get familyBudgetTitle;
   String get createNewGroupTitle;
@@ -1500,6 +1533,66 @@ class _Tr extends AppStrings {
   String get payMinimumButton => 'Asgariyi Öde';
   @override
   String get statementPeriodFmt => 'Dönem';
+
+  // Contribution report
+  @override
+  String get contributionReport => 'Katkı Raporu';
+  @override
+  String get selectPeriod => 'Dönem Seç';
+  @override
+  String get periodUpperCase => 'DÖNEM';
+  @override
+  String get noContributionData => 'Bu dönem için katkı verisi yok.';
+  @override
+  String get inflationTabGeneral => 'Genel';
+  @override
+  String get inflationTabInflation => 'Enflasyon';
+  @override
+  String get inflationDataNotReady => 'Enflasyon verisi henüz hazır değil';
+  @override
+  String get spendingVsInflation => 'Harcama vs Enflasyon';
+  @override
+  String get inflationTrend => 'Enflasyon Trendi';
+  @override
+  String get editSubscriptionTitle => 'Aboneliği Düzenle';
+  @override
+  String get subscriptionNameHint2 => 'Abonelik adı';
+
+  // Inflation widgets — D1 comparison table
+  @override
+  String get inflationCategoryHeader => 'KATEGORİ';
+  @override
+  String get inflationYoursHeader => 'SENİN %';
+  @override
+  String get inflationCpiHeader => 'TÜFE %';
+  @override
+  String get inflationStatusBelow => 'Altında';
+  @override
+  String get inflationStatusOnTrack => 'Dengede';
+  @override
+  String get inflationStatusAbove => 'Üstünde';
+
+  // Inflation widgets — D2 trend chart
+  @override
+  String get inflationTrendNotReady => 'Trend verisi henüz hazır değil';
+  @override
+  String get inflationLegendGeneralCpi => 'Genel TÜFE';
+  @override
+  String get inflationLegendFood => 'Gıda';
+
+  // Inflation widgets — D3 suggestion card
+  @override
+  String get inflationSuggestionBadge => 'ENFLASYON ÖNERİSİ';
+  @override
+  String inflationCumulativeText(int months, String rate) =>
+      'Son $months ayda %$rate kümülatif enflasyon';
+  @override
+  String get inflationCurrentLabel => 'Mevcut';
+  @override
+  String get inflationSuggestedLabel => 'Önerilen';
+  @override
+  String inflationUpdateBudgetBtn(String amount) =>
+      "Bütçeyi Güncelle  $amount'ye";
 
   // Family module
   @override
@@ -2719,6 +2812,66 @@ class _En extends AppStrings {
     'Alacak Tahsilatı': 'Debt Collection',
     'Abonelik': 'Subscription',
   };
+
+  // Contribution report
+  @override
+  String get contributionReport => 'Contribution Report';
+  @override
+  String get selectPeriod => 'Select Period';
+  @override
+  String get periodUpperCase => 'PERIOD';
+  @override
+  String get noContributionData => 'No contribution data for this period.';
+  @override
+  String get inflationTabGeneral => 'General';
+  @override
+  String get inflationTabInflation => 'Inflation';
+  @override
+  String get inflationDataNotReady => 'Inflation data is not ready yet';
+  @override
+  String get spendingVsInflation => 'Spending vs Inflation';
+  @override
+  String get inflationTrend => 'Inflation Trend';
+  @override
+  String get editSubscriptionTitle => 'Edit Subscription';
+  @override
+  String get subscriptionNameHint2 => 'Subscription name';
+
+  // Inflation widgets — D1 comparison table
+  @override
+  String get inflationCategoryHeader => 'CATEGORY';
+  @override
+  String get inflationYoursHeader => 'YOURS %';
+  @override
+  String get inflationCpiHeader => 'CPI %';
+  @override
+  String get inflationStatusBelow => 'Below';
+  @override
+  String get inflationStatusOnTrack => 'On Track';
+  @override
+  String get inflationStatusAbove => 'Above';
+
+  // Inflation widgets — D2 trend chart
+  @override
+  String get inflationTrendNotReady => 'Trend data is not ready yet';
+  @override
+  String get inflationLegendGeneralCpi => 'General CPI';
+  @override
+  String get inflationLegendFood => 'Food';
+
+  // Inflation widgets — D3 suggestion card
+  @override
+  String get inflationSuggestionBadge => 'INFLATION SUGGESTION';
+  @override
+  String inflationCumulativeText(int months, String rate) =>
+      '%$rate cumulative inflation in last $months months';
+  @override
+  String get inflationCurrentLabel => 'Current';
+  @override
+  String get inflationSuggestedLabel => 'Suggested';
+  @override
+  String inflationUpdateBudgetBtn(String amount) =>
+      'Update Budget to $amount';
 
   // Family module
   @override

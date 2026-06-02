@@ -189,7 +189,7 @@ class _DetailBody extends StatelessWidget {
                 icon: const Icon(Icons.bar_chart_rounded),
                 onPressed: () =>
                     context.push(RouteNames.familyContributions(groupId)),
-                tooltip: 'Katkı Raporu',
+                tooltip: AppStrings.of(context).contributionReport,
               ),
               if (isOwner)
                 IconButton(

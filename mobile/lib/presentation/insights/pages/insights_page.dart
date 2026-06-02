@@ -72,7 +72,7 @@ class _InsightsViewState extends State<_InsightsView>
         backgroundColor: colors.surface,
         surfaceTintColor: Colors.transparent,
         title: const Text('Akıllı Öneriler'),
-        titleTextStyle: AppTypography.headlineSm,
+        titleTextStyle: AppTypography.headlineSm.copyWith(color: colors.onSurface),
         iconTheme: IconThemeData(color: colors.onSurface),
         actions: [
           BlocBuilder<InsightsBloc, InsightsState>(

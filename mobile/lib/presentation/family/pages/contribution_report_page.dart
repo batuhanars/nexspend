@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
+import '../../../core/l10n/app_strings.dart';
 import '../../../core/theme/app_palette.dart';
 import '../bloc/family_bloc.dart';
 import '../bloc/family_event.dart';
@@ -45,19 +46,20 @@ class _ContributionReportPageState extends State<ContributionReportPage> {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final s = AppStrings.of(context);
     return Scaffold(
       backgroundColor: colors.surface,
       appBar: AppBar(
         backgroundColor: colors.surface,
         surfaceTintColor: Colors.transparent,
         iconTheme: IconThemeData(color: colors.onSurface),
-        title: const Text('Katkı Raporu'),
-        titleTextStyle: AppTypography.headlineSm,
+        title: Text(s.contributionReport),
+        titleTextStyle: AppTypography.headlineSm.copyWith(color: colors.onSurface),
         actions: [
           IconButton(
             icon: const Icon(Icons.calendar_today_outlined),
             onPressed: () => _showPeriodPicker(context),
-            tooltip: 'Dönem Seç',
+            tooltip: s.selectPeriod,
           ),
         ],
       ),
@@ -76,7 +78,7 @@ class _ContributionReportPageState extends State<ContributionReportPage> {
                   children: [
                     Row(
                       children: [
-                        Text('DÖNEM', style: AppTypography.labelSm),
+                        Text(s.periodUpperCase, style: AppTypography.labelSm),
                         const SizedBox(width: AppSpacing.sm),
                         Text(report.period,
                             style: AppTypography.labelSm
@@ -87,7 +89,7 @@ class _ContributionReportPageState extends State<ContributionReportPage> {
                     if (report.members.isEmpty)
                       Center(
                         child: Text(
-                          'Bu dönem için katkı verisi yok.',
+                          s.noContributionData,
                           style: AppTypography.bodyMd.copyWith(
                               color: colors.onSurfaceVariant),
                         ),
@@ -118,7 +120,7 @@ class _ContributionReportPageState extends State<ContributionReportPage> {
                     const SizedBox(height: AppSpacing.lg),
                     TextButton(
                       onPressed: _fetch,
-                      child: Text('Tekrar Dene',
+                      child: Text(s.retry,
                           style: AppTypography.bodyMd
                               .copyWith(color: colors.primary)),
                     ),
@@ -151,6 +153,7 @@ class _ContributionReportPageState extends State<ContributionReportPage> {
       ),
       builder: (ctx) {
         final colors = ctx.colors;
+        final sheetS = AppStrings.of(ctx);
         return Padding(
           padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
           child: Column(
@@ -164,7 +167,7 @@ class _ContributionReportPageState extends State<ContributionReportPage> {
                   AppSpacing.pagePadding,
                   AppSpacing.lg,
                 ),
-                child: Text('Dönem Seç', style: AppTypography.titleSm),
+                child: Text(sheetS.selectPeriod, style: AppTypography.titleSm),
               ),
               ...months.map(
                 (period) => ListTile(

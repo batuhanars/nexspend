@@ -73,10 +73,10 @@ class AppTheme {
         elevation: 0,
         scrolledUnderElevation: 0,
         centerTitle: false,
-        systemOverlayStyle: const SystemUiOverlayStyle(
+        systemOverlayStyle: SystemUiOverlayStyle(
           statusBarColor: Colors.transparent,
           statusBarIconBrightness: Brightness.light,
-          systemNavigationBarColor: Colors.transparent,
+          systemNavigationBarColor: p.surface,
           systemNavigationBarIconBrightness: Brightness.light,
         ),
         titleTextStyle: textTheme.headlineSmall,

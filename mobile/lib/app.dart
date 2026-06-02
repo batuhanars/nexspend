@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 import 'core/di/injection.dart';
+import 'core/theme/app_palette.dart';
 import 'core/theme/app_theme.dart';
 import 'core/utils/currency_notifier.dart';
 import 'core/utils/locale_notifier.dart';
@@ -61,6 +63,23 @@ class _WalletAppState extends State<WalletApp> {
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
+      builder: (context, child) {
+        final isDark = Theme.of(context).brightness == Brightness.dark;
+        final palette = isDark ? AppPalette.dark : AppPalette.light;
+        final overlay = SystemUiOverlayStyle(
+          statusBarColor: Colors.transparent,
+          statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
+          statusBarBrightness: isDark ? Brightness.dark : Brightness.light,
+          systemNavigationBarColor: palette.surface,
+          systemNavigationBarIconBrightness:
+              isDark ? Brightness.light : Brightness.dark,
+          systemNavigationBarDividerColor: palette.surface,
+        );
+        return AnnotatedRegion<SystemUiOverlayStyle>(
+          value: overlay,
+          child: child ?? const SizedBox.shrink(),
+        );
+      },
     );
   }
 }

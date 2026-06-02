@@ -1,5 +1,10 @@
 # Contract — Rehber (Coach Mark) Turunu Genişlet
 
+> **REVİZYON (2 Haz 2026):** Cihaz testinden sonra karar değişti. 10 adımlık tur fazla uzun + tab'lar zaten kendini-açıklayan (etiketli ikonlar); asıl değer keşfedilmesi zor elemanlarda (özellikle Borçlar — bottom nav'da YOK). Tur **odaklı 5 adıma** indiriliyor: **[+] Hızlı Ekle → Raporlar & Enflasyon → Hesaplarım → Borçlar → Kaydırarak Sil**. Tab adımları (navHome/navTransactions/navBudgets/navSubscriptions) ve Ayarlar adımı KALDIRILIYOR. Aşağıdaki 10-adım spec'i tarihsel referans; uygulanan = bu revizyon. Detay: revizyonun sonundaki "REVİZYON DETAYI" bölümü.
+
+---
+
+
 > **Tür:** Frontend-only feature. Backend YOK.
 > **Dev session:** Flutter (Sonnet), `cd mobile`.
 > **Paket:** `tutorial_coach_mark: ^1.3.3` (mevcut). Yeni paket EKLEME.
@@ -91,3 +96,25 @@ Tüm coach metinleri (10 başlık + 10 gövde + "Atla"/"Skip" + "Tamam"/"Done") 
 - Yeni AppStrings anahtarlarını 3 yere de ekle (abstract + TR + EN), yoksa derleme patlar.
 - Tetikleme tek seferlik kalmalı; aynı oturumda iki kez açılmamalı.
 - Commit ETME — working tree'yi inceleme için bırak.
+
+---
+
+## REVİZYON DETAYI — Odaklı 5 Adım (uygulanan hal)
+
+Mevcut 10-adımlık implementasyondan şu adımlara indir (sıra aynen):
+
+| # | Hedef key | Başlık | Gövde |
+|---|---|---|---|
+| 1 | `fab` | Hızlı Ekle / Quick Add | (mevcut metin) |
+| 2 | `reports` | Raporlar & Enflasyon / Reports & Inflation | (mevcut metin) |
+| 3 | `accounts` | Hesaplarım / My Accounts | (mevcut metin) |
+| 4 | `debts` | Borçlar / Debts | (mevcut metin) |
+| 5 | (off-screen) | Kaydırarak Sil / Swipe to Delete | (mevcut metin) |
+
+Yapılacaklar:
+- `_showCoachMark`'tan **navHome, navTransactions, navBudgets, navSubscriptions ve settings** TargetFocus'larını çıkar; yalnızca yukarıdaki 5 adım kalsın, bu sırada.
+- `coach_mark_keys.dart`'tan artık kullanılmayan `navHome/navTransactions/navBudgets/navSubscriptions` key'lerini sil. `bottom_nav_bar.dart`'taki `_TabItem.coachKey` alanı + `_buildTabItem` key bağlama ve `leftTabs/rightTabs`'taki `coachKey:` atamalarını geri al (tab'lar artık keylenmez). `settings` key'i dashboard'daki IconButton'da bu özellikten önce de vardı — bağlı kalabilir, dokunma.
+- `app_strings.dart`'tan artık kullanılmayan coach metinlerini (nav tab başlık/gövdeleri + settings başlık/gövde) **3 yerden de** (abstract + TR + EN) sil. Kalan coach key'lerine dokunma.
+- Zamanlama koruması `accounts/debts/reports` currentContext'ini yokluyor — bu 3'ü turda kaldığı için **aynen kalsın**, doğru çalışır.
+- **`kCoachMarkVersion`'ı 3 yap** (turun içeriği değiştiği için; daha önce v2'yi görmüş kapalı-test/geliştirme cihazı yeni 5-adımlık turu bir kez görsün).
+- `flutter analyze` temiz + `flutter test` yeşil olmalı. Commit ETME.

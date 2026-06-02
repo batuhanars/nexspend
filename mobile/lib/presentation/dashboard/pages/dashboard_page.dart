@@ -236,6 +236,11 @@ class _DashboardViewState extends State<_DashboardView> {
               personalBudgets: _personalBudgets,
               sharedBudgets: _sharedBudgets,
               onViewAll: () => context.go(RouteNames.transactions),
+              onChanged: () {
+                context
+                    .read<DashboardBloc>()
+                    .add(const DashboardRefreshRequested());
+              },
             ),
           ],
         ),

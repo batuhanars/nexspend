@@ -156,13 +156,10 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
         'type': _type,
         'amount': amount,
         'title': title,
-        'accountId': _selectedAccount!.id,
         'transactionDate': submitDate.toUtc().toIso8601String(),
         if (_selectedCategory != null) 'categoryId': _selectedCategory!.id,
         if (_noteController.text.trim().isNotEmpty)
           'note': _noteController.text.trim(),
-        if (_type == 'TRANSFER' && _transferToAccount != null)
-          'transferToAccountId': _transferToAccount!.id,
       };
       context.read<AddTransactionBloc>().add(AddTransactionSubmitted(data));
     } else {
@@ -321,6 +318,7 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                 const SizedBox(height: AppSpacing.lg),
                 TransactionTypeSelector(
                   selected: _type,
+                  showTransfer: !_isEditMode,
                   onChanged: (t) => setState(() {
                     _type = t;
                     _selectedCategory = null;
@@ -380,16 +378,30 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                 const SizedBox(height: AppSpacing.xl),
                 _sectionLabel(s.accountLabel),
                 const SizedBox(height: AppSpacing.sm),
-                AccountChips(
-                  accounts: _type == 'INCOME'
-                      ? accounts
-                          .where((a) => a.type != AccountType.CREDIT_CARD)
-                          .toList()
-                      : accounts,
-                  selected: _selectedAccount,
-                  onSelected: (a) => setState(() => _selectedAccount = a),
-                ),
-                if (_type == 'TRANSFER') ...[
+                if (_isEditMode)
+                  IgnorePointer(
+                    child: Opacity(
+                      opacity: 0.5,
+                      child: AccountChips(
+                        accounts: _selectedAccount != null
+                            ? [_selectedAccount!]
+                            : accounts,
+                        selected: _selectedAccount,
+                        onSelected: (_) {},
+                      ),
+                    ),
+                  )
+                else
+                  AccountChips(
+                    accounts: _type == 'INCOME'
+                        ? accounts
+                            .where((a) => a.type != AccountType.CREDIT_CARD)
+                            .toList()
+                        : accounts,
+                    selected: _selectedAccount,
+                    onSelected: (a) => setState(() => _selectedAccount = a),
+                  ),
+                if (_type == 'TRANSFER' && !_isEditMode) ...[
                   const SizedBox(height: AppSpacing.lg),
                   _sectionLabel(s.targetAccountLabel),
                   const SizedBox(height: AppSpacing.sm),

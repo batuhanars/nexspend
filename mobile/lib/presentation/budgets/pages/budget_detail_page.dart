@@ -379,6 +379,14 @@ class _BudgetDetailPageState extends State<BudgetDetailPage>
                       });
                       await _txFuture;
                     },
+                    onTransactionChanged: () {
+                      context.read<BudgetsBloc>().add(
+                        const BudgetsRefreshRequested(),
+                      );
+                      setState(() {
+                        _txFuture = _loadTransactions();
+                      });
+                    },
                   ),
                   _HistoryView(budgetId: _budgetId),
                 ],
@@ -395,6 +403,14 @@ class _BudgetDetailPageState extends State<BudgetDetailPage>
                   });
                   await _txFuture;
                 },
+                onTransactionChanged: () {
+                  context.read<BudgetsBloc>().add(
+                    const BudgetsRefreshRequested(),
+                  );
+                  setState(() {
+                    _txFuture = _loadTransactions();
+                  });
+                },
               ),
       ),
     );
@@ -406,11 +422,13 @@ class _CurrentPeriodView extends StatelessWidget {
     required this.budget,
     required this.txFuture,
     required this.onRefresh,
+    this.onTransactionChanged,
   });
 
   final BudgetModel budget;
   final Future<List<TransactionModel>> txFuture;
   final Future<void> Function() onRefresh;
+  final VoidCallback? onTransactionChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -464,7 +482,11 @@ class _CurrentPeriodView extends StatelessWidget {
                   ),
                 )
               else
-                ..._buildGroupedTransactions(transactions, context),
+                ..._buildGroupedTransactions(
+                  transactions,
+                  context,
+                  onTransactionChanged: onTransactionChanged,
+                ),
               const SizedBox(height: AppSpacing.xxl),
             ],
           );
@@ -475,8 +497,9 @@ class _CurrentPeriodView extends StatelessWidget {
 
   List<Widget> _buildGroupedTransactions(
     List<TransactionModel> transactions,
-    BuildContext context,
-  ) {
+    BuildContext context, {
+    VoidCallback? onTransactionChanged,
+  }) {
     final colors = context.colors;
     final sorted = [...transactions]..sort((a, b) => b.date.compareTo(a.date));
     final groups = <String, List<TransactionModel>>{};
@@ -501,7 +524,12 @@ class _CurrentPeriodView extends StatelessWidget {
         ),
       );
       for (final t in items) {
-        widgets.add(_BudgetTransactionTile(transaction: t));
+        widgets.add(
+          _BudgetTransactionTile(
+            transaction: t,
+            onChanged: onTransactionChanged,
+          ),
+        );
       }
     });
     return widgets;
@@ -1102,9 +1130,13 @@ class _DailySpendChart extends StatelessWidget {
 }
 
 class _BudgetTransactionTile extends StatelessWidget {
-  const _BudgetTransactionTile({required this.transaction});
+  const _BudgetTransactionTile({
+    required this.transaction,
+    this.onChanged,
+  });
 
   final TransactionModel transaction;
+  final VoidCallback? onChanged;
 
   static Color _hexColor(String hex, Color fallback) {
     try {
@@ -1124,53 +1156,65 @@ class _BudgetTransactionTile extends StatelessWidget {
         ? _hexColor(transaction.category!.color!, colors.expense)
         : colors.expense;
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
-      child: Row(
-        children: [
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.12),
-              shape: BoxShape.circle,
+    return InkWell(
+      onTap: () async {
+        final changed = await context.push<bool>(
+          RouteNames.transactionDetail(transaction.id),
+          extra: {'transaction': transaction},
+        );
+        if (changed == true && context.mounted) {
+          onChanged?.call();
+        }
+      },
+      borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
+        child: Row(
+          children: [
+            Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: color.withValues(alpha: 0.12),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(iconData, color: color, size: 18),
             ),
-            child: Icon(iconData, color: color, size: 18),
-          ),
-          const SizedBox(width: AppSpacing.md),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  transaction.description ??
-                      transaction.category?.localizedName(context) ??
-                      AppStrings.of(context).transactionFallback,
-                  style: AppTypography.bodyMd.copyWith(
-                    fontWeight: FontWeight.w500,
+            const SizedBox(width: AppSpacing.md),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    transaction.description ??
+                        transaction.category?.localizedName(context) ??
+                        AppStrings.of(context).transactionFallback,
+                    style: AppTypography.bodyMd.copyWith(
+                      fontWeight: FontWeight.w500,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  '${transaction.account?.name ?? ''}  •  '
-                  '${DateFormatter.formatTime(transaction.date)}',
-                  style: AppTypography.bodySm.copyWith(
-                    color: colors.onSurfaceVariant,
+                  const SizedBox(height: 2),
+                  Text(
+                    '${transaction.account?.name ?? ''}  •  '
+                    '${DateFormatter.formatTime(transaction.date)}',
+                    style: AppTypography.bodySm.copyWith(
+                      color: colors.onSurfaceVariant,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-          Text(
-            '-${CurrencyFormatter.format(transaction.amount)}',
-            style: AppTypography.bodyMd.copyWith(
-              color: colors.expense,
-              fontWeight: FontWeight.w600,
+            Text(
+              '-${CurrencyFormatter.format(transaction.amount)}',
+              style: AppTypography.bodyMd.copyWith(
+                color: colors.expense,
+                fontWeight: FontWeight.w600,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

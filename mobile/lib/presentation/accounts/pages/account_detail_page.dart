@@ -376,6 +376,11 @@ class _AccountDetailPageState extends State<AccountDetailPage> {
         analytics: state.analytics,
         transactions: state.transactions,
         onAddTransaction: _addTransaction,
+        onTransactionChanged: () {
+          context.read<AccountDetailBloc>().add(
+                AccountDetailRefreshRequested(accountId: widget.accountId),
+              );
+        },
       );
     }
     return const SizedBox.shrink();
@@ -388,12 +393,14 @@ class _DetailContent extends StatelessWidget {
     required this.analytics,
     required this.transactions,
     required this.onAddTransaction,
+    this.onTransactionChanged,
   });
 
   final AccountModel account;
   final AccountAnalyticsModel analytics;
   final List<TransactionModel> transactions;
   final VoidCallback onAddTransaction;
+  final VoidCallback? onTransactionChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -424,6 +431,7 @@ class _DetailContent extends StatelessWidget {
         AccountTransactionsSection(
           transactions: transactions,
           onAddTransaction: onAddTransaction,
+          onTransactionChanged: onTransactionChanged,
         ),
       ],
     );

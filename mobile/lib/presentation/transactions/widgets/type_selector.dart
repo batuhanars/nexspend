@@ -9,19 +9,24 @@ class TransactionTypeSelector extends StatelessWidget {
     super.key,
     required this.selected,
     required this.onChanged,
+    this.showTransfer = true,
   });
   final String selected;
   final ValueChanged<String> onChanged;
+  final bool showTransfer;
 
   @override
   Widget build(BuildContext context) {
     final s = AppStrings.of(context);
     final colors = context.colors;
-    final types = [
+    final allTypes = [
       (label: s.expense, value: 'EXPENSE', color: colors.expense),
       (label: s.income, value: 'INCOME', color: colors.income),
       (label: s.transfer, value: 'TRANSFER', color: colors.primary),
     ];
+    final types = showTransfer
+        ? allTypes
+        : allTypes.where((t) => t.value != 'TRANSFER').toList();
 
     return Container(
       decoration: BoxDecoration(

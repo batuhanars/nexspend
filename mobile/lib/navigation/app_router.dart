@@ -251,11 +251,17 @@ GoRouter createRouter() {
         builder: (context, state) {
           final extra = state.extra as Map<String, dynamic>;
           final transaction = extra['transaction'] as TransactionModel;
-          final bloc = extra['bloc'] as TransactionsBloc;
-          return BlocProvider.value(
-            value: bloc,
-            child: TransactionDetailPage(transaction: transaction),
-          );
+          final bloc = extra['bloc'] as TransactionsBloc?;
+          if (bloc != null) {
+            return BlocProvider.value(
+              value: bloc,
+              child: TransactionDetailPage(
+                transaction: transaction,
+                listBloc: bloc,
+              ),
+            );
+          }
+          return TransactionDetailPage(transaction: transaction);
         },
       ),
       GoRoute(

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
 import '../../../core/l10n/app_strings.dart';
@@ -8,15 +9,18 @@ import '../../../core/utils/currency_formatter.dart';
 import '../../../core/utils/date_formatter.dart';
 import '../../../core/utils/icon_mapper.dart';
 import '../../../data/models/transaction_model.dart';
+import '../../../navigation/route_names.dart';
 
 class AccountTransactionsSection extends StatelessWidget {
   const AccountTransactionsSection({
     super.key,
     required this.transactions,
     required this.onAddTransaction,
+    this.onTransactionChanged,
   });
   final List<TransactionModel> transactions;
   final VoidCallback onAddTransaction;
+  final VoidCallback? onTransactionChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -67,15 +71,23 @@ class AccountTransactionsSection extends StatelessWidget {
           )
         else
           ...transactions
-              .map((t) => AccountTransactionTile(transaction: t)),
+              .map((t) => AccountTransactionTile(
+                    transaction: t,
+                    onChanged: onTransactionChanged,
+                  )),
       ],
     );
   }
 }
 
 class AccountTransactionTile extends StatelessWidget {
-  const AccountTransactionTile({super.key, required this.transaction});
+  const AccountTransactionTile({
+    super.key,
+    required this.transaction,
+    this.onChanged,
+  });
   final TransactionModel transaction;
+  final VoidCallback? onChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -100,52 +112,66 @@ class AccountTransactionTile extends StatelessWidget {
                 ? Icons.swap_horiz_rounded
                 : Icons.arrow_upward_rounded;
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.pagePadding,
-        vertical: AppSpacing.sm,
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: categoryColor.withValues(alpha: 0.12),
-              shape: BoxShape.circle,
+    return InkWell(
+      onTap: () async {
+        final changed = await context.push<bool>(
+          RouteNames.transactionDetail(transaction.id),
+          extra: {'transaction': transaction},
+        );
+        if (changed == true && context.mounted) {
+          onChanged?.call();
+        }
+      },
+      borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.pagePadding,
+          vertical: AppSpacing.sm,
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: categoryColor.withValues(alpha: 0.12),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(iconData, color: categoryColor, size: 18),
             ),
-            child: Icon(iconData, color: categoryColor, size: 18),
-          ),
-          const SizedBox(width: AppSpacing.md),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  transaction.description ??
-                      transaction.category?.localizedName(context) ??
-                      (isTransfer ? AppStrings.of(context).transfer : AppStrings.of(context).transactionFallback),
-                  style: AppTypography.bodyMd
-                      .copyWith(fontWeight: FontWeight.w500),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                Text(
-                  DateFormatter.formatShort(transaction.date, context),
-                  style: AppTypography.bodySm
-                      .copyWith(color: colors.onSurfaceVariant),
-                ),
-              ],
+            const SizedBox(width: AppSpacing.md),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    transaction.description ??
+                        transaction.category?.localizedName(context) ??
+                        (isTransfer
+                            ? AppStrings.of(context).transfer
+                            : AppStrings.of(context).transactionFallback),
+                    style: AppTypography.bodyMd
+                        .copyWith(fontWeight: FontWeight.w500),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  Text(
+                    DateFormatter.formatShort(transaction.date, context),
+                    style: AppTypography.bodySm
+                        .copyWith(color: colors.onSurfaceVariant),
+                  ),
+                ],
+              ),
             ),
-          ),
-          Text(
-            '${isIncome ? '+' : isTransfer ? '' : '-'}${CurrencyFormatter.format(transaction.amount)}',
-            style: AppTypography.bodyMd.copyWith(
-              color: amountColor,
-              fontWeight: FontWeight.w600,
+            Text(
+              '${isIncome ? '+' : isTransfer ? '' : '-'}${CurrencyFormatter.format(transaction.amount)}',
+              style: AppTypography.bodyMd.copyWith(
+                color: amountColor,
+                fontWeight: FontWeight.w600,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
 import '../../../core/l10n/app_strings.dart';
@@ -10,6 +11,7 @@ import '../../../core/utils/icon_mapper.dart';
 import '../../../data/models/budget_model.dart';
 import '../../../data/models/family_model.dart';
 import '../../../data/models/transaction_model.dart';
+import '../../../navigation/route_names.dart';
 
 class RecentTransactionsSection extends StatelessWidget {
   const RecentTransactionsSection({
@@ -18,12 +20,15 @@ class RecentTransactionsSection extends StatelessWidget {
     required this.onViewAll,
     this.personalBudgets = const [],
     this.sharedBudgets = const [],
+    this.onChanged,
   });
 
   final List<TransactionModel> transactions;
   final VoidCallback onViewAll;
   final List<BudgetModel> personalBudgets;
   final List<MySharedBudgetModel> sharedBudgets;
+  /// Called when a transaction was deleted/edited from the detail page.
+  final VoidCallback? onChanged;
 
   String? _budgetLabel(TransactionModel tx) {
     if (tx.type != TransactionType.EXPENSE) return null;
@@ -80,6 +85,7 @@ class RecentTransactionsSection extends StatelessWidget {
                 transaction: t,
                 s: s,
                 budgetLabel: _budgetLabel(t),
+                onChanged: onChanged,
               ),
             ),
       ],
@@ -92,10 +98,12 @@ class _TransactionTile extends StatelessWidget {
     required this.transaction,
     required this.s,
     this.budgetLabel,
+    this.onChanged,
   });
   final TransactionModel transaction;
   final AppStrings s;
   final String? budgetLabel;
+  final VoidCallback? onChanged;
 
   static Color _colorFromHex(String hex, Color fallback) {
     try {
@@ -128,69 +136,81 @@ class _TransactionTile extends StatelessWidget {
             ? Icons.arrow_downward_rounded
             : Icons.arrow_upward_rounded;
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.pagePadding,
-        vertical: AppSpacing.xs,
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 44,
-            height: 44,
-            decoration: BoxDecoration(
-              color: categoryColor.withValues(alpha: 0.12),
-              shape: BoxShape.circle,
+    return InkWell(
+      onTap: () async {
+        final changed = await context.push<bool>(
+          RouteNames.transactionDetail(transaction.id),
+          extra: {'transaction': transaction},
+        );
+        if (changed == true && context.mounted) {
+          onChanged?.call();
+        }
+      },
+      borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.pagePadding,
+          vertical: AppSpacing.xs,
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: categoryColor.withValues(alpha: 0.12),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(iconData, color: categoryColor, size: 20),
             ),
-            child: Icon(iconData, color: categoryColor, size: 20),
-          ),
-          const SizedBox(width: AppSpacing.md),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            const SizedBox(width: AppSpacing.md),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    transaction.description ??
+                        transaction.category?.localizedName(context) ??
+                        s.transactionFallback,
+                    style: AppTypography.bodyMd.copyWith(
+                      fontWeight: FontWeight.w500,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    '${transaction.account?.name ?? ''}'
+                    '  •  ${DateFormatter.formatShort(transaction.date, context)}, ${DateFormatter.formatTime(transaction.date)}',
+                    style: AppTypography.bodySm,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  if (budgetLabel != null) ...[
+                    const SizedBox(height: 4),
+                    _BudgetBadge(label: budgetLabel!),
+                  ],
+                ],
+              ),
+            ),
+            const SizedBox(width: AppSpacing.sm),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Text(
-                  transaction.description ??
-                      transaction.category?.localizedName(context) ??
-                      s.transactionFallback,
+                  '${isIncome ? '+' : isTransfer ? '' : '-'}'
+                  '${CurrencyFormatter.format(transaction.amount)}',
                   style: AppTypography.bodyMd.copyWith(
-                    fontWeight: FontWeight.w500,
+                    color: amountColor,
+                    fontWeight: FontWeight.w600,
                   ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: 2),
-                Text(
-                  '${transaction.account?.name ?? ''}'
-                  '  •  ${DateFormatter.formatShort(transaction.date, context)}, ${DateFormatter.formatTime(transaction.date)}',
-                  style: AppTypography.bodySm,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                if (budgetLabel != null) ...[
-                  const SizedBox(height: 4),
-                  _BudgetBadge(label: budgetLabel!),
-                ],
+                if (transaction.source != TransactionSource.MANUAL)
+                  _SourceBadge(source: transaction.source),
               ],
             ),
-          ),
-          const SizedBox(width: AppSpacing.sm),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(
-                '${isIncome ? '+' : isTransfer ? '' : '-'}'
-                '${CurrencyFormatter.format(transaction.amount)}',
-                style: AppTypography.bodyMd.copyWith(
-                  color: amountColor,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              if (transaction.source != TransactionSource.MANUAL)
-                _SourceBadge(source: transaction.source),
-            ],
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

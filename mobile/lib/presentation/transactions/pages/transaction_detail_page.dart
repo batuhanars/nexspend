@@ -20,8 +20,13 @@ import '../bloc/transactions_bloc.dart';
 import 'add_transaction_page.dart';
 
 class TransactionDetailPage extends StatelessWidget {
-  const TransactionDetailPage({super.key, required this.transaction});
+  const TransactionDetailPage({
+    super.key,
+    required this.transaction,
+    this.listBloc,
+  });
   final TransactionModel transaction;
+  final TransactionsBloc? listBloc;
 
   static Color _hexColor(String hex, Color fallback) {
     try {
@@ -75,7 +80,8 @@ class TransactionDetailPage extends StatelessWidget {
         title: Text(s.transactionDetailTitle, style: AppTypography.titleSm),
         centerTitle: true,
         actions: [
-          if (transaction.source == TransactionSource.MANUAL)
+          if (transaction.source == TransactionSource.MANUAL &&
+              transaction.type != TransactionType.TRANSFER)
             IconButton(
               icon: const Icon(Icons.edit_outlined),
               onPressed: () => _openEdit(context),
@@ -155,14 +161,33 @@ class TransactionDetailPage extends StatelessWidget {
     if (confirmed == true && context.mounted) {
       final messenger = ScaffoldMessenger.of(context);
       final deleteMsg = AppStrings.of(context).transactionDeletedSuccess;
-      context
-          .read<TransactionsBloc>()
-          .add(TransactionDeleteRequested(transaction.id));
-      context.pop(true);
-      messenger.showSnackBar(SnackBar(
-        content: Text(deleteMsg),
-        backgroundColor: colors.income,
-      ));
+      if (listBloc != null) {
+        listBloc!.add(TransactionDeleteRequested(transaction.id));
+        context.pop(true);
+        messenger.showSnackBar(SnackBar(
+          content: Text(deleteMsg),
+          backgroundColor: colors.income,
+        ));
+      } else {
+        try {
+          await getIt<TransactionRepository>()
+              .deleteTransaction(transaction.id);
+          if (context.mounted) {
+            context.pop(true);
+            messenger.showSnackBar(SnackBar(
+              content: Text(deleteMsg),
+              backgroundColor: colors.income,
+            ));
+          }
+        } catch (e) {
+          if (context.mounted) {
+            messenger.showSnackBar(SnackBar(
+              content: Text(AppStrings.of(context).serverError),
+              backgroundColor: colors.error,
+            ));
+          }
+        }
+      }
     }
   }
 }

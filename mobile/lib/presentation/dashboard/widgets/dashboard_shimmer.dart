@@ -15,6 +15,7 @@ class DashboardShimmer extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // BalanceCard
           const SizedBox(height: AppSpacing.md),
           Container(
             margin: const EdgeInsets.symmetric(
@@ -26,40 +27,29 @@ class DashboardShimmer extends StatelessWidget {
               borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
             ),
           ),
+
+          // "Hesaplarım" section header
           const SizedBox(height: AppSpacing.xl),
           Padding(
             padding: const EdgeInsets.symmetric(
               horizontal: AppSpacing.pagePadding,
             ),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: List.generate(
-                4,
-                (_) => Column(
-                  children: [
-                    Container(
-                      width: 56,
-                      height: 56,
-                      decoration: BoxDecoration(
-                        color: colors.surfaceContainerHigh,
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-                    const SizedBox(height: AppSpacing.xs),
-                    Container(
-                      width: 40,
-                      height: 12,
-                      decoration: BoxDecoration(
-                        color: colors.surfaceContainerHigh,
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                    ),
-                  ],
+              children: [
+                Container(
+                  height: 14,
+                  width: 100,
+                  decoration: BoxDecoration(
+                    color: colors.surfaceContainerHigh,
+                    borderRadius: BorderRadius.circular(4),
+                  ),
                 ),
-              ),
+              ],
             ),
           ),
-          const SizedBox(height: AppSpacing.xl),
+
+          // AccountCarousel (horizontal, height 150)
+          const SizedBox(height: AppSpacing.md),
           SizedBox(
             height: 150,
             child: ListView.separated(
@@ -68,9 +58,9 @@ class DashboardShimmer extends StatelessWidget {
                 horizontal: AppSpacing.pagePadding,
               ),
               itemCount: 3,
-              separatorBuilder: (_, index) =>
+              separatorBuilder: (_, _) =>
                   const SizedBox(width: AppSpacing.md),
-              itemBuilder: (_, index) => Container(
+              itemBuilder: (_, _) => Container(
                 width: 200,
                 decoration: BoxDecoration(
                   color: colors.surfaceContainerHigh,
@@ -79,13 +69,67 @@ class DashboardShimmer extends StatelessWidget {
               ),
             ),
           ),
+
+          // DebtShortcutCard (single wide card)
+          const SizedBox(height: AppSpacing.xl),
+          Container(
+            margin: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.pagePadding,
+            ),
+            height: 64,
+            decoration: BoxDecoration(
+              color: colors.surfaceContainerHigh,
+              borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+            ),
+          ),
+
+          // InsightsCarousel section header + single card width
+          const SizedBox(height: AppSpacing.xl),
+          Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.pagePadding,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  height: 12,
+                  width: 130,
+                  decoration: BoxDecoration(
+                    color: colors.surfaceContainerHigh,
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.md),
+                SizedBox(
+                  height: 80,
+                  child: ListView.separated(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: 2,
+                    separatorBuilder: (_, _) =>
+                        const SizedBox(width: AppSpacing.sm),
+                    itemBuilder: (_, _) => Container(
+                      width: 260,
+                      decoration: BoxDecoration(
+                        color: colors.surfaceContainerHigh,
+                        borderRadius:
+                            BorderRadius.circular(AppSpacing.radiusLg),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // RecentTransactions rows (~4-5 rows)
           const SizedBox(height: AppSpacing.xl),
           ...List.generate(
-            4,
+            5,
             (_) => Padding(
               padding: const EdgeInsets.symmetric(
                 horizontal: AppSpacing.pagePadding,
-                vertical: AppSpacing.sm,
+                vertical: AppSpacing.xs,
               ),
               child: Row(
                 children: [

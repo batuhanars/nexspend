@@ -164,15 +164,41 @@ class _CarouselShimmer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return Padding(
-      padding:
-          const EdgeInsets.symmetric(horizontal: AppSpacing.pagePadding),
-      child: Container(
-        height: 80,
-        decoration: BoxDecoration(
-          color: context.colors.surfaceContainerHigh,
-          borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-        ),
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.pagePadding),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Section label placeholder
+          Container(
+            height: 12,
+            width: 130,
+            decoration: BoxDecoration(
+              color: colors.surfaceContainerHigh,
+              borderRadius: BorderRadius.circular(4),
+            ),
+          ),
+          const SizedBox(height: AppSpacing.md),
+          // Horizontal cards — 2 card widths matching real InsightCard (260px wide, 80px tall)
+          SizedBox(
+            height: 80,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: 2,
+              separatorBuilder: (_, _) =>
+                  const SizedBox(width: AppSpacing.sm),
+              itemBuilder: (_, _) => Container(
+                width: 260,
+                decoration: BoxDecoration(
+                  color: colors.surfaceContainerHigh,
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

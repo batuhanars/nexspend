@@ -15,6 +15,7 @@ class SubscriptionsShimmer extends StatelessWidget {
       highlightColor: colors.surfaceContainerHighest,
       child: Column(
         children: [
+          // SummaryCard
           const Padding(
             padding: EdgeInsets.symmetric(
               horizontal: AppSpacing.pagePadding,
@@ -22,6 +23,24 @@ class SubscriptionsShimmer extends StatelessWidget {
             ),
             child: ShimmerBox(height: 100),
           ),
+
+          // UpcomingBanner placeholder (narrow band, between summary and list)
+          Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.pagePadding,
+              vertical: AppSpacing.xs,
+            ),
+            child: Container(
+              height: 44,
+              decoration: BoxDecoration(
+                color: colors.surfaceContainerHigh,
+                borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+              ),
+            ),
+          ),
+          const SizedBox(height: AppSpacing.xs),
+
+          // SubscriptionList rows
           ...List.generate(4, (_) => _subscriptionCard(colors)),
         ],
       ),

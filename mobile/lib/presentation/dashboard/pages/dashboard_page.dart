@@ -136,6 +136,7 @@ class _DashboardViewState extends State<_DashboardView> {
       title: Text(greeting, style: AppTypography.headlineSm),
       actions: [
         IconButton(
+          key: CoachMarkKeys.reports,
           icon: Icon(Icons.analytics_outlined, color: colors.onSurface),
           tooltip: s.reportsTitle,
           onPressed: () => context.push(RouteNames.reports),
@@ -170,62 +171,69 @@ class _DashboardViewState extends State<_DashboardView> {
                   setState(() => _isBalanceHidden = !_isBalanceHidden),
             ),
             const SizedBox(height: AppSpacing.xl),
-            Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.pagePadding,
-              ),
-              child: Row(
-                children: [
-                  Text(AppStrings.of(context).myAccountsTitle, style: AppTypography.titleSm),
-                  const Spacer(),
-                  if (dashboard.accounts.isNotEmpty)
-                    TextButton(
-                      onPressed: () async {
-                        final bloc = context.read<DashboardBloc>();
-                        await context.push(RouteNames.addAccount);
-                        if (mounted) {
-                          bloc.add(const DashboardRefreshRequested());
-                        }
-                      },
-                      style: TextButton.styleFrom(
-                        padding: EdgeInsets.zero,
-                        minimumSize: Size.zero,
-                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      ),
-                      child: Text(
-                        AppStrings.of(context).addAccount,
-                        style: AppTypography.bodySm
-                            .copyWith(color: context.colors.primary),
-                      ),
-                    ),
-                ],
-              ),
-            ),
-            const SizedBox(height: AppSpacing.md),
-            if (dashboard.accounts.isEmpty)
-              EmptyAccountsCard(
-                onTap: () async {
-                  final bloc = context.read<DashboardBloc>();
-                  await context.push(RouteNames.addAccount);
-                  if (mounted) bloc.add(const DashboardRefreshRequested());
-                },
-              )
-            else
-              AccountCarousel(
-                accounts: dashboard.accounts,
-                isBalanceHidden: _isBalanceHidden,
-                onAccountTap: (account) => context.push(
-                  RouteNames.accountDetail(account.id),
-                  extra: account,
+            Column(
+              key: CoachMarkKeys.accounts,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.pagePadding,
+                  ),
+                  child: Row(
+                    children: [
+                      Text(AppStrings.of(context).myAccountsTitle, style: AppTypography.titleSm),
+                      const Spacer(),
+                      if (dashboard.accounts.isNotEmpty)
+                        TextButton(
+                          onPressed: () async {
+                            final bloc = context.read<DashboardBloc>();
+                            await context.push(RouteNames.addAccount);
+                            if (mounted) {
+                              bloc.add(const DashboardRefreshRequested());
+                            }
+                          },
+                          style: TextButton.styleFrom(
+                            padding: EdgeInsets.zero,
+                            minimumSize: Size.zero,
+                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                          ),
+                          child: Text(
+                            AppStrings.of(context).addAccount,
+                            style: AppTypography.bodySm
+                                .copyWith(color: context.colors.primary),
+                          ),
+                        ),
+                    ],
+                  ),
                 ),
-                onAddAccount: () async {
-                  final bloc = context.read<DashboardBloc>();
-                  await context.push(RouteNames.addAccount);
-                  if (mounted) bloc.add(const DashboardRefreshRequested());
-                },
-              ),
+                const SizedBox(height: AppSpacing.md),
+                if (dashboard.accounts.isEmpty)
+                  EmptyAccountsCard(
+                    onTap: () async {
+                      final bloc = context.read<DashboardBloc>();
+                      await context.push(RouteNames.addAccount);
+                      if (mounted) bloc.add(const DashboardRefreshRequested());
+                    },
+                  )
+                else
+                  AccountCarousel(
+                    accounts: dashboard.accounts,
+                    isBalanceHidden: _isBalanceHidden,
+                    onAccountTap: (account) => context.push(
+                      RouteNames.accountDetail(account.id),
+                      extra: account,
+                    ),
+                    onAddAccount: () async {
+                      final bloc = context.read<DashboardBloc>();
+                      await context.push(RouteNames.addAccount);
+                      if (mounted) bloc.add(const DashboardRefreshRequested());
+                    },
+                  ),
+              ],
+            ),
             const SizedBox(height: AppSpacing.xl),
             DebtShortcutCard(
+              key: CoachMarkKeys.debts,
               onTap: () => context.push(RouteNames.debts),
             ),
             const SizedBox(height: AppSpacing.xl),

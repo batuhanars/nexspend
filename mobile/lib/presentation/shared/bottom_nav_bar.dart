@@ -250,19 +250,84 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
     }
   }
 
+  static const int kCoachMarkVersion = 2;
+
   Future<void> _checkCoachMark() async {
-    final seen = await getIt<SecureStorage>().isCoachMarkSeen();
-    if (!seen && mounted) {
-      await Future.delayed(const Duration(milliseconds: 900));
-      if (mounted) _showCoachMark();
+    final storedVersion = await getIt<SecureStorage>().getCoachMarkVersion();
+    if (storedVersion >= kCoachMarkVersion) return;
+    if (!mounted) return;
+
+    // Poll until the dashboard-body keys are mounted (they only appear after
+    // DashboardLoaded). Try every 200 ms for up to 8 seconds then give up.
+    const interval = Duration(milliseconds: 200);
+    const maxWait = Duration(seconds: 8);
+    final deadline = DateTime.now().add(maxWait);
+
+    while (DateTime.now().isBefore(deadline)) {
+      await Future.delayed(interval);
+      if (!mounted) return;
+      if (CoachMarkKeys.accounts.currentContext != null &&
+          CoachMarkKeys.debts.currentContext != null &&
+          CoachMarkKeys.reports.currentContext != null) {
+        break;
+      }
     }
+
+    if (!mounted) return;
+    // Verify all critical keys are ready before showing
+    if (CoachMarkKeys.accounts.currentContext == null ||
+        CoachMarkKeys.debts.currentContext == null ||
+        CoachMarkKeys.reports.currentContext == null) {
+      return; // Timeout — skip silently
+    }
+
+    _showCoachMark();
   }
 
   void _showCoachMark() {
+    final s = AppStrings.of(context);
     final size = MediaQuery.of(context).size;
+
+    void saveVersion() =>
+        getIt<SecureStorage>().saveCoachMarkVersion(kCoachMarkVersion);
 
     TutorialCoachMark(
       targets: [
+        // Step 1 — Home tab
+        TargetFocus(
+          identify: 'navHome',
+          keyTarget: CoachMarkKeys.navHome,
+          shape: ShapeLightFocus.RRect,
+          paddingFocus: 6,
+          contents: [
+            TargetContent(
+              align: ContentAlign.top,
+              padding: const EdgeInsets.only(bottom: AppSpacing.xl),
+              child: _CoachContent(
+                title: s.coachNavHomeTitle,
+                body: s.coachNavHomeBody,
+              ),
+            ),
+          ],
+        ),
+        // Step 2 — Transactions tab
+        TargetFocus(
+          identify: 'navTransactions',
+          keyTarget: CoachMarkKeys.navTransactions,
+          shape: ShapeLightFocus.RRect,
+          paddingFocus: 6,
+          contents: [
+            TargetContent(
+              align: ContentAlign.top,
+              padding: const EdgeInsets.only(bottom: AppSpacing.xl),
+              child: _CoachContent(
+                title: s.coachNavTransactionsTitle,
+                body: s.coachNavTransactionsBody,
+              ),
+            ),
+          ],
+        ),
+        // Step 3 — FAB (+ button)
         TargetFocus(
           identify: 'fab',
           keyTarget: CoachMarkKeys.fab,
@@ -273,12 +338,64 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
               align: ContentAlign.top,
               padding: const EdgeInsets.only(bottom: AppSpacing.xl),
               child: _CoachContent(
-                title: 'Hızlı Ekle',
-                body: 'Bu butona basarak gelir, gider, transfer ekleyebilir ve fiş tarayabilirsin.',
+                title: s.coachFabTitle,
+                body: s.coachFabBody,
               ),
             ),
           ],
         ),
+        // Step 4 — Budgets tab
+        TargetFocus(
+          identify: 'navBudgets',
+          keyTarget: CoachMarkKeys.navBudgets,
+          shape: ShapeLightFocus.RRect,
+          paddingFocus: 6,
+          contents: [
+            TargetContent(
+              align: ContentAlign.top,
+              padding: const EdgeInsets.only(bottom: AppSpacing.xl),
+              child: _CoachContent(
+                title: s.coachNavBudgetsTitle,
+                body: s.coachNavBudgetsBody,
+              ),
+            ),
+          ],
+        ),
+        // Step 5 — Subscriptions tab
+        TargetFocus(
+          identify: 'navSubscriptions',
+          keyTarget: CoachMarkKeys.navSubscriptions,
+          shape: ShapeLightFocus.RRect,
+          paddingFocus: 6,
+          contents: [
+            TargetContent(
+              align: ContentAlign.top,
+              padding: const EdgeInsets.only(bottom: AppSpacing.xl),
+              child: _CoachContent(
+                title: s.coachNavSubscriptionsTitle,
+                body: s.coachNavSubscriptionsBody,
+              ),
+            ),
+          ],
+        ),
+        // Step 6 — Reports icon (app bar, top of screen → content below)
+        TargetFocus(
+          identify: 'reports',
+          keyTarget: CoachMarkKeys.reports,
+          shape: ShapeLightFocus.Circle,
+          paddingFocus: 6,
+          contents: [
+            TargetContent(
+              align: ContentAlign.bottom,
+              padding: const EdgeInsets.only(top: AppSpacing.xl),
+              child: _CoachContent(
+                title: s.coachReportsTitle,
+                body: s.coachReportsBody,
+              ),
+            ),
+          ],
+        ),
+        // Step 7 — Settings icon (app bar)
         TargetFocus(
           identify: 'settings',
           keyTarget: CoachMarkKeys.settings,
@@ -289,15 +406,49 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
               align: ContentAlign.bottom,
               padding: const EdgeInsets.only(top: AppSpacing.xl),
               child: _CoachContent(
-                title: 'Ayarlar',
-                body: 'Profilini düzenleyebilir, Ortak Bütçe oluşturabilir ve bildirim tercihlerini ayarlayabilirsin.',
+                title: s.coachSettingsTitle,
+                body: s.coachSettingsBody,
               ),
             ),
           ],
         ),
+        // Step 8 — My Accounts section
+        TargetFocus(
+          identify: 'accounts',
+          keyTarget: CoachMarkKeys.accounts,
+          shape: ShapeLightFocus.RRect,
+          paddingFocus: 8,
+          contents: [
+            TargetContent(
+              align: ContentAlign.bottom,
+              padding: const EdgeInsets.only(top: AppSpacing.xl),
+              child: _CoachContent(
+                title: s.coachAccountsTitle,
+                body: s.coachAccountsBody,
+              ),
+            ),
+          ],
+        ),
+        // Step 9 — Debts shortcut card
+        TargetFocus(
+          identify: 'debts',
+          keyTarget: CoachMarkKeys.debts,
+          shape: ShapeLightFocus.RRect,
+          paddingFocus: 8,
+          contents: [
+            TargetContent(
+              align: ContentAlign.top,
+              padding: const EdgeInsets.only(bottom: AppSpacing.xl),
+              child: _CoachContent(
+                title: s.coachDebtsTitle,
+                body: s.coachDebtsBody,
+              ),
+            ),
+          ],
+        ),
+        // Step 10 — Swipe to delete (off-screen spotlight)
         TargetFocus(
           identify: 'swipe',
-          // Ekranın dışına konumlandırılmış 1×1 hedef — spotlight yok
           targetPosition: TargetPosition(const Size(1, 1), Offset(-10, -10)),
           color: Colors.transparent,
           contents: [
@@ -313,8 +464,8 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _CoachContent(
-                    title: 'Kaydırarak Sil',
-                    body: 'İşlem, bütçe veya herhangi bir listede kartı sola kaydırarak silebilirsin.',
+                    title: s.coachSwipeTitle,
+                    body: s.coachSwipeBody,
                     icon: Icons.swipe_left_rounded,
                   ),
                   const SizedBox(height: AppSpacing.xl),
@@ -331,7 +482,7 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
                         ),
                       ),
                       child: Text(
-                        'Tamam',
+                        s.coachDone,
                         style: AppTypography.bodyMd.copyWith(
                           fontWeight: FontWeight.w600,
                           color: btnCtx.colors.surface,
@@ -347,19 +498,19 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
       ],
       colorShadow: Colors.black,
       opacityShadow: 0.88,
-      textSkip: 'Atla',
+      textSkip: s.coachSkip,
       skipWidget: Padding(
         padding: const EdgeInsets.all(AppSpacing.lg),
         child: Text(
-          'Atla',
+          s.coachSkip,
           style: AppTypography.bodyMd.copyWith(
             color: Colors.white.withValues(alpha: 0.7),
           ),
         ),
       ),
-      onFinish: () => getIt<SecureStorage>().saveCoachMarkSeen(),
+      onFinish: saveVersion,
       onSkip: () {
-        getIt<SecureStorage>().saveCoachMarkSeen();
+        saveVersion();
         return true;
       },
     ).show(context: context);
@@ -571,12 +722,14 @@ class _BottomNavBar extends StatelessWidget {
         activeIcon: Icons.dashboard,
         label: s.navHome,
         route: RouteNames.home,
+        coachKey: CoachMarkKeys.navHome,
       ),
       _TabItem(
         icon: Icons.receipt_long_outlined,
         activeIcon: Icons.receipt_long,
         label: s.navTransactions,
         route: RouteNames.transactions,
+        coachKey: CoachMarkKeys.navTransactions,
       ),
     ];
 
@@ -586,12 +739,14 @@ class _BottomNavBar extends StatelessWidget {
         activeIcon: Icons.pie_chart,
         label: s.navBudgets,
         route: RouteNames.budgets,
+        coachKey: CoachMarkKeys.navBudgets,
       ),
       _TabItem(
         icon: Icons.subscriptions_outlined,
         activeIcon: Icons.subscriptions,
         label: s.navSubscriptions,
         route: RouteNames.subscriptions,
+        coachKey: CoachMarkKeys.navSubscriptions,
       ),
     ];
 
@@ -661,6 +816,7 @@ class _BottomNavBar extends StatelessWidget {
     final colors = context.colors;
     return Expanded(
       child: InkWell(
+        key: tab.coachKey,
         onTap: () => context.go(tab.route),
         borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
         child: Column(
@@ -695,12 +851,14 @@ class _TabItem {
     required this.activeIcon,
     required this.label,
     required this.route,
+    this.coachKey,
   });
 
   final IconData icon;
   final IconData activeIcon;
   final String label;
   final String route;
+  final GlobalKey? coachKey;
 }
 
 class _CoachContent extends StatelessWidget {

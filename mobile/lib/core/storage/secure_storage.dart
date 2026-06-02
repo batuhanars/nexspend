@@ -84,13 +84,13 @@ class SecureStorage {
     return val == 'true';
   }
 
-  static const _coachMarkSeenKey = 'coach_mark_seen';
+  static const _coachMarkVersionKey = 'coach_mark_version';
 
-  Future<void> saveCoachMarkSeen() =>
-      _storage.write(key: _coachMarkSeenKey, value: 'true');
+  Future<void> saveCoachMarkVersion(int version) =>
+      _storage.write(key: _coachMarkVersionKey, value: version.toString());
 
-  Future<bool> isCoachMarkSeen() async {
-    final val = await _storage.read(key: _coachMarkSeenKey);
-    return val == 'true';
+  Future<int> getCoachMarkVersion() async {
+    final val = await _storage.read(key: _coachMarkVersionKey);
+    return int.tryParse(val ?? '') ?? 0;
   }
 }

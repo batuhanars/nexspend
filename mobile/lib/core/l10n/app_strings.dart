@@ -637,6 +637,30 @@ abstract class AppStrings {
   String get resetConfirmBtn;
   String get resetSuccessMessage;
   String get resetErrorMessage;
+
+  // Coach mark tour — 10 steps
+  String get coachSkip;
+  String get coachDone;
+  String get coachNavHomeTitle;
+  String get coachNavHomeBody;
+  String get coachNavTransactionsTitle;
+  String get coachNavTransactionsBody;
+  String get coachFabTitle;
+  String get coachFabBody;
+  String get coachNavBudgetsTitle;
+  String get coachNavBudgetsBody;
+  String get coachNavSubscriptionsTitle;
+  String get coachNavSubscriptionsBody;
+  String get coachReportsTitle;
+  String get coachReportsBody;
+  String get coachSettingsTitle;
+  String get coachSettingsBody;
+  String get coachAccountsTitle;
+  String get coachAccountsBody;
+  String get coachDebtsTitle;
+  String get coachDebtsBody;
+  String get coachSwipeTitle;
+  String get coachSwipeBody;
 }
 
 // ─── Turkish ────────────────────────────────────────────────────────────────
@@ -1823,6 +1847,62 @@ class _Tr extends AppStrings {
   String get resetSuccessMessage => 'Verileriniz sıfırlandı.';
   @override
   String get resetErrorMessage => 'Veriler sıfırlanamadı. Lütfen tekrar deneyin.';
+
+  // Coach mark tour — 10 steps
+  @override
+  String get coachSkip => 'Atla';
+  @override
+  String get coachDone => 'Tamam';
+  @override
+  String get coachNavHomeTitle => 'Ana Ekran';
+  @override
+  String get coachNavHomeBody =>
+      'Bakiyenin, hesaplarının ve son işlemlerinin özeti burada.';
+  @override
+  String get coachNavTransactionsTitle => 'İşlemler';
+  @override
+  String get coachNavTransactionsBody =>
+      'Tüm gelir, gider ve transferlerini görüntüle ve filtrele.';
+  @override
+  String get coachFabTitle => 'Hızlı Ekle';
+  @override
+  String get coachFabBody =>
+      'Gelir, gider, transfer ekle veya fiş tara.';
+  @override
+  String get coachNavBudgetsTitle => 'Bütçeler';
+  @override
+  String get coachNavBudgetsBody =>
+      'Kategori bütçeleri oluştur, harcamanı limitlerle takip et.';
+  @override
+  String get coachNavSubscriptionsTitle => 'Abonelikler';
+  @override
+  String get coachNavSubscriptionsBody =>
+      'Düzenli ödemelerini takip et, yaklaşan yenilemeleri gör.';
+  @override
+  String get coachReportsTitle => 'Raporlar & Enflasyon';
+  @override
+  String get coachReportsBody =>
+      'Harcama raporlarını gör, harcamanı TÜFE enflasyonuyla karşılaştır.';
+  @override
+  String get coachSettingsTitle => 'Ayarlar';
+  @override
+  String get coachSettingsBody =>
+      'Profilini düzenle, Ortak Bütçe oluştur, dil/tema ve bildirimleri ayarla.';
+  @override
+  String get coachAccountsTitle => 'Hesaplarım';
+  @override
+  String get coachAccountsBody =>
+      'Nakit, banka ve kredi kartı hesaplarını buradan yönet.';
+  @override
+  String get coachDebtsTitle => 'Borçlar';
+  @override
+  String get coachDebtsBody =>
+      'Verdiğin ve aldığın borçları takip et, ödemeleri kaydet.';
+  @override
+  String get coachSwipeTitle => 'Kaydırarak Sil';
+  @override
+  String get coachSwipeBody =>
+      'Bir listede kartı sola kaydırarak silebilirsin.';
 }
 
 // ─── English ─────────────────────────────────────────────────────────────────
@@ -3102,4 +3182,60 @@ class _En extends AppStrings {
   String get resetSuccessMessage => 'Your data has been reset.';
   @override
   String get resetErrorMessage => 'Could not reset data. Please try again.';
+
+  // Coach mark tour — 10 steps
+  @override
+  String get coachSkip => 'Skip';
+  @override
+  String get coachDone => 'Done';
+  @override
+  String get coachNavHomeTitle => 'Home';
+  @override
+  String get coachNavHomeBody =>
+      'An overview of your balance, accounts, and recent activity.';
+  @override
+  String get coachNavTransactionsTitle => 'Transactions';
+  @override
+  String get coachNavTransactionsBody =>
+      'View and filter all your income, expenses, and transfers.';
+  @override
+  String get coachFabTitle => 'Quick Add';
+  @override
+  String get coachFabBody =>
+      'Add income, expenses, transfers, or scan a receipt.';
+  @override
+  String get coachNavBudgetsTitle => 'Budgets';
+  @override
+  String get coachNavBudgetsBody =>
+      'Create category budgets and track spending against limits.';
+  @override
+  String get coachNavSubscriptionsTitle => 'Subscriptions';
+  @override
+  String get coachNavSubscriptionsBody =>
+      'Track recurring payments and see upcoming renewals.';
+  @override
+  String get coachReportsTitle => 'Reports & Inflation';
+  @override
+  String get coachReportsBody =>
+      'View spending reports and compare your spending with CPI inflation.';
+  @override
+  String get coachSettingsTitle => 'Settings';
+  @override
+  String get coachSettingsBody =>
+      'Edit your profile, create a Shared Budget, set language/theme and notifications.';
+  @override
+  String get coachAccountsTitle => 'My Accounts';
+  @override
+  String get coachAccountsBody =>
+      'Manage your cash, bank, and credit card accounts here.';
+  @override
+  String get coachDebtsTitle => 'Debts';
+  @override
+  String get coachDebtsBody =>
+      'Track money you\'ve lent and borrowed, and record payments.';
+  @override
+  String get coachSwipeTitle => 'Swipe to Delete';
+  @override
+  String get coachSwipeBody =>
+      'Swipe any card left in a list to delete it.';
 }

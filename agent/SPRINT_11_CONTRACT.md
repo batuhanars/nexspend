@@ -136,7 +136,7 @@ export const FAMILY_CONSTANTS = {
 ```env
 # .env — yeni eklenecek
 RESEND_API_KEY=re_xxxxx
-RESEND_FROM_EMAIL=bütçe@wallet-app.com
+RESEND_FROM_EMAIL=bütçe@nexspend.com
 APP_BASE_URL=https://your-app.com   # deep link için (mobil: custom URL scheme kullanılacak)
 ```
 
@@ -391,7 +391,7 @@ export class SharedBudgetListener {
 }
 ```
 
-**Önemli:** Event listener Prisma `$transaction` dışında çalışır — transaction commit sonrası emit (Sprint 9 event-driven pattern, bkz. `wallet-app-master.md §3.2`). Listener hata verirse `transaction.created` akışı geri alınmaz (fire-and-forget).
+**Önemli:** Event listener Prisma `$transaction` dışında çalışır — transaction commit sonrası emit (Sprint 9 event-driven pattern, bkz. `nexspend-master.md §3.2`). Listener hata verirse `transaction.created` akışı geri alınmaz (fire-and-forget).
 
 ---
 

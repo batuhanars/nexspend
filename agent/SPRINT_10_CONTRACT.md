@@ -4,7 +4,7 @@
 >
 > **Değiştirme kuralı:** Bu dosya sprint sırasında değişirse → PM güncelleyip ilgili session'a haber verir. Tek taraflı sapma yasak.
 >
-> **Kapsam:** `DEVELOPMENT_PLAN_V2.md → Section 8.8` + `wallet-app-master.md §11` mimarisinin sözleşmeye dökülmüş hali.
+> **Kapsam:** `DEVELOPMENT_PLAN_V2.md → Section 8.8` + `nexspend-master.md §11` mimarisinin sözleşmeye dökülmüş hali.
 
 ---
 
@@ -323,7 +323,7 @@ Tetikleme: `GET /api/insights/summary`
 
 ## 10. Açık Sorular (Çözüldü)
 
-1. ✅ **7 kural seti:** `wallet-app-master.md §11` listesi kullanıldı (DEVELOPMENT_PLAN_V2'deki listeden farklı ama daha proje-spesifik ve Sprint 9 enflasyon verisini kullanıyor).
+1. ✅ **7 kural seti:** `nexspend-master.md §11` listesi kullanıldı (DEVELOPMENT_PLAN_V2'deki listeden farklı ama daha proje-spesifik ve Sprint 9 enflasyon verisini kullanıyor).
 2. ✅ **Navigasyon:** `/insights` full page — Home carousel'dan erişim, ayrı tab yok.
 3. ✅ **Periyot benzersizliği:** `(userId, ruleId, period)` unique — upsert ile yeniden üretimde mevcut override edilir.
 4. ✅ **`data` alanı:** Şimdilik null, grafik entegrasyonu ilerleyen sprint'lere ertelendi.

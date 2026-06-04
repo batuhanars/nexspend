@@ -1,17 +1,17 @@
 services:
   db:
     image: mysql:8.0
-    container_name: wallet_db
+    container_name: nexspend_db
     restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-rootpassword}
-      MYSQL_DATABASE: ${DB_NAME:-wallet_db}
-      MYSQL_USER: ${DB_USER:-wallet_user}
-      MYSQL_PASSWORD: ${DB_PASSWORD:-wallet_pass}
+      MYSQL_DATABASE: ${DB_NAME:-nexspend_db}
+      MYSQL_USER: ${DB_USER:-nexspend_user}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-nexspend_pass}
     ports:
       - '${DB_PORT:-3306}:3306'
     volumes:
-      - wallet_db_data:/var/lib/mysql
+      - nexspend_db_data:/var/lib/mysql
     command: --default-authentication-plugin=mysql_native_password --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
     healthcheck:
       test: ['CMD', 'mysqladmin', 'ping', '-h', 'localhost']
@@ -20,4 +20,4 @@ services:
       retries: 5
 
 volumes:
-  wallet_db_data:
+  nexspend_db_data:

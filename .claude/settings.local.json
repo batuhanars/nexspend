@@ -193,7 +193,15 @@
       "Bash(docker exec *)",
       "Bash(docker volume *)",
       "Bash(docker run *)",
-      "Bash(git grep *)"
+      "Bash(git grep *)",
+      "Bash(grep -E \"\\\\.ts$\")",
+      "Bash(Get-ChildItem -Recurse -Path . -Include \"*.dart\")",
+      "Bash(Select-Object -First 5)",
+      "Bash(gh auth *)",
+      "Bash(gh api *)",
+      "Bash(mkdir -p /c/Users/batuh/dev/projects/batuhanars.github.io)",
+      "Bash(printf 'google.com, pub-9972490944328521, DIRECT, f08c47fec0942fa0\\\\n')",
+      "Read(//c/Users/batuh/dev/projects/batuhanars.github.io/**)"
     ]
   }
 }

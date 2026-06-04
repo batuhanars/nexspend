@@ -71,6 +71,6 @@ Bu projede uygulanan, başka projelerde de geçerli pattern'lerin detaylı dokü
 |---|---|---|
 | Çoklu Claude Code session koordinasyonu (PM/Dev/Contract) | `C:\Users\batuh\dev\knowledge\stack\claude-code\multi-session-pm-dev-contract.md` | ↑ Çalışma Modeli |
 | Event-driven NestJS modüller (`@nestjs/event-emitter` + listener pattern) | `C:\Users\batuh\dev\knowledge\stack\nestjs\event-driven-modules.md` | ↑ Çapraz Mimari İlkeler — Event-driven bağımlılık |
-| Wallet App proje kaydı (meta + master + V1 ADR'ları) | `C:\Users\batuh\dev\knowledge\projects\wallet-app.md` → linkler `wallet-app-master.md` + `decisions-log/2026-05-11-v1-*.md` | ↑ Proje Özeti, ↑ Çapraz Mimari İlkeler |
+| NexSpend proje kaydı (meta + master + V1 ADR'ları) | `C:\Users\batuh\dev\knowledge\projects\nexspend.md` → linkler `nexspend-master.md` + `decisions-log/2026-05-11-v1-*.md` | ↑ Proje Özeti, ↑ Çapraz Mimari İlkeler |
 
 > Üst iki satır **transferable pattern'lere** dair — başka NestJS / Claude Code projelerinde de açıp uyarlayabilirsin. Yeni transferable pattern bu projede ortaya çıkarsa vault'a ekle, tabloya satır ekle. Üçüncü satır bu projenin kendi vault girişidir — meta kart üzerinden master dosyaya ve V1'in 8 retrospektif ADR'ına ulaşılır.

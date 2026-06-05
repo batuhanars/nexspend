@@ -45,6 +45,15 @@
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_channel_id"
             android:value="high_importance_channel_v2" />
+        <!-- Bildirim küçük ikonu: şeffaf zeminli beyaz X siluet.
+             Android renkleri yok sayıp alpha'ya göre temaya uygun renkte boyar
+             (koyu temada beyaz, açık temada koyu) — launcher ikonu burada kullanılamaz. -->
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_icon"
+            android:resource="@drawable/ic_stat_notification" />
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_color"
+            android:resource="@color/notification_accent" />
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
             android:value="ca-app-pub-9972490944328521~8406936801"/>

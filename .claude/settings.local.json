@@ -201,7 +201,17 @@
       "Bash(gh api *)",
       "Bash(mkdir -p /c/Users/batuh/dev/projects/batuhanars.github.io)",
       "Bash(printf 'google.com, pub-9972490944328521, DIRECT, f08c47fec0942fa0\\\\n')",
-      "Read(//c/Users/batuh/dev/projects/batuhanars.github.io/**)"
+      "Read(//c/Users/batuh/dev/projects/batuhanars.github.io/**)",
+      "Bash(awk -F: '{s+=$2} END {print s\" toplam satir\"}')",
+      "Bash(python -c \"import PIL; print\\('PIL', PIL.__version__\\)\")",
+      "Bash(magick --version)",
+      "Bash(node -e \"require\\('sharp'\\);console.log\\('sharp ok'\\)\")",
+      "Bash(python -m pip install --quiet Pillow)",
+      "Bash(cat)",
+      "Bash(python /tmp/preview_compose.py)",
+      "Bash(awk '{print $5, $9}')",
+      "Bash(python *)",
+      "Bash(Write-Output \"temp cleaned\")"
     ]
   }
 }

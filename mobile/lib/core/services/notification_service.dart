@@ -132,8 +132,11 @@ class NotificationService {
     if (_initialized) return;
     _initialized = true;
 
+    // Bildirim küçük ikonu monokrom siluet olmalı (Android renkleri yok sayıp
+    // alpha'ya göre temaya uygun boyar). Renkli launcher ikonu açık temada
+    // boş kareye dönüştüğü için @drawable/ic_stat_notification kullanılır.
     const androidSettings =
-        AndroidInitializationSettings('@mipmap/ic_launcher');
+        AndroidInitializationSettings('ic_stat_notification');
     await _localNotifications.initialize(
       const InitializationSettings(android: androidSettings),
       onDidReceiveNotificationResponse: _onNotificationTap,

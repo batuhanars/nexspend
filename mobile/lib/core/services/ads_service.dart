@@ -3,7 +3,7 @@ import 'package:flutter/foundation.dart';
 
 class AdsService {
   static const String _androidBannerUnitId =
-      'ca-app-pub-9972490944328521/3011139898';
+      'ca-app-pub-9972490944328521/3281560024';
 
   // Google test ID'leri — kendi reklamına tıklamak AdMob hesap banı sebebidir.
   // Debug build ve iOS (henüz prod ID yok) her zaman bunları kullanır.

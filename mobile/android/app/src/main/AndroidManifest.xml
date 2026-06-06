@@ -56,7 +56,7 @@
             android:resource="@color/notification_accent" />
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
-            android:value="ca-app-pub-9972490944328521~8406936801"/>
+            android:value="ca-app-pub-9972490944328521~5534982996"/>
     </application>
     <!-- Required to query activities that can process text, see:
          https://developer.android.com/training/package-visibility and

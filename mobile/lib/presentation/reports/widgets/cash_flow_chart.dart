@@ -9,6 +9,22 @@ import 'package:wallet_app/core/theme/app_palette.dart';
 import 'package:wallet_app/core/utils/currency_formatter.dart';
 import 'package:wallet_app/data/models/report_model.dart';
 
+double _niceCeil(double v) {
+  if (v <= 0) return 1;
+  final mag = math.pow(10, (math.log(v) / math.ln10).floor()).toDouble();
+  final norm = v / mag;
+  final nice = norm <= 1
+      ? 1.0
+      : norm <= 2
+          ? 2.0
+          : norm <= 2.5
+              ? 2.5
+              : norm <= 5
+                  ? 5.0
+                  : 10.0;
+  return nice * mag;
+}
+
 class CashFlowChart extends StatelessWidget {
   const CashFlowChart({super.key, required this.items});
   final List<CashFlowItem> items;
@@ -20,7 +36,9 @@ class CashFlowChart extends StatelessWidget {
     final colors = context.colors;
     final s = AppStrings.of(context);
     final maxVal = items.expand((i) => [i.income, i.expense]).reduce(math.max);
-    final topY = (maxVal * 1.2).ceilToDouble();
+    const divisions = 4;
+    final interval = _niceCeil(maxVal <= 0 ? 25 : maxVal / divisions);
+    final topY = interval * divisions;
 
     final tooltipBg = colors.surfaceContainerHighest;
     final gridLineColor = colors.surfaceContainerHighest;
@@ -82,6 +100,7 @@ class CashFlowChart extends StatelessWidget {
               sideTitles: SideTitles(
                 showTitles: true,
                 reservedSize: 44,
+                interval: interval,
                 getTitlesWidget: (value, _) => Text(
                   CurrencyFormatter.formatCompact(value),
                   style: AppTypography.labelSm.copyWith(
@@ -97,6 +116,7 @@ class CashFlowChart extends StatelessWidget {
           gridData: FlGridData(
             show: true,
             drawVerticalLine: false,
+            horizontalInterval: interval,
             getDrawingHorizontalLine: (_) => FlLine(
               color: gridLineColor,
               strokeWidth: 1,
